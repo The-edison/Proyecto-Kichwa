@@ -1,0 +1,9 @@
+import { Head, Link } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
+import { AppLayout } from '../../layouts/AppLayout';
+import { ExerciseCard } from '../../components/ExerciseCard';
+import { EmptyState, ErrorState, LoadingState } from '../../components/States';
+import { useApi } from '../../hooks/useApi';
+import { apiGet } from '../../services/api';
+import type { Content, Exercise } from '../../types';
+export default function Unit({unitId}:{unitId:number}){const contents=useApi<Content[]>(`/units/${unitId}/contents`);const [exercises,setExercises]=useState<Record<number,Exercise[]>>({});useEffect(()=>{let active=true;if(contents.data)Promise.all(contents.data.map(async c=>[c.id,await apiGet<Exercise[]>(`/contents/${c.id}/exercises`)] as const)).then(rows=>{if(active)setExercises(Object.fromEntries(rows))}).catch(()=>{});return()=>{active=false}},[contents.data]);return <AppLayout title="Tu lección" subtitle="Lee, practica y recibe retroalimentación inmediata."><Head title="Lección"/><Link href="/aprender" className="mb-6 inline-block text-sm font-bold text-forest">← Mis niveles</Link>{contents.loading?<LoadingState/>:contents.error?<ErrorState message={contents.error}/>:!contents.data?.length?<EmptyState title="Sin contenidos" description="Esta unidad todavía no tiene lecciones publicadas."/>:<div className="space-y-8">{contents.data.map((content,index)=><section key={content.id}><div className="glass-panel mb-4 p-7"><span className="eyebrow">LECCIÓN {index+1} · {content.kind==='grammar'?'GRAMÁTICA':'VOCABULARIO'}</span><h2 className="section-title mt-3">{content.title}</h2><div className="mt-5 whitespace-pre-line leading-8 text-muted">{content.body}</div></div>{Boolean(exercises[content.id]?.length)&&<div className="grid gap-4 lg:grid-cols-2">{exercises[content.id].map((exercise,i)=><ExerciseCard key={exercise.id} exercise={exercise} index={i}/>)}</div>}</section>)}</div>}</AppLayout>}
