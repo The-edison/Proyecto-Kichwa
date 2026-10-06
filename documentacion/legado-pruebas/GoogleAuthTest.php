@@ -2,12 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Models\Usuario;
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\InvalidStateException;
 use Laravel\Socialite\Two\User as GoogleUser;
 use Tests\TestCase;
-use Tests\UsesPostgreSQL as RefreshDatabase;
 
 class GoogleAuthTest extends TestCase
 {
@@ -34,12 +35,12 @@ class GoogleAuthTest extends TestCase
         $this->get('/auth/google')->assertRedirect('https://socialite.fake/google/authorize');
         $this->get('/auth/google/callback')->assertRedirect('http://127.0.0.1:5173/aprender');
 
-        $this->assertDatabaseHas('usuarios', [
-            'correo_usuario' => 'rosa@example.test',
+        $this->assertDatabaseHas('users', [
+            'email' => 'rosa@example.test',
             'google_id' => 'google-123',
-            'cedula_usuario' => null,
-            'contrasena_usuario' => null,
-            'rol_usuario' => 'estudiante',
+            'cedula' => null,
+            'password' => null,
+            'role_id' => Role::where('code', 'student')->firstOrFail()->id,
         ]);
         $this->assertAuthenticated('web');
 
@@ -52,10 +53,10 @@ class GoogleAuthTest extends TestCase
 
     public function test_existing_email_requires_password_login_before_google_is_linked(): void
     {
-        $student = Usuario::factory()->create(['correo_usuario' => 'rosa@example.test']);
+        $student = User::factory()->create(['email' => 'rosa@example.test']);
         Socialite::fake('google', GoogleUser::fake([
             'id' => 'google-456',
-            'email' => $student->correo_usuario,
+            'email' => $student->email,
             'email_verified' => true,
         ]));
 
@@ -64,22 +65,22 @@ class GoogleAuthTest extends TestCase
         $this->assertStringStartsWith('http://127.0.0.1:5173/iniciar-sesion?google_error=', (string) $response->headers->get('Location'));
 
         $this->assertGuest('web');
-        $this->assertDatabaseHas('usuarios', ['id_usuario' => $student->id_usuario, 'google_id' => null]);
-        $this->assertDatabaseCount('usuarios', 1);
+        $this->assertDatabaseHas('users', ['id' => $student->id, 'google_id' => null]);
+        $this->assertDatabaseCount('users', 1);
     }
 
     public function test_authenticated_admin_can_link_matching_google_and_later_sign_in(): void
     {
-        $admin = Usuario::factory()->create(['rol_usuario' => 'administrador']);
+        $admin = User::factory()->create(['role_id' => Role::where('code', 'admin')->firstOrFail()->id]);
         Socialite::fake('google', GoogleUser::fake([
             'id' => 'google-admin',
-            'email' => $admin->correo_usuario,
+            'email' => $admin->email,
             'email_verified' => true,
         ]));
 
         $this->actingAs($admin)->get('/cuenta/google')->assertRedirect();
         $this->get('/auth/google/callback')->assertRedirect();
-        $this->assertDatabaseHas('usuarios', ['id_usuario' => $admin->id_usuario, 'google_id' => 'google-admin']);
+        $this->assertDatabaseHas('users', ['id' => $admin->id, 'google_id' => 'google-admin']);
 
         $this->postJson('/api/auth/logout')->assertNoContent();
         $this->assertGuest('web');
@@ -92,7 +93,7 @@ class GoogleAuthTest extends TestCase
 
     public function test_google_cannot_link_to_a_different_email(): void
     {
-        $student = Usuario::factory()->create(['correo_usuario' => 'student@example.test']);
+        $student = User::factory()->create(['email' => 'student@example.test']);
         Socialite::fake('google', GoogleUser::fake([
             'id' => 'google-other',
             'email' => 'other@example.test',
@@ -102,7 +103,7 @@ class GoogleAuthTest extends TestCase
         $this->actingAs($student)->get('/cuenta/google')->assertRedirect();
         $response = $this->get('/auth/google/callback')->assertRedirect();
         $this->assertStringStartsWith('http://127.0.0.1:5173/cuenta?google_error=', (string) $response->headers->get('Location'));
-        $this->assertDatabaseHas('usuarios', ['id_usuario' => $student->id_usuario, 'google_id' => null]);
+        $this->assertDatabaseHas('users', ['id' => $student->id, 'google_id' => null]);
     }
 
     public function test_unverified_email_and_callback_without_initiated_flow_are_rejected(): void
@@ -116,7 +117,7 @@ class GoogleAuthTest extends TestCase
         $this->get('/auth/google/callback')->assertRedirect();
         $this->get('/auth/google')->assertRedirect();
         $this->get('/auth/google/callback')->assertRedirect();
-        $this->assertDatabaseCount('usuarios', 0);
+        $this->assertDatabaseCount('users', 0);
     }
 
     public function test_failed_google_state_does_not_authenticate_anyone(): void
@@ -128,7 +129,7 @@ class GoogleAuthTest extends TestCase
         $this->get('/auth/google')->assertRedirect();
         $this->get('/auth/google/callback')->assertRedirect();
         $this->assertGuest('web');
-        $this->assertDatabaseCount('usuarios', 0);
+        $this->assertDatabaseCount('users', 0);
     }
 
     public function test_google_redirect_is_unavailable_without_oauth_credentials(): void

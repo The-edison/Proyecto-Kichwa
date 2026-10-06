@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Middleware\CuentaActiva;
 use App\Http\Middleware\RequireRole;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,12 +16,26 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->alias(['role' => RequireRole::class]);
+        $middleware->alias(['role' => RequireRole::class, 'active' => CuentaActiva::class]);
         $middleware->statefulApi();
         $middleware->redirectGuestsTo(fn (): string => rtrim(config('app.frontend_url'), '/').'/iniciar-sesion');
-        $middleware->redirectUsersTo(fn (Request $request): string => rtrim(config('app.frontend_url'), '/').($request->user()?->role?->code === 'admin' ? '/admin' : '/aprender'));
+        $middleware->redirectUsersTo(fn (Request $request): string => rtrim(config('app.frontend_url'), '/').($request->user()?->rol_usuario === 'administrador' ? '/admin' : '/aprender'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(function (QueryException $exception, Request $request) {
+            if (! $request->is('api/*')) {
+                return null;
+            }
+            $state = $exception->errorInfo[0] ?? '';
+            if ($state === '23505') {
+                return response()->json(['message' => 'El correo, la cédula o el orden ya está registrado. Usa un valor distinto.'], 422);
+            }
+            if (in_array($state, ['23001', '23503', '23514'], true)) {
+                return response()->json(['message' => 'Este cambio está bloqueado por contenido relacionado o respuestas históricas. Conserva el registro y crea una nueva versión.'], 409);
+            }
+
+            return null;
+        });
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );

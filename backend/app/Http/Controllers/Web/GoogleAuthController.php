@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\Role;
-use App\Models\User;
+use App\Models\Nivel;
+use App\Models\Usuario;
+use App\Models\UsuarioNivel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -52,15 +53,15 @@ class GoogleAuthController extends Controller
         $raw = $googleUser->getRaw();
         $emailVerified = ($raw['email_verified'] ?? $raw['verified_email'] ?? false) === true;
 
-        if ($googleId === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL) || ! $emailVerified) {
+        if ($googleId === '' || strlen($googleId) > 255 || strlen($email) > 254 || ! filter_var($email, FILTER_VALIDATE_EMAIL) || ! $emailVerified) {
             return $this->fail($intent, 'Google no proporcionó un correo verificado.');
         }
 
-        $linked = User::where('google_id', $googleId)->first();
+        $linked = Usuario::where('google_id', $googleId)->first();
 
         if ($intent === 'link') {
             $user = Auth::guard('web')->user();
-            if (! $user || $user->id !== $linkUserId || mb_strtolower($user->email) !== $email || ($linked && $linked->id !== $user->id)) {
+            if (! $user || $user->estado_usuario !== 'activo' || $user->id_usuario !== $linkUserId || mb_strtolower($user->correo_usuario) !== $email || ($linked && $linked->id_usuario !== $user->id_usuario)) {
                 return $this->fail('link', 'Usa la misma cuenta de Google que tu correo registrado.');
             }
 
@@ -78,24 +79,31 @@ class GoogleAuthController extends Controller
         }
 
         if (! $linked) {
-            $existing = User::whereRaw('LOWER(email) = ?', [$email])->first();
+            $existing = Usuario::whereRaw('LOWER(correo_usuario) = ?', [$email])->first();
             if ($existing) {
                 return $this->fail('login', 'Este correo ya tiene una cuenta. Ingresa con tu contraseña y vincula Google desde Mi cuenta.');
             }
 
-            $linked = new User;
-            $linked->name = $googleUser->getName() ?: $email;
-            $linked->email = $email;
+            $linked = new Usuario;
+            $linked->nombre_usuario = mb_substr($googleUser->getName() ?: $email, 0, 150);
+            $linked->correo_usuario = $email;
             $linked->email_verified_at = now();
             $linked->google_id = $googleId;
-            $linked->role_id = Role::where('code', 'student')->firstOrFail()->id;
+            $linked->rol_usuario = 'estudiante';
             $linked->save();
+            $linked->refresh();
         }
 
+        if ($linked->estado_usuario !== 'activo') {
+            return $this->fail('login', 'Tu cuenta está bloqueada.');
+        }
+        if ($linked->rol_usuario === 'estudiante') {
+            UsuarioNivel::firstOrCreate(['id_usuario' => $linked->id_usuario, 'id_nivel' => Nivel::where('orden_nivel', 1)->firstOrFail()->id_nivel]);
+        }
         Auth::guard('web')->login($linked);
         $request->session()->regenerate();
 
-        return redirect()->away($this->frontendPath($linked->role?->code === 'admin' ? '/admin' : '/aprender'));
+        return redirect()->away($this->frontendPath($linked->rol_usuario === 'administrador' ? '/admin' : '/aprender'));
     }
 
     private function ensureConfigured(): void

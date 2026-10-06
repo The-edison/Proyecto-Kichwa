@@ -2,184 +2,107 @@
 
 namespace Tests\Feature;
 
-use App\Models\Content;
-use App\Models\Evaluation;
-use App\Models\EvaluationQuestion;
-use App\Models\Exercise;
-use App\Models\LearningModule;
-use App\Models\Level;
-use App\Models\Role;
-use App\Models\Unit;
-use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\Actividad;
+use App\Models\EvaluacionKichwa;
+use App\Models\Pregunta;
+use App\Models\RespuestaEvaluacion;
+use App\Models\Unidad;
+use App\Models\Usuario;
+use App\Models\VistaProgreso;
+use App\Models\VistaProgresoNivel;
+use App\Services\ContratoEjercicio;
+use Database\Seeders\DemostracionSeeder;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use Tests\UsesPostgreSQL as RefreshDatabase;
 
 class LearningApiTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_registration_uses_cedula_and_assigns_student_role(): void
+    public function test_invalid_solution_references_and_unuploaded_resources_are_rejected(): void
     {
-        $registered = $this->postJson('/api/auth/register', [
-            'name' => 'Ana Yánez',
-            'cedula' => '0201234567',
-            'email' => 'ana@example.test',
-            'password' => 'ClaveSegura123',
-            'password_confirmation' => 'ClaveSegura123',
-        ]);
-
-        $registered->assertCreated()->assertJsonPath('user.role.code', 'student');
-        $this->assertNotEmpty($registered->json('token'));
-
-        $this->postJson('/api/auth/login', [
-            'cedula' => '0201234567',
-            'password' => 'ClaveSegura123',
-        ])->assertOk()->assertJsonPath('user.cedula', '0201234567');
-
-        $this->postJson('/api/auth/login', [
-            'cedula' => '0201234567',
-            'password' => 'incorrecta',
-        ])->assertUnprocessable();
+        $this->seed(DemostracionSeeder::class);
+        Sanctum::actingAs(Usuario::factory()->administrador()->create());
+        $unit = Unidad::firstOrFail()->id_unidad;
+        $payload = ['unit_id' => $unit, 'type' => 'seleccion_multiple', 'prompt' => '[DEMO] Prueba',
+            'elements' => [['id' => 'a', 'texto' => '[DEMO] A'], ['id' => 'b', 'texto' => '[DEMO] B']],
+            'zones' => [], 'solution' => ['seleccion' => ['no_existe']], 'sort_order' => 10];
+        $this->postJson('/api/admin/exercises', $payload)->assertUnprocessable()->assertJsonValidationErrors('solution');
+        $payload['solution'] = ['seleccion' => ['a']];
+        $this->postJson('/api/admin/exercises', $payload + ['resource' => 'https://example.com/a.mp3'])->assertUnprocessable();
+        $this->postJson('/api/admin/exercises', $payload)->assertCreated();
+        $payload['elements'][1]['id'] = 'a';
+        $this->postJson('/api/admin/exercises', $payload)->assertUnprocessable()->assertJsonValidationErrors('elements.0.id');
     }
 
-    public function test_api_registration_and_login_accept_email_without_cedula(): void
+    public function test_progress_counts_distinct_successes_and_averages_unstarted_units(): void
     {
-        $this->postJson('/api/auth/register', [
-            'name' => 'Rosa Test',
-            'email' => 'rosa@example.test',
-            'password' => 'ClaveSegura123',
-            'password_confirmation' => 'ClaveSegura123',
-        ])->assertCreated()->assertJsonPath('user.cedula', null);
-
-        $this->postJson('/api/auth/login', [
-            'identifier' => 'rosa@example.test',
-            'password' => 'ClaveSegura123',
-        ])->assertOk()->assertJsonPath('user.email', 'rosa@example.test');
-
-        $this->postJson('/api/auth/login', [
-            'identifier' => 'rosa@example.test',
-            'password' => 'incorrecta',
-        ])->assertUnprocessable();
-    }
-
-    public function test_student_cannot_use_admin_crud_and_admin_can(): void
-    {
-        $student = User::factory()->create();
+        $this->seed(DemostracionSeeder::class);
+        $unit = Unidad::firstOrFail();
+        Unidad::create(['id_modulo' => $unit->id_modulo, 'titulo_unidad' => '[DEMO] No iniciada', 'objetivo_unidad' => 'Prueba', 'orden_unidad' => 2]);
+        $student = Usuario::factory()->create();
         Sanctum::actingAs($student);
+        $activity = Actividad::where('tipo_actividad', 'seleccion_multiple')->firstOrFail()->id_actividad;
+        foreach ([['a'], ['a'], ['b']] as $selection) {
+            $this->postJson('/api/exercises/'.$activity.'/answer', ['answer' => ['seleccion' => $selection]])->assertOk();
+        }
+        $this->getJson('/api/progress')->assertOk()->assertJsonPath('0.completed_activities', 1)->assertJsonPath('0.percentage', 12.5);
+        $this->assertSame('25.00', (string) VistaProgreso::where('id_usuario', $student->id_usuario)->value('porcentaje_progreso'));
+    }
 
-        $this->getJson('/api/admin/students')->assertForbidden();
-        $this->postJson('/api/admin/modules', ['level_id' => 1, 'title' => 'Uno'])->assertForbidden();
+    public function test_database_rejects_response_with_question_from_another_evaluation(): void
+    {
+        $this->seed(DemostracionSeeder::class);
+        $student = Usuario::factory()->create();
+        Sanctum::actingAs($student);
+        $evaluation = EvaluacionKichwa::where('tipo_evaluacion', 'unidad')->firstOrFail()->id_evaluacion;
+        $attempt = $this->postJson('/api/evaluations/'.$evaluation.'/attempts')->assertOk()->json('attempt_id');
+        $otherQuestion = Pregunta::where('id_evaluacion', '<>', $evaluation)->firstOrFail()->id_pregunta;
+        $this->postJson('/api/evaluations/'.$evaluation.'/submit', ['attempt_id' => $attempt,
+            'answers' => [['question_id' => $otherQuestion, 'answer' => ['textos' => ['h1' => 'ishkay']]]]])->assertUnprocessable();
+        try {
+            DB::transaction(fn () => RespuestaEvaluacion::create(['id_intento' => $attempt, 'id_pregunta' => $otherQuestion,
+                'id_evaluacion' => $evaluation, 'respuesta_evaluacion' => ['textos' => ['h1' => 'ishkay']], 'puntaje_respuesta_evaluacion' => 0]));
+            $this->fail('Se permitió mezclar evaluaciones.');
+        } catch (QueryException $exception) {
+            $this->assertSame('23503', $exception->errorInfo[0]);
+        }
+        $this->assertDatabaseCount('respuestas_evaluacion', 0);
+    }
 
-        $admin = User::factory()->create(['role_id' => Role::where('code', 'admin')->firstOrFail()->id]);
+    public function test_empty_evaluation_diagnostic_contract_and_readonly_views(): void
+    {
+        Sanctum::actingAs(Usuario::factory()->administrador()->create());
+        $this->postJson('/api/admin/evaluations', ['title' => '[DEMO] Sin unidad', 'type' => 'unidad'])->assertUnprocessable();
+        $evaluation = $this->postJson('/api/admin/evaluations', ['title' => '[DEMO] Diagnóstico', 'type' => 'diagnostica', 'unit_id' => null])->assertCreated()->json('id');
+        Sanctum::actingAs(Usuario::factory()->create());
+        $this->postJson('/api/evaluations/'.$evaluation.'/attempts')->assertUnprocessable();
+        $this->assertDatabaseCount('intentos_evaluacion', 0);
+        $view = new VistaProgresoNivel;
+        $this->expectException(\LogicException::class);
+        $view->save();
+    }
+
+    public function test_admin_block_revokes_tokens_and_prevents_password_and_google_access(): void
+    {
+        $student = Usuario::factory()->create();
+        $student->createToken('viejo');
+        $admin = Usuario::factory()->administrador()->create();
         Sanctum::actingAs($admin);
-
-        $this->postJson('/api/admin/modules', [
-            'level_id' => Level::where('code', 'basic')->firstOrFail()->id,
-            'title' => 'Saludos',
-            'is_published' => true,
-        ])->assertCreated()->assertJsonPath('title', 'Saludos');
-
-        $this->getJson('/api/admin/students')->assertOk()
-            ->assertJsonPath('data.0.cedula', $student->cedula);
+        $this->patchJson('/api/admin/students/'.$student->id_usuario, ['state' => 'bloqueado'])->assertOk()->assertJsonPath('state', 'bloqueado');
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+        $this->postJson('/api/auth/login', ['identifier' => $student->correo_usuario, 'password' => 'PruebaSegura#2026'])->assertUnprocessable();
+        $this->patchJson('/api/admin/students/'.$student->id_usuario, ['state' => 'activo'])->assertOk();
     }
 
-    public function test_exercise_and_evaluation_feedback_update_progress(): void
+    public function test_selection_and_pairs_are_sets_and_unicode_is_normalized(): void
     {
-        $level = Level::where('code', 'basic')->firstOrFail();
-        $module = LearningModule::create(['level_id' => $level->id, 'title' => 'Primer módulo', 'is_published' => true]);
-        $unit = Unit::create(['module_id' => $module->id, 'title' => 'Saludos', 'is_published' => true]);
-        $content = Content::create([
-            'unit_id' => $unit->id, 'kind' => 'vocabulary', 'title' => 'Saludar',
-            'body' => 'Contenido revisado.', 'is_published' => true,
-        ]);
-        $exercise = Exercise::create([
-            'content_id' => $content->id, 'type' => 'multiple_choice', 'prompt' => 'Selecciona la respuesta.',
-            'options' => ['Uno', 'Dos'], 'correct_answer' => 'Uno',
-            'feedback_incorrect' => 'Inténtalo de nuevo.', 'is_published' => true,
-        ]);
-        $evaluation = Evaluation::create([
-            'level_id' => $level->id, 'title' => 'Evaluación básica',
-            'passing_score' => 70, 'is_published' => true,
-        ]);
-        $first = EvaluationQuestion::create([
-            'evaluation_id' => $evaluation->id, 'type' => 'multiple_choice',
-            'prompt' => 'Pregunta 1', 'options' => ['A', 'B'], 'correct_answer' => 'A',
-        ]);
-        $second = EvaluationQuestion::create([
-            'evaluation_id' => $evaluation->id, 'type' => 'complete',
-            'prompt' => 'Pregunta 2', 'correct_answer' => 'respuesta',
-        ]);
-
-        Sanctum::actingAs(User::factory()->create());
-        $this->getJson("/api/contents/{$content->id}/exercises")
-            ->assertOk()->assertDontSee('correct_answer');
-
-        $this->postJson("/api/exercises/{$exercise->id}/answer", ['answer' => 'Dos'])
-            ->assertOk()->assertJsonPath('is_correct', false)
-            ->assertJsonPath('correct_answer', 'Uno');
-        $this->getJson("/api/progress/levels/{$level->id}")
-            ->assertJsonPath('percentage', 0);
-
-        $this->postJson("/api/exercises/{$exercise->id}/answer", ['answer' => 'Uno'])
-            ->assertOk()->assertJsonPath('is_correct', true);
-        $this->getJson("/api/progress/levels/{$level->id}")
-            ->assertJsonPath('percentage', 50);
-
-        $this->getJson("/api/evaluations/{$evaluation->id}")
-            ->assertOk()->assertDontSee('correct_answer');
-        $this->postJson("/api/evaluations/{$evaluation->id}/submit", [
-            'answers' => [
-                ['question_id' => $first->id, 'answer' => 'A'],
-                ['question_id' => $second->id, 'answer' => 'equivocada'],
-            ],
-        ])->assertOk()->assertJsonPath('score', 50)->assertJsonPath('passed', false)
-            ->assertJsonPath('results.1.correct_answer', 'respuesta');
-
-        $this->getJson("/api/progress/levels/{$level->id}")
-            ->assertOk()->assertJsonPath('percentage', 100)
-            ->assertJsonPath('evaluation_results.0.best_score', '50.00');
-    }
-
-    public function test_unpublished_parent_hides_student_content(): void
-    {
-        $level = Level::where('code', 'basic')->firstOrFail();
-        $module = LearningModule::create(['level_id' => $level->id, 'title' => 'Oculto']);
-        Sanctum::actingAs(User::factory()->create());
-
-        $this->getJson("/api/modules/{$module->id}/units")->assertNotFound();
-    }
-
-    public function test_admin_validates_answer_keys_and_keeps_published_evaluations_answerable(): void
-    {
-        $admin = User::factory()->create(['role_id' => Role::where('code', 'admin')->firstOrFail()->id]);
-        Sanctum::actingAs($admin);
-        $level = Level::where('code', 'basic')->firstOrFail();
-        $module = LearningModule::create(['level_id' => $level->id, 'title' => 'Module']);
-        $unit = Unit::create(['module_id' => $module->id, 'title' => 'Unit']);
-        $content = Content::create([
-            'unit_id' => $unit->id, 'kind' => 'vocabulary', 'title' => 'Content', 'body' => 'Text',
-        ]);
-
-        $exercise = [
-            'content_id' => $content->id,
-            'type' => 'multiple_choice',
-            'prompt' => 'Choose',
-            'options' => ['A', 'B'],
-            'correct_answer' => 'C',
-        ];
-        $this->postJson('/api/admin/exercises', $exercise)->assertUnprocessable();
-        $this->postJson('/api/admin/exercises', array_replace($exercise, ['correct_answer' => 'A']))
-            ->assertCreated();
-
-        $evaluation = Evaluation::create(['level_id' => $level->id, 'title' => 'Exam']);
-        $question = $this->postJson('/api/admin/questions', [
-            'evaluation_id' => $evaluation->id, 'type' => 'complete',
-            'prompt' => 'Write a word', 'correct_answer' => 'A',
-        ])->assertCreated();
-        $this->patchJson("/api/admin/evaluations/{$evaluation->id}", ['is_published' => true])
-            ->assertOk();
-        $this->deleteJson('/api/admin/questions/'.$question->json('id'))
-            ->assertStatus(409);
+        $selection = ['type' => 'seleccion_multiple', 'elements' => [['id' => 'a'], ['id' => 'b']], 'solution' => ['seleccion' => ['a', 'b']]];
+        $this->assertTrue(ContratoEjercicio::grade($selection, ['seleccion' => ['b', 'a']]));
+        $text = ['type' => 'completar', 'solution' => ['textos' => ['x' => ['á']]]];
+        $this->assertTrue(ContratoEjercicio::grade($text, ['textos' => ['x' => "A\u{0301}"]]));
     }
 }

@@ -1,60 +1,55 @@
 <?php
 
-use App\Http\Controllers\Api\Admin\ContentController as AdminContentController;
-use App\Http\Controllers\Api\Admin\EvaluationController as AdminEvaluationController;
-use App\Http\Controllers\Api\Admin\ExerciseController as AdminExerciseController;
-use App\Http\Controllers\Api\Admin\GlossaryController as AdminGlossaryController;
-use App\Http\Controllers\Api\Admin\ModuleController as AdminModuleController;
-use App\Http\Controllers\Api\Admin\QuestionController as AdminQuestionController;
-use App\Http\Controllers\Api\Admin\StudentController;
-use App\Http\Controllers\Api\Admin\UnitController as AdminUnitController;
+use App\Http\Controllers\Api\ArchivoController;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\CatalogController;
-use App\Http\Controllers\Api\EvaluationSubmissionController;
-use App\Http\Controllers\Api\ExerciseSubmissionController;
-use App\Http\Controllers\Api\GlossaryController;
-use App\Http\Controllers\Api\ProgressController;
+use App\Http\Controllers\Api\KichwaAdminController;
+use App\Http\Controllers\Api\KichwaCatalogController;
+use App\Http\Controllers\Api\KichwaSubmissionController;
 use App\Http\Controllers\Api\TestimonialController;
-use App\Models\Level;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
-Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
-Route::get('/glossary', [GlossaryController::class, 'index']);
+Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:3,1');
+Route::post('/auth/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
+Route::get('/glossary', [KichwaCatalogController::class, 'glossary']);
 Route::get('/testimonials', [TestimonialController::class, 'index']);
-Route::get('/config', fn () => response()->json([
-    'google' => ['enabled' => (bool) (config('services.google.client_id') && config('services.google.client_secret'))],
-]));
-
-Route::middleware('auth:sanctum')->group(function () {
+Route::get('/media/{path}', [ArchivoController::class, 'show'])->where('path', '.*');
+Route::get('/config', fn () => response()->json(['google' => ['enabled' => (bool) (config('services.google.client_id') && config('services.google.client_secret'))]]));
+Route::middleware(['auth:sanctum', 'active'])->group(function (): void {
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
-
-    Route::middleware('role:student')->group(function () {
-        Route::get('/levels', [CatalogController::class, 'levels']);
-        Route::get('/levels/{level}/modules', [CatalogController::class, 'modules']);
-        Route::get('/modules/{module}/units', [CatalogController::class, 'units']);
-        Route::get('/units/{unit}/contents', [CatalogController::class, 'contents']);
-        Route::get('/contents/{content}/exercises', [CatalogController::class, 'exercises']);
-        Route::get('/levels/{level}/evaluations', [CatalogController::class, 'evaluations']);
-        Route::get('/evaluations/{evaluation}', [CatalogController::class, 'evaluation']);
-        Route::post('/exercises/{exercise}/answer', [ExerciseSubmissionController::class, 'store']);
-        Route::post('/evaluations/{evaluation}/submit', [EvaluationSubmissionController::class, 'store']);
-        Route::get('/progress', [ProgressController::class, 'index']);
-        Route::get('/progress/levels/{level}', [ProgressController::class, 'show']);
-        Route::get('/testimonials/eligibility', [TestimonialController::class, 'eligibility']);
-        Route::post('/testimonials', [TestimonialController::class, 'store'])->middleware('throttle:5,1');
+    Route::post('/auth/change-password', [AuthController::class, 'changePassword'])->middleware('throttle:5,1');
+    Route::post('/auth/verification-notification', [AuthController::class, 'resendVerification'])->middleware('throttle:3,1');
+    Route::middleware('role:student')->group(function (): void {
+        Route::get('/levels', [KichwaCatalogController::class, 'levels']);
+        Route::get('/levels/{level}/modules', [KichwaCatalogController::class, 'modules']);
+        Route::get('/modules/{module}/units', [KichwaCatalogController::class, 'units']);
+        Route::get('/units/{unit}/contents', [KichwaCatalogController::class, 'contents']);
+        Route::get('/units/{unit}/exercises', [KichwaCatalogController::class, 'exercises']);
+        Route::get('/levels/{level}/evaluations', [KichwaCatalogController::class, 'evaluations']);
+        Route::get('/evaluations/{evaluation}', [KichwaCatalogController::class, 'evaluation']);
+        Route::post('/exercises/{exercise}/answer', [KichwaSubmissionController::class, 'activity'])->middleware('throttle:60,1');
+        Route::post('/evaluations/{evaluation}/attempts', [KichwaSubmissionController::class, 'start'])->middleware('throttle:10,1');
+        Route::post('/evaluations/{evaluation}/submit', [KichwaSubmissionController::class, 'submit'])->middleware('throttle:10,1');
+        Route::delete('/attempts/{attempt}', [KichwaSubmissionController::class, 'abandon']);
+        Route::get('/progress', [KichwaCatalogController::class, 'progress']);
+        Route::get('/progress/levels/{level}', [KichwaCatalogController::class, 'progress']);
+        Route::get('/testimonials/eligibility', fn () => response()->json(['completed_intermediate' => false, 'has_commented' => false, 'can_comment' => false]));
+        Route::post('/testimonials', fn () => abort(403, 'Disponible cuando se habilite Intermedio.'));
     });
-
-    Route::prefix('admin')->middleware('role:admin')->group(function () {
-        Route::get('/levels', fn () => Level::orderBy('sort_order')->get(['id', 'code', 'name', 'sort_order']));
-        Route::get('/students', [StudentController::class, 'index']);
-        Route::apiResource('modules', AdminModuleController::class);
-        Route::apiResource('units', AdminUnitController::class);
-        Route::apiResource('contents', AdminContentController::class);
-        Route::apiResource('exercises', AdminExerciseController::class);
-        Route::apiResource('evaluations', AdminEvaluationController::class);
-        Route::apiResource('questions', AdminQuestionController::class);
-        Route::apiResource('glossary', AdminGlossaryController::class);
+    Route::prefix('admin')->middleware('role:admin')->group(function (): void {
+        Route::get('/students', [KichwaAdminController::class, 'students']);
+        Route::patch('/students/{id}', [KichwaAdminController::class, 'block']);
+        Route::post('/uploads', [ArchivoController::class, 'store'])->middleware('throttle:20,1');
+        foreach (['levels', 'modules', 'units', 'contents', 'exercises', 'evaluations', 'questions', 'glossary'] as $resource) {
+            Route::get('/'.$resource, [KichwaAdminController::class, 'index'])->defaults('resource', $resource);
+            Route::get('/'.$resource.'/{id}', [KichwaAdminController::class, 'show'])->defaults('resource', $resource);
+            if ($resource !== 'levels') {
+                Route::post('/'.$resource, [KichwaAdminController::class, 'store'])->defaults('resource', $resource);
+                Route::patch('/'.$resource.'/{id}', [KichwaAdminController::class, 'update'])->defaults('resource', $resource);
+                Route::delete('/'.$resource.'/{id}', [KichwaAdminController::class, 'destroy'])->defaults('resource', $resource);
+            }
+        }
     });
 });

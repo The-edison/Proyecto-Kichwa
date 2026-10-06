@@ -2,9 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\Usuario;
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\UsesPostgreSQL as RefreshDatabase;
 
 class FrontendAccessTest extends TestCase
 {
@@ -23,8 +24,8 @@ class FrontendAccessTest extends TestCase
         $this->postJson('/api/auth/register', [
             'name' => 'Ana Test',
             'email' => 'ana@example.test',
-            'password' => 'ClaveSegura#123',
-            'password_confirmation' => 'ClaveSegura#123',
+            'password' => 'ClaveSegura123',
+            'password_confirmation' => 'ClaveSegura123',
         ])->assertCreated()->assertJsonMissingPath('token')->assertJsonPath('user.role.code', 'student');
 
         $this->assertAuthenticated('web');
@@ -40,18 +41,18 @@ class FrontendAccessTest extends TestCase
 
     public function test_spa_login_accepts_email_and_admin_can_access_admin_levels(): void
     {
-        $admin = Usuario::factory()->create([
-            'rol_usuario' => 'administrador',
+        $admin = User::factory()->create([
+            'role_id' => Role::where('code', 'admin')->firstOrFail()->id,
         ]);
 
         $this->postJson('/api/auth/login', [
-            'identifier' => $admin->correo_usuario,
+            'identifier' => $admin->email,
             'password' => 'incorrecta',
         ])->assertUnprocessable();
 
         $this->postJson('/api/auth/login', [
-            'identifier' => $admin->correo_usuario,
-            'password' => 'PruebaSegura#2026',
+            'identifier' => $admin->email,
+            'password' => 'password',
         ])->assertOk()->assertJsonMissingPath('token')->assertJsonPath('user.role.code', 'admin');
 
         $this->getJson('/api/admin/levels')->assertOk();

@@ -10,7 +10,8 @@ class RequireRole
 {
     public function handle(Request $request, Closure $next, string $role): Response
     {
-        abort_unless($request->user()?->role?->code === $role, 403);
+        $expected = $role === 'admin' ? 'administrador' : 'estudiante';
+        abort_unless($request->user()?->rol_usuario === $expected, 403, 'No tienes permiso para esta acción.');
 
         return $next($request);
     }
