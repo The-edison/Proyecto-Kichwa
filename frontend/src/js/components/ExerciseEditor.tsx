@@ -11,7 +11,7 @@ export function newExercise(type: Exercise['type'] = 'seleccion_multiple'): Edit
     return { id: 0, type, prompt: '', elements, zones: [], resource: null, sort_order: 1,
         solution: type === 'seleccion_multiple' ? { seleccion: [] } : type === 'completar' ? { textos: { e1: [''] } } : { pares: [] } };
 }
-export function ExerciseEditor({ value, onChange }: { value: EditableExercise; onChange: (value: EditableExercise) => void }) {
+export function ExerciseEditor({ value, onChange, errors = {}, onBusyChange }: { value: EditableExercise; onChange: (value: EditableExercise) => void; errors?: Record<string, string[]>; onBusyChange?: (busy: boolean)=>void }) {
     const [error, setError] = useState('');
     const [uploading, setUploading] = useState(false);
     const [previewAnswer, setPreviewAnswer] = useState<ExerciseAnswer>({});
@@ -21,11 +21,11 @@ export function ExerciseEditor({ value, onChange }: { value: EditableExercise; o
     const destinations = value.type === 'arrastrar' ? value.zones : value.elements.filter(e => e.grupo === 'destino');
     async function upload(file: File | undefined, kind: 'imagen' | 'audio', done: (path: string) => void) {
         if (!file) return;
-        setError(''); setUploading(true);
+        setError(''); setUploading(true); onBusyChange?.(true);
         const data = new FormData(); data.append('kind', kind); data.append('file', file);
         try { const result = await apiPost<{ path: string }>('/admin/uploads', data); done(result.path); }
         catch (reason) { setError(reason instanceof ApiError ? Object.values(reason.errors).flat().join(' ') || reason.message : 'No se pudo subir el archivo.'); }
-        finally { setUploading(false); }
+        finally { setUploading(false); onBusyChange?.(false); }
     }
     function element(index: number, changes: Partial<ExerciseElement>) {
         onChange({ ...value, elements: value.elements.map((e, i) => i === index ? { ...e, ...changes } : e) });
@@ -60,13 +60,15 @@ export function ExerciseEditor({ value, onChange }: { value: EditableExercise; o
             <option value="seleccion_multiple">Selección múltiple</option><option value="completar">Completar</option><option value="relacionar">Relacionar palabras o imágenes</option><option value="arrastrar">Arrastrar a zonas</option>
         </select></label>
         <label className="grid gap-2">Enunciado<textarea className="field" required maxLength={10000} value={value.prompt} onChange={e => onChange({ ...value, prompt: e.target.value })} /></label>
+        {errors.prompt && <p className="form-error" role="alert">{errors.prompt.join(' ')}</p>}
         <label className="grid gap-2">Audio principal (MP3, WAV, OGG, M4A; máximo 10 MB)<input type="file" accept=".mp3,.wav,.ogg,.m4a" disabled={uploading} onChange={e => void upload(e.target.files?.[0], 'audio', path => onChange({ ...value, resource: path }))} /></label>
-        {value.resource && <div className="space-y-2"><audio controls className="w-full" src={mediaUrl(value.resource)} /><button className="secondary-button" type="button" onClick={() => onChange({ ...value, resource: null })}>Quitar audio</button></div>}
+        {value.resource && <div className="space-y-2"><audio controls preload="none" className="w-full" src={mediaUrl(value.resource)} /><button className="secondary-button" type="button" onClick={() => onChange({ ...value, resource: null })}>Quitar audio</button></div>}
         <h3 className="font-bold">Elementos y opciones</h3>
         {value.elements.map((e, index) => <fieldset key={e.id} className="space-y-3 rounded-xl bg-white/70 p-3"><legend className="text-sm">{e.grupo === 'destino' ? 'Destino' : 'Elemento'} {index + 1}</legend>
+            {Object.entries(errors).filter(([key])=>key.startsWith(`elements.${index}`)||key.startsWith(`solution.textos.${e.id}`)).map(([key,messages])=><p className="form-error" role="alert" key={key}>{messages.join(' ')}</p>)}
             <label className="grid gap-1">Texto / descripción de la imagen<input className="field" required maxLength={500} value={e.texto} onChange={event => element(index, { texto: event.target.value })} /></label>
             <label className="grid gap-1 text-sm">Imagen (PNG, JPG, WEBP; máximo 5 MB)<input type="file" accept=".png,.jpg,.jpeg,.webp" disabled={uploading} onChange={event => void upload(event.target.files?.[0], 'imagen', path => element(index, { imagen: path }))} /></label>
-            {e.imagen && <div className="flex items-center gap-2"><img src={mediaUrl(e.imagen)} alt={e.texto || 'Imagen del elemento'} className="h-20 w-20 object-contain" /><button type="button" className="secondary-button" onClick={() => element(index, { imagen: undefined })}>Quitar imagen</button></div>}
+            {e.imagen && <div className="flex items-center gap-2"><img loading="lazy" decoding="async" src={mediaUrl(e.imagen)} alt={e.texto || 'Imagen del elemento'} className="h-20 w-20 object-contain" /><button type="button" className="secondary-button" onClick={() => element(index, { imagen: undefined })}>Quitar imagen</button></div>}
             {value.type === 'seleccion_multiple' && <label className="flex gap-2"><input type="checkbox" checked={value.solution.seleccion?.includes(e.id) ?? false} onChange={event => onChange({ ...value, solution: { seleccion: event.target.checked ? [...(value.solution.seleccion ?? []), e.id] : value.solution.seleccion?.filter(key => key !== e.id) ?? [] } })} />Respuesta correcta</label>}
             {value.type === 'completar' && <><label className="grid gap-1">Respuestas aceptadas (una variante aprobada por línea)<textarea className="field" required value={value.solution.textos?.[e.id]?.join('\n') ?? ''} onChange={event => onChange({ ...value, solution: { textos: { ...value.solution.textos, [e.id]: event.target.value.split('\n') } } })} /></label>
                 <label className="grid gap-1">Opciones para escoger (una por línea; vacío permite escribir)<textarea className="field" value={e.opciones?.join('\n') ?? ''} onChange={event => element(index, { opciones: event.target.value.split('\n').filter(Boolean) })} /></label></>}
@@ -76,7 +78,7 @@ export function ExerciseEditor({ value, onChange }: { value: EditableExercise; o
         {value.type === 'arrastrar' && <section className="space-y-4"><h3 className="font-bold">Imagen y zonas del cuerpo</h3><label className="grid gap-2">Subir imagen de fondo<input type="file" accept=".png,.jpg,.jpeg,.webp" disabled={uploading} onChange={event => void upload(event.target.files?.[0], 'imagen', path => {
             if (!value.zones.length) addZone(.5, .5, path); else onChange({ ...value, zones: value.zones.map(z => ({ ...z, imagen: path })) });
         })} /></label>
-            {background && <div className="relative cursor-crosshair overflow-hidden rounded-xl" onClick={event => { const rect = event.currentTarget.getBoundingClientRect(); if (value.zones.length < 50) addZone((event.clientX - rect.left) / rect.width, (event.clientY - rect.top) / rect.height); }}><img src={mediaUrl(background)} alt="Haz clic en la imagen para añadir una zona" className="w-full" />{value.zones.map(z => <span key={z.id} className="pointer-events-none absolute rounded bg-forest px-2 py-1 text-xs text-white" style={{ left: `${z.x * 100}%`, top: `${z.y * 100}%`, transform: 'translate(-50%, -50%)' }}>{z.texto}</span>)}</div>}
+            {background && <div className="relative cursor-crosshair overflow-hidden rounded-xl" onClick={event => { const rect = event.currentTarget.getBoundingClientRect(); if (value.zones.length < 50) addZone((event.clientX - rect.left) / rect.width, (event.clientY - rect.top) / rect.height); }}><img loading="lazy" decoding="async" src={mediaUrl(background)} alt="Haz clic en la imagen para añadir una zona" className="w-full" />{value.zones.map(z => <span key={z.id} className="pointer-events-none absolute rounded bg-forest px-2 py-1 text-xs text-white" style={{ left: `${z.x * 100}%`, top: `${z.y * 100}%`, transform: 'translate(-50%, -50%)' }}>{z.texto}</span>)}</div>}
             <p className="text-sm text-muted">Marca las partes haciendo clic sobre la imagen y escribe sus etiquetas. Las coordenadas se adaptan al tamaño de pantalla.</p>
             {value.zones.map((z, index) => <div key={z.id} className="grid gap-2 rounded-xl border border-emerald-100 p-3"><label>Nombre de zona<input className="field" required value={z.texto} onChange={e => zone(index, { texto: e.target.value })} /></label><div className="grid grid-cols-2 gap-2">{(['x','y'] as const).map(axis => <label key={axis}>{axis.toUpperCase()} (0 a 1)<input className="field" type="number" min="0" max="1" step=".01" value={z[axis]} onChange={e => zone(index, { [axis]: Number(e.target.value) })} /></label>)}</div><button type="button" className="secondary-button" onClick={() => onChange({ ...value, zones: value.zones.filter((_, i) => i !== index), solution: { pares: value.solution.pares?.filter(p => p.destino !== z.id) ?? [] } })}>Eliminar zona</button></div>)}
             <button type="button" className="secondary-button" disabled={value.zones.length >= 50} onClick={() => addZone()}>Añadir zona</button>

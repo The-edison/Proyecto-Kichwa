@@ -1,6 +1,8 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, startTransition, type ReactNode } from 'react';
 import { apiGet, apiPost, ApiError } from '../services/api';
 import type { AuthUser } from '../types';
+import { useNavigate } from 'react-router-dom';
+import { queryClient } from '../services/queryClient';
 
 interface ApiUser extends Omit<AuthUser, 'role'> {
     role: { code: AuthUser['role'] };
@@ -16,6 +18,7 @@ interface AuthValue {
     user: AuthUser | null;
     loading: boolean;
     googleEnabled: boolean;
+    refreshUser: () => Promise<void>;
     login: (identifier: string, password: string) => Promise<void>;
     register: (data: Record<string, string>) => Promise<void>;
     logout: () => Promise<void>;
@@ -24,6 +27,7 @@ interface AuthValue {
 const AuthContext = createContext<AuthValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+    const navigate = useNavigate();
     const [user, setUser] = useState<AuthUser | null>(null);
     const [loading, setLoading] = useState(true);
     const [googleEnabled, setGoogleEnabled] = useState(false);
@@ -39,24 +43,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function login(identifier: string, password: string) {
         const response = await apiPost<{ user: ApiUser }>('/auth/login', { identifier, password });
         const authenticated = toAuthUser(response.user);
+        queryClient.clear();
         setUser(authenticated);
-        window.location.assign(authenticated.debe_cambiar_contrasena ? '/cuenta' : authenticated.role === 'admin' ? '/admin' : '/aprender');
+        navigate(authenticated.debe_cambiar_contrasena ? '/cuenta' : authenticated.role === 'admin' ? '/admin' : '/aprender');
     }
 
     async function register(data: Record<string, string>) {
         const response = await apiPost<{ user: ApiUser }>('/auth/register', data);
+        queryClient.clear();
         setUser(toAuthUser(response.user));
-        window.location.assign('/aprender');
+        navigate('/aprender');
     }
 
     async function logout() {
         await apiPost<void>('/auth/logout', {});
-        setUser(null);
-        window.location.assign('/');
+        queryClient.clear();
+        startTransition(() => { setUser(null); navigate('/'); });
     }
 
+    async function refreshUser() { setUser(toAuthUser(await apiGet<ApiUser>("/auth/me"))); }
     return (
-        <AuthContext.Provider value={{ user, loading, googleEnabled, login, register, logout }}>
+        <AuthContext.Provider value={{ user, loading, googleEnabled, login, register, logout, refreshUser }}>
             {children}
         </AuthContext.Provider>
     );

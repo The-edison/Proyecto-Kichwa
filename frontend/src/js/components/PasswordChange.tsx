@@ -1,15 +1,17 @@
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { apiPost, ApiError } from '../services/api';
 export function PasswordChange() {
-    const { user } = useAuth();
+    const { user, refreshUser } = useAuth();
+    const navigate = useNavigate();
     const [data, setData] = useState({ current_password: '', password: '', password_confirmation: '' });
     const [error, setError] = useState('');
     const [notice, setNotice] = useState('');
     const [busy, setBusy] = useState(false);
     async function submit(event: FormEvent) {
         event.preventDefault(); setBusy(true); setError('');
-        try { await apiPost('/auth/change-password', data); window.location.assign(user?.role === 'admin' ? '/admin' : '/aprender'); }
+        try { await apiPost('/auth/change-password', data); await refreshUser(); navigate(user?.role === 'admin' ? '/admin' : '/aprender'); }
         catch (reason) { setError(reason instanceof ApiError ? Object.values(reason.errors).flat().join(' ') || reason.message : 'No se pudo cambiar la contraseña.'); setBusy(false); }
     }
     async function verify() {

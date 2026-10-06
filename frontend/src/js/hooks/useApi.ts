@@ -1,33 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { apiGet, ApiError } from '../services/api';
-
 export function useApi<T>(path: string | null) {
-    const [data, setData] = useState<T | null>(null);
-    const [loading, setLoading] = useState(Boolean(path));
-    const [error, setError] = useState<string | null>(null);
-    const [version, setVersion] = useState(0);
-
-    useEffect(() => {
-        if (!path) {
-            setData(null);
-            setLoading(false);
-            return;
-        }
-        const controller = new AbortController();
-        setLoading(true);
-        setError(null);
-        apiGet<T>(path, controller.signal)
-            .then(setData)
-            .catch((reason: unknown) => {
-                if (controller.signal.aborted) return;
-                setError(reason instanceof ApiError ? reason.message : 'No se pudo cargar la información.');
-            })
-            .finally(() => {
-                if (!controller.signal.aborted) setLoading(false);
-            });
-        return () => controller.abort();
-    }, [path, version]);
-
-    const refresh = useCallback(() => setVersion((current) => current + 1), []);
-    return { data, loading, error, refresh };
+    const query = useQuery<T>({ queryKey: ['api', path], queryFn: ({ signal }) => apiGet<T>(path!, signal), enabled: Boolean(path) });
+    return { data: query.data ?? null, loading: Boolean(path) && query.isPending,
+        error: query.error ? query.error instanceof ApiError ? query.error.message : 'No se pudo cargar la información.' : null,
+        refresh: query.refetch };
 }

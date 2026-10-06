@@ -1,49 +1,22 @@
+import { useState } from 'react';
 import { Head, Link } from '../../navigation';
-import { ArrowRight, ClipboardCheck, Layers } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { AppLayout } from '../../layouts/AppLayout';
 import { EmptyState, ErrorState, LoadingState } from '../../components/States';
+import { Pagination } from '../../components/Pagination';
 import { useApi } from '../../hooks/useApi';
-import { apiGet, ApiError } from '../../services/api';
-import type { LearningModule, Unit, Evaluation } from '../../types';
-
+import type { LearningModule, Paginated, Evaluation } from '../../types';
 export default function Level({ level }: { level: { id: number; name: string; code: string } }) {
-    const modules = useApi<LearningModule[]>(`/levels/${level.id}/modules`);
-    const evaluations = useApi<Evaluation[]>(`/levels/${level.id}/evaluations`);
-    const [units, setUnits] = useState<Record<number, Unit[]>>({});
-    const [unitError, setUnitError] = useState('');
-    useEffect(() => {
-        let active = true;
-        setUnitError('');
-        if (modules.data) Promise.all(modules.data.map(async m => [m.id, await apiGet<Unit[]>(`/modules/${m.id}/units`)] as const))
-            .then(rows => { if (active) setUnits(Object.fromEntries(rows)); })
-            .catch(reason => { if (active) setUnitError(reason instanceof ApiError ? reason.message : 'No se pudieron cargar las unidades.'); });
-        return () => { active = false; };
-    }, [modules.data]);
-
-    return <AppLayout title={`Nivel ${level.name}`} subtitle="Selecciona una unidad para leer sus temas y practicar.">
-        <Head title={`Nivel ${level.name}`} />
-        <Link className="mb-7 inline-block text-sm font-bold text-forest" href="/aprender">← Volver a mis niveles</Link>
-        {modules.loading ? <LoadingState /> : modules.error ? <ErrorState message={modules.error} /> : !modules.data?.length ?
-            <EmptyState title="Aún no hay módulos" description="El administrador todavía no ha cargado contenido para este nivel." /> :
-            <div className="space-y-6">{modules.data.map((module, index) => <section className="glass-panel p-6" key={module.id}>
-                <div className="mb-5 flex items-start gap-4">
-                    <span className="grid h-11 w-11 place-items-center rounded-xl bg-emerald-100 text-forest"><Layers size={21} /></span>
-                    <div><span className="eyebrow">MÓDULO {index + 1}</span><h2 className="font-serif text-2xl">{module.title}</h2><p className="text-muted">{module.description}</p>
-                        <p className="mt-2 text-sm font-bold text-forest">Progreso: {module.percentage ?? 0}%</p></div>
-                </div>
-                {unitError ? <ErrorState message={unitError} /> : !units[module.id] ? <LoadingState /> :
-                    <div className="grid gap-3 md:grid-cols-2">{units[module.id].map((unit, i) =>
-                        <Link key={unit.id} href={`/aprender/unidad/${unit.id}`} className="card-hover flex items-center justify-between gap-3 rounded-2xl border border-emerald-100 bg-white/70 p-5">
-                            <div><small className="text-muted">Unidad {i + 1}</small><h3 className="font-bold text-ink">{unit.title}</h3><p className="text-sm text-muted">{unit.description}</p>
-                                <p className="mt-2 text-sm font-bold text-forest">{unit.percentage ?? 0}% completado</p></div><ArrowRight className="shrink-0 text-forest" size={20} />
-                        </Link>)}{units[module.id].length === 0 && <p className="text-sm text-muted">Sin unidades publicadas.</p>}</div>}
-            </section>)}</div>}
-        {evaluations.error && <ErrorState message={evaluations.error} />}
-        {Boolean(evaluations.data?.length) && <section className="mt-9"><h2 className="mb-4 font-serif text-3xl">Evaluaciones</h2><div className="grid gap-4 md:grid-cols-2">
-            {evaluations.data?.map(item => <Link key={item.id} href={`/aprender/evaluacion/${item.id}`} className="glass-panel card-hover flex items-center gap-4 p-6">
-                <ClipboardCheck className="shrink-0 text-forest" /><span className="flex-1"><strong className="block">{item.title}</strong>
-                    <small className="text-muted">{item.type === 'diagnostica' ? 'Diagnóstico general' : 'Evaluación de unidad'}</small></span><ArrowRight size={18} /></Link>)}
-        </div></section>}
+    const [page, setPage] = useState(1);
+    const modules = useApi<Paginated<LearningModule>>(`/levels/${level.id}/modules?page=${page}`);
+    const [diagnosticPage,setDiagnosticPage]=useState(1);
+    const diagnostic=useApi<Paginated<Evaluation>>(`/levels/${level.id}/evaluations?type=diagnostica&page=${diagnosticPage}`);
+    return <AppLayout title={'Nivel ' + level.name} subtitle="Escoge un módulo publicado."><Head title={level.name} />
+        <nav aria-label="Migas de pan" className="mb-6 flex gap-3"><Link href="/aprender">Niveles</Link><span>› {level.name}</span></nav>
+        {modules.loading ? <LoadingState /> : modules.error ? <ErrorState message={modules.error} /> : !modules.data?.data.length ? <EmptyState title="Todavía no hay módulos publicados" description="El administrador está preparando el contenido de este nivel." /> :
+            <div className="grid gap-5 md:grid-cols-2">{modules.data.data.map(m => <Link key={m.id} className="glass-panel card-hover space-y-3 p-6" href={'/aprender/modulo/' + m.id}>
+                <h2 className="font-serif text-2xl">{m.title}</h2><p className="text-muted">{m.description}</p><p className="font-bold text-forest">{m.percentage ?? 0}% completado</p><p className="text-forest">Ver unidades →</p>
+            </Link>)}</div>}
+        <Pagination page={page} lastPage={modules.data?.last_page ?? 1} onChange={setPage} />
+        {!!diagnostic.data?.data.length && <section className="mt-7 space-y-3"><h2 className="font-serif text-2xl">Diagnóstico general</h2>{diagnostic.data.data.map(e=><Link key={e.id} className="glass-panel card-hover block p-5" href={'/aprender/evaluacion/'+e.id}>{e.title} →</Link>)}<Pagination page={diagnosticPage} lastPage={diagnostic.data.last_page} onChange={setDiagnosticPage}/></section>}
     </AppLayout>;
 }

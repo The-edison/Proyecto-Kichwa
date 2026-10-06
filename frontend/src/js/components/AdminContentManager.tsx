@@ -1,97 +1,144 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { apiDelete, apiGet, apiPatch, apiPost, ApiError } from '../services/api';
-import { EmptyState, LoadingState } from './States';
+import { queryClient } from '../services/queryClient';
+import { useApi } from '../hooks/useApi';
+import { Link } from '../navigation';
+import { EmptyState, ErrorState, LoadingState } from './States';
+import { useToast } from './Toast';
 import { ExerciseEditor, newExercise, type EditableExercise } from './ExerciseEditor';
 import type { Level, Paginated } from '../types';
-
 type Resource = 'modules' | 'units' | 'contents' | 'exercises' | 'evaluations' | 'questions' | 'glossary';
 type Row = Record<string, unknown> & { id: number };
-type Form = Record<string, unknown>;
-const names: Record<Resource, string> = { modules: 'Módulos', units: 'Unidades', contents: 'Temas', exercises: 'Ejercicios', evaluations: 'Evaluaciones', questions: 'Preguntas', glossary: 'Diccionario' };
-const parents: Partial<Record<Resource, { resource: Resource; field: string; label: string }>> = {
-    units: { resource: 'modules', field: 'module_id', label: 'Módulo' },
-    contents: { resource: 'units', field: 'unit_id', label: 'Unidad' },
-    exercises: { resource: 'units', field: 'unit_id', label: 'Unidad' },
-    evaluations: { resource: 'units', field: 'unit_id', label: 'Unidad' },
-    questions: { resource: 'evaluations', field: 'evaluation_id', label: 'Evaluación' },
-};
-const initial = (resource: Resource): Form => ({ sort_order: 1, type: resource === 'evaluations' ? 'unidad' : 'seleccion_multiple', kind: 'vocabulary', score: 10, ...(resource === 'exercises' || resource === 'questions' ? newExercise() : {}) });
-const display = (row: Row) => String(row.title || row.prompt || row.spanish || row.name || `#${row.id}`);
-async function allRows(resource: Resource): Promise<Row[]> {
-    let page = 1; const rows: Row[] = [];
-    while (true) {
-        const result = await apiGet<Paginated<Row>>(`/admin/${resource}?per_page=200&page=${page}`);
-        rows.push(...result.data);
-        if (page >= result.last_page) return rows;
-        page++;
-    }
-}
+const titles: Record<Resource, string> = { modules: 'módulo', units: 'unidad', contents: 'tema', exercises: 'ejercicio', evaluations: 'evaluación', questions: 'pregunta', glossary: 'entrada' };
+const display = (row: Row) => String(row.title || row.prompt || row.kichwa || '#' + row.id);
+const base = '/admin/contenidos';
 export function AdminContentManager({ levels }: { levels: Level[] }) {
-    const [resource, setResource] = useState<Resource>('modules');
-    const [rows, setRows] = useState<Row[]>([]);
-    const [parentRows, setParentRows] = useState<Row[]>([]);
-    const [form, setForm] = useState<Form>(initial('modules'));
+    const location = useLocation(); const [params, setParams] = useSearchParams(); const toast = useToast();
+    const parts = location.pathname.slice(base.length).split('/').filter(Boolean);
+    const numberAfter = (key: string) => { const i = parts.indexOf(key); return i >= 0 ? Number(parts[i + 1]) : null; };
+    const levelId = numberAfter('nivel'), moduleId = numberAfter('modulo'), unitId = numberAfter('unidad'), topicId = numberAfter('tema'), evaluationId = numberAfter('evaluacion');
+    const levelPath = base + '/nivel/' + levelId, modulePath = levelPath + '/modulo/' + moduleId, unitPath = modulePath + '/unidad/' + unitId;
+    const topicPath = unitPath + '/tema/' + topicId;
+    const diagnostic = parts.includes('diagnostico'), glossary = parts.includes('diccionario');
+    const resource: Resource | null = glossary ? 'glossary' : evaluationId ? 'questions' : diagnostic ? 'evaluations' : topicId ? 'exercises' : unitId ? params.get('tab') === 'evaluations' ? 'evaluations' : params.get('tab') === 'exercises' ? 'exercises' : 'contents' : moduleId ? 'units' : levelId ? 'modules' : null;
+    const parentId = resource === 'modules' ? levelId : resource === 'units' ? moduleId : resource === 'questions' ? evaluationId : unitId;
+    const page = Number(params.get('page') || 1);
+    const path = resource ? `/admin/${resource}?page=${page}${parentId ? '&parent_id=' + parentId : ''}${topicId ? '&topic_id=' + topicId : ''}${diagnostic ? '&type=diagnostica' : ''}` : null;
+    const listing = useApi<Paginated<Row>>(path);
+    const module = useApi<Row>(moduleId ? '/admin/modules/' + moduleId + '?parent_id=' + levelId : null);
+    const unit = useApi<Row>(unitId ? '/admin/units/' + unitId + '?parent_id=' + moduleId : null);
+    const topic = useApi<Row>(topicId ? '/admin/contents/' + topicId + '?parent_id=' + unitId : null);
+    const evaluation = useApi<Row>(evaluationId ? '/admin/evaluations/' + evaluationId : null);
+    const [form, setForm] = useState<Record<string, unknown>>({});
     const [editing, setEditing] = useState<number | null>(null);
-    const [page, setPage] = useState(1);
-    const [lastPage, setLastPage] = useState(1);
-    const [loading, setLoading] = useState(false);
-    const [busy, setBusy] = useState(false);
-    const [error, setError] = useState('');
-    const [notice, setNotice] = useState('');
-    const parent = parents[resource];
+    const [open, setOpen] = useState(false), [busy, setBusy] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string[]>>({});
     const exercise = resource === 'exercises' || resource === 'questions';
-    async function load() {
-        setLoading(true); setError('');
-        try {
-            const [result, options] = await Promise.all([
-                apiGet<Paginated<Row>>(`/admin/${resource}?per_page=20&page=${page}`),
-                parent ? allRows(parent.resource) : Promise.resolve([]),
-            ]);
-            setRows(result.data); setLastPage(result.last_page); setParentRows(options);
-        } catch (reason) { setError(reason instanceof ApiError ? reason.message : 'No se pudieron cargar los registros.'); }
-        finally { setLoading(false); }
+    useEffect(() => { setOpen(false); setEditing(null); setErrors({}); }, [location.pathname, params.get('tab')]);
+    function begin() { setForm({ kind: 'vocabulary', score: 10, ...(exercise ? newExercise() : {}) }); setEditing(null); setErrors({}); setOpen(true); }
+    function fail(reason: unknown) { const message = reason instanceof ApiError ? reason.message : 'No se pudo completar la operación.'; setErrors(reason instanceof ApiError ? reason.errors : {}); toast(message, true); }
+    function updateList(changed: Row[], removed?: number, append = false) {
+        if (resource === 'modules' && (append || removed)) queryClient.setQueryData<Level[]>(['api', '/admin/levels'], old => old?.map(l => l.id === levelId ? { ...l, children_count: (l.children_count ?? 0) + (append ? 1 : -1) } : l));
+        queryClient.setQueryData<Paginated<Row>>(['api', path], old => {
+            if (!old) return old;
+            const originalIds = new Set(old.data.map(r => r.id));
+            let data = old.data.filter(r => r.id !== removed).map(r => changed.find(c => c.id === r.id) ?? r);
+            const added = append ? changed.filter(r => !originalIds.has(r.id)) : [];
+            data = [...data, ...added].sort((a, b) => Number(a.sort_order ?? a.id) - Number(b.sort_order ?? b.id));
+            const total = old.total + added.length - (removed ? 1 : 0);
+            return { ...old, data: data.slice(0, old.per_page), total, last_page: Math.max(1, Math.ceil(total / old.per_page)) };
+        });
+        queryClient.invalidateQueries({ predicate: q => q.queryKey[0] === 'api' && q.queryKey[1] !== path, refetchType: 'none' });
     }
-    useEffect(() => { void load(); }, [resource, page]);
-    const set = (key: string, value: unknown) => setForm(current => ({ ...current, [key]: value }));
-    function switchResource(next: Resource) { setResource(next); setPage(1); setEditing(null); setForm(initial(next)); setNotice(''); }
     async function save(event: FormEvent) {
-        event.preventDefault(); setBusy(true); setError(''); setNotice('');
-        const payload = { ...form };
-        delete payload.id;
-        if (!editing) delete payload.sort_order;
-        if (resource === 'evaluations' && form.type === 'diagnostica') payload.unit_id = null;
+        event.preventDefault(); if (busy || !resource) return;
+        setBusy(true); setErrors({});
+        const payload = { ...form }; delete payload.id; delete payload.sort_order;
+        const parentKey = resource === 'modules' ? 'level_id' : resource === 'units' ? 'module_id' : resource === 'questions' ? 'evaluation_id' : 'unit_id';
+        if (parentId) payload[parentKey] = parentId;
+        if (topicId && resource === 'exercises') payload.topic_id = topicId;
+        if (resource === 'evaluations') { payload.type = diagnostic ? 'diagnostica' : 'unidad'; payload.unit_id = diagnostic ? null : unitId; }
         try {
-            if (editing) await apiPatch(`/admin/${resource}/${editing}`, payload);
-            else await apiPost(`/admin/${resource}`, payload);
-            setNotice('Registro guardado.'); setEditing(null); setForm(initial(resource)); await load();
-        } catch (reason) { setError(reason instanceof ApiError ? Object.values(reason.errors).flat().join(' ') || reason.message : 'No se pudo guardar.'); }
-        finally { setBusy(false); }
+            const row = editing ? await apiPatch<Row>(`/admin/${resource}/${editing}`, payload) : await apiPost<Row>('/admin/' + resource, payload);
+            updateList([row], undefined, !editing); setOpen(false); setEditing(null); toast('Registro guardado.');
+        } catch (reason) { fail(reason); } finally { setBusy(false); }
     }
+    async function edit(row: Row) { if (!resource) return; setBusy(true); try { setForm(await apiGet<Row>(`/admin/${resource}/${row.id}`)); setEditing(row.id); setOpen(true); setErrors({}); } catch (reason) { fail(reason); } finally { setBusy(false); } }
     async function remove(row: Row) {
-        if (!window.confirm(`¿Eliminar «${display(row)}»? El contenido con relaciones o respuestas históricas se conserva.`)) return;
-        setError('');
-        try { await apiDelete(`/admin/${resource}/${row.id}`); setNotice('Registro eliminado.'); await load(); }
-        catch (reason) { setError(reason instanceof ApiError ? reason.message : 'No se pudo eliminar.'); }
+        if (!resource || busy) return;
+        setBusy(true);
+        try {
+            const result = await apiGet<{ dependencies: Record<string, number> }>(`/admin/${resource}/${row.id}/dependencies`);
+            const children = Object.entries(result.dependencies).filter(([, n]) => n > 0).map(([name, n]) => `${n} ${name}`);
+            if (children.length) { toast('No se puede eliminar: contiene ' + children.join(', ') + '.', true); return; }
+            if (!confirm(`¿Eliminar «${display(row)}»? No tiene registros dependientes.`)) return;
+            await apiDelete(`/admin/${resource}/${row.id}`); updateList([], row.id); toast('Registro eliminado.');
+        } catch (reason) { fail(reason); } finally { setBusy(false); }
     }
-    function textField(key: string, label: string, multiline = false, max = 180) {
-        return <label className="grid gap-2">{label}{multiline ? <textarea className="field min-h-28" required maxLength={max} value={String(form[key] ?? '')} onChange={e => set(key, e.target.value)} /> : <input className="field" required maxLength={max} value={String(form[key] ?? '')} onChange={e => set(key, e.target.value)} />}</label>;
+    async function move(row: Row, direction: 'up' | 'down') {
+        if (!resource || busy) return; setBusy(true);
+        try { const result = await apiPatch<{ data: Row[] }>(`/admin/${resource}/${row.id}/move`, { direction }); updateList(result.data); toast('Orden actualizado.'); }
+        catch (reason) { fail(reason); } finally { setBusy(false); }
     }
+    async function publish(row: Row) {
+        if (!resource || busy) return; setBusy(true);
+        try { const result = await apiPatch<Row>(`/admin/${resource}/${row.id}`, { published: !row.published }); updateList([result]); toast(result.published ? 'Publicado. Sus padres también deben estar publicados.' : 'Guardado como borrador.'); }
+        catch (reason) { fail(reason); } finally { setBusy(false); }
+    }
+    async function importCsv(file: File | undefined) {
+        if (!file) return; setBusy(true); const payload = new FormData(); payload.append('file', file);
+        try { const result = await apiPost<{ message: string }>('/admin/glossary/import', payload); toast(result.message); await listing.refresh(); }
+        catch (reason) { fail(reason); } finally { setBusy(false); }
+    }
+    function field(key: string, label: string, multiline = false, required = true, maxLength = 180) {
+        return <label className="grid gap-2">{label}{multiline ? <textarea className="field min-h-28" required={required} maxLength={maxLength} value={String(form[key] ?? '')} onChange={e => setForm({ ...form, [key]: e.target.value })} aria-invalid={Boolean(errors[key])} /> :
+            <input className="field" required={required} maxLength={maxLength} value={String(form[key] ?? '')} onChange={e => setForm({ ...form, [key]: e.target.value })} aria-invalid={Boolean(errors[key])} />}
+            {errors[key] && <span className="form-error">{errors[key].join(' ')}</span>}</label>;
+    }
+    function childPath(row: Row): string | null {
+        if (resource === 'modules') return levelPath + '/modulo/' + row.id;
+        if (resource === 'units') return modulePath + '/unidad/' + row.id;
+        if (resource === 'contents') return unitPath + '/tema/' + row.id;
+        if (resource === 'evaluations') return (diagnostic ? base + '/diagnostico' : unitPath) + '/evaluacion/' + row.id;
+        return null;
+    }
+    const crumbs = [[base, 'Niveles'], ...(levelId ? [[levelPath, levels.find(l => l.id === levelId)?.name ?? 'Nivel']] : []),
+        ...(moduleId ? [[modulePath, String(module.data?.title ?? 'Módulo')]] : []), ...(unitId ? [[unitPath, String(unit.data?.title ?? 'Unidad')]] : []),
+        ...(topicId ? [[topicPath, String(topic.data?.title ?? 'Tema')]] : []), ...(evaluationId ? [[location.pathname, String(evaluation.data?.title ?? 'Evaluación')]] : [])];
+    const parentError = module.error || unit.error || topic.error || evaluation.error;
     return <div className="space-y-6">
-        <div className="glass-panel p-4"><strong>Niveles</strong><div className="mt-2 flex flex-wrap gap-3">{levels.map(level => <span key={level.id} className="rounded-xl bg-emerald-50 p-3">{level.name} · {level.available ? 'Disponible' : 'Próximamente'}</span>)}</div><p className="mt-3 text-sm text-muted">Carga contenido validado por el docente. Los registros del Básico guardados aquí estarán disponibles para el estudiante.</p></div>
-        <div className="flex gap-2 overflow-x-auto" role="tablist" aria-label="Tipo de contenido">{(Object.keys(names) as Resource[]).map(key => <button key={key} role="tab" aria-selected={resource === key} className={`tab-button ${resource === key ? 'is-active' : ''}`} onClick={() => switchResource(key)}>{names[key]}</button>)}</div>
-        <div className="grid items-start gap-6 xl:grid-cols-2"><form className="glass-panel space-y-5 p-6" onSubmit={save}><h2 className="font-serif text-2xl">{editing ? 'Editar' : 'Crear'} · {names[resource]}</h2>
-            {resource === 'modules' && <label className="grid gap-2">Nivel<select className="field" required value={String(form.level_id ?? '')} onChange={e => set('level_id', Number(e.target.value))}><option value="">Selecciona nivel</option>{levels.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}</select></label>}
-            {resource === 'evaluations' && <label className="grid gap-2">Tipo de evaluación<select className="field" value={String(form.type)} onChange={e => set('type', e.target.value)}><option value="unidad">Unidad</option><option value="diagnostica">Diagnóstica general</option></select></label>}
-            {parent && !(resource === 'evaluations' && form.type === 'diagnostica') && <label className="grid gap-2">{parent.label}<select className="field" required value={String(form[parent.field] ?? '')} onChange={e => set(parent.field, Number(e.target.value))}><option value="">Selecciona…</option>{parentRows.map(row => <option key={row.id} value={row.id}>#{row.id} · {display(row)}</option>)}</select></label>}
-            {resource === 'glossary' ? <>{textField('kichwa', 'Palabra o expresión Kichwa', false, 200)}{textField('spanish', 'Equivalencia en español', false, 250)}</> : exercise ? <ExerciseEditor key={resource + '-' + (editing ?? 'new')} value={form as unknown as EditableExercise} onChange={value => setForm(current => ({ ...current, ...value }))} /> : <>{textField('title', 'Título', false, resource === 'modules' ? 150 : 180)}
-                {(resource === 'modules' || resource === 'units') && textField('description', resource === 'units' ? 'Objetivo de la unidad' : 'Descripción', true, 20000)}
-                {resource === 'contents' && <><label className="grid gap-2">Tipo de tema<select className="field" value={String(form.kind)} onChange={e => set('kind', e.target.value)}><option value="vocabulary">Vocabulario</option><option value="grammar">Gramática</option><option value="culture">Cultura</option></select></label>{textField('body', 'Contenido (texto plano)', true, 50000)}</>}</>}
-            {editing && resource !== 'evaluations' && resource !== 'glossary' && <label className="grid gap-2">Orden dentro de su nivel, móduloulo, unidad o evaluación<input className="field" type="number" required min={1} step={1} value={Number(form.sort_order)} onChange={e => set('sort_order', Number(e.target.value))} /></label>}
-            {resource === 'questions' && <label className="grid gap-2">Puntaje máximo<input className="field" type="number" required min={.01} max={999999.99} step={.01} value={Number(form.score)} onChange={e => set('score', Number(e.target.value))} /></label>}
-            <div className="flex flex-wrap gap-3"><button className="primary-button" disabled={busy} type="submit">Guardar</button>{editing && <button className="secondary-button" type="button" onClick={() => { setEditing(null); setForm(initial(resource)); }}>Cancelar</button>}</div>
-            {error && <p className="form-error" role="alert">{error}</p>}{notice && <p role="status" className="text-forest">{notice}</p>}
-        </form><section className="space-y-4"><h2 className="font-serif text-2xl">Registros</h2>{loading ? <LoadingState /> : !rows.length ? <EmptyState title="Sin registros" description="Crea el primer registro desde el formulario." /> : rows.map(row => <article key={row.id} className="glass-panel flex flex-wrap items-center gap-3 p-4"><div className="min-w-0 flex-1"><strong className="block">{display(row)}</strong><small className="text-muted">#{row.id}{row.sort_order ? ` · Orden ${row.sort_order}` : ''}</small></div><button className="secondary-button" onClick={() => { setEditing(row.id); setForm({ ...initial(resource), ...row }); setNotice(''); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Editar</button><button className="secondary-button" onClick={() => void remove(row)}>Eliminar</button></article>)}
-            {lastPage > 1 && <div className="flex items-center justify-end gap-3"><button className="secondary-button" disabled={page <= 1} onClick={() => setPage(page - 1)}>Anterior</button><span>{page} / {lastPage}</span><button className="secondary-button" disabled={page >= lastPage} onClick={() => setPage(page + 1)}>Siguiente</button></div>}
-        </section></div>
+        <nav aria-label="Migas de pan" className="flex flex-wrap items-center gap-2 text-sm">{crumbs.map(([href, label], i) => <span key={href} className="flex items-center gap-2">{i > 0 && <span aria-hidden>›</span>}<Link href={href} className="rounded px-2 py-3 font-bold text-forest">{label}</Link></span>)}</nav>
+        <div className="flex flex-wrap gap-3"><Link className="secondary-button" href={base}>Niveles</Link><Link className="secondary-button" href={base + '/diccionario'}>Diccionario</Link><Link className="secondary-button" href={base + '/diagnostico'}>Diagnóstico general</Link></div>
+        {parentError ? <ErrorState message={parentError} /> : !resource ? <div className="grid gap-4 sm:grid-cols-2">{levels.map(level => <Link key={level.id} href={base + '/nivel/' + level.id} className="glass-panel card-hover p-6"><h2 className="font-serif text-3xl">{level.name}</h2><p className="mt-3">{level.children_count ?? 0} módulos</p><p className="mt-2 text-muted">{level.available ? 'Administrar contenido del Básico' : 'Estudiante: Próximamente'}</p></Link>)}</div> : <>
+            {unitId && !topicId && !evaluationId && <div className="flex flex-wrap gap-2">{[['contents', 'Temas'], ['exercises', 'Actividades de la unidad'], ['evaluations', 'Evaluaciones']].map(([tab, label]) =>
+                <Link key={tab} className={resource === tab ? 'primary-button' : 'secondary-button'} href={unitPath + (tab === 'contents' ? '' : '?tab=' + tab)}>{label}</Link>)}</div>}
+            <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-serif text-2xl">{listing.data?.total ?? 0} registros · {titles[resource]}</h2>
+                <button className="primary-button" disabled={busy} onClick={begin}>Crear {titles[resource]}</button></div>
+            {glossary && <label className="glass-panel grid gap-2 p-4">Importar CSV (UTF-8, máximo 2 MB)<input type="file" accept=".csv" disabled={busy} onChange={e => void importCsv(e.target.files?.[0])} /><small>Columnas: kichwa, spanish; synonyms y notes opcionales. Se conservan los duplicados existentes.</small></label>}
+            {open && <form className="glass-panel space-y-4 p-5 sm:p-6" onSubmit={save} aria-busy={busy}>
+                <h3 className="font-serif text-2xl">{editing ? 'Editar' : 'Crear'} {titles[resource]}</h3>
+                {exercise ? <ExerciseEditor onBusyChange={setBusy} errors={errors} value={form as unknown as EditableExercise} onChange={value => setForm(current => ({ ...current, ...value }))} /> :
+                    glossary ? <>{field('kichwa', 'Palabra o expresión Kichwa', false, true, 200)}{field('spanish', 'Equivalencia en español', false, true, 250)}{field('synonyms', 'Sinónimos', true, false, 2000)}{field('notes', 'Notas', true, false, 5000)}</> : <>
+                    {field('title', 'Título', false, true, resource === 'modules' ? 150 : 180)}
+                    {(resource === 'modules' || resource === 'units') && field('description', resource === 'modules' ? 'Descripción' : 'Objetivo de la unidad', true, true, 20000)}
+                    {resource === 'contents' && <><label className="grid gap-2">Tipo de tema<select className="field" value={String(form.kind ?? 'vocabulary')} onChange={e => setForm({ ...form, kind: e.target.value })}><option value="vocabulary">Vocabulario</option><option value="grammar">Gramática</option><option value="culture">Cultura</option></select></label>{field('body', 'Contenido (texto plano)', true, true, 50000)}</>}
+                </>}
+                {resource === 'questions' && <label className="grid gap-2">Puntaje máximo<input className="field" type="number" required min=".01" max="999999.99" step=".01" value={Number(form.score ?? 10)} onChange={e => setForm({ ...form, score: Number(e.target.value) })} />{errors.score && <span className="form-error">{errors.score}</span>}</label>}
+                {['modules', 'units', 'contents'].includes(resource) && <p className="text-sm text-muted">Los registros nuevos se guardan como borrador. Publica después de revisar el contenido.</p>}
+                {Object.entries(errors).filter(([key]) => !['title', 'description', 'body', 'kichwa', 'spanish', 'synonyms', 'notes', 'score'].includes(key)).map(([key, values]) => <p key={key} className="form-error" role="alert">{values.join(' ')}</p>)}
+                <div className="flex gap-3"><button className="primary-button" type="submit" disabled={busy}>{busy ? 'Guardando…' : 'Guardar'}</button><button className="secondary-button" type="button" disabled={busy} onClick={() => setOpen(false)}>Cancelar</button></div>
+            </form>}
+            {listing.loading ? <LoadingState /> : listing.error ? <ErrorState message={listing.error} /> : !listing.data?.data.length ?
+                <EmptyState title={'Todavía no hay ' + titles[resource]} description="Crea el primer registro dentro de este recorrido." action={<button className="primary-button" onClick={begin}>Crear primer {titles[resource]}</button>} /> :
+                <div className="grid gap-3">{listing.data.data.map(row => <article className="glass-panel flex flex-wrap items-center gap-3 p-4" key={row.id}>
+                    <div className="min-w-0 flex-1">{childPath(row) ? <Link className="block break-words font-bold text-forest underline" href={childPath(row)!}>{display(row)}</Link> : <strong className="block break-words">{display(row)}</strong>}
+                        <small className="text-muted">#{row.id}{row.sort_order ? ' · Orden ' + row.sort_order : ''}{'published' in row ? row.published ? ' · Publicado' : ' · Borrador' : ''}</small></div>
+                    <div className="flex flex-wrap gap-2">{'published' in row && <button className="secondary-button" disabled={busy} onClick={() => void publish(row)}>{row.published ? 'Retirar publicación' : 'Publicar'}</button>}
+                        {row.sort_order !== undefined && <><button className="secondary-button" disabled={busy} aria-label={'Subir ' + display(row)} onClick={() => void move(row, 'up')}>↑</button><button className="secondary-button" disabled={busy} aria-label={'Bajar ' + display(row)} onClick={() => void move(row, 'down')}>↓</button></>}
+                        <button className="secondary-button" disabled={busy} onClick={() => void edit(row)}>Editar</button><button className="secondary-button" disabled={busy} onClick={() => void remove(row)}>Eliminar</button>
+                    </div></article>)}</div>}
+            {(listing.data?.last_page ?? 1) > 1 && <div className="flex items-center justify-end gap-3"><button className="secondary-button" disabled={page <= 1} onClick={() => setParams(p => { p.set('page', String(page - 1)); return p; })}>Anterior</button><span>Página {page} de {listing.data?.last_page}</span><button className="secondary-button" disabled={page >= (listing.data?.last_page ?? 1)} onClick={() => setParams(p => { p.set('page', String(page + 1)); return p; })}>Siguiente</button></div>}
+        </>}
     </div>;
 }

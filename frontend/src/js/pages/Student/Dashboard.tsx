@@ -25,6 +25,7 @@ export default function Dashboard() {
             ) : (
                 <div className="grid gap-5 md:grid-cols-2">
                     {levels.data.map((level, index) => {
+                        if (!level.available) return <article key={level.id} className="glass-panel p-7"><h3 className="font-serif text-3xl">{level.name}</h3><p className="mt-3 text-muted">Próximamente</p></article>;
                         const summary = progress.data?.find((item) => item.level.id === level.id);
                         return (
                             <Link

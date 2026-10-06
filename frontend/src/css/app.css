@@ -159,3 +159,7 @@ a { text-decoration: none; }
     -webkit-background-clip: text;
     color: transparent;
 }
+
+/* Accesibilidad táctil y de teclado en todo el campus. */
+.primary-button, .secondary-button, .glass-icon-button, .menu-button { min-height: 44px; min-width: 44px; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }

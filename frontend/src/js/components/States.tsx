@@ -1,8 +1,8 @@
-import { AlertCircle, BookOpen, LoaderCircle } from 'lucide-react';
+import { AlertCircle, BookOpen } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 export function LoadingState({ label = 'Cargando...' }: { label?: string }) {
-    return <div className="glass-panel state-panel" role="status"><LoaderCircle className="animate-spin" size={24} /><span>{label}</span></div>;
+    return <div className="glass-panel space-y-3 p-6" role="status"><span>{label}</span><div aria-hidden className="motion-safe:animate-pulse space-y-3"><div className="h-4 w-3/4 rounded bg-emerald-100" /><div className="h-4 w-full rounded bg-emerald-50" /><div className="h-4 w-1/2 rounded bg-emerald-50" /></div></div>;
 }
 
 export function ErrorState({ message, action }: { message: string; action?: ReactNode }) {

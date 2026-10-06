@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom';
 import { Link } from '../navigation';
 import {
     BookOpen,
@@ -30,6 +31,7 @@ function initialCollapsed(): boolean {
 
 function Shell({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
     const { user, logout } = useAuth();
+    const location = useLocation();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [collapsed, setCollapsed] = useState(initialCollapsed);
     const admin = user?.role === 'admin';
@@ -83,9 +85,9 @@ function Shell({ title, subtitle, children }: { title: string; subtitle?: string
                         <Link
                             key={href}
                             href={href}
-                            className={`sidebar-link ${window.location.pathname === href ? 'is-active' : ''}`}
+                            className={`sidebar-link ${location.pathname === href ? 'is-active' : ''}`}
                             aria-label={label}
-                            aria-current={window.location.pathname === href ? 'page' : undefined}
+                            aria-current={location.pathname === href ? 'page' : undefined}
                             title={collapsed ? label : undefined}
                             onClick={() => setMobileOpen(false)}
                         >

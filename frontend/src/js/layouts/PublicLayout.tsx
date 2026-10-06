@@ -1,10 +1,12 @@
+import { useLocation } from 'react-router-dom';
 import { Link } from '../navigation';
 import { Menu, X } from 'lucide-react';
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { Brand } from '../components/Brand';
 
 function Shell({ children }: { children: ReactNode }) {
-    const url = window.location.pathname;
+    const location = useLocation();
+    const url = location.pathname;
     const headerRef = useRef<HTMLElement>(null);
     const navRef = useRef<HTMLElement>(null);
     const [open, setOpen] = useState(false);
@@ -109,8 +111,8 @@ function Shell({ children }: { children: ReactNode }) {
                         }
                     }}
                 >
-                    <a href="/#como-funciona" className={linkClass('como-funciona')} {...selectLink('como-funciona')}>Cómo funciona</a>
-                    <a href="/#cultura" className={linkClass('cultura')} {...selectLink('cultura')}>Nuestra cultura</a>
+                    <Link href="/#como-funciona" className={linkClass('como-funciona')} {...selectLink('como-funciona')}>Cómo funciona</Link>
+                    <Link href="/#cultura" className={linkClass('cultura')} {...selectLink('cultura')}>Nuestra cultura</Link>
                     <Link href="/glosario" className={linkClass('glosario')} {...selectLink('glosario')}>Diccionario</Link>
                     <Link href="/iniciar-sesion" className={linkClass('iniciar-sesion')} {...selectLink('iniciar-sesion')}>Iniciar sesión</Link>
                     <Link href="/registro" className={linkClass('registro')} {...selectLink('registro')}>Comenzar ahora →</Link>
