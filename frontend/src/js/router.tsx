@@ -16,6 +16,7 @@ const StudentModule = lazy(() => import('./pages/Student/Module'));
 const StudentUnit = lazy(() => import('./pages/Student/Unit'));
 const StudentEvaluation = lazy(() => import('./pages/Student/Evaluation'));
 const StudentProgress = lazy(() => import('./pages/Student/Progress'));
+const StudentGlossary = lazy(() => import('./pages/Student/Glossary'));
 const AdminDashboard = lazy(() => import('./pages/Admin/Dashboard'));
 const AdminStudents = lazy(() => import('./pages/Admin/Students'));
 const AdminContentManager = lazy(() => import('./pages/Admin/ContentManager'));
@@ -57,6 +58,7 @@ export function AppRouter() {
         </Route>
         <Route element={<Protected role="student" />}>
             <Route path="/aprender" element={<StudentDashboard />} /><Route path="/aprender/progreso" element={<StudentProgress />} />
+            <Route path="/aprender/diccionario" element={<StudentGlossary />} />
             <Route path="/aprender/nivel/:id" element={<LevelPage />} /><Route path="/aprender/modulo/:id" element={<ParameterPage kind="module" />} />
             <Route path="/aprender/unidad/:id" element={<ParameterPage kind="unit" />} /><Route path="/aprender/evaluacion/:id" element={<ParameterPage kind="evaluation" />} />
         </Route>

@@ -47,7 +47,7 @@ function Shell({ title, subtitle, children }: { title: string; subtitle?: string
             ['/aprender', 'Mi aprendizaje', House],
             ['/aprender/progreso', 'Mi progreso', ChartNoAxesCombined],
             ['/cuenta', 'Mi cuenta', UserRound],
-            ['/glosario', 'Diccionario', Languages],
+            ['/aprender/diccionario', 'Diccionario', Languages],
         ];
 
     useEffect(() => {
