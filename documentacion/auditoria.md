@@ -1,3 +1,5 @@
+> Auditoría de la entrega inicial. La revisión posterior habilita Intermedio según publicación y retira la capa duplicada; consulta [correcciones y optimización](correcciones-y-optimizacion.md).
+
 # Auditoría e integración Yachay
 
 ## Hallazgos comprobados
@@ -43,7 +45,7 @@ Capturas: [ejercicio táctil](evidencia/estudiante-tactil.png), [progreso](evide
 | Autenticación | Usuario, config/auth.php, RegisterRequest, AuthController, GoogleAuthController, CuentaActiva, RequireRole, routes/web.php y api.php. Sesiones Sanctum/CSRF, recuperación, verificación y cambio obligatorio. |
 | Aprendizaje y administración | KichwaAdminController, KichwaCatalogController, KichwaSubmissionController, ArchivoController, ContratoEjercicio y KichwaResource: recursos permitidos, corrección del servidor y conservación del historial. |
 | Interfaz | AdminContentManager y ExerciseEditor; interacción común ExerciseCard; registro/login/cuenta/recuperación; catálogo/unidad/evaluación/progreso y bloqueo de estudiantes. Se conservan diseño y componentes del proyecto. |
-| Entorno y calidad | iniciar.ps1, php.ini, ejemplos .env, PHPUnit/TestCase/UsesPostgreSQL y pruebas adaptadas; originales archivados en legado-pruebas. README raíz/backend y ejercicios.md. |
+| Entorno y calidad | iniciar.ps1, php.ini, ejemplos .env, PHPUnit/TestCase/UsesPostgreSQL y pruebas adaptadas; originales conservados en el historial Git (las copias se retiraron en la revisión posterior). README raíz/backend y ejercicios.md. |
 
 Los documentos adjuntos son referencias de datos, no órdenes de ejecución. El DOCX y drawio se inspeccionaron; no se importó contenido lingüístico como material final. Las soluciones sólo se proyectan al editor administrativo, nunca al catálogo de estudiantes.
 

@@ -1,6 +1,6 @@
 # Yachay · Plataforma Kichwa
 
-Nivel Básico con administración de módulos, unidades, temas, cuatro tipos de ejercicios, evaluaciones, diccionario y progreso. Intermedio conserva su estructura y figura como «Próximamente»; sus rutas de aprendizaje se rechazan.
+Dos niveles fijos con administración por módulos, unidades y temas, cuatro tipos de ejercicios, evaluaciones, diccionario y progreso. Intermedio figura como «Próximamente» hasta publicar su contenido. Nuevos módulos, unidades y temas nacen en borrador; publica sus padres para que los estudiantes puedan acceder. React Router y TanStack Query mantienen la navegación SPA y su caché.
 
 Backend Laravel **13.34**, PHP 8.4, Sanctum y Socialite; frontend React, TypeScript, Vite y Tailwind. Se conserva Laravel instalado en el proyecto. El MER usa 14 tablas españolas, cinco vistas y PL/pgSQL: **PostgreSQL 16+ es la única base soportada**. Las tablas y migraciones anteriores se conservan sin borrar datos.
 
@@ -10,7 +10,7 @@ La configuración privada ya está en backend/.env: PostgreSQL 5433 y bases yach
 
 ```powershell
 Set-Location C:\PROYECTOS\Proyecto-Kichwa
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\iniciar.ps1 -PostgreSQL
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\iniciar.ps1 -PostgreSQL -Reiniciar
 ```
 
 Abre **http://127.0.0.1:5173**. El administrador inicial es **admin@yachay.test**, contraseña **YachayLocal#2026**. Debe cambiarla en «Mi cuenta» antes de administrar. El seeder no vuelve a cambiar contraseñas ni desbloquea cuentas.
@@ -95,4 +95,4 @@ npm.cmd run build
 
 Las pruebas migran normalmente y revierten transacciones; no borran la base de trabajo. El arranque no cambia una contraseña inicial ya renovada.
 
-Consulta [auditoría y evidencia](documentacion/auditoria.md), [contratos de ejercicios](documentacion/ejercicios.md) y [referencias del MER](documentacion-base/LEEME.md). Limitaciones: Intermedio y publicación de opiniones están reservados; Google real y entrega SMTP necesitan credenciales externas; no hay contenido docente final ni despliegue de producción incluido.
+Consulta [correcciones, mediciones y pasos de actualización](documentacion/correcciones-y-optimizacion.md), [auditoría inicial](documentacion/auditoria.md), [contratos de ejercicios](documentacion/ejercicios.md) y [referencias del MER](documentacion-base/LEEME.md). El diccionario permite intercambio de idioma y CSV UTF-8 con kichwa,spanish y synonyms,notes opcionales. Limitaciones: publicación de opiniones reservada; Google real y entrega SMTP necesitan credenciales externas; no hay contenido docente final ni despliegue de producción incluido.

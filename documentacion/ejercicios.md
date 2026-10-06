@@ -8,7 +8,7 @@ Cada elemento tiene `id` local único (letras, números, guion o guion bajo), `t
 
 `resource` contiene el audio principal de `recurso_actividad/recurso_pregunta`. Imágenes de opciones en `elementos_*`. Imagen del cuerpo humano en `zonas_*[0].imagen` (el editor la replica en las demás zonas). Cada zona tiene id, texto, x e y relativos entre 0 y 1. Las respuestas guardan IDs de zona, nunca coordenadas de pantalla. Las etiquetas y la imagen requieren revisión docente.
 
-Las rutas admitidas son `kichwa/imagenes/<nombre aleatorio>.png` y `kichwa/audio/<nombre aleatorio>.<extensión permitida>`. No aceptar enlaces externos ni archivos no subidos. Imágenes PNG/JPEG/WEBP de hasta 5 MB y 6000×6000 se recodifican a PNG. Audio MP3/WAV/OGG/M4A hasta 10 MB. Se valida MIME real y extensión. SVG, HTML, scripts y ejecutables se rechazan. Los archivos quedan en storage/app/public; GET /api/media/... sirve MIME real y nosniff, sin ejecución. El servidor de producción debe bloquear ejecución en /storage.
+Las imágenes nuevas usan `kichwa/imagenes/<nombre aleatorio>.webp`; los PNG anteriores siguen siendo válidos. Audio: `kichwa/audio/<nombre aleatorio>.<extensión permitida>`. No aceptar enlaces externos ni archivos no subidos. Imágenes PNG/JPEG/WEBP de hasta 5 MB y 6000×6000 se recodifican a WebP y se reducen a 1600 px en el lado mayor. Audio MP3/WAV/OGG/M4A hasta 10 MB. Se valida MIME real y extensión. SVG, HTML, scripts y ejecutables se rechazan. Los archivos quedan en storage/app/public; GET /api/media/... sirve MIME real y nosniff, sin ejecución, con ETag y caché immutable. El servidor de producción debe bloquear ejecución en /storage.
 
 ## Selección múltiple
 
@@ -46,7 +46,7 @@ La imagen subida se referencia en imagen de las zonas. Arrastrar con ratón, toc
 
 POST /api/evaluations/{id}/attempts crea o retoma un intento abierto. Devuelve attempt_id y numero_intento. POST /api/evaluations/{id}/submit recibe attempt_id y answers: [{question_id,answer}]. Se exige una respuesta por pregunta. DELETE /api/attempts/{id} abandona un intento propio.
 
-La asignación de número bloquea la fila de usuario dentro de transacción; un índice único impide dos intentos abiertos. Calificación desde v_intentos_evaluacion. FK compuestas y triggers verifican pertenencia, puntaje máximo, fechas e inmutabilidad. No editar una actividad con respuestas ni una evaluación/pregunta con intentos: crear nueva versión.
+La asignación de número bloquea la fila de usuario dentro de transacción; un índice único impide dos intentos abiertos. Calificación desde v_intentos_evaluacion. FK compuestas y triggers verifican pertenencia, puntaje máximo, fechas e inmutabilidad. No editar contenido de una actividad con respuestas ni una evaluación/pregunta con intentos: crear nueva versión. Cambiar exclusivamente el orden está permitido. Las actividades admiten topic_id opcional, perteneciente a la misma unidad; el orden se asigna automáticamente dentro del padre.
 
 Las palabras del paquete siguen siendo [DEMO]; el contenido real debe cargarlo el administrador y validarlo el docente.
 

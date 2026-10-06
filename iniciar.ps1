@@ -1,4 +1,4 @@
-﻿param([switch]$PostgreSQL)
+﻿param([switch]$PostgreSQL, [switch]$Reiniciar)
 $ErrorActionPreference = 'Stop'
 $projectRoot = $PSScriptRoot
 $backend = Join-Path $projectRoot 'backend'
@@ -23,6 +23,20 @@ function Test-LocalPort([int]$port) {
     try { $result = $client.BeginConnect('127.0.0.1', $port, $null, $null); return $result.AsyncWaitHandle.WaitOne(500) -and $client.Connected }
     catch { return $false }
     finally { $client.Dispose() }
+}
+if ($Reiniciar) {
+    $ownedServices = @()
+    foreach ($servicePort in @(8000, 5173)) {
+        $listeners = Get-NetTCPConnection -LocalPort $servicePort -State Listen -ErrorAction SilentlyContinue
+        foreach ($listenerId in ($listeners.OwningProcess | Select-Object -Unique)) {
+            $serviceProcess = Get-CimInstance Win32_Process -Filter "ProcessId = $listenerId"
+            if ($serviceProcess.Name -notin @('php.exe', 'node.exe') -or -not $serviceProcess.CommandLine.Contains($projectRoot)) {
+                throw "El puerto $servicePort pertenece a otro proceso. No se detendrá automáticamente."
+            }
+            $ownedServices += $listenerId
+        }
+    }
+    foreach ($ownedService in ($ownedServices | Select-Object -Unique)) { Stop-Process -Id $ownedService -Force }
 }
 Push-Location $backend
 try {
