@@ -18,6 +18,7 @@ interface AuthValue {
     user: AuthUser | null;
     loading: boolean;
     googleEnabled: boolean;
+    googleLoading: boolean;
     refreshUser: () => Promise<void>;
     login: (identifier: string, password: string) => Promise<void>;
     register: (data: Record<string, string>) => Promise<void>;
@@ -31,9 +32,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<AuthUser | null>(null);
     const [loading, setLoading] = useState(true);
     const [googleEnabled, setGoogleEnabled] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(true);
 
     useEffect(() => {
-        apiGet<{ google: { enabled: boolean } }>('/config').then((config) => setGoogleEnabled(config.google.enabled)).catch(() => {});
+        apiGet<{ google: { enabled: boolean } }>('/config').then((config) => setGoogleEnabled(config.google.enabled)).catch(() => {}).finally(() => setGoogleLoading(false));
         apiGet<ApiUser>('/auth/me')
             .then((current) => setUser(toAuthUser(current)))
             .catch((error: unknown) => { if (!(error instanceof ApiError && error.status === 401)) console.error(error); })
@@ -63,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function refreshUser() { setUser(toAuthUser(await apiGet<ApiUser>("/auth/me"))); }
     return (
-        <AuthContext.Provider value={{ user, loading, googleEnabled, login, register, logout, refreshUser }}>
+        <AuthContext.Provider value={{ user, loading, googleEnabled, googleLoading, login, register, logout, refreshUser }}>
             {children}
         </AuthContext.Provider>
     );
