@@ -1,0 +1,84 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class DemostracionSeeder extends Seeder
+{
+    public function run(): void
+    {
+        if (! app()->environment(['local', 'testing'])) {
+            throw new \RuntimeException('DemostracionSeeder sólo se permite en local o testing.');
+        }
+        $this->call(NivelSeeder::class);
+        DB::transaction(function (): void {
+            // Serializa ejecuciones simultáneas de los seeders de este paquete.
+            DB::select('SELECT pg_advisory_xact_lock(20260930)');
+            DB::unprepared(<<<'SQL'
+-- Sólo demostración técnica. No es material lingüístico validado por el docente experto.
+DO $$
+DECLARE nivel bigint; modulo bigint; unidad bigint; evaluacion bigint; diagnostica bigint;
+BEGIN
+ SELECT id_nivel INTO STRICT nivel FROM niveles WHERE nombre_nivel='Básico';
+ INSERT INTO modulos (id_nivel,nombre_modulo,descripcion_modulo,orden_modulo)
+ VALUES (nivel,'[DEMO] Vocabulario inicial','Demostración; sustituir por contenido validado.',900000)
+ ON CONFLICT (id_nivel,orden_modulo) DO NOTHING;
+ SELECT id_modulo INTO STRICT modulo FROM modulos WHERE id_nivel=nivel AND orden_modulo=900000 AND nombre_modulo='[DEMO] Vocabulario inicial';
+ INSERT INTO unidades (id_modulo,titulo_unidad,objetivo_unidad,orden_unidad)
+ VALUES (modulo,'[DEMO] Números y vocabulario','Comprobar los cuatro contratos de ejercicios; no publicar sin validación.',1)
+ ON CONFLICT (id_modulo,orden_unidad) DO NOTHING;
+ SELECT id_unidad INTO STRICT unidad FROM unidades WHERE id_modulo=modulo AND orden_unidad=1;
+ INSERT INTO temas (id_unidad,tipo_tema,titulo_tema,contenido_tema,orden_tema)
+ VALUES (unidad,'vocabulario','[DEMO] Vocabulario','Ejemplos técnicos: shuk (uno), ishkay (dos), uma (cabeza). Revisar con docente experto.',1)
+ ON CONFLICT (id_unidad,orden_tema) DO NOTHING;
+ IF NOT EXISTS (SELECT 1 FROM actividades WHERE id_unidad=unidad AND orden_actividad=1) THEN
+ INSERT INTO actividades (id_unidad,tipo_actividad,enunciado_actividad,elementos_actividad,zonas_actividad,solucion_actividad,orden_actividad)
+ VALUES (unidad,'seleccion_multiple','[DEMO] Selecciona el equivalente de uno.',
+ '[{"id":"a","texto":"shuk"},{"id":"b","texto":"ishkay"}]','[]','{"seleccion":["a"]}',1);
+ END IF;
+ IF NOT EXISTS (SELECT 1 FROM actividades WHERE id_unidad=unidad AND orden_actividad=2) THEN
+ INSERT INTO actividades (id_unidad,tipo_actividad,enunciado_actividad,elementos_actividad,zonas_actividad,solucion_actividad,orden_actividad)
+ VALUES (unidad,'completar','[DEMO] Escribe el equivalente de dos.',
+ '[{"id":"h1","texto":"dos"}]','[]','{"textos":{"h1":["ishkay"]}}',2);
+ END IF;
+ IF NOT EXISTS (SELECT 1 FROM actividades WHERE id_unidad=unidad AND orden_actividad=3) THEN
+ INSERT INTO actividades (id_unidad,tipo_actividad,enunciado_actividad,elementos_actividad,zonas_actividad,solucion_actividad,orden_actividad)
+ VALUES (unidad,'relacionar','[DEMO] Relaciona cada palabra con su significado.',
+ '[{"id":"k1","texto":"shuk","grupo":"origen"},{"id":"k2","texto":"ishkay","grupo":"origen"},{"id":"e1","texto":"uno","grupo":"destino"},{"id":"e2","texto":"dos","grupo":"destino"}]',
+ '[]','{"pares":[{"origen":"k1","destino":"e1"},{"origen":"k2","destino":"e2"}]}',3);
+ END IF;
+ IF NOT EXISTS (SELECT 1 FROM actividades WHERE id_unidad=unidad AND orden_actividad=4) THEN
+ INSERT INTO actividades (id_unidad,tipo_actividad,enunciado_actividad,elementos_actividad,zonas_actividad,solucion_actividad,orden_actividad)
+ VALUES (unidad,'arrastrar','[DEMO] Arrastra la etiqueta al recuadro cabeza; no requiere una imagen externa.',
+ '[{"id":"k1","texto":"uma"}]','[{"id":"z1","texto":"cabeza","x":0.5,"y":0.25}]',
+ '{"pares":[{"origen":"k1","destino":"z1"}]}',4);
+ END IF;
+ SELECT id_evaluacion INTO evaluacion FROM evaluaciones WHERE id_unidad=unidad AND titulo_evaluacion='[DEMO] Evaluación de unidad' LIMIT 1;
+ IF evaluacion IS NULL THEN
+ INSERT INTO evaluaciones (id_unidad,titulo_evaluacion,tipo_evaluacion) VALUES (unidad,'[DEMO] Evaluación de unidad','unidad') RETURNING id_evaluacion INTO evaluacion;
+ END IF;
+ IF NOT EXISTS (SELECT 1 FROM preguntas WHERE id_evaluacion=evaluacion AND orden_pregunta=1) THEN
+ INSERT INTO preguntas (id_evaluacion,tipo_pregunta,enunciado_pregunta,elementos_pregunta,solucion_pregunta,puntaje_pregunta,orden_pregunta)
+ VALUES (evaluacion,'seleccion_multiple','[DEMO] Selecciona uno.','[{"id":"a","texto":"shuk"},{"id":"b","texto":"ishkay"}]','{"seleccion":["a"]}',10,1);
+ END IF;
+ SELECT id_evaluacion INTO diagnostica FROM evaluaciones WHERE tipo_evaluacion='diagnostica' AND titulo_evaluacion='[DEMO] Diagnóstico técnico' LIMIT 1;
+ IF diagnostica IS NULL THEN
+ INSERT INTO evaluaciones (titulo_evaluacion,tipo_evaluacion) VALUES ('[DEMO] Diagnóstico técnico','diagnostica') RETURNING id_evaluacion INTO diagnostica;
+ END IF;
+ IF NOT EXISTS (SELECT 1 FROM preguntas WHERE id_evaluacion=diagnostica AND orden_pregunta=1) THEN
+ INSERT INTO preguntas (id_evaluacion,tipo_pregunta,enunciado_pregunta,elementos_pregunta,solucion_pregunta,puntaje_pregunta,orden_pregunta)
+ VALUES (diagnostica,'completar','[DEMO] Escribe el equivalente de dos.','[{"id":"h1","texto":"dos"}]','{"textos":{"h1":["ishkay"]}}',10,1);
+ END IF;
+ INSERT INTO diccionario (palabra_kichwa_diccionario,palabra_espanol_diccionario)
+ VALUES ('shuk','uno'),('ishkay','dos'),('uma','cabeza')
+ ON CONFLICT (palabra_kichwa_diccionario,palabra_espanol_diccionario) DO NOTHING;
+END;
+$$;
+
+SQL
+            );
+        });
+    }
+}

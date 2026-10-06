@@ -1,0 +1,12 @@
+{
+  "name": "base-kichwa-validacion",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node verificar.mjs"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "php-parser": "3.4.0"
+  }
+}

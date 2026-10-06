@@ -1,0 +1,61 @@
+MODELO RELACIONAL — PLATAFORMA KICHWA
+Basado en MER_plataforma_kichwa_v3.drawio
+PK = clave primaria; FK = clave foránea. En un modelo relacional las FK repiten necesariamente los identificadores referenciados.
+
+USUARIOS (id_usuario [PK], cedula_usuario, nombre_usuario, correo_usuario, contrasena_usuario, rol_usuario, estado_usuario, remember_token)
+  UNIQUE (cedula_usuario)
+  UNIQUE (correo_usuario)
+  CHECK (correo_usuario = lower(btrim(correo_usuario)) AND position('@' in correo_usuario) > 1)
+
+NIVELES (id_nivel [PK], nombre_nivel, descripcion_nivel, orden_nivel)
+  UNIQUE (nombre_nivel)
+  UNIQUE (orden_nivel)
+
+MODULOS (id_modulo [PK], id_nivel [FK], nombre_modulo, descripcion_modulo, orden_modulo)
+  UNIQUE (id_nivel, orden_modulo)
+
+UNIDADES (id_unidad [PK], id_modulo [FK], titulo_unidad, objetivo_unidad, orden_unidad)
+  UNIQUE (id_modulo, orden_unidad)
+
+USUARIOS_NIVELES (id_usuario_nivel [PK], id_usuario [FK], id_nivel [FK])
+  UNIQUE (id_usuario, id_nivel)
+
+PROGRESO (id_progreso [PK], id_usuario [FK], id_unidad [FK], fecha_inicio_progreso, fecha_actualizacion_progreso)
+  UNIQUE (id_usuario, id_unidad)
+  CHECK (fecha_actualizacion_progreso >= fecha_inicio_progreso)
+
+TEMAS (id_tema [PK], id_unidad [FK], tipo_tema, titulo_tema, contenido_tema, orden_tema)
+  UNIQUE (id_unidad, orden_tema)
+
+ACTIVIDADES (id_actividad [PK], id_unidad [FK], tipo_actividad, enunciado_actividad, elementos_actividad, zonas_actividad, recurso_actividad, solucion_actividad, orden_actividad)
+  UNIQUE (id_unidad, orden_actividad)
+
+RESPUESTAS_ACTIVIDAD (id_respuesta_actividad [PK], id_usuario [FK], id_actividad [FK], respuesta_actividad, acierto_actividad, retroalimentacion_actividad, fecha_respuesta_actividad)
+
+
+EVALUACIONES (id_evaluacion [PK], id_unidad [FK], titulo_evaluacion, tipo_evaluacion)
+  CHECK ((tipo_evaluacion = 'unidad' AND id_unidad IS NOT NULL) OR (tipo_evaluacion = 'diagnostica' AND id_unidad IS NULL))
+
+PREGUNTAS (id_pregunta [PK], id_evaluacion [FK], tipo_pregunta, enunciado_pregunta, elementos_pregunta, zonas_pregunta, recurso_pregunta, solucion_pregunta, puntaje_pregunta, orden_pregunta)
+  UNIQUE (id_evaluacion, orden_pregunta)
+  UNIQUE (id_pregunta, id_evaluacion)
+
+INTENTOS_EVALUACION (id_intento [PK], id_usuario [FK], id_evaluacion [FK], numero_intento, fecha_inicio_intento, fecha_fin_intento, estado_intento)
+  UNIQUE (id_usuario, id_evaluacion, numero_intento)
+  UNIQUE (id_intento, id_evaluacion)
+  CHECK ((estado_intento = 'en_curso' AND fecha_fin_intento IS NULL) OR (estado_intento IN ('finalizado','abandonado') AND fecha_fin_intento IS NOT NULL AND fecha_fin_intento >= fecha_inicio_intento))
+
+RESPUESTAS_EVALUACION (id_respuesta_evaluacion [PK], id_intento [FK], id_pregunta [FK], id_evaluacion [FK compuesta], respuesta_evaluacion, puntaje_respuesta_evaluacion, fecha_respuesta_evaluacion)
+  UNIQUE (id_intento, id_pregunta)
+  FOREIGN KEY (id_intento, id_evaluacion) REFERENCES intentos_evaluacion (id_intento, id_evaluacion) ON DELETE RESTRICT
+  FOREIGN KEY (id_pregunta, id_evaluacion) REFERENCES preguntas (id_pregunta, id_evaluacion) ON DELETE RESTRICT
+
+DICCIONARIO (id_diccionario [PK], palabra_kichwa_diccionario, palabra_espanol_diccionario)
+  UNIQUE (palabra_kichwa_diccionario, palabra_espanol_diccionario)
+
+ATRIBUTOS CALCULADOS (VISTAS; NO SE INSERTAN):
+V_EVALUACIONES: evaluaciones + puntaje_maximo_evaluacion
+V_INTENTOS_EVALUACION: intentos_evaluacion + puntaje_obtenido, puntaje_maximo_evaluacion, calificacion_intento, porcentaje_calificacion
+V_PROGRESO: progreso + total_actividades, actividades_completadas, porcentaje_progreso, estado_progreso
+V_PROGRESO_MODULOS: id_usuario, id_modulo, id_nivel, porcentaje_progreso_modulo
+V_PROGRESO_NIVELES: id_usuario, id_nivel, porcentaje_progreso_nivel

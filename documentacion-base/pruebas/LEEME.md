@@ -1,0 +1,52 @@
+# Validación de la entrega
+
+Se aprobaron 26 grupos de comprobaciones. Motor: PostgreSQL 18.3 (PGlite 0.5.8) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit. Se analizaron 22 archivos PHP con php-parser 3.4.0.
+
+## Reproducir
+
+Requiere Node.js y acceso a npm. Desde la carpeta base_kichwa:
+
+```bash
+cd pruebas
+npm install
+npm test
+```
+
+La base de prueba vive en memoria y no se conecta a su PostgreSQL. No utiliza credenciales reales. Las cuentas de prueba se crean sólo dentro de ese motor desechable.
+
+## Qué se comprobó
+
+- Instalación transaccional de las 14 tablas, 5 vistas y reglas
+- Seed SQL de niveles y demostración; ejecución doble sin duplicar datos
+- Rechaza email duplicado y correo no normalizado
+- Rol estudiante obligatorio para progreso e intentos
+- Una sola asociación de nivel por estudiante
+- No permite transformar en administrador un estudiante con historial
+- JSON inválido o con forma incorrecta es rechazado
+- Práctica repetida cuenta una sola vez y conserva retroalimentación
+- Protege actividad y respuestas históricas
+- Progreso llega a 100 al acertar todas las actividades
+- Unidades no iniciadas cuentan como cero en módulo y nivel
+- Diagnóstico sin unidad permitido; evaluación de unidad sin unidad rechazada
+- Intentos únicos y un solo intento abierto por estudiante/evaluación
+- Pregunta e intento de distintas evaluaciones son rechazados
+- Puntuación negativa o excesiva es rechazada
+- Respuesta válida guardada y duplicado rechazado
+- No permite editar preguntas ni evaluación después del primer intento
+- Semillas repetibles incluso con historial existente
+- Calificación pendiente NULL y calificación final calculada
+- Intento finalizado y respuestas quedan protegidos
+- Segundo intento válido al cerrar el anterior
+- Protege borrado de usuarios con historial
+- Columnas y nulabilidad del diccionario coinciden con PostgreSQL
+- Migraciones PHP contienen exactamente el SQL comprobado
+- Sintaxis PHP de todos los archivos analizada (php-parser)
+- Desinstalación en orden inverso y reinstalación completas
+
+## Límites
+
+- No se ejecutó PHP/Artisan ni una instalación completa de Laravel.
+- No son pruebas de endpoints, React, Sanctum o concurrencia multisesión.
+- El motor es PostgreSQL embebido mediante PGlite, no el servidor del usuario.
+
+La sintaxis PHP se analizó, pero los seeders PHP y el arranque de Laravel no se ejecutaron en esta sesión. Se ejecutó el SQL idéntico que contienen las migraciones y las semillas de niveles/demostración. La semilla AdministradorSeeder requiere comprobación de integración en Laravel con Hash y configuración reales.

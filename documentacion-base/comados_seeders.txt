@@ -1,0 +1,19 @@
+SEEDERS KICHWA
+Se conserva el nombre original comados_seeders.txt para mantener correspondencia con el RAR.
+
+Sólo si desea generar archivos vacíos (los PHP completos ya están incluidos):
+php artisan make:seeder NivelSeeder
+php artisan make:seeder DemostracionSeeder
+php artisan make:seeder AdministradorSeeder
+
+Después de instalar las migraciones:
+php artisan db:seed
+
+Opcional, únicamente para desarrollo local o pruebas:
+php artisan db:seed --class=DemostracionSeeder
+
+Opcional, después de configurar KICHWA_ADMIN_* en .env y copiar config/kichwa.php:
+php artisan config:clear
+php artisan db:seed --class=AdministradorSeeder
+
+DatabaseSeeder ya existe en Laravel: integre su llamada a NivelSeeder en lugar de duplicar la clase.

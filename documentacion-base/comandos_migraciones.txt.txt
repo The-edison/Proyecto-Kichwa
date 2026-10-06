@@ -1,0 +1,27 @@
+COMANDOS DE REFERENCIA
+Los archivos PHP ya están incluidos: no vuelva a generarlos si los copia.
+
+php artisan make:migration create_usuarios_table
+php artisan make:migration create_niveles_table
+php artisan make:migration create_modulos_table
+php artisan make:migration create_unidades_table
+php artisan make:migration create_usuarios_niveles_table
+php artisan make:migration create_progreso_table
+php artisan make:migration create_temas_table
+php artisan make:migration create_actividades_table
+php artisan make:migration create_respuestas_actividad_table
+php artisan make:migration create_evaluaciones_table
+php artisan make:migration create_preguntas_table
+php artisan make:migration create_intentos_evaluacion_table
+php artisan make:migration create_respuestas_evaluacion_table
+php artisan make:migration create_diccionario_table
+php artisan make:migration reglas_integridad
+php artisan make:migration vistas
+
+EJECUTAR después de leer LEEME.md:
+php artisan config:clear
+php artisan migrate --pretend
+php artisan migrate
+php artisan migrate:status
+
+No use migrate:fresh en una base que contenga datos.
