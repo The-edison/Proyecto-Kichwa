@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\ArchivoController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DiccionarioController;
 use App\Http\Controllers\Api\KichwaAdminController;
 use App\Http\Controllers\Api\KichwaCatalogController;
 use App\Http\Controllers\Api\KichwaSubmissionController;
@@ -13,6 +14,7 @@ Route::post('/auth/login', [AuthController::class, 'login'])->middleware('thrott
 Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:3,1');
 Route::post('/auth/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
 Route::get('/glossary', [KichwaCatalogController::class, 'glossary']);
+Route::get('/diccionario/buscar', [DiccionarioController::class, 'search'])->middleware('throttle:120,1');
 Route::get('/testimonials', [TestimonialController::class, 'index']);
 Route::get('/media/{path}', [ArchivoController::class, 'show'])->where('path', '.*');
 Route::get('/config', fn () => response()->json(['google' => ['enabled' => (bool) (config('services.google.client_id') && config('services.google.client_secret'))]]));
@@ -25,7 +27,10 @@ Route::middleware(['auth:sanctum', 'active'])->group(function (): void {
         Route::get('/levels', [KichwaCatalogController::class, 'levels']);
         Route::get('/levels/{level}/modules', [KichwaCatalogController::class, 'modules']);
         Route::get('/modules/{module}/units', [KichwaCatalogController::class, 'units']);
+        Route::get('/modules/{module}', [KichwaCatalogController::class, 'module']);
+        Route::get('/units/{unit}', [KichwaCatalogController::class, 'unit']);
         Route::get('/units/{unit}/contents', [KichwaCatalogController::class, 'contents']);
+        Route::get('/units/{unit}/topics/{topic}', [KichwaCatalogController::class, 'topic']);
         Route::get('/units/{unit}/exercises', [KichwaCatalogController::class, 'exercises']);
         Route::get('/levels/{level}/evaluations', [KichwaCatalogController::class, 'evaluations']);
         Route::get('/evaluations/{evaluation}', [KichwaCatalogController::class, 'evaluation']);
@@ -39,10 +44,14 @@ Route::middleware(['auth:sanctum', 'active'])->group(function (): void {
         Route::post('/testimonials', fn () => abort(403, 'Disponible cuando se habilite Intermedio.'));
     });
     Route::prefix('admin')->middleware('role:admin')->group(function (): void {
+        Route::get('/overview', [KichwaAdminController::class, 'overview']);
+        Route::post('/glossary/import', [DiccionarioController::class, 'import'])->middleware('throttle:5,1');
         Route::get('/students', [KichwaAdminController::class, 'students']);
         Route::patch('/students/{id}', [KichwaAdminController::class, 'block']);
         Route::post('/uploads', [ArchivoController::class, 'store'])->middleware('throttle:20,1');
         foreach (['levels', 'modules', 'units', 'contents', 'exercises', 'evaluations', 'questions', 'glossary'] as $resource) {
+            Route::get('/'.$resource.'/{id}/dependencies', [KichwaAdminController::class, 'dependencies'])->defaults('resource', $resource);
+            Route::patch('/'.$resource.'/{id}/move', [KichwaAdminController::class, 'move'])->defaults('resource', $resource);
             Route::get('/'.$resource, [KichwaAdminController::class, 'index'])->defaults('resource', $resource);
             Route::get('/'.$resource.'/{id}', [KichwaAdminController::class, 'show'])->defaults('resource', $resource);
             if ($resource !== 'levels') {

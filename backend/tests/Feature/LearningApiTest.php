@@ -42,7 +42,7 @@ class LearningApiTest extends TestCase
     {
         $this->seed(DemostracionSeeder::class);
         $unit = Unidad::firstOrFail();
-        Unidad::create(['id_modulo' => $unit->id_modulo, 'titulo_unidad' => '[DEMO] No iniciada', 'objetivo_unidad' => 'Prueba', 'orden_unidad' => 2]);
+        Unidad::create(['id_modulo' => $unit->id_modulo, 'titulo_unidad' => '[DEMO] No iniciada', 'objetivo_unidad' => 'Prueba', 'orden_unidad' => 2, 'publicado' => true]);
         $student = Usuario::factory()->create();
         Sanctum::actingAs($student);
         $activity = Actividad::where('tipo_actividad', 'seleccion_multiple')->firstOrFail()->id_actividad;

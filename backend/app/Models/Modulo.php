@@ -12,10 +12,10 @@ class Modulo extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['id_nivel', 'nombre_modulo', 'descripcion_modulo', 'orden_modulo'];
+    protected $fillable = ['publicado', 'id_nivel', 'nombre_modulo', 'descripcion_modulo', 'orden_modulo'];
 
     protected function casts(): array
     {
-        return [];
+        return ['publicado' => 'boolean'];
     }
 }

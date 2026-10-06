@@ -74,6 +74,9 @@ BEGIN
  INSERT INTO diccionario (palabra_kichwa_diccionario,palabra_espanol_diccionario)
  VALUES ('shuk','uno'),('ishkay','dos'),('uma','cabeza')
  ON CONFLICT (palabra_kichwa_diccionario,palabra_espanol_diccionario) DO NOTHING;
+ UPDATE modulos SET publicado=true WHERE id_modulo=modulo;
+ UPDATE unidades SET publicado=true WHERE id_unidad=unidad;
+ UPDATE temas SET publicado=true WHERE id_unidad=unidad;
 END;
 $$;
 

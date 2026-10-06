@@ -16,86 +16,149 @@ use App\Models\UsuarioNivel;
 use App\Models\VistaIntento;
 use App\Models\VistaProgresoNivel;
 use App\Services\KichwaResource;
+use App\Services\PublicacionContenido;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class KichwaCatalogController extends Controller
 {
-    public static function basicUnit(int $id): Unidad
+    public static function publishedUnit(int $id): Unidad
     {
-        $unit = Unidad::findOrFail($id);
-        $module = Modulo::findOrFail($unit->id_modulo);
-        abort_unless(Nivel::findOrFail($module->id_nivel)->orden_nivel === 1, 404, 'El nivel Intermedio estará disponible próximamente.');
-
-        return $unit;
+        return Unidad::select('unidades.*', 'modulos.id_nivel', 'modulos.nombre_modulo', 'niveles.nombre_nivel')->join('modulos', 'modulos.id_modulo', '=', 'unidades.id_modulo')
+            ->join('niveles', 'niveles.id_nivel', '=', 'modulos.id_nivel')->whereIn('niveles.orden_nivel', [1, 2])
+            ->where('modulos.publicado', true)->where('unidades.publicado', true)->where('unidades.id_unidad', $id)->firstOrFail();
     }
 
-    public static function basicEvaluation(EvaluacionKichwa $evaluation): void
+    public static function publishedEvaluation(EvaluacionKichwa $evaluation): void
     {
         if ($evaluation->id_unidad !== null) {
-            self::basicUnit($evaluation->id_unidad);
+            self::publishedUnit($evaluation->id_unidad);
         }
+    }
+
+    private function publishedLevel(int $id): Nivel
+    {
+        $level = Nivel::whereIn('orden_nivel', [1, 2])->findOrFail($id);
+        abort_unless($level->orden_nivel === 1 || Modulo::where('id_nivel', $id)->where('publicado', true)->exists(), 404);
+
+        return $level;
+    }
+
+    private function paginate(Request $request, string $key, callable $load): array
+    {
+        $request->validate(['page' => ['sometimes', 'integer', 'min:1']]);
+
+        return PublicacionContenido::remember($key.':'.$request->integer('page', 1), fn () => $load()->paginate(20)->through(fn ($record) => $record)->toArray());
     }
 
     public function levels(): JsonResponse
     {
-        return response()->json(Nivel::where('orden_nivel', 1)->get()->map(fn ($r) => KichwaResource::present('levels', $r)));
+        return response()->json(PublicacionContenido::remember('student-levels', fn () => Nivel::whereIn('orden_nivel', [1, 2])->addSelect(['has_published_modules' => Modulo::selectRaw('count(*) > 0')->whereColumn('modulos.id_nivel', 'niveles.id_nivel')->where('publicado', true)])->orderBy('orden_nivel')->get()->map(fn ($r) => KichwaResource::present('levels', $r))->all()));
     }
 
     public function modules(Request $request, int $level): JsonResponse
     {
-        abort_unless(Nivel::findOrFail($level)->orden_nivel === 1, 404);
+        $this->publishedLevel($level);
         UsuarioNivel::firstOrCreate(['id_usuario' => $request->user()->id_usuario, 'id_nivel' => $level]);
-        $progress = DB::table('v_progreso_modulos')->where('id_usuario', $request->user()->id_usuario)->pluck('porcentaje_progreso_modulo', 'id_modulo');
+        $data = $this->paginate($request, 'modules:'.$level, fn () => Modulo::where('id_nivel', $level)->where('publicado', true)->orderBy('orden_modulo'));
+        $progress = DB::table('v_progreso_modulos')->where('id_usuario', $request->user()->id_usuario)->whereIn('id_modulo', array_column($data['data'], 'id_modulo'))->pluck('porcentaje_progreso_modulo', 'id_modulo');
+        $data['data'] = array_map(fn ($r) => KichwaResource::present('modules', (new Modulo)->newFromBuilder($r)) + ['percentage' => (float) ($progress[$r['id_modulo']] ?? 0)], $data['data']);
 
-        return response()->json(Modulo::where('id_nivel', $level)->orderBy('orden_modulo')->get()->map(fn ($r) => KichwaResource::present('modules', $r) + ['percentage' => (float) ($progress[$r->id_modulo] ?? 0)]));
+        return response()->json($data);
+    }
+
+    public function module(int $module): JsonResponse
+    {
+        $record = Modulo::where('publicado', true)->findOrFail($module);
+        $level = $this->publishedLevel($record->id_nivel);
+
+        return response()->json(KichwaResource::present('modules', $record) + ['level_name' => $level->nombre_nivel]);
     }
 
     public function units(Request $request, int $module): JsonResponse
     {
-        $record = Modulo::findOrFail($module);
-        abort_unless(Nivel::findOrFail($record->id_nivel)->orden_nivel === 1, 404);
+        $this->module($module);
+        $data = $this->paginate($request, 'units:'.$module, fn () => Unidad::where('id_modulo', $module)->where('publicado', true)->orderBy('orden_unidad'));
+        $progress = DB::table('v_progreso')->where('id_usuario', $request->user()->id_usuario)->whereIn('id_unidad', array_column($data['data'], 'id_unidad'))->pluck('porcentaje_progreso', 'id_unidad');
+        $data['data'] = array_map(fn ($r) => KichwaResource::present('units', (new Unidad)->newFromBuilder($r)) + ['percentage' => (float) ($progress[$r['id_unidad']] ?? 0)], $data['data']);
 
-        $progress = DB::table('v_progreso')->where('id_usuario', $request->user()->id_usuario)->pluck('porcentaje_progreso', 'id_unidad');
+        return response()->json($data);
+    }
 
-        return response()->json(Unidad::where('id_modulo', $module)->orderBy('orden_unidad')->get()->map(fn ($r) => KichwaResource::present('units', $r) + ['percentage' => (float) ($progress[$r->id_unidad] ?? 0)]));
+    public function unit(Request $request, int $unit): JsonResponse
+    {
+        $record = self::publishedUnit($unit);
+
+        return response()->json(KichwaResource::present('units', $record) + ['level_id' => $record->id_nivel, 'level_name' => $record->nombre_nivel, 'module_name' => $record->nombre_modulo, 'percentage' => (float) (DB::table('v_progreso')->where('id_usuario', $request->user()->id_usuario)->where('id_unidad', $unit)->value('porcentaje_progreso') ?? 0)]);
     }
 
     public function contents(Request $request, int $unit): JsonResponse
     {
-        self::basicUnit($unit);
+        self::publishedUnit($unit);
         ProgresoUnidad::firstOrCreate(['id_usuario' => $request->user()->id_usuario, 'id_unidad' => $unit]);
+        $request->validate(['page' => ['sometimes', 'integer', 'min:1']]);
 
-        return response()->json(Tema::where('id_unidad', $unit)->orderBy('orden_tema')->get()->map(fn ($r) => KichwaResource::present('contents', $r)));
+        $data = PublicacionContenido::remember('contents:'.$unit.':'.$request->integer('page', 1), fn () => Tema::where('id_unidad', $unit)->where('publicado', true)->select('id_tema', 'id_unidad', 'tipo_tema', 'titulo_tema', 'orden_tema', 'publicado')->orderBy('orden_tema')->paginate(20)->through(fn ($r) => KichwaResource::present('contents', $r))->toArray());
+        $progress = DB::table('actividades as a')->leftJoin('respuestas_actividad as r', function ($join) use ($request) {
+            $join->on('r.id_actividad', '=', 'a.id_actividad')->where('r.id_usuario', $request->user()->id_usuario)->where('r.acierto_actividad', true);
+        })->where('a.id_unidad', $unit)->whereIn('a.id_tema', array_column($data['data'], 'id'))->groupBy('a.id_tema')->selectRaw('a.id_tema, round(100.0 * count(distinct r.id_actividad) / nullif(count(distinct a.id_actividad), 0), 2) as percentage')->pluck('percentage', 'id_tema');
+        $data['data'] = array_map(fn ($topic) => $topic + ['percentage' => (float) ($progress[$topic['id']] ?? 0)], $data['data']);
+
+        return response()->json($data);
     }
 
-    public function exercises(int $unit): JsonResponse
+    public function topic(int $unit, int $topic): JsonResponse
     {
-        self::basicUnit($unit);
+        self::publishedUnit($unit);
 
-        return response()->json(Actividad::where('id_unidad', $unit)->orderBy('orden_actividad')->get()->map(fn ($r) => KichwaResource::present('exercises', $r)));
+        return response()->json(KichwaResource::present('contents', Tema::where('id_unidad', $unit)->where('publicado', true)->findOrFail($topic)));
     }
 
-    public function evaluations(int $level): JsonResponse
+    public function exercises(Request $request, int $unit): JsonResponse
     {
-        abort_unless(Nivel::findOrFail($level)->orden_nivel === 1, 404);
-        $unitIds = Unidad::whereIn('id_modulo', Modulo::where('id_nivel', $level)->select('id_modulo'))->pluck('id_unidad');
+        self::publishedUnit($unit);
+        $request->validate(['topic_id' => ['sometimes', 'integer', 'exists:temas,id_tema'], 'page' => ['sometimes', 'integer', 'min:1']]);
+        $query = Actividad::where('id_unidad', $unit)->where(fn ($q) => $q->whereNull('id_tema')->orWhereIn('id_tema', Tema::where('publicado', true)->select('id_tema')));
+        if ($request->filled('topic_id')) {
+            $topic = Tema::where('publicado', true)->where('id_unidad', $unit)->findOrFail($request->integer('topic_id'));
+            $query->where('id_tema', $topic->id_tema);
+        } else {
+            $query->whereNull('id_tema');
+        }
 
-        return response()->json(EvaluacionKichwa::where(fn ($q) => $q->whereIn('id_unidad', $unitIds)->orWhere('tipo_evaluacion', 'diagnostica'))
-            ->whereIn('id_evaluacion', Pregunta::select('id_evaluacion'))->orderBy('id_evaluacion')->get()
-            ->map(fn ($r) => KichwaResource::present('evaluations', $r) + ['level_id' => $level]));
+        return response()->json($query->select(array_values(array_diff(KichwaResource::FIELDS['exercises'], ['solucion_actividad'])) + [])->addSelect('id_tema')->orderBy('orden_actividad')->paginate(20)->through(fn ($r) => KichwaResource::present('exercises', $r)));
+    }
+
+    public function evaluations(Request $request, int $level): JsonResponse
+    {
+        $record = $this->publishedLevel($level);
+        $query = EvaluacionKichwa::where(function ($q) use ($level, $record) {
+            $q->whereIn('id_unidad', PublicacionContenido::unitIds($level));
+            if ($record->orden_nivel === 1) {
+                $q->orWhere(fn ($q) => $q->whereNull('id_unidad')->where('tipo_evaluacion', 'diagnostica'));
+            }
+        })
+            ->whereIn('id_evaluacion', Pregunta::select('id_evaluacion'));
+        if ($request->input('type') === 'diagnostica') {
+            $query->where('tipo_evaluacion', 'diagnostica');
+        }
+        if ($request->filled('unit_id')) {
+            abort_unless(self::publishedUnit($request->integer('unit_id'))->id_nivel === $level, 404);
+            $query->where('id_unidad', $request->integer('unit_id'));
+        }
+
+        return response()->json($query->orderBy('id_evaluacion')->paginate(20)->through(fn ($r) => KichwaResource::present('evaluations', $r) + ['level_id' => $level]));
     }
 
     public function evaluation(int $evaluation): JsonResponse
     {
         $record = EvaluacionKichwa::findOrFail($evaluation);
-        self::basicEvaluation($record);
+        self::publishedEvaluation($record);
+        $level = $record->id_unidad !== null ? self::publishedUnit($record->id_unidad)->id_nivel : Nivel::where('orden_nivel', 1)->firstOrFail()->id_nivel;
 
-        return response()->json(KichwaResource::present('evaluations', $record) + [
-            'level_id' => Nivel::where('orden_nivel', 1)->firstOrFail()->id_nivel,
-            'description' => $record->tipo_evaluacion === 'diagnostica' ? 'Diagnóstico general del Básico.' : 'Evaluación de unidad.',
-            'questions' => Pregunta::where('id_evaluacion', $evaluation)->orderBy('orden_pregunta')->get()->map(fn ($r) => KichwaResource::present('questions', $r))]);
+        return response()->json(KichwaResource::present('evaluations', $record) + ['level_id' => $level, 'description' => 'Evaluación del nivel.',
+            'questions' => Pregunta::where('id_evaluacion', $evaluation)->select(array_values(array_diff(KichwaResource::FIELDS['questions'], ['solucion_pregunta'])))->orderBy('orden_pregunta')->get()->map(fn ($r) => KichwaResource::present('questions', $r))]);
     }
 
     public function glossary(Request $request): JsonResponse
@@ -112,18 +175,29 @@ class KichwaCatalogController extends Controller
 
     public function progress(Request $request): JsonResponse
     {
-        $level = Nivel::where('orden_nivel', 1)->firstOrFail();
-        UsuarioNivel::firstOrCreate(['id_usuario' => $request->user()->id_usuario, 'id_nivel' => $level->id_nivel]);
-        $unitIds = Unidad::whereIn('id_modulo', Modulo::where('id_nivel', $level->id_nivel)->select('id_modulo'))->pluck('id_unidad');
-        $activities = Actividad::whereIn('id_unidad', $unitIds)->pluck('id_actividad');
-        $completed = DB::table('respuestas_actividad')->where('id_usuario', $request->user()->id_usuario)->whereIn('id_actividad', $activities)->where('acierto_actividad', true)->distinct()->count('id_actividad');
-        $results = VistaIntento::where('id_usuario', $request->user()->id_usuario)->where('estado_intento', 'finalizado')
-            ->selectRaw('id_evaluacion as evaluation_id, max(porcentaje_calificacion) as best_score, max(fecha_fin_intento) as completed_at')->groupBy('id_evaluacion')->get();
-        $result = ['level' => ['id' => $level->id_nivel, 'name' => $level->nombre_nivel],
-            'completed_activities' => $completed, 'total_activities' => count($activities),
-            'percentage' => (float) (VistaProgresoNivel::where('id_usuario', $request->user()->id_usuario)->where('id_nivel', $level->id_nivel)->value('porcentaje_progreso_nivel') ?? 0),
-            'evaluation_results' => $results];
+        if ($request->route('level') !== null) {
+            return response()->json($this->levelProgress($request, $this->publishedLevel((int) $request->route('level'))));
+        }
+        $levels = Nivel::whereIn('orden_nivel', [1, 2])->where(fn ($q) => $q->where('orden_nivel', 1)->orWhereIn('id_nivel', Modulo::where('publicado', true)->select('id_nivel')))->orderBy('orden_nivel')->get();
 
-        return response()->json($request->route('level') !== null ? $result : [$result]);
+        return response()->json($levels->map(fn ($level) => $this->levelProgress($request, $level)));
+    }
+
+    private function levelProgress(Request $request, Nivel $level): array
+    {
+        UsuarioNivel::firstOrCreate(['id_usuario' => $request->user()->id_usuario, 'id_nivel' => $level->id_nivel]);
+        $activities = Actividad::whereIn('id_unidad', PublicacionContenido::unitIds($level->id_nivel))->where(fn ($q) => $q->whereNull('id_tema')->orWhereIn('id_tema', Tema::where('publicado', true)->select('id_tema')))->pluck('id_actividad');
+        $completed = DB::table('respuestas_actividad')->where('id_usuario', $request->user()->id_usuario)->whereIn('id_actividad', $activities)->where('acierto_actividad', true)->distinct()->count('id_actividad');
+        $results = VistaIntento::where('id_usuario', $request->user()->id_usuario)->where('estado_intento', 'finalizado')->whereIn('id_evaluacion', EvaluacionKichwa::where(function ($q) use ($level) {
+            $q->whereIn('id_unidad', PublicacionContenido::unitIds($level->id_nivel));
+            if ($level->orden_nivel === 1) {
+                $q->orWhereNull('id_unidad');
+            }
+        })->select('id_evaluacion'))
+            ->selectRaw('id_evaluacion as evaluation_id,max(porcentaje_calificacion) as best_score,max(fecha_fin_intento) as completed_at')->groupBy('id_evaluacion')->get();
+        $result = ['level' => ['id' => $level->id_nivel, 'name' => $level->nombre_nivel], 'completed_activities' => $completed, 'total_activities' => count($activities),
+            'percentage' => (float) (VistaProgresoNivel::where('id_usuario', $request->user()->id_usuario)->where('id_nivel', $level->id_nivel)->value('porcentaje_progreso_nivel') ?? 0), 'evaluation_results' => $results];
+
+        return $result;
     }
 }

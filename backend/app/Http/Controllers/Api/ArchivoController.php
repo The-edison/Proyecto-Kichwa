@@ -30,11 +30,19 @@ class ArchivoController extends Controller
             if (! $source) {
                 throw ValidationException::withMessages(['file' => 'La imagen no se puede leer.']);
             }
+            $width = imagesx($source);
+            $height = imagesy($source);
+            if (max($width, $height) > 1600) {
+                $ratio = 1600 / max($width, $height);
+                $resized = imagescale($source, (int) round($width * $ratio), (int) round($height * $ratio), IMG_BICUBIC);
+                imagedestroy($source);
+                $source = $resized;
+            }
             ob_start();
-            imagepng($source);
+            imagewebp($source, null, 82);
             $bytes = ob_get_clean();
             imagedestroy($source);
-            $path = 'kichwa/imagenes/'.bin2hex(random_bytes(20)).'.png';
+            $path = 'kichwa/imagenes/'.bin2hex(random_bytes(20)).'.webp';
             Storage::disk('public')->put($path, $bytes);
         } else {
             $path = $file->storeAs('kichwa/audio', bin2hex(random_bytes(20)).'.'.strtolower($file->getClientOriginalExtension()), 'public');
@@ -44,15 +52,20 @@ class ArchivoController extends Controller
         return response()->json(['path' => $path, 'url' => url('/api/media/'.$path)], 201);
     }
 
-    public function show(string $path): BinaryFileResponse
+    public function show(Request $request, string $path): BinaryFileResponse
     {
         abort_unless(preg_match('#^kichwa/(imagenes|audio)/[a-zA-Z0-9]+\\.(png|jpg|jpeg|webp|mp3|wav|ogg|m4a|mp4)$#', $path), 404);
         abort_unless(Storage::disk('public')->exists($path), 404);
 
-        return response()->file(Storage::disk('public')->path($path), [
+        $response = response()->file(Storage::disk('public')->path($path), [
+            'Cache-Control' => 'public, max-age=31536000, immutable',
             'Content-Type' => Storage::disk('public')->mimeType($path),
             'X-Content-Type-Options' => 'nosniff',
             'Content-Security-Policy' => "default-src 'none'",
         ]);
+        $response->setAutoEtag();
+        $response->isNotModified($request);
+
+        return $response;
     }
 }

@@ -28,13 +28,16 @@ class KichwaResource
         'evaluations' => ['id' => 'id_evaluacion', 'unit_id' => 'id_unidad', 'title' => 'titulo_evaluacion', 'type' => 'tipo_evaluacion'],
         'questions' => ['id' => 'id_pregunta', 'evaluation_id' => 'id_evaluacion', 'type' => 'tipo_pregunta', 'prompt' => 'enunciado_pregunta',
             'elements' => 'elementos_pregunta', 'zones' => 'zonas_pregunta', 'resource' => 'recurso_pregunta', 'solution' => 'solucion_pregunta', 'score' => 'puntaje_pregunta', 'sort_order' => 'orden_pregunta'],
-        'glossary' => ['id' => 'id_diccionario', 'kichwa' => 'palabra_kichwa_diccionario', 'spanish' => 'palabra_espanol_diccionario'],
+        'glossary' => ['id' => 'id_diccionario', 'kichwa' => 'palabra_kichwa_diccionario', 'spanish' => 'palabra_espanol_diccionario', 'synonyms' => 'sinonimos_diccionario', 'notes' => 'notas_diccionario'],
     ];
 
     public static function present(string $resource, Model $record, bool $admin = false): array
     {
         $result = [];
         foreach (self::FIELDS[$resource] as $key => $column) {
+            if (! array_key_exists($column, $record->getAttributes())) {
+                continue;
+            }
             if ($key === 'solution' && ! $admin) {
                 continue;
             }
@@ -42,10 +45,16 @@ class KichwaResource
         }
         if ($resource === 'levels') {
             $result['code'] = $record->orden_nivel === 1 ? 'basic' : 'intermediate';
-            $result['available'] = $record->orden_nivel === 1;
+            $result['available'] = $record->orden_nivel === 1 || (bool) $record->getAttribute('has_published_modules');
         }
         if ($resource === 'contents') {
             $result['kind'] = ['vocabulario' => 'vocabulary', 'gramatica' => 'grammar', 'cultura' => 'culture'][$result['kind']];
+        }
+        if (in_array($resource, ['modules', 'units', 'contents'], true)) {
+            $result['published'] = (bool) $record->publicado;
+        }
+        if ($resource === 'exercises') {
+            $result['topic_id'] = $record->id_tema;
         }
         if ($resource === 'glossary') {
             $result += ['meaning' => $result['spanish'], 'example_spanish' => null, 'example_kichwa' => null];
@@ -60,6 +69,12 @@ class KichwaResource
             $data['kind'] = ['vocabulary' => 'vocabulario', 'grammar' => 'gramatica', 'culture' => 'cultura'][$data['kind']] ?? $data['kind'];
         }
         $result = [];
+        if (in_array($resource, ['modules', 'units', 'contents'], true) && array_key_exists('published', $data)) {
+            $result['publicado'] = $data['published'];
+        }
+        if ($resource === 'exercises' && array_key_exists('topic_id', $data)) {
+            $result['id_tema'] = $data['topic_id'];
+        }
         foreach (self::FIELDS[$resource] as $key => $column) {
             if ($key !== 'id' && array_key_exists($key, $data)) {
                 $result[$column] = $data[$key];

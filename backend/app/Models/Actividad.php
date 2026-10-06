@@ -12,7 +12,7 @@ class Actividad extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['id_unidad', 'tipo_actividad', 'enunciado_actividad', 'elementos_actividad', 'zonas_actividad', 'recurso_actividad', 'solucion_actividad', 'orden_actividad'];
+    protected $fillable = ['id_tema', 'id_unidad', 'tipo_actividad', 'enunciado_actividad', 'elementos_actividad', 'zonas_actividad', 'recurso_actividad', 'solucion_actividad', 'orden_actividad'];
 
     protected $hidden = ['solucion_actividad'];
 

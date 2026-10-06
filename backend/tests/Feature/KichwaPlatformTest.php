@@ -97,7 +97,7 @@ class KichwaPlatformTest extends TestCase
         $student = Usuario::factory()->create();
         Sanctum::actingAs($student);
         $this->getJson('/api/admin/modules')->assertForbidden();
-        $this->getJson('/api/levels')->assertOk()->assertJsonCount(1)->assertJsonPath('0.code', 'basic');
+        $this->getJson('/api/levels')->assertOk()->assertJsonCount(2)->assertJsonPath('0.code', 'basic')->assertJsonPath('1.available', false);
         $id = Nivel::where('orden_nivel', 2)->firstOrFail()->id_nivel;
         $this->getJson('/api/levels/'.$id.'/modules')->assertNotFound();
         $token = $student->createToken('test')->plainTextToken;

@@ -12,7 +12,7 @@ class Diccionario extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['palabra_kichwa_diccionario', 'palabra_espanol_diccionario'];
+    protected $fillable = ['palabra_kichwa_diccionario', 'palabra_espanol_diccionario', 'sinonimos_diccionario', 'notas_diccionario'];
 
     protected function casts(): array
     {

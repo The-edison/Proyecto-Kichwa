@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CompressJsonResponse;
 use App\Http\Middleware\CuentaActiva;
 use App\Http\Middleware\RequireRole;
 use App\Services\ErroresIntegridad;
@@ -19,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias(['role' => RequireRole::class, 'active' => CuentaActiva::class]);
         $middleware->statefulApi();
+        $middleware->append(CompressJsonResponse::class);
         $middleware->redirectGuestsTo(fn (): string => rtrim(config('app.frontend_url'), '/').'/iniciar-sesion');
         $middleware->redirectUsersTo(fn (Request $request): string => rtrim(config('app.frontend_url'), '/').($request->user()?->rol_usuario === 'administrador' ? '/admin' : '/aprender'));
     })

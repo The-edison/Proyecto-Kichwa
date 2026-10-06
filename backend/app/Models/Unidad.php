@@ -12,10 +12,10 @@ class Unidad extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['id_modulo', 'titulo_unidad', 'objetivo_unidad', 'orden_unidad'];
+    protected $fillable = ['publicado', 'id_modulo', 'titulo_unidad', 'objetivo_unidad', 'orden_unidad'];
 
     protected function casts(): array
     {
-        return [];
+        return ['publicado' => 'boolean'];
     }
 }

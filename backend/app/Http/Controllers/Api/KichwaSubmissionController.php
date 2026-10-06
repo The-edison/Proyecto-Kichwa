@@ -9,6 +9,7 @@ use App\Models\IntentoEvaluacion;
 use App\Models\Pregunta;
 use App\Models\RespuestaActividad;
 use App\Models\RespuestaEvaluacion;
+use App\Models\Tema;
 use App\Models\Usuario;
 use App\Models\VistaIntento;
 use App\Services\ContratoEjercicio;
@@ -25,7 +26,10 @@ class KichwaSubmissionController extends Controller
         $data = $request->validate(['answer' => ['required', 'array']]);
         $result = DB::transaction(function () use ($request, $exercise, $data): array {
             $record = Actividad::whereKey($exercise)->lockForUpdate()->firstOrFail();
-            KichwaCatalogController::basicUnit($record->id_unidad);
+            KichwaCatalogController::publishedUnit($record->id_unidad);
+            if ($record->id_tema !== null) {
+                abort_unless(Tema::whereKey($record->id_tema)->where('publicado', true)->exists(), 404);
+            }
             $correct = ContratoEjercicio::grade(KichwaResource::present('exercises', $record, true), $data['answer']);
             $feedback = $correct ? 'Respuesta correcta. Continúa practicando.' : 'Revisa el tema y vuelve a intentarlo.';
             RespuestaActividad::create([
@@ -42,7 +46,7 @@ class KichwaSubmissionController extends Controller
     public function start(Request $request, int $evaluation): JsonResponse
     {
         $record = EvaluacionKichwa::findOrFail($evaluation);
-        KichwaCatalogController::basicEvaluation($record);
+        KichwaCatalogController::publishedEvaluation($record);
         abort_unless(Pregunta::where('id_evaluacion', $evaluation)->exists(), 422, 'Añade preguntas antes de iniciar una evaluación.');
         $attempt = DB::transaction(function () use ($request, $evaluation) {
             Usuario::whereKey($request->user()->id_usuario)->lockForUpdate()->firstOrFail();
@@ -58,7 +62,7 @@ class KichwaSubmissionController extends Controller
     public function submit(Request $request, int $evaluation): JsonResponse
     {
         $record = EvaluacionKichwa::findOrFail($evaluation);
-        KichwaCatalogController::basicEvaluation($record);
+        KichwaCatalogController::publishedEvaluation($record);
         $data = $request->validate(['attempt_id' => ['required', 'integer', 'min:1'],
             'answers' => ['required', 'array', 'min:1', 'max:200'],
             'answers.*' => ['array:question_id,answer'],

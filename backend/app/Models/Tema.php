@@ -12,10 +12,10 @@ class Tema extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['id_unidad', 'tipo_tema', 'titulo_tema', 'contenido_tema', 'orden_tema'];
+    protected $fillable = ['publicado', 'id_unidad', 'tipo_tema', 'titulo_tema', 'contenido_tema', 'orden_tema'];
 
     protected function casts(): array
     {
-        return [];
+        return ['publicado' => 'boolean'];
     }
 }
