@@ -140,11 +140,11 @@ export function TestimonialsSection() {
                 ) : eligibility?.has_commented ? (
                     <p className="text-muted">Ya compartiste tu opinión. Gracias por participar.</p>
                 ) : user?.role === 'student' ? (
-                    <p className="text-muted">Podrás publicar tu opinión al completar las actividades del nivel Intermedio y aprobar sus evaluaciones. <Link href="/aprender" className="font-bold text-forest underline">Ir a mi panel</Link></p>
+                    <p className="text-muted">Las opiniones estarán disponibles cuando se habilite el nivel Intermedio. Por ahora puedes aprender el Básico. <Link href="/aprender" className="font-bold text-forest underline">Ir a mi panel</Link></p>
                 ) : user?.role === 'admin' ? (
-                    <p className="text-muted">Las opiniones de esta sección las comparten los estudiantes que completaron el nivel Intermedio.</p>
+                    <p className="text-muted">La publicación de opiniones se habilitará junto con el nivel Intermedio.</p>
                 ) : (
-                    <p className="text-muted">Cuando completes el nivel Intermedio podrás compartir tu experiencia. <Link href="/iniciar-sesion" className="font-bold text-forest underline">Inicia sesión</Link> para continuar tu aprendizaje.</p>
+                    <p className="text-muted">Nivel Intermedio y publicación de opiniones: próximamente. <Link href="/iniciar-sesion" className="font-bold text-forest underline">Inicia sesión</Link> para aprender el Básico.</p>
                 )}
                 {error && <p className="form-error" role="alert">{error}</p>}
                 {success && <p className="text-sm font-semibold text-forest" role="status">{success}</p>}

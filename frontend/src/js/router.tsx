@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Glossary from './pages/Glossary/Index';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
+import PasswordRecovery from './pages/Auth/PasswordRecovery';
 import Account from './pages/Account/Index';
 import StudentDashboard from './pages/Student/Dashboard';
 import StudentLevel from './pages/Student/Level';
@@ -23,6 +24,7 @@ export function AppRouter() {
     if (loading) return <LoadingState />;
     if (path === '/') return <Home />;
     if (path === '/glosario') return <Glossary />;
+    if (path === '/recuperar-contrasena') return <PasswordRecovery />;
     if (path === '/iniciar-sesion' || path === '/registro') {
         if (user) {
             window.location.replace(user.role === 'admin' ? '/admin' : '/aprender');
@@ -37,6 +39,10 @@ export function AppRouter() {
     }
 
     if (path === '/cuenta') return <Account />;
+    if (user.debe_cambiar_contrasena) {
+        window.location.replace('/cuenta');
+        return null;
+    }
     if (path.startsWith('/admin')) {
         if (user.role !== 'admin') return <p>Acceso denegado.</p>;
         if (path === '/admin') return <AdminDashboard />;

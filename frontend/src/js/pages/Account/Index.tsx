@@ -3,6 +3,7 @@ import { CheckCircle2, Mail, ShieldCheck } from 'lucide-react';
 import { AppLayout } from '../../layouts/AppLayout';
 import { useAuth } from '../../context/AuthContext';
 import { apiBaseUrl } from '../../services/api';
+import { PasswordChange } from '../../components/PasswordChange';
 
 export default function Account() {
     const { user, googleEnabled } = useAuth();
@@ -13,6 +14,7 @@ export default function Account() {
     return (
         <AppLayout title="Mi cuenta" subtitle="Consulta tus datos y métodos de acceso.">
             <Head title="Mi cuenta" />
+            <PasswordChange />
             <div className="grid gap-5 lg:grid-cols-2">
                 <section className="glass-panel p-7">
                     <span className="eyebrow">DATOS DE TU CUENTA</span>

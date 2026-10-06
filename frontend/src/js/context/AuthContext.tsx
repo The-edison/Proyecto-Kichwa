@@ -2,14 +2,14 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { apiGet, apiPost, ApiError } from '../services/api';
 import type { AuthUser } from '../types';
 
-interface ApiUser extends Omit<AuthUser, 'role' | 'google_connected'> {
+interface ApiUser extends Omit<AuthUser, 'role'> {
     role: { code: AuthUser['role'] };
-    google_id: string | null;
 }
 
 function toAuthUser(user: ApiUser): AuthUser {
     return { id: user.id, name: user.name, email: user.email, cedula: user.cedula,
-        role: user.role.code, google_connected: user.google_id !== null };
+        role: user.role.code, google_connected: user.google_connected,
+        debe_cambiar_contrasena: user.debe_cambiar_contrasena, email_verified: user.email_verified };
 }
 
 interface AuthValue {
@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const response = await apiPost<{ user: ApiUser }>('/auth/login', { identifier, password });
         const authenticated = toAuthUser(response.user);
         setUser(authenticated);
-        window.location.assign(authenticated.role === 'admin' ? '/admin' : '/aprender');
+        window.location.assign(authenticated.debe_cambiar_contrasena ? '/cuenta' : authenticated.role === 'admin' ? '/admin' : '/aprender');
     }
 
     async function register(data: Record<string, string>) {

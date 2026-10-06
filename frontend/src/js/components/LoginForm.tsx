@@ -19,7 +19,7 @@ export function LoginForm() {
         try {
             await login(data.identifier, data.password);
         } catch (error) {
-            setErrors(error instanceof ApiError ? Object.fromEntries(Object.entries(error.errors).map(([key, values]) => [key, values[0]])) : { identifier: 'No se pudo iniciar sesión.' });
+            setErrors(error instanceof ApiError ? Object.keys(error.errors).length ? Object.fromEntries(Object.entries(error.errors).map(([key, values]) => [key, values[0]])) : { identifier: error.message } : { identifier: 'No se pudo iniciar sesión.' });
             setProcessing(false);
         }
     }
@@ -28,7 +28,7 @@ export function LoginForm() {
         <div className="space-y-6">
             <form onSubmit={submit} className="space-y-5">
                 <div>
-                    <label className="field-label" htmlFor="identifier">Correo electrónico o cédula</label>
+                    <label className="field-label" htmlFor="identifier">Correo electrónico</label>
                     <input className="field" id="identifier" autoComplete="username" required value={data.identifier} onChange={(event) => setData({ ...data, identifier: event.target.value })} />
                     {errors.identifier && <p className="form-error" role="alert">{errors.identifier}</p>}
                 </div>
@@ -40,6 +40,7 @@ export function LoginForm() {
                 <button className="primary-button w-full" disabled={processing}>Entrar a mi espacio <ArrowRight size={18} /></button>
             </form>
             <GoogleAuthButton label="Iniciar sesión con Google" />
+            <Link href="/recuperar-contrasena" className="block text-center font-bold text-forest">Olvidé mi contraseña</Link>
             {googleError && <p className="form-error" role="alert">{googleError}</p>}
             <p className="text-center text-sm text-muted">¿Aún no tienes cuenta? <Link className="font-bold text-forest underline" href="/registro">Regístrate</Link></p>
         </div>

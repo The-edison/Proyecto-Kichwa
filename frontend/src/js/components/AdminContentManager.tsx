@@ -1,34 +1,96 @@
-﻿import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { apiDelete, apiGet, apiPatch, apiPost, ApiError } from '../services/api';
-import { EmptyState, ErrorState, LoadingState } from './States';
+import { EmptyState, LoadingState } from './States';
+import { ExerciseEditor, newExercise, type EditableExercise } from './ExerciseEditor';
 import type { Level, Paginated } from '../types';
 
-type Resource = 'modules'|'units'|'contents'|'exercises'|'evaluations'|'questions'|'glossary';
-type Row = Record<string, unknown> & {id:number;is_published?:boolean};
-type Field = {name:string;label:string;kind?:'textarea'|'select'|'number'|'checkbox'|'options';required?:boolean;choices?:Array<{value:string;label:string}>};
-const resourceNames:Record<Resource,string>={modules:'MÃ³dulos',units:'Unidades',contents:'Lecciones',exercises:'Ejercicios',evaluations:'Evaluaciones',questions:'Preguntas',glossary:'Diccionario'};
-const fieldSets:Record<Resource,Field[]>={
-    modules:[{name:'level_id',label:'Nivel',kind:'select',required:true},{name:'title',label:'TÃ­tulo',required:true},{name:'description',label:'DescripciÃ³n',kind:'textarea'},{name:'sort_order',label:'Orden',kind:'number'},{name:'is_published',label:'Publicado',kind:'checkbox'}],
-    units:[{name:'module_id',label:'MÃ³dulo',kind:'select',required:true},{name:'title',label:'TÃ­tulo',required:true},{name:'description',label:'DescripciÃ³n',kind:'textarea'},{name:'sort_order',label:'Orden',kind:'number'},{name:'is_published',label:'Publicado',kind:'checkbox'}],
-    contents:[{name:'unit_id',label:'Unidad',kind:'select',required:true},{name:'kind',label:'Tipo',kind:'select',required:true,choices:[{value:'vocabulary',label:'Vocabulario'},{value:'grammar',label:'GramÃ¡tica'}]},{name:'title',label:'TÃ­tulo',required:true},{name:'body',label:'Contenido',kind:'textarea',required:true},{name:'sort_order',label:'Orden',kind:'number'},{name:'is_published',label:'Publicado',kind:'checkbox'}],
-    exercises:[{name:'content_id',label:'LecciÃ³n',kind:'select',required:true},{name:'type',label:'Tipo de actividad',kind:'select',required:true,choices:[{value:'multiple_choice',label:'OpciÃ³n mÃºltiple'},{value:'complete',label:'Completar'},{value:'select',label:'Seleccionar'}]},{name:'prompt',label:'Enunciado',kind:'textarea',required:true},{name:'options',label:'Opciones (una por lÃ­nea)',kind:'options'},{name:'correct_answer',label:'Respuesta correcta',required:true},{name:'feedback_correct',label:'Mensaje si acierta',kind:'textarea'},{name:'feedback_incorrect',label:'Mensaje si falla',kind:'textarea'},{name:'sort_order',label:'Orden',kind:'number'},{name:'is_published',label:'Publicado',kind:'checkbox'}],
-    evaluations:[{name:'level_id',label:'Nivel',kind:'select',required:true},{name:'title',label:'TÃ­tulo',required:true},{name:'description',label:'DescripciÃ³n',kind:'textarea'},{name:'passing_score',label:'Nota mÃ­nima (%)',kind:'number'},{name:'is_published',label:'Publicado',kind:'checkbox'}],
-    questions:[{name:'evaluation_id',label:'EvaluaciÃ³n',kind:'select',required:true},{name:'type',label:'Tipo de pregunta',kind:'select',required:true,choices:[{value:'multiple_choice',label:'OpciÃ³n mÃºltiple'},{value:'complete',label:'Completar'},{value:'select',label:'Seleccionar'}]},{name:'prompt',label:'Enunciado',kind:'textarea',required:true},{name:'options',label:'Opciones (una por lÃ­nea)',kind:'options'},{name:'correct_answer',label:'Respuesta correcta',required:true},{name:'feedback_correct',label:'Mensaje si acierta',kind:'textarea'},{name:'feedback_incorrect',label:'Mensaje si falla',kind:'textarea'},{name:'sort_order',label:'Orden',kind:'number'}],
-    glossary:[{name:'spanish',label:'EspaÃ±ol',required:true},{name:'kichwa',label:'Kichwa',required:true},{name:'meaning',label:'Significado',kind:'textarea',required:true},{name:'example_spanish',label:'Ejemplo en espaÃ±ol',kind:'textarea'},{name:'example_kichwa',label:'Ejemplo en Kichwa',kind:'textarea'},{name:'is_published',label:'Publicado',kind:'checkbox'}]
+type Resource = 'modules' | 'units' | 'contents' | 'exercises' | 'evaluations' | 'questions' | 'glossary';
+type Row = Record<string, unknown> & { id: number };
+type Form = Record<string, unknown>;
+const names: Record<Resource, string> = { modules: 'Módulos', units: 'Unidades', contents: 'Temas', exercises: 'Ejercicios', evaluations: 'Evaluaciones', questions: 'Preguntas', glossary: 'Diccionario' };
+const parents: Partial<Record<Resource, { resource: Resource; field: string; label: string }>> = {
+    units: { resource: 'modules', field: 'module_id', label: 'Módulo' },
+    contents: { resource: 'units', field: 'unit_id', label: 'Unidad' },
+    exercises: { resource: 'units', field: 'unit_id', label: 'Unidad' },
+    evaluations: { resource: 'units', field: 'unit_id', label: 'Unidad' },
+    questions: { resource: 'evaluations', field: 'evaluation_id', label: 'Evaluación' },
 };
-const parentResource:Partial<Record<Resource,Resource>>={units:'modules',contents:'units',exercises:'contents',questions:'evaluations'};
-const parentField:Partial<Record<Resource,string>>={modules:'level_id',units:'module_id',contents:'unit_id',exercises:'content_id',evaluations:'level_id',questions:'evaluation_id'};
-function display(row:Row){return String(row.title??row.prompt??row.spanish??`#${row.id}`)}
-function initial(resource:Resource){return Object.fromEntries(fieldSets[resource].map(f=>[f.name,f.kind==='checkbox'?false:f.kind==='number'?0:''])) as Record<string,string|number|boolean>}
-function normalize(row:Row,resource:Resource){return Object.fromEntries(fieldSets[resource].map(f=>{const value=row[f.name];return [f.name,f.kind==='options'?(Array.isArray(value)?value.join('\n'):''):value??(f.kind==='checkbox'?false:'')]})) as Record<string,string|number|boolean>}
-export function AdminContentManager({levels}:{levels:Level[]}){const [resource,setResource]=useState<Resource>('modules');const [rows,setRows]=useState<Row[]>([]);const [parents,setParents]=useState<Row[]>([]);const [page,setPage]=useState(1);const [lastPage,setLastPage]=useState(1);const [loading,setLoading]=useState(true);const [error,setError]=useState('');const [notice,setNotice]=useState('');const [editing,setEditing]=useState<number|null>(null);const [form,setForm]=useState<Record<string,string|number|boolean>>(initial('modules'));const [busy,setBusy]=useState(false);const fields=fieldSets[resource];const parentKey=parentField[resource];const parentOptions=useMemo(()=>parentResource[resource]?parents.map(p=>({value:String(p.id),label:display(p)})):levels.map(l=>({value:String(l.id),label:l.name})),[parents,levels,resource]);
-    async function load(){setLoading(true);setError('');try{const result=await apiGet<Paginated<Row>>(`/admin/${resource}?page=${page}&per_page=20`);setRows(result.data);setLastPage(result.last_page);const parent=parentResource[resource];setParents(parent?(await apiGet<Paginated<Row>>(`/admin/${parent}?per_page=50`)).data:[])}catch(reason){setError(reason instanceof ApiError?reason.message:'No se pudieron cargar los datos.')}finally{setLoading(false)}}
-    useEffect(()=>{void load()},[resource,page]);
-    function switchResource(next:Resource){setResource(next);setPage(1);setEditing(null);setNotice('');setForm(initial(next))}
-    function edit(row:Row){setEditing(row.id);setForm(normalize(row,resource));setNotice('');window.scrollTo({top:0,behavior:'smooth'})}
-    async function save(e:FormEvent){e.preventDefault();setBusy(true);setError('');setNotice('');const payload:Record<string,unknown>={...form};for(const f of fields){if(f.kind==='number')payload[f.name]=Number(form[f.name]||0);if(f.kind==='select'&&f.name.endsWith('_id'))payload[f.name]=Number(form[f.name]);if(f.kind==='options')payload[f.name]=String(form[f.name]||'').split('\n').map(s=>s.trim()).filter(Boolean)}if(editing&&parentKey)delete payload[parentKey];try{if(editing)await apiPatch(`/admin/${resource}/${editing}`,payload);else await apiPost(`/admin/${resource}`,payload);setNotice(editing?'Registro actualizado.':'Registro creado.');setEditing(null);setForm(initial(resource));await load()}catch(reason){setError(reason instanceof ApiError?(Object.values(reason.errors).flat().join(' ')||reason.message):'No se pudo guardar.')}finally{setBusy(false)}}
-    async function remove(row:Row){if(!window.confirm(`Â¿Eliminar ${display(row)}?`))return;setError('');try{await apiDelete(`/admin/${resource}/${row.id}`);setNotice('Registro eliminado.');await load()}catch(reason){setError(reason instanceof ApiError?reason.message:'No se pudo eliminar.') }}
-    async function toggle(row:Row){setError('');try{await apiPatch(`/admin/${resource}/${row.id}`,{is_published:!row.is_published});await load()}catch(reason){setError(reason instanceof ApiError?reason.message:'No se pudo cambiar el estado.')}}
-    return <div><div className="mb-6 flex gap-2 overflow-x-auto pb-2" role="tablist" aria-label="Tipo de contenido">{(Object.keys(resourceNames) as Resource[]).map(key=><button role="tab" aria-selected={resource===key} key={key} className={`tab-button ${resource===key?'is-active':''}`} onClick={()=>switchResource(key)}>{resourceNames[key]}</button>)}</div><div className="grid items-start gap-6 xl:grid-cols-[minmax(300px,420px)_1fr]"><form className="glass-panel space-y-4 p-6" onSubmit={save}><div className="flex items-center gap-2"><Plus size={20} className="text-forest"/><h2 className="font-serif text-2xl">{editing?'Editar':'Crear'} {resourceNames[resource].toLowerCase()}</h2></div>{fields.map(field=>{const choices=field.choices??(field.name===parentKey?parentOptions:[]);return <div key={field.name}>{field.kind==='checkbox'?<label className="flex items-center gap-3 font-bold text-ink"><input type="checkbox" checked={Boolean(form[field.name])} onChange={e=>setForm({...form,[field.name]:e.target.checked})}/>{field.label}</label>:<><label className="field-label" htmlFor={`admin-${field.name}`}>{field.label}</label>{field.kind==='textarea'||field.kind==='options'?<textarea id={`admin-${field.name}`} className="field min-h-24" required={field.required} value={String(form[field.name]??'')} onChange={e=>setForm({...form,[field.name]:e.target.value})}/>:field.kind==='select'?<select id={`admin-${field.name}`} className="field" required={field.required} disabled={Boolean(editing&&field.name===parentKey)} value={String(form[field.name]??'')} onChange={e=>setForm({...form,[field.name]:e.target.value})}><option value="">Selecciona...</option>{choices.map(option=><option key={option.value} value={option.value}>{option.label}</option>)}</select>:<input id={`admin-${field.name}`} className="field" type={field.kind==='number'?'number':'text'} min={field.kind==='number'?0:undefined} max={field.name==='passing_score'?100:undefined} required={field.required} value={String(form[field.name]??'')} onChange={e=>setForm({...form,[field.name]:e.target.value})}/>}</>}</div>})}<div className="flex flex-wrap gap-2"><button className="primary-button" disabled={busy} type="submit">{editing?'Guardar cambios':'Crear registro'}</button>{editing&&<button type="button" className="secondary-button" onClick={()=>{setEditing(null);setForm(initial(resource))}}>Cancelar</button>}</div>{notice&&<p className="rounded-xl bg-emerald-100 p-3 text-sm text-emerald-900" role="status">{notice}</p>}{error&&<p className="form-error" role="alert">{error}</p>}</form><section className="space-y-3"><h2 className="font-serif text-2xl">Registros</h2>{loading?<LoadingState/>:error&&!rows.length?<ErrorState message={error}/>:!rows.length?<EmptyState title="Sin registros" description="Crea el primer registro con el formulario."/>:rows.map(row=><article key={row.id} className="glass-panel flex flex-wrap items-center gap-3 p-4"><div className="min-w-0 flex-1"><strong className="block truncate">{display(row)}</strong><small className="text-muted">#{row.id} {row.kind?`Â· ${row.kind}`:''} {row.type?`Â· ${row.type}`:''}</small></div>{'is_published' in row&&<button className={`rounded-full px-3 py-1 text-xs font-bold ${row.is_published?'bg-emerald-100 text-emerald-800':'bg-slate-100 text-slate-600'}`} onClick={()=>toggle(row)} title="Cambiar publicaciÃ³n">{row.is_published?'Publicado':'Borrador'}</button>}<button className="glass-icon-button" aria-label={`Editar ${display(row)}`} onClick={()=>edit(row)}><Pencil size={17}/></button><button className="glass-icon-button text-rose-700" aria-label={`Eliminar ${display(row)}`} onClick={()=>remove(row)}><Trash2 size={17}/></button></article>)}{lastPage>1&&<div className="flex items-center justify-end gap-3 pt-3"><button className="secondary-button" disabled={page===1} onClick={()=>setPage(page-1)}>Anterior</button><span>{page} / {lastPage}</span><button className="secondary-button" disabled={page===lastPage} onClick={()=>setPage(page+1)}>Siguiente</button></div>}</section></div></div>}
-
+const initial = (resource: Resource): Form => ({ sort_order: 1, type: resource === 'evaluations' ? 'unidad' : 'seleccion_multiple', kind: 'vocabulary', score: 10, ...(resource === 'exercises' || resource === 'questions' ? newExercise() : {}) });
+const display = (row: Row) => String(row.title || row.prompt || row.spanish || row.name || `#${row.id}`);
+async function allRows(resource: Resource): Promise<Row[]> {
+    let page = 1; const rows: Row[] = [];
+    while (true) {
+        const result = await apiGet<Paginated<Row>>(`/admin/${resource}?per_page=200&page=${page}`);
+        rows.push(...result.data);
+        if (page >= result.last_page) return rows;
+        page++;
+    }
+}
+export function AdminContentManager({ levels }: { levels: Level[] }) {
+    const [resource, setResource] = useState<Resource>('modules');
+    const [rows, setRows] = useState<Row[]>([]);
+    const [parentRows, setParentRows] = useState<Row[]>([]);
+    const [form, setForm] = useState<Form>(initial('modules'));
+    const [editing, setEditing] = useState<number | null>(null);
+    const [page, setPage] = useState(1);
+    const [lastPage, setLastPage] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState('');
+    const [notice, setNotice] = useState('');
+    const parent = parents[resource];
+    const exercise = resource === 'exercises' || resource === 'questions';
+    async function load() {
+        setLoading(true); setError('');
+        try {
+            const [result, options] = await Promise.all([
+                apiGet<Paginated<Row>>(`/admin/${resource}?per_page=20&page=${page}`),
+                parent ? allRows(parent.resource) : Promise.resolve([]),
+            ]);
+            setRows(result.data); setLastPage(result.last_page); setParentRows(options);
+        } catch (reason) { setError(reason instanceof ApiError ? reason.message : 'No se pudieron cargar los registros.'); }
+        finally { setLoading(false); }
+    }
+    useEffect(() => { void load(); }, [resource, page]);
+    const set = (key: string, value: unknown) => setForm(current => ({ ...current, [key]: value }));
+    function switchResource(next: Resource) { setResource(next); setPage(1); setEditing(null); setForm(initial(next)); setNotice(''); }
+    async function save(event: FormEvent) {
+        event.preventDefault(); setBusy(true); setError(''); setNotice('');
+        const payload = { ...form };
+        delete payload.id;
+        if (resource === 'evaluations' && form.type === 'diagnostica') payload.unit_id = null;
+        try {
+            if (editing) await apiPatch(`/admin/${resource}/${editing}`, payload);
+            else await apiPost(`/admin/${resource}`, payload);
+            setNotice('Registro guardado.'); setEditing(null); setForm(initial(resource)); await load();
+        } catch (reason) { setError(reason instanceof ApiError ? Object.values(reason.errors).flat().join(' ') || reason.message : 'No se pudo guardar.'); }
+        finally { setBusy(false); }
+    }
+    async function remove(row: Row) {
+        if (!window.confirm(`¿Eliminar «${display(row)}»? El contenido con relaciones o respuestas históricas se conserva.`)) return;
+        setError('');
+        try { await apiDelete(`/admin/${resource}/${row.id}`); setNotice('Registro eliminado.'); await load(); }
+        catch (reason) { setError(reason instanceof ApiError ? reason.message : 'No se pudo eliminar.'); }
+    }
+    function textField(key: string, label: string, multiline = false, max = 180) {
+        return <label className="grid gap-2">{label}{multiline ? <textarea className="field min-h-28" required maxLength={max} value={String(form[key] ?? '')} onChange={e => set(key, e.target.value)} /> : <input className="field" required maxLength={max} value={String(form[key] ?? '')} onChange={e => set(key, e.target.value)} />}</label>;
+    }
+    return <div className="space-y-6">
+        <div className="glass-panel p-4"><strong>Niveles</strong><div className="mt-2 flex flex-wrap gap-3">{levels.map(level => <span key={level.id} className="rounded-xl bg-emerald-50 p-3">{level.name} · {level.available ? 'Disponible' : 'Próximamente'}</span>)}</div><p className="mt-3 text-sm text-muted">Carga contenido validado por el docente. Los registros del Básico guardados aquí estarán disponibles para el estudiante.</p></div>
+        <div className="flex gap-2 overflow-x-auto" role="tablist" aria-label="Tipo de contenido">{(Object.keys(names) as Resource[]).map(key => <button key={key} role="tab" aria-selected={resource === key} className={`tab-button ${resource === key ? 'is-active' : ''}`} onClick={() => switchResource(key)}>{names[key]}</button>)}</div>
+        <div className="grid items-start gap-6 xl:grid-cols-2"><form className="glass-panel space-y-5 p-6" onSubmit={save}><h2 className="font-serif text-2xl">{editing ? 'Editar' : 'Crear'} · {names[resource]}</h2>
+            {resource === 'modules' && <label className="grid gap-2">Nivel<select className="field" required value={String(form.level_id ?? '')} onChange={e => set('level_id', Number(e.target.value))}><option value="">Selecciona nivel</option>{levels.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}</select></label>}
+            {resource === 'evaluations' && <label className="grid gap-2">Tipo de evaluación<select className="field" value={String(form.type)} onChange={e => set('type', e.target.value)}><option value="unidad">Unidad</option><option value="diagnostica">Diagnóstica general</option></select></label>}
+            {parent && !(resource === 'evaluations' && form.type === 'diagnostica') && <label className="grid gap-2">{parent.label}<select className="field" required value={String(form[parent.field] ?? '')} onChange={e => set(parent.field, Number(e.target.value))}><option value="">Selecciona…</option>{parentRows.map(row => <option key={row.id} value={row.id}>#{row.id} · {display(row)}</option>)}</select></label>}
+            {resource === 'glossary' ? <>{textField('kichwa', 'Palabra o expresión Kichwa', false, 200)}{textField('spanish', 'Equivalencia en español', false, 250)}</> : exercise ? <ExerciseEditor key={resource + '-' + (editing ?? 'new')} value={form as unknown as EditableExercise} onChange={value => setForm(current => ({ ...current, ...value }))} /> : <>{textField('title', 'Título', false, resource === 'modules' ? 150 : 180)}
+                {(resource === 'modules' || resource === 'units') && textField('description', resource === 'units' ? 'Objetivo de la unidad' : 'Descripción', true, 20000)}
+                {resource === 'contents' && <><label className="grid gap-2">Tipo de tema<select className="field" value={String(form.kind)} onChange={e => set('kind', e.target.value)}><option value="vocabulary">Vocabulario</option><option value="grammar">Gramática</option><option value="culture">Cultura</option></select></label>{textField('body', 'Contenido (texto plano)', true, 50000)}</>}</>}
+            {resource !== 'evaluations' && resource !== 'glossary' && <label className="grid gap-2">Orden dentro de su nivel, módulo, unidad o evaluación<input className="field" type="number" required min={1} step={1} value={Number(form.sort_order)} onChange={e => set('sort_order', Number(e.target.value))} /></label>}
+            {resource === 'questions' && <label className="grid gap-2">Puntaje máximo<input className="field" type="number" required min={.01} max={999999.99} step={.01} value={Number(form.score)} onChange={e => set('score', Number(e.target.value))} /></label>}
+            <div className="flex flex-wrap gap-3"><button className="primary-button" disabled={busy} type="submit">Guardar</button>{editing && <button className="secondary-button" type="button" onClick={() => { setEditing(null); setForm(initial(resource)); }}>Cancelar</button>}</div>
+            {error && <p className="form-error" role="alert">{error}</p>}{notice && <p role="status" className="text-forest">{notice}</p>}
+        </form><section className="space-y-4"><h2 className="font-serif text-2xl">Registros</h2>{loading ? <LoadingState /> : !rows.length ? <EmptyState title="Sin registros" description="Crea el primer registro desde el formulario." /> : rows.map(row => <article key={row.id} className="glass-panel flex flex-wrap items-center gap-3 p-4"><div className="min-w-0 flex-1"><strong className="block">{display(row)}</strong><small className="text-muted">#{row.id}{row.sort_order ? ` · Orden ${row.sort_order}` : ''}</small></div><button className="secondary-button" onClick={() => { setEditing(row.id); setForm({ ...initial(resource), ...row }); setNotice(''); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Editar</button><button className="secondary-button" onClick={() => void remove(row)}>Eliminar</button></article>)}
+            {lastPage > 1 && <div className="flex items-center justify-end gap-3"><button className="secondary-button" disabled={page <= 1} onClick={() => setPage(page - 1)}>Anterior</button><span>{page} / {lastPage}</span><button className="secondary-button" disabled={page >= lastPage} onClick={() => setPage(page + 1)}>Siguiente</button></div>}
+        </section></div>
+    </div>;
+}

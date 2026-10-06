@@ -19,7 +19,7 @@ export function RegisterForm() {
         try {
             await register(data);
         } catch (error) {
-            setErrors(error instanceof ApiError ? Object.fromEntries(Object.entries(error.errors).map(([key, values]) => [key, values[0]])) : { email: 'No se pudo crear la cuenta.' });
+            setErrors(error instanceof ApiError ? Object.keys(error.errors).length ? Object.fromEntries(Object.entries(error.errors).map(([key, values]) => [key, values[0]])) : { email: error.message } : { email: 'No se pudo crear la cuenta.' });
             setProcessing(false);
         }
     }
@@ -36,7 +36,7 @@ export function RegisterForm() {
                         {errors.name && <p className="form-error">{errors.name}</p>}
                     </div>
                     <div>
-                        <label className="field-label" htmlFor="cedula">Cédula o DNI (opcional)</label>
+                        <label className="field-label" htmlFor="cedula">Cédula ecuatoriana (opcional)</label>
                         <input id="cedula" className="field" inputMode="numeric" value={data.cedula} onChange={(event) => update('cedula', event.target.value)} />
                         {errors.cedula && <p className="form-error">{errors.cedula}</p>}
                     </div>
@@ -49,12 +49,13 @@ export function RegisterForm() {
                 <div className="form-grid">
                     <div>
                         <label className="field-label" htmlFor="password">Contraseña</label>
-                        <input id="password" className="field" type="password" required minLength={8} autoComplete="new-password" value={data.password} onChange={(event) => update('password', event.target.value)} />
+                        <input id="password" className="field" type="password" required minLength={12} autoComplete="new-password" value={data.password} onChange={(event) => update('password', event.target.value)} />
+                        <p className="mt-2 text-sm text-muted">Al menos 12 caracteres, mayúsculas, minúsculas, números y símbolos.</p>
                         {errors.password && <p className="form-error">{errors.password}</p>}
                     </div>
                     <div>
                         <label className="field-label" htmlFor="confirmation">Confirmar contraseña</label>
-                        <input id="confirmation" className="field" type="password" required minLength={8} autoComplete="new-password" value={data.password_confirmation} onChange={(event) => update('password_confirmation', event.target.value)} />
+                        <input id="confirmation" className="field" type="password" required minLength={12} autoComplete="new-password" value={data.password_confirmation} onChange={(event) => update('password_confirmation', event.target.value)} />
                     </div>
                 </div>
                 <button className="primary-button w-full" disabled={processing}>Crear mi cuenta <ArrowRight size={18} /></button>

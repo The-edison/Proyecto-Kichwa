@@ -33,14 +33,14 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
         Accept: 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
     };
-    if (options.data !== undefined) headers['Content-Type'] = 'application/json';
+    if (options.data !== undefined && !(options.data instanceof FormData)) headers['Content-Type'] = 'application/json';
     if (method !== 'GET' && csrfToken()) headers['X-XSRF-TOKEN'] = csrfToken()!;
 
     const response = await fetch(`${apiBaseUrl}/api${path}`, {
         method,
         credentials: 'include',
         headers,
-        body: options.data === undefined ? undefined : JSON.stringify(options.data),
+        body: options.data === undefined ? undefined : options.data instanceof FormData ? options.data : JSON.stringify(options.data),
         signal: options.signal,
     });
 
