@@ -58,6 +58,7 @@ export function AdminContentManager({ levels }: { levels: Level[] }) {
         event.preventDefault(); setBusy(true); setError(''); setNotice('');
         const payload = { ...form };
         delete payload.id;
+        if (!editing) delete payload.sort_order;
         if (resource === 'evaluations' && form.type === 'diagnostica') payload.unit_id = null;
         try {
             if (editing) await apiPatch(`/admin/${resource}/${editing}`, payload);
@@ -85,7 +86,7 @@ export function AdminContentManager({ levels }: { levels: Level[] }) {
             {resource === 'glossary' ? <>{textField('kichwa', 'Palabra o expresión Kichwa', false, 200)}{textField('spanish', 'Equivalencia en español', false, 250)}</> : exercise ? <ExerciseEditor key={resource + '-' + (editing ?? 'new')} value={form as unknown as EditableExercise} onChange={value => setForm(current => ({ ...current, ...value }))} /> : <>{textField('title', 'Título', false, resource === 'modules' ? 150 : 180)}
                 {(resource === 'modules' || resource === 'units') && textField('description', resource === 'units' ? 'Objetivo de la unidad' : 'Descripción', true, 20000)}
                 {resource === 'contents' && <><label className="grid gap-2">Tipo de tema<select className="field" value={String(form.kind)} onChange={e => set('kind', e.target.value)}><option value="vocabulary">Vocabulario</option><option value="grammar">Gramática</option><option value="culture">Cultura</option></select></label>{textField('body', 'Contenido (texto plano)', true, 50000)}</>}</>}
-            {resource !== 'evaluations' && resource !== 'glossary' && <label className="grid gap-2">Orden dentro de su nivel, módulo, unidad o evaluación<input className="field" type="number" required min={1} step={1} value={Number(form.sort_order)} onChange={e => set('sort_order', Number(e.target.value))} /></label>}
+            {editing && resource !== 'evaluations' && resource !== 'glossary' && <label className="grid gap-2">Orden dentro de su nivel, móduloulo, unidad o evaluación<input className="field" type="number" required min={1} step={1} value={Number(form.sort_order)} onChange={e => set('sort_order', Number(e.target.value))} /></label>}
             {resource === 'questions' && <label className="grid gap-2">Puntaje máximo<input className="field" type="number" required min={.01} max={999999.99} step={.01} value={Number(form.score)} onChange={e => set('score', Number(e.target.value))} /></label>}
             <div className="flex flex-wrap gap-3"><button className="primary-button" disabled={busy} type="submit">Guardar</button>{editing && <button className="secondary-button" type="button" onClick={() => { setEditing(null); setForm(initial(resource)); }}>Cancelar</button>}</div>
             {error && <p className="form-error" role="alert">{error}</p>}{notice && <p role="status" className="text-forest">{notice}</p>}

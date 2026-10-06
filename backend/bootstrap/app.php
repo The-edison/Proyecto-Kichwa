@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\CuentaActiva;
 use App\Http\Middleware\RequireRole;
+use App\Services\ErroresIntegridad;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -28,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
             $state = $exception->errorInfo[0] ?? '';
             if ($state === '23505') {
-                return response()->json(['message' => 'El correo, la cédula o el orden ya está registrado. Usa un valor distinto.'], 422);
+                return ErroresIntegridad::response($exception);
             }
             if (in_array($state, ['23001', '23503', '23514'], true)) {
                 return response()->json(['message' => 'Este cambio está bloqueado por contenido relacionado o respuestas históricas. Conserva el registro y crea una nueva versión.'], 409);

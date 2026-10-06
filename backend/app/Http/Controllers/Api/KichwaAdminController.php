@@ -3,14 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SaveKichwaContentRequest;
 use App\Models\Usuario;
 use App\Services\ContratoEjercicio;
 use App\Services\KichwaResource;
+use App\Services\OrdenContenido;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
 class KichwaAdminController extends Controller
 {
@@ -51,40 +52,23 @@ class KichwaAdminController extends Controller
         return response()->json(KichwaResource::present($resource, $model::findOrFail($id), true));
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(SaveKichwaContentRequest $request): JsonResponse
     {
         return $this->save($request, null);
     }
 
-    public function update(Request $request, int $id): JsonResponse
+    public function update(SaveKichwaContentRequest $request, int $id): JsonResponse
     {
         return $this->save($request, $id);
     }
 
-    private function save(Request $request, ?int $id): JsonResponse
+    private function save(SaveKichwaContentRequest $request, ?int $id): JsonResponse
     {
         $resource = $this->resource($request);
         abort_if($resource === 'levels', 405, 'Los niveles son de lectura.');
         $model = KichwaResource::MODELS[$resource];
         $record = $id ? $model::findOrFail($id) : null;
-        $rules = match ($resource) {
-            'modules' => ['level_id' => ['required', 'integer', 'exists:niveles,id_nivel'], 'title' => ['required', 'string', 'max:150'], 'description' => ['required', 'string', 'max:20000'], 'sort_order' => ['required', 'integer', 'min:1']],
-            'units' => ['module_id' => ['required', 'integer', 'exists:modulos,id_modulo'], 'title' => ['required', 'string', 'max:180'], 'description' => ['required', 'string', 'max:20000'], 'sort_order' => ['required', 'integer', 'min:1']],
-            'contents' => ['unit_id' => ['required', 'integer', 'exists:unidades,id_unidad'], 'kind' => ['required', Rule::in(['vocabulary', 'grammar', 'culture'])], 'title' => ['required', 'string', 'max:180'], 'body' => ['required', 'string', 'max:50000'], 'sort_order' => ['required', 'integer', 'min:1']],
-            'exercises' => ['unit_id' => ['required', 'integer', 'exists:unidades,id_unidad'], 'type' => ['required', 'string'], 'prompt' => ['required', 'string'], 'elements' => ['required', 'array'], 'zones' => ['present', 'array'], 'solution' => ['required', 'array'], 'resource' => ['nullable', 'string', 'max:500'], 'sort_order' => ['required', 'integer', 'min:1']],
-            'questions' => ['evaluation_id' => ['required', 'integer', 'exists:evaluaciones,id_evaluacion'], 'type' => ['required', 'string'], 'prompt' => ['required', 'string'], 'elements' => ['required', 'array'], 'zones' => ['present', 'array'], 'solution' => ['required', 'array'], 'resource' => ['nullable', 'string', 'max:500'], 'score' => ['required', 'numeric', 'min:0.01', 'max:999999.99'], 'sort_order' => ['required', 'integer', 'min:1']],
-            'evaluations' => ['unit_id' => ['nullable', 'integer', 'exists:unidades,id_unidad'], 'type' => ['required', Rule::in(['unidad', 'diagnostica'])], 'title' => ['required', 'string', 'max:180']],
-            'glossary' => ['kichwa' => ['required', 'string', 'max:200'], 'spanish' => ['required', 'string', 'max:250']],
-        };
-        if ($record) {
-            foreach ($rules as &$parts) {
-                $parts = array_values(array_filter($parts, fn ($p) => $p !== 'required' && $p !== 'present'));
-                array_unshift($parts, 'sometimes');
-            }
-            unset($parts);
-        }
-        $validated = $request->validate($rules, ['required' => 'El campo :attribute es obligatorio.',
-            'exists' => 'La entidad seleccionada no existe.', 'min' => 'El orden o puntaje debe ser positivo.']);
+        $validated = $request->validated();
         $merged = array_replace($record ? KichwaResource::present($resource, $record, true) : [], $validated);
         if (in_array($resource, ['exercises', 'questions'], true)) {
             ContratoEjercicio::validate($merged);
@@ -98,7 +82,8 @@ class KichwaAdminController extends Controller
                 $data[$text] = strip_tags($data[$text]);
             }
         }
-        $saved = DB::transaction(function () use ($model, $record, $data): Model {
+        $saved = DB::transaction(function () use ($model, $record, $data, $resource): Model {
+            $data = OrdenContenido::assign($resource, $data, $record);
             if ($record) {
                 $record->update($data);
 
