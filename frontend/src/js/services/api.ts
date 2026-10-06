@@ -63,7 +63,7 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
             if (query.queryKey[0] !== 'api' || typeof key !== 'string') return false;
             if (dictionaryChanged) return /^\/(diccionario\/buscar|glossary)/.test(key);
             if (hierarchyChanged) return /^\/(levels|modules|units|evaluations|progress)(\/|\?|$)/.test(key);
-            return progressChanged && (/^\/progress(\/|\?|$)/.test(key) || /^\/levels\/\d+\/modules/.test(key) || /^\/modules\/\d+\/units/.test(key) || /^\/units\/\d+(\?|$)/.test(key));
+            return progressChanged && (/^\/progress(\/|\?|$)/.test(key) || /^\/levels\/\d+\/modules/.test(key) || /^\/modules\/\d+\/(units|contents)/.test(key) || /^\/units\/\d+(\?|$)/.test(key));
         }, refetchType: 'none' });
     }
     return payload as T;

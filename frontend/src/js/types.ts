@@ -8,6 +8,7 @@ export interface Level { id: number; code: string; name: string; sort_order: num
 export interface LearningModule { id: number; level_id: number; title: string; description: string; sort_order: number; percentage?: number; }
 export interface Unit { id: number; module_id: number; title: string; description: string; sort_order: number; percentage?: number; }
 export interface Content { id: number; unit_id: number; kind: 'vocabulary' | 'grammar' | 'culture'; title: string; body?: string; sort_order: number; percentage?: number; }
+export interface ModuleContent extends Content { unit_title: string; unit_order: number; exercise_count: number; }
 export interface ExerciseElement { id: string; texto: string; grupo?: 'origen' | 'destino'; imagen?: string; opciones?: string[]; }
 export interface ExerciseZone { id: string; texto: string; x: number; y: number; imagen?: string; }
 export interface ExerciseAnswer { seleccion?: string[]; textos?: Record<string, string>; pares?: Array<{ origen: string; destino: string }>; }

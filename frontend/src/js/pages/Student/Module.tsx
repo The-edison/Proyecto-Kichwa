@@ -1,21 +1,49 @@
 import { useState } from 'react';
+import { ArrowRight, BookOpen, CheckCircle2, Circle } from 'lucide-react';
 import { Head, Link } from '../../navigation';
 import { AppLayout } from '../../layouts/AppLayout';
 import { EmptyState, ErrorState, LoadingState } from '../../components/States';
 import { Pagination } from '../../components/Pagination';
 import { useApi } from '../../hooks/useApi';
-import type { LearningModule, Unit, Paginated } from '../../types';
+import type { LearningModule, ModuleContent, Paginated } from '../../types';
+
 export default function Module({ moduleId }: { moduleId: number }) {
     const [page, setPage] = useState(1);
     const module = useApi<LearningModule & { level_name: string }>('/modules/' + moduleId);
-    const units = useApi<Paginated<Unit>>(`/modules/${moduleId}/units?page=${page}`);
-    return <AppLayout title={module.data?.title ?? 'Módulo'} subtitle="Escoge una unidad publicada."><Head title="Módulo" />
-        <nav aria-label="Migas de pan" className="mb-6 flex flex-wrap gap-3"><Link href="/aprender">Niveles</Link><span>›</span><Link href={'/aprender/nivel/' + module.data?.level_id}>{module.data?.level_name ?? 'Nivel'}</Link><span>› {module.data?.title}</span></nav>
-        {module.loading || units.loading ? <LoadingState /> : module.error || units.error ? <ErrorState message={module.error || units.error || ''} /> :
-            !units.data?.data.length ? <EmptyState title="Todavía no hay unidades publicadas" description="Vuelve pronto para continuar tu aprendizaje." /> :
-                <div className="grid gap-5 md:grid-cols-2">{units.data.data.map(u => <Link key={u.id} className="glass-panel card-hover space-y-3 p-6" href={'/aprender/unidad/' + u.id}>
-                    <h2 className="font-serif text-2xl">{u.title}</h2><p className="text-muted">{u.description}</p><p className="font-bold text-forest">{u.percentage ?? 0}% completado</p><p className="text-forest">Ver temas →</p>
-                </Link>)}</div>}
-        <Pagination page={page} lastPage={units.data?.last_page ?? 1} onChange={setPage} />
+    const contents = useApi<Paginated<ModuleContent>>(`/modules/${moduleId}/contents?page=${page}`);
+    const groups = new Map<number, { title: string; order: number; topics: ModuleContent[] }>();
+    for (const topic of contents.data?.data ?? []) {
+        const group = groups.get(topic.unit_id) ?? { title: topic.unit_title, order: topic.unit_order, topics: [] };
+        group.topics.push(topic); groups.set(topic.unit_id, group);
+    }
+
+    return <AppLayout title={module.data?.title ?? 'Contenidos del módulo'} subtitle="Explora los temas de cada unidad y continúa donde te quedaste.">
+        <Head title={module.data?.title ?? 'Módulo'} />
+        <nav aria-label="Migas de pan" className="mb-7 flex flex-wrap items-center gap-3 text-sm">
+            <Link href="/aprender" className="font-semibold text-forest">Mi aprendizaje</Link>
+            {module.data && <><span aria-hidden="true">/</span><Link href={'/aprender/nivel/' + module.data.level_id} className="font-semibold text-forest">{module.data.level_name}</Link><span aria-hidden="true">/</span><span aria-current="page" className="break-words">{module.data.title}</span></>}
+        </nav>
+        {module.data?.description && <div className="glass-panel mb-7 border-l-4 border-l-forest p-5 sm:p-6"><p className="eyebrow mb-2">Objetivo del módulo</p><p className="break-words leading-7 text-muted">{module.data.description.replace(/^Objetivo del módulo:\s*/i, '')}</p></div>}
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3"><h2 className="font-serif text-3xl">Contenido del módulo</h2>{contents.data && <span className="text-sm text-muted">{contents.data.total} {contents.data.total === 1 ? 'tema disponible' : 'temas disponibles'}</span>}</div>
+        {module.loading || contents.loading ? <LoadingState /> : module.error || contents.error ? <ErrorState message={module.error || contents.error || ''} /> :
+            !contents.data?.data.length ? <EmptyState title="El contenido de este módulo está en preparación" description="Los temas aparecerán aquí cuando el docente los publique." /> :
+                <div className="space-y-6">{[...groups.entries()].map(([unitId, group]) => <section key={unitId} className="glass-panel overflow-hidden" aria-labelledby={'unit-' + unitId}>
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-emerald-100 bg-emerald-50/70 px-5 py-4 sm:px-6">
+                        <div className="min-w-0"><p className="mb-1 text-xs font-bold uppercase tracking-widest text-forest">Unidad {group.order}</p><h3 id={'unit-' + unitId} className="break-words font-serif text-xl sm:text-2xl">{group.title.replace(/^Unidad\s+\d+\s*/iu, '')}</h3></div>
+                        <Link href={'/aprender/unidad/' + unitId} className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-forest">Ver unidad <ArrowRight size={16} aria-hidden="true" /></Link>
+                    </div>
+                    <ol aria-label={'Temas de ' + group.title} className="divide-y divide-emerald-100">
+                        {group.topics.map(topic => {
+                            const percentage = Math.min(100, Math.max(0, topic.percentage ?? 0));
+                            const completed = topic.exercise_count > 0 && percentage === 100;
+                            return <li key={topic.id}><Link href={`/aprender/unidad/${unitId}?tema=${topic.id}`} className="group flex min-h-24 items-center gap-4 px-5 py-5 transition-colors hover:bg-emerald-50/80 focus-visible:bg-emerald-50 sm:px-6">
+                                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-emerald-100 text-forest" aria-hidden="true"><BookOpen size={20} /></span>
+                                <div className="min-w-0 flex-1"><h4 className="break-words text-base font-bold text-ink sm:text-lg">{topic.title}</h4><div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted"><span>Lectura{topic.exercise_count > 0 && ` · ${topic.exercise_count} ${topic.exercise_count === 1 ? 'ejercicio' : 'ejercicios'}`}</span><span className="inline-flex items-center gap-1.5">{completed ? <CheckCircle2 size={15} className="text-forest" aria-hidden="true" /> : <Circle size={13} aria-hidden="true" />}{completed ? 'Completado' : percentage > 0 ? percentage + '% completado' : 'Por explorar'}</span></div></div>
+                                <ArrowRight size={20} aria-hidden="true" className="shrink-0 text-forest transition-transform group-hover:translate-x-1" />
+                            </Link></li>;
+                        })}
+                    </ol>
+                </section>)}</div>}
+        <Pagination page={page} lastPage={contents.data?.last_page ?? 1} onChange={setPage} />
     </AppLayout>;
 }

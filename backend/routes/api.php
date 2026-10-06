@@ -27,6 +27,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function (): void {
         Route::get('/levels', [KichwaCatalogController::class, 'levels']);
         Route::get('/levels/{level}/modules', [KichwaCatalogController::class, 'modules']);
         Route::get('/modules/{module}/units', [KichwaCatalogController::class, 'units']);
+        Route::get('/modules/{module}/contents', [KichwaCatalogController::class, 'moduleContents']);
         Route::get('/modules/{module}', [KichwaCatalogController::class, 'module']);
         Route::get('/units/{unit}', [KichwaCatalogController::class, 'unit']);
         Route::get('/units/{unit}/contents', [KichwaCatalogController::class, 'contents']);

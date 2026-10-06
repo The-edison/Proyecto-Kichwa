@@ -86,6 +86,21 @@ class KichwaCatalogController extends Controller
         return response()->json($data);
     }
 
+    public function moduleContents(Request $request, int $module): JsonResponse
+    {
+        $this->module($module);
+        $request->validate(['page' => ['sometimes', 'integer', 'min:1']]);
+        $data = PublicacionContenido::remember('module-contents:'.$module.':'.$request->integer('page', 1), fn () => Tema::query()
+            ->join('unidades as u', 'u.id_unidad', '=', 'temas.id_unidad')
+            ->where('u.id_modulo', $module)->where('u.publicado', true)->where('temas.publicado', true)
+            ->select('temas.id_tema', 'temas.id_unidad', 'temas.tipo_tema', 'temas.titulo_tema', 'temas.orden_tema', 'temas.publicado', 'u.titulo_unidad as unit_title', 'u.orden_unidad as unit_order')
+            ->selectSub(DB::table('actividades')->selectRaw('count(*)')->whereColumn('actividades.id_tema', 'temas.id_tema'), 'exercise_count')
+            ->orderBy('u.orden_unidad')->orderBy('temas.orden_tema')->orderBy('temas.id_tema')
+            ->paginate(20)->through(fn ($r) => KichwaResource::present('contents', $r) + ['unit_title' => $r->unit_title, 'unit_order' => $r->unit_order, 'exercise_count' => (int) $r->exercise_count])->toArray());
+
+        return response()->json($this->topicProgress($request, $data));
+    }
+
     public function unit(Request $request, int $unit): JsonResponse
     {
         $record = self::publishedUnit($unit);
@@ -100,12 +115,18 @@ class KichwaCatalogController extends Controller
         $request->validate(['page' => ['sometimes', 'integer', 'min:1']]);
 
         $data = PublicacionContenido::remember('contents:'.$unit.':'.$request->integer('page', 1), fn () => Tema::where('id_unidad', $unit)->where('publicado', true)->select('id_tema', 'id_unidad', 'tipo_tema', 'titulo_tema', 'orden_tema', 'publicado')->orderBy('orden_tema')->paginate(20)->through(fn ($r) => KichwaResource::present('contents', $r))->toArray());
+
+        return response()->json($this->topicProgress($request, $data));
+    }
+
+    private function topicProgress(Request $request, array $data): array
+    {
         $progress = DB::table('actividades as a')->leftJoin('respuestas_actividad as r', function ($join) use ($request) {
             $join->on('r.id_actividad', '=', 'a.id_actividad')->where('r.id_usuario', $request->user()->id_usuario)->where('r.acierto_actividad', true);
-        })->where('a.id_unidad', $unit)->whereIn('a.id_tema', array_column($data['data'], 'id'))->groupBy('a.id_tema')->selectRaw('a.id_tema, round(100.0 * count(distinct r.id_actividad) / nullif(count(distinct a.id_actividad), 0), 2) as percentage')->pluck('percentage', 'id_tema');
+        })->whereIn('a.id_tema', array_column($data['data'], 'id'))->groupBy('a.id_tema')->selectRaw('a.id_tema, round(100.0 * count(distinct r.id_actividad) / nullif(count(distinct a.id_actividad), 0), 2) as percentage')->pluck('percentage', 'id_tema');
         $data['data'] = array_map(fn ($topic) => $topic + ['percentage' => (float) ($progress[$topic['id']] ?? 0)], $data['data']);
 
-        return response()->json($data);
+        return $data;
     }
 
     public function topic(int $unit, int $topic): JsonResponse
