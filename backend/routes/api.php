@@ -15,12 +15,16 @@ use App\Http\Controllers\Api\ExerciseSubmissionController;
 use App\Http\Controllers\Api\GlossaryController;
 use App\Http\Controllers\Api\ProgressController;
 use App\Http\Controllers\Api\TestimonialController;
+use App\Models\Level;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
 Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::get('/glossary', [GlossaryController::class, 'index']);
 Route::get('/testimonials', [TestimonialController::class, 'index']);
+Route::get('/config', fn () => response()->json([
+    'google' => ['enabled' => (bool) (config('services.google.client_id') && config('services.google.client_secret'))],
+]));
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
@@ -43,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::prefix('admin')->middleware('role:admin')->group(function () {
+        Route::get('/levels', fn () => Level::orderBy('sort_order')->get(['id', 'code', 'name', 'sort_order']));
         Route::get('/students', [StudentController::class, 'index']);
         Route::apiResource('modules', AdminModuleController::class);
         Route::apiResource('units', AdminUnitController::class);

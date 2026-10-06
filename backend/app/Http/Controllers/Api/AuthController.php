@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
@@ -25,6 +26,13 @@ class AuthController extends Controller
 
         $data['role_id'] = Role::where('code', 'student')->firstOrFail()->id;
         $user = User::create($data);
+
+        if ($request->hasSession()) {
+            Auth::guard('web')->login($user);
+            $request->session()->regenerate();
+
+            return response()->json(['user' => $user->load('role:id,code,name')], 201);
+        }
 
         return response()->json([
             'user' => $user->load('role:id,code,name'),
@@ -55,6 +63,13 @@ class AuthController extends Controller
             throw ValidationException::withMessages([$errorField => 'Credenciales incorrectas.']);
         }
 
+        if ($request->hasSession()) {
+            Auth::guard('web')->login($user);
+            $request->session()->regenerate();
+
+            return response()->json(['user' => $user]);
+        }
+
         return response()->json([
             'user' => $user,
             'token' => $user->createToken('api', ['*'], now()->addDays(7))->plainTextToken,
@@ -71,6 +86,12 @@ class AuthController extends Controller
         $token = $request->user()->currentAccessToken();
         if ($token instanceof PersonalAccessToken) {
             $token->delete();
+        }
+
+        if ($request->hasSession()) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
         }
 
         return response()->json(null, 204);

@@ -68,7 +68,9 @@ class GoogleAuthController extends Controller
             $user->email_verified_at ??= now();
             $user->save();
 
-            return redirect()->route('account')->with('status', 'Tu cuenta de Google quedó vinculada.');
+            return redirect()->away($this->frontendPath('/cuenta', [
+                'google_status' => 'Tu cuenta de Google quedó vinculada.',
+            ]));
         }
 
         if ($intent !== 'login') {
@@ -93,7 +95,7 @@ class GoogleAuthController extends Controller
         Auth::guard('web')->login($linked);
         $request->session()->regenerate();
 
-        return redirect()->route($linked->role?->code === 'admin' ? 'admin.dashboard' : 'student.dashboard');
+        return redirect()->away($this->frontendPath($linked->role?->code === 'admin' ? '/admin' : '/aprender'));
     }
 
     private function ensureConfigured(): void
@@ -103,6 +105,16 @@ class GoogleAuthController extends Controller
 
     private function fail(?string $intent, string $message): RedirectResponse
     {
-        return redirect()->route($intent === 'link' ? 'account' : 'login')->withErrors(['google' => $message]);
+        return redirect()->away($this->frontendPath($intent === 'link' ? '/cuenta' : '/iniciar-sesion', [
+            'google_error' => $message,
+        ]));
+    }
+
+    /** @param array<string, string> $query */
+    private function frontendPath(string $path, array $query = []): string
+    {
+        $url = rtrim(config('app.frontend_url'), '/').$path;
+
+        return $query ? $url.'?'.http_build_query($query) : $url;
     }
 }

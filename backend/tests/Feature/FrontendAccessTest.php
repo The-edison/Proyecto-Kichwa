@@ -11,75 +11,62 @@ class FrontendAccessTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_public_pages_render_and_student_registration_creates_a_session(): void
+    protected function setUp(): void
     {
-        $this->get('/')->assertOk()->assertSee('lang="es"', false);
-        $this->get('/glosario')->assertOk();
-        $this->get('/registro')->assertOk();
+        parent::setUp();
 
-        $this->post('/registro', [
+        config()->set('sanctum.stateful', ['127.0.0.1:5173']);
+        $this->withHeader('Origin', 'http://127.0.0.1:5173');
+    }
+
+    public function test_spa_registration_creates_a_session_without_returning_a_token(): void
+    {
+        $this->postJson('/api/auth/register', [
             'name' => 'Ana Test',
-            'cedula' => '0201234567',
             'email' => 'ana@example.test',
             'password' => 'ClaveSegura123',
             'password_confirmation' => 'ClaveSegura123',
-        ])->assertRedirect('/aprender');
+        ])->assertCreated()->assertJsonMissingPath('token')->assertJsonPath('user.role.code', 'student');
 
-        $this->assertAuthenticated();
-        $this->get('/aprender')->assertOk();
+        $this->assertAuthenticated('web');
+        $this->getJson('/api/auth/me')->assertOk()->assertJsonPath('email', 'ana@example.test');
         $this->getJson('/api/levels')->assertOk();
-        $this->get('/admin')->assertForbidden();
+        $this->getJson('/api/admin/levels')->assertForbidden();
+        $this->postJson('/api/auth/logout')->assertNoContent();
+        $this->assertGuest('web');
+        $this->flushSession();
+        $this->app['auth']->forgetGuards();
+        $this->getJson('/api/auth/me')->assertUnauthorized();
     }
 
-    public function test_admin_session_is_restricted_to_admin_pages(): void
+    public function test_spa_login_accepts_email_and_admin_can_access_admin_levels(): void
     {
         $admin = User::factory()->create([
             'role_id' => Role::where('code', 'admin')->firstOrFail()->id,
         ]);
 
-        $this->actingAs($admin)->get('/admin')->assertOk();
-        $this->get('/admin/contenidos')->assertOk();
-        $this->getJson('/api/admin/students')->assertOk();
-        $this->get('/aprender')->assertForbidden();
-        $this->post('/cerrar-sesion')->assertRedirect('/');
-        $this->assertGuest('web');
-    }
-
-    public function test_login_accepts_email_or_cedula_and_rejects_an_invalid_password(): void
-    {
-        $student = User::factory()->create(['cedula' => '0201234567']);
-
-        $this->post('/iniciar-sesion', [
-            'identifier' => $student->cedula,
+        $this->postJson('/api/auth/login', [
+            'identifier' => $admin->email,
             'password' => 'incorrecta',
-        ])->assertSessionHasErrors('identifier');
+        ])->assertUnprocessable();
 
-        $this->post('/iniciar-sesion', [
-            'identifier' => $student->email,
+        $this->postJson('/api/auth/login', [
+            'identifier' => $admin->email,
             'password' => 'password',
-        ])->assertRedirect('/aprender');
+        ])->assertOk()->assertJsonMissingPath('token')->assertJsonPath('user.role.code', 'admin');
 
-        $this->getJson('/api/progress')->assertOk();
-
-        $this->post('/cerrar-sesion')->assertRedirect('/');
-        $this->post('/iniciar-sesion', [
-            'identifier' => $student->cedula,
-            'password' => 'password',
-        ])->assertRedirect('/aprender');
+        $this->getJson('/api/admin/levels')->assertOk();
+        $this->getJson('/api/levels')->assertForbidden();
     }
 
-    public function test_student_can_register_with_email_without_cedula(): void
+    public function test_api_allows_only_the_configured_frontend_origin_with_credentials(): void
     {
-        $this->post('/registro', [
-            'name' => 'Rosa Test',
-            'email' => 'rosa@example.test',
-            'password' => 'ClaveSegura123',
-            'password_confirmation' => 'ClaveSegura123',
-        ])->assertRedirect('/aprender');
+        $this->getJson('/api/config')
+            ->assertOk()
+            ->assertHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:5173')
+            ->assertHeader('Access-Control-Allow-Credentials', 'true');
 
-        $this->assertDatabaseHas('users', [
-            'email' => 'rosa@example.test',
-            'cedula' => null,
-        ]);
+        $response = $this->withHeader('Origin', 'https://untrusted.example')->getJson('/api/config');
+        $this->assertNotSame('https://untrusted.example', $response->headers->get('Access-Control-Allow-Origin'));
     }
 }

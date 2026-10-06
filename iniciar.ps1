@@ -5,16 +5,17 @@ param(
 $ErrorActionPreference = 'Stop'
 $projectRoot = $PSScriptRoot
 $backend = Join-Path $projectRoot 'backend'
+$frontend = Join-Path $projectRoot 'frontend'
 $phpIni = Join-Path $projectRoot 'php.ini'
 $phpFallback = 'C:\Users\said_\AppData\Local\Microsoft\WinGet\Packages\PHP.PHP.8.4_Microsoft.Winget.Source_8wekyb3d8bbwe\php.exe'
 $nodeFallback = 'C:\Users\said_\AppData\Local\Microsoft\WinGet\Packages\OpenJS.NodeJS.LTS_Microsoft.Winget.Source_8wekyb3d8bbwe\node-v24.19.0-win-x64\node.exe'
 $phpExe = if (Test-Path $phpFallback) { $phpFallback } else { (Get-Command php.exe -ErrorAction Stop).Source }
 $nodeExe = if (Test-Path $nodeFallback) { $nodeFallback } else { (Get-Command node.exe -ErrorAction Stop).Source }
-$viteEntry = Join-Path $backend 'node_modules\vite\bin\vite.js'
+$viteEntry = Join-Path $frontend 'node_modules\vite\bin\vite.js'
 $router = Join-Path $backend 'vendor\laravel\framework\src\Illuminate\Foundation\resources\server.php'
 
 if (-not (Test-Path $viteEntry) -or -not (Test-Path $router)) {
-    throw 'Faltan dependencias. Ejecuta composer install y npm install dentro de backend.'
+    throw 'Faltan dependencias. Ejecuta composer install en backend y npm install en frontend.'
 }
 
 function Test-LocalPort([int]$port) {
@@ -58,8 +59,8 @@ if (-not (Test-LocalPort 8000)) {
     Start-Process -FilePath $phpExe -ArgumentList @('-c', $phpIni, '-S', '127.0.0.1:8000', '-t', '.', $router) -WorkingDirectory (Join-Path $backend 'public') -WindowStyle Hidden | Out-Null
 }
 if (-not (Test-LocalPort 5173)) {
-    Start-Process -FilePath $nodeExe -ArgumentList @($viteEntry, '--host', '127.0.0.1') -WorkingDirectory $backend -WindowStyle Hidden | Out-Null
+    Start-Process -FilePath $nodeExe -ArgumentList @($viteEntry, '--host', '127.0.0.1') -WorkingDirectory $frontend -WindowStyle Hidden | Out-Null
 }
 
-Write-Host 'Abre http://127.0.0.1:8000/ en tu navegador.'
+Write-Host 'Abre http://127.0.0.1:5173/ en tu navegador.'
 Write-Host 'Si es tu primera vez, entra en Registro y crea una cuenta de estudiante.'

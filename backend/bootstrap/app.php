@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\RequireRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,9 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias(['role' => RequireRole::class]);
-        $middleware->web(append: [HandleInertiaRequests::class]);
         $middleware->statefulApi();
-        $middleware->redirectUsersTo(fn (Request $request): string => $request->user()?->role?->code === 'admin' ? '/admin' : '/aprender');
+        $middleware->redirectGuestsTo(fn (): string => rtrim(config('app.frontend_url'), '/').'/iniciar-sesion');
+        $middleware->redirectUsersTo(fn (Request $request): string => rtrim(config('app.frontend_url'), '/').($request->user()?->role?->code === 'admin' ? '/admin' : '/aprender'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
