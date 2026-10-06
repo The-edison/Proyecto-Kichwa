@@ -4,6 +4,26 @@ Dos niveles fijos con administración por módulos, unidades y temas, cuatro tip
 
 Backend Laravel **13.34**, PHP 8.4, Sanctum y Socialite; frontend React, TypeScript, Vite y Tailwind. Se conserva Laravel instalado en el proyecto. El MER usa 14 tablas españolas, cinco vistas y PL/pgSQL: **PostgreSQL 16+ es la única base soportada**. Las tablas y migraciones anteriores se conservan sin borrar datos.
 
+## Paneles implementados
+
+### Panel de administrador
+
+- **Resumen (`/admin`):** indicadores de estudiantes, lecciones, ejercicios y términos del diccionario, con accesos a la gestión del campus.
+- **Estudiantes (`/admin/estudiantes`):** listado paginado, búsqueda por nombre o cédula y acciones para bloquear o activar cuentas.
+- **Contenidos (`/admin/contenidos`):** gestión de módulos, unidades y temas por nivel, con orden y estados de borrador o publicado. Los estudiantes acceden al contenido cuando sus padres también están publicados.
+- **Actividades y evaluaciones:** editor de selección múltiple, completar, relacionar y arrastrar, con imágenes, audio, soluciones y vista previa del estudiante; gestión de evaluaciones diagnósticas y de unidad y sus preguntas.
+- **Diccionario:** gestión de términos e importación de CSV UTF-8 con las columnas `kichwa`, `spanish` y, opcionalmente, `synonyms` y `notes`.
+
+### Panel de estudiante
+
+- **Mi aprendizaje (`/aprender`):** niveles disponibles y porcentaje de avance. El nivel intermedio muestra «Próximamente» hasta que su contenido esté disponible.
+- **Recorrido de aprendizaje:** navegación por niveles, módulos, unidades y temas publicados, lectura de lecciones y resolución de ejercicios con recursos multimedia.
+- **Evaluaciones (`/aprender/evaluacion/:id`):** acceso a las evaluaciones del recorrido de aprendizaje.
+- **Mi progreso (`/aprender/progreso`):** consulta del avance del estudiante.
+- **Diccionario (`/aprender/diccionario`):** búsqueda de vocabulario e intercambio entre kichwa y español.
+
+Ambos paneles requieren una sesión y el rol correspondiente. El registro crea cuentas de estudiante; el administrador inicial se configura mediante las variables `KICHWA_ADMIN_*`. La cuenta inicial debe cambiar su contraseña en **Mi cuenta (`/cuenta`)** antes de acceder al panel.
+
 ## Arranque en este equipo
 
 La configuración privada ya está en backend/.env: PostgreSQL 5433 y bases yachay_kichwa / yachay_kichwa_test. Desde PowerShell:
