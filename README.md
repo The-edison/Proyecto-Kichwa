@@ -1,59 +1,98 @@
-# Yachay · Plataforma para aprender Kichwa
+# Yachay · Plataforma Kichwa
 
-Aplicación de aprendizaje del Kichwa de la Sierra Centro del Ecuador. Incluye lecciones, ejercicios, evaluaciones, seguimiento del progreso, diccionario y un panel de administración.
+Nivel Básico con administración de módulos, unidades, temas, cuatro tipos de ejercicios, evaluaciones, diccionario y progreso. Intermedio conserva su estructura y figura como «Próximamente»; sus rutas de aprendizaje se rechazan.
 
-## Estructura
+Backend Laravel **13.34**, PHP 8.4, Sanctum y Socialite; frontend React, TypeScript, Vite y Tailwind. Se conserva Laravel instalado en el proyecto. El MER usa 14 tablas españolas, cinco vistas y PL/pgSQL: **PostgreSQL 16+ es la única base soportada**. Las tablas y migraciones anteriores se conservan sin borrar datos.
 
-| Carpeta | Función | Tecnología |
-| --- | --- | --- |
-| [`frontend/`](frontend/) | Interfaz web independiente | React, TypeScript, Vite y Tailwind CSS |
-| [`backend/`](backend/) | API, autenticación y datos | Laravel, Sanctum y PostgreSQL |
+## Arranque en este equipo
 
-El frontend consulta la API de Laravel por HTTP. En el navegador usa sesiones de Sanctum y protección CSRF; los clientes externos pueden usar tokens de API.
-
-## Inicio rápido en Windows
-
-Necesitas PHP 8.4 con Composer y Node.js con npm. Desde la raíz del proyecto, en PowerShell:
+La configuración privada ya está en backend/.env: PostgreSQL 5433 y bases yachay_kichwa / yachay_kichwa_test. Desde PowerShell:
 
 ```powershell
-Copy-Item backend/.env.example backend/.env
-cd backend
+Set-Location C:\PROYECTOS\Proyecto-Kichwa
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\iniciar.ps1 -PostgreSQL
+```
+
+Abre **http://127.0.0.1:5173**. El administrador inicial es **admin@yachay.test**, contraseña **YachayLocal#2026**. Debe cambiarla en «Mi cuenta» antes de administrar. El seeder no vuelve a cambiar contraseñas ni desbloquea cuentas.
+
+## Instalación desde cero en Windows
+
+Instala PHP 8.4, Composer, Node.js 22.12+ y PostgreSQL 16+. PHP debe tener pdo_pgsql, pgsql, mbstring, openssl, fileinfo, gd, intl, curl, zip y bcmath. php.ini del proyecto es portable; el lanzador obtiene la carpeta de extensiones del PHP de PATH.
+
+```powershell
+Set-Location C:\PROYECTOS\Proyecto-Kichwa
+Copy-Item backend\.env.example backend\.env
+Copy-Item backend\.env.testing.example backend\.env.testing
+notepad backend\.env
+notepad backend\.env.testing
+```
+
+Configura DB_USERNAME, DB_PASSWORD y DB_PORT en ambos archivos. En pgAdmin o psql crea dos bases NUEVAS con estos nombres; si ya existen, utiliza otros nombres nuevos y actualiza los archivos:
+
+```sql
+CREATE DATABASE yachay_kichwa;
+CREATE DATABASE yachay_kichwa_test;
+```
+
+No uses migrate:fresh sobre la base de trabajo. A continuación:
+
+```powershell
+Set-Location backend
 composer install
 php artisan key:generate
-cd ../frontend
-npm install
-cd ..
-.\iniciar.ps1
+# Copia el APP_KEY generado desde .env a .env.testing.
+notepad .env.testing
+php artisan config:clear
+php artisan migrate --pretend
+php artisan migrate
+php artisan migrate:status
+php artisan db:seed
+php artisan storage:link
+Set-Location ..\frontend
+npm.cmd ci
+npm.cmd run typecheck
+npm.cmd run build
+Set-Location ..
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\iniciar.ps1 -PostgreSQL
 ```
 
-Abre **http://127.0.0.1:5173**. El lanzador inicia el frontend en el puerto 5173 y la API en el 8000 con una base SQLite de vista previa. Para usar PostgreSQL, configura `backend/.env` y ejecuta `.\iniciar.ps1 -PostgreSQL`.
+Si Windows impide storage:link, habilita el modo de desarrollador o ejecuta ese comando con permisos para enlaces simbólicos. Usa 127.0.0.1 tanto en frontend como API; cambiar sólo uno por localhost rompe el contexto de cookies. Los logs locales están en backend/storage/logs.
 
-`iniciar.ps1` y `php.ini` facilitan el arranque en este equipo Windows. `php.ini` incluye una ruta local de instalación de PHP; ajústala si usas otra máquina.
+## Variables y autenticación
 
-## Desarrollo por separado
+DB_* configura PostgreSQL. KICHWA_ADMIN_NOMBRE, KICHWA_ADMIN_EMAIL y KICHWA_ADMIN_PASSWORD crean el administrador inicial. En producción configura correo real y contraseña fuerte distinta de la local **antes del primer seeding**; el seeder se niega a usar valores locales inseguros. Guarda .env fuera de Git.
 
-En una terminal, inicia la API desde `backend`:
+El registro normaliza el correo, valida nombre y cédula opcional, exige contraseña de 12 caracteres con mayúsculas, minúsculas, números y símbolos, y un máximo de 72 bytes. Comprueba DNS y contraseñas comprometidas en desarrollo/producción; testing desactiva esas consultas externas. Los estudiantes nunca asignan su rol. El bloqueo revoca sesiones y tokens. Recuperación y verificación de correo están implementadas; MAIL_MAILER=log escribe enlaces en backend/storage/logs/laravel.log y **no envía correos**. Para enviar configura SMTP (MAIL_MAILER=smtp, MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD y remitente autorizado).
+
+## Google Cloud paso a paso
+
+1. En [Google Cloud Console](https://console.cloud.google.com/) crea o selecciona un proyecto.
+2. Abre Google Auth Platform y configura Branding: nombre Yachay, correo de soporte y contacto.
+3. En Audience elige el público apropiado. Para una aplicación externa en pruebas, agrega los correos de prueba.
+4. En Data Access solicita únicamente openid, email y profile.
+5. En Clients crea un cliente OAuth de tipo **Web application**.
+6. Agrega el origen http://127.0.0.1:5173 y la URI de redirección **http://127.0.0.1:8000/auth/google/callback** exactamente.
+7. Copia el identificador y secreto privados a GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET de backend/.env; configura GOOGLE_REDIRECT_URI con la URI anterior.
+8. Ejecuta php artisan config:clear desde backend y abre «Continuar con Google» en el navegador. Si la consola rechaza 127.0.0.1 como origen JavaScript, omite ese origen: Socialite usa redirección de servidor; conserva la URI de callback permitida.
+9. Para producción agrega la URI HTTPS definitiva y completa los requisitos de publicación de Google.
+
+El flujo valida state y correo verificado. Una cuenta local existente sólo se vincula desde una sesión local autenticada con el mismo correo; no hay vinculación automática ni promoción de roles. Referencias: [OAuth para aplicaciones web](https://developers.google.com/identity/protocols/oauth2/web-server), [Socialite](https://laravel.com/docs/13.x/socialite). No se inventan credenciales de Google: en este equipo el botón indica que falta configurarlas.
+
+## Contenido y pruebas
+
+El administrador carga el material real y el docente experto lo valida. No se importó contenido lingüístico final del DOCX. Los registros [DEMO] de verificación y el tono de audio son datos técnicos locales. DemostracionSeeder no se ejecuta por defecto y se limita a local/testing:
 
 ```powershell
-php artisan serve --host=127.0.0.1 --port=8000
-```
-
-En otra terminal, inicia la interfaz desde `frontend`:
-
-```powershell
-npm run dev
-```
-
-Los valores de `FRONTEND_URL` y `SANCTUM_STATEFUL_DOMAINS` en `backend/.env` deben corresponder al origen del frontend. Si cambias la dirección de la API, configura `VITE_API_URL` en `frontend/.env` según [`frontend/.env.example`](frontend/.env.example). Usa el mismo nombre de host para ambos servicios en el entorno local, por ejemplo `127.0.0.1`.
-
-## Verificación
-
-```powershell
-cd backend
+Set-Location backend
+# Opcional, sólo para una base local de demostración:
+php artisan db:seed --class=DemostracionSeeder
+# Pruebas: requieren la base separada que termina en _test.
 php artisan test
-cd ../frontend
-npm run typecheck
-npm run build
+Set-Location ..\frontend
+npm.cmd run typecheck
+npm.cmd run build
 ```
 
-Consulta [`backend/README.md`](backend/README.md) para la configuración de PostgreSQL, el primer administrador y las rutas de la API.
+Las pruebas migran normalmente y revierten transacciones; no borran la base de trabajo. El arranque no cambia una contraseña inicial ya renovada.
+
+Consulta [auditoría y evidencia](documentacion/auditoria.md), [contratos de ejercicios](documentacion/ejercicios.md) y [referencias del MER](documentacion-base/LEEME.md). Limitaciones: Intermedio y publicación de opiniones están reservados; Google real y entrega SMTP necesitan credenciales externas; no hay contenido docente final ni despliegue de producción incluido.
