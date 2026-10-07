@@ -5,7 +5,8 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsc --noEmit",
+        "test": "node --experimental-vm-modules --test tests/*.test.mjs"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
@@ -18,7 +19,10 @@
     },
     "dependencies": {
         "@tanstack/react-query": "^5.104.1",
+        "class-variance-authority": "^0.7.1",
+        "cn": "^0.4.0",
         "lucide-react": "^1.49.0",
+        "radix-ui": "^1.7.0",
         "react": "^19.3.0",
         "react-dom": "^19.3.0",
         "react-router-dom": "^7.18.4"

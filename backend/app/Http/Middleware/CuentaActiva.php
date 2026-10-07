@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\AutenticacionPestana;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,12 @@ class CuentaActiva
             $user->tokens()->delete();
             if ($request->hasSession()) {
                 Auth::guard('web')->logout();
-                $request->session()->invalidate();
+                if ($request->is('api/*')) {
+                    AutenticacionPestana::revoke($request);
+                    $request->session()->regenerate();
+                } else {
+                    $request->session()->invalidate();
+                }
                 $request->session()->regenerateToken();
             }
             abort(401, 'Tu cuenta está bloqueada.');

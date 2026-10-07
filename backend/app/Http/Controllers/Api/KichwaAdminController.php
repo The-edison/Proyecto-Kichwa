@@ -18,7 +18,7 @@ class KichwaAdminController extends Controller
 {
     public function overview(): JsonResponse
     {
-        return response()->json(DB::selectOne("SELECT (SELECT count(*) FROM usuarios WHERE rol_usuario='estudiante') AS students, (SELECT count(*) FROM temas) AS contents, (SELECT count(*) FROM actividades) AS exercises, (SELECT count(*) FROM diccionario) AS glossary"));
+        return response()->json(DB::selectOne("SELECT (SELECT count(*) FROM usuarios WHERE rol_usuario='estudiante') AS students, (SELECT count(*) FROM temas) AS contents, (SELECT count(*) FROM actividades) AS exercises, (SELECT count(*) FROM diccionario) AS diccionario"));
     }
 
     private function resource(Request $request): string
@@ -203,14 +203,15 @@ class KichwaAdminController extends Controller
 
     public function students(Request $request): JsonResponse
     {
-        $request->validate(['q' => ['sometimes', 'string', 'max:100']]);
+        $data = $request->validate(['q' => ['nullable', 'string', 'max:100'], 'page' => ['sometimes', 'integer', 'min:1']]);
         $query = Usuario::where('rol_usuario', 'estudiante');
-        if ($request->filled('q')) {
-            $needle = '%'.trim($request->input('q')).'%';
+        $search = trim($data['q'] ?? '');
+        if ($search !== '') {
+            $needle = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search).'%';
             $query->where(fn ($q) => $q->where('nombre_usuario', 'ilike', $needle)->orWhere('correo_usuario', 'ilike', $needle)->orWhere('cedula_usuario', 'like', $needle));
         }
 
-        return response()->json($query->orderBy('nombre_usuario')->paginate(20)->through(fn ($u) => $u->perfil() + ['state' => $u->estado_usuario]));
+        return response()->json($query->orderBy('nombre_usuario')->orderBy('id_usuario')->paginate(20)->through(fn ($u) => $u->perfil() + ['state' => $u->estado_usuario]));
     }
 
     public function block(Request $request, int $id): JsonResponse

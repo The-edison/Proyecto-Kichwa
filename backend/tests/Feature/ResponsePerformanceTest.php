@@ -17,7 +17,7 @@ class ResponsePerformanceTest extends TestCase
 
     public function test_json_compression_respects_negotiation_and_preserves_dictionary_response(): void
     {
-        Diccionario::create(['palabra_kichwa_diccionario' => '[DEMO] compresión', 'palabra_espanol_diccionario' => '[DEMO] técnica', 'notas_diccionario' => str_repeat('Nota técnica. ', 100)]);
+        Diccionario::create(['kichwa' => '[DEMO] compresión', 'español' => '[DEMO] técnica']);
         $response = $this->getJson('/api/diccionario/buscar?q=compresion&direccion=kichwa-es', ['Accept-Encoding' => 'gzip;q=0.5'])->assertOk()->assertHeader('Content-Encoding', 'gzip')->assertHeader('Vary', 'Accept-Encoding');
         $data = json_decode(gzdecode($response->getContent()), true);
         $this->assertSame(1, $data['total']);
@@ -45,6 +45,6 @@ class ResponsePerformanceTest extends TestCase
         $level = Nivel::where('orden_nivel', 1)->firstOrFail()->id_nivel;
         $this->getJson('/api/admin/levels')->assertOk()->assertJsonPath('0.children_count', 0);
         $this->postJson('/api/admin/modules', ['level_id' => $level, 'title' => '[DEMO] Caché', 'description' => 'Prueba'])->assertCreated();
-        $this->getJson('/api/admin/levels')->assertOk()->assertJsonPath('0.children_count',1);
+        $this->getJson('/api/admin/levels')->assertOk()->assertJsonPath('0.children_count', 1);
     }
 }

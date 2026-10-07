@@ -90,13 +90,13 @@ class KichwaCatalogController extends Controller
     {
         $this->module($module);
         $request->validate(['page' => ['sometimes', 'integer', 'min:1']]);
-        $data = PublicacionContenido::remember('module-contents:'.$module.':'.$request->integer('page', 1), fn () => Tema::query()
+        $data = PublicacionContenido::remember('module-contents:v2:'.$module.':'.$request->integer('page', 1), fn () => Tema::query()
             ->join('unidades as u', 'u.id_unidad', '=', 'temas.id_unidad')
             ->where('u.id_modulo', $module)->where('u.publicado', true)->where('temas.publicado', true)
-            ->select('temas.id_tema', 'temas.id_unidad', 'temas.tipo_tema', 'temas.titulo_tema', 'temas.orden_tema', 'temas.publicado', 'u.titulo_unidad as unit_title', 'u.orden_unidad as unit_order')
+            ->select('temas.id_tema', 'temas.id_unidad', 'temas.tipo_tema', 'temas.titulo_tema', 'temas.orden_tema', 'temas.publicado', 'u.titulo_unidad as unit_title', 'u.objetivo_unidad as unit_objective', 'u.orden_unidad as unit_order')
             ->selectSub(DB::table('actividades')->selectRaw('count(*)')->whereColumn('actividades.id_tema', 'temas.id_tema'), 'exercise_count')
             ->orderBy('u.orden_unidad')->orderBy('temas.orden_tema')->orderBy('temas.id_tema')
-            ->paginate(20)->through(fn ($r) => KichwaResource::present('contents', $r) + ['unit_title' => $r->unit_title, 'unit_order' => $r->unit_order, 'exercise_count' => (int) $r->exercise_count])->toArray());
+            ->paginate(20)->through(fn ($r) => KichwaResource::present('contents', $r) + ['unit_title' => $r->unit_title, 'unit_objective' => $r->unit_objective, 'unit_order' => $r->unit_order, 'exercise_count' => (int) $r->exercise_count])->toArray());
 
         return response()->json($this->topicProgress($request, $data));
     }
@@ -182,16 +182,16 @@ class KichwaCatalogController extends Controller
             'questions' => Pregunta::where('id_evaluacion', $evaluation)->select(array_values(array_diff(KichwaResource::FIELDS['questions'], ['solucion_pregunta'])))->orderBy('orden_pregunta')->get()->map(fn ($r) => KichwaResource::present('questions', $r))]);
     }
 
-    public function glossary(Request $request): JsonResponse
+    public function diccionario(Request $request): JsonResponse
     {
         $request->validate(['q' => ['sometimes', 'string', 'max:100']]);
         $query = Diccionario::query();
         if ($request->filled('q')) {
             $needle = '%'.trim($request->input('q')).'%';
-            $query->where(fn ($q) => $q->where('palabra_kichwa_diccionario', 'ilike', $needle)->orWhere('palabra_espanol_diccionario', 'ilike', $needle));
+            $query->where(fn ($q) => $q->where('kichwa', 'ilike', $needle)->orWhere('español', 'ilike', $needle));
         }
 
-        return response()->json($query->orderBy('palabra_kichwa_diccionario')->paginate(20)->through(fn ($r) => KichwaResource::present('glossary', $r)));
+        return response()->json($query->orderBy('kichwa')->paginate(20)->through(fn ($r) => KichwaResource::present('diccionario', $r)));
     }
 
     public function progress(Request $request): JsonResponse
@@ -207,8 +207,9 @@ class KichwaCatalogController extends Controller
     private function levelProgress(Request $request, Nivel $level): array
     {
         UsuarioNivel::firstOrCreate(['id_usuario' => $request->user()->id_usuario, 'id_nivel' => $level->id_nivel]);
-        $activities = Actividad::whereIn('id_unidad', PublicacionContenido::unitIds($level->id_nivel))->where(fn ($q) => $q->whereNull('id_tema')->orWhereIn('id_tema', Tema::where('publicado', true)->select('id_tema')))->pluck('id_actividad');
-        $completed = DB::table('respuestas_actividad')->where('id_usuario', $request->user()->id_usuario)->whereIn('id_actividad', $activities)->where('acierto_actividad', true)->distinct()->count('id_actividad');
+        $activities = Actividad::whereIn('id_unidad', PublicacionContenido::unitIds($level->id_nivel))->where(fn ($q) => $q->whereNull('id_tema')->orWhereIn('id_tema', Tema::where('publicado', true)->select('id_tema')));
+        $total = (clone $activities)->count();
+        $completed = DB::table('respuestas_actividad')->where('id_usuario', $request->user()->id_usuario)->whereIn('id_actividad', $activities->select('id_actividad'))->where('acierto_actividad', true)->distinct()->count('id_actividad');
         $results = VistaIntento::where('id_usuario', $request->user()->id_usuario)->where('estado_intento', 'finalizado')->whereIn('id_evaluacion', EvaluacionKichwa::where(function ($q) use ($level) {
             $q->whereIn('id_unidad', PublicacionContenido::unitIds($level->id_nivel));
             if ($level->orden_nivel === 1) {
@@ -216,7 +217,7 @@ class KichwaCatalogController extends Controller
             }
         })->select('id_evaluacion'))
             ->selectRaw('id_evaluacion as evaluation_id,max(porcentaje_calificacion) as best_score,max(fecha_fin_intento) as completed_at')->groupBy('id_evaluacion')->get();
-        $result = ['level' => ['id' => $level->id_nivel, 'name' => $level->nombre_nivel], 'completed_activities' => $completed, 'total_activities' => count($activities),
+        $result = ['level' => ['id' => $level->id_nivel, 'name' => $level->nombre_nivel], 'completed_activities' => $completed, 'total_activities' => $total,
             'percentage' => (float) (VistaProgresoNivel::where('id_usuario', $request->user()->id_usuario)->where('id_nivel', $level->id_nivel)->value('porcentaje_progreso_nivel') ?? 0), 'evaluation_results' => $results];
 
         return $result;

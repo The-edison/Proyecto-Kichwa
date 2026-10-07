@@ -16,7 +16,7 @@ class KichwaResource
 {
     public const MODELS = ['levels' => Nivel::class, 'modules' => Modulo::class, 'units' => Unidad::class,
         'contents' => Tema::class, 'exercises' => Actividad::class, 'evaluations' => EvaluacionKichwa::class,
-        'questions' => Pregunta::class, 'glossary' => Diccionario::class];
+        'questions' => Pregunta::class, 'diccionario' => Diccionario::class];
 
     public const FIELDS = [
         'levels' => ['id' => 'id_nivel', 'name' => 'nombre_nivel', 'description' => 'descripcion_nivel', 'sort_order' => 'orden_nivel'],
@@ -28,7 +28,7 @@ class KichwaResource
         'evaluations' => ['id' => 'id_evaluacion', 'unit_id' => 'id_unidad', 'title' => 'titulo_evaluacion', 'type' => 'tipo_evaluacion'],
         'questions' => ['id' => 'id_pregunta', 'evaluation_id' => 'id_evaluacion', 'type' => 'tipo_pregunta', 'prompt' => 'enunciado_pregunta',
             'elements' => 'elementos_pregunta', 'zones' => 'zonas_pregunta', 'resource' => 'recurso_pregunta', 'solution' => 'solucion_pregunta', 'score' => 'puntaje_pregunta', 'sort_order' => 'orden_pregunta'],
-        'glossary' => ['id' => 'id_diccionario', 'kichwa' => 'palabra_kichwa_diccionario', 'spanish' => 'palabra_espanol_diccionario', 'synonyms' => 'sinonimos_diccionario', 'notes' => 'notas_diccionario'],
+        'diccionario' => ['id' => 'id', 'kichwa' => 'kichwa', 'español' => 'español'],
     ];
 
     public static function present(string $resource, Model $record, bool $admin = false): array
@@ -55,9 +55,6 @@ class KichwaResource
         }
         if ($resource === 'exercises') {
             $result['topic_id'] = $record->id_tema;
-        }
-        if ($resource === 'glossary') {
-            $result += ['meaning' => $result['spanish'], 'example_spanish' => null, 'example_kichwa' => null];
         }
 
         return $result;

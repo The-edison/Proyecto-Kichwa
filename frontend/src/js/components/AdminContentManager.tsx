@@ -6,11 +6,11 @@ import { useApi } from '../hooks/useApi';
 import { Link } from '../navigation';
 import { EmptyState, ErrorState, LoadingState } from './States';
 import { useToast } from './Toast';
-import { ExerciseEditor, newExercise, type EditableExercise } from './ExerciseEditor';
+import { ExerciseEditor, exerciseForSave, newExercise, type EditableExercise } from './ExerciseEditor';
 import type { Level, Paginated } from '../types';
-type Resource = 'modules' | 'units' | 'contents' | 'exercises' | 'evaluations' | 'questions' | 'glossary';
+type Resource = 'modules' | 'units' | 'contents' | 'exercises' | 'evaluations' | 'questions' | 'diccionario';
 type Row = Record<string, unknown> & { id: number };
-const titles: Record<Resource, string> = { modules: 'módulo', units: 'unidad', contents: 'tema', exercises: 'ejercicio', evaluations: 'evaluación', questions: 'pregunta', glossary: 'entrada' };
+const titles: Record<Resource, string> = { modules: 'módulo', units: 'unidad', contents: 'tema', exercises: 'ejercicio', evaluations: 'evaluación', questions: 'pregunta', diccionario: 'entrada' };
 const display = (row: Row) => String(row.title || row.prompt || row.kichwa || '#' + row.id);
 const base = '/admin/contenidos';
 export function AdminContentManager({ levels }: { levels: Level[] }) {
@@ -20,8 +20,8 @@ export function AdminContentManager({ levels }: { levels: Level[] }) {
     const levelId = numberAfter('nivel'), moduleId = numberAfter('modulo'), unitId = numberAfter('unidad'), topicId = numberAfter('tema'), evaluationId = numberAfter('evaluacion');
     const levelPath = base + '/nivel/' + levelId, modulePath = levelPath + '/modulo/' + moduleId, unitPath = modulePath + '/unidad/' + unitId;
     const topicPath = unitPath + '/tema/' + topicId;
-    const diagnostic = parts.includes('diagnostico'), glossary = parts.includes('diccionario');
-    const resource: Resource | null = glossary ? 'glossary' : evaluationId ? 'questions' : diagnostic ? 'evaluations' : topicId ? 'exercises' : unitId ? params.get('tab') === 'evaluations' ? 'evaluations' : params.get('tab') === 'exercises' ? 'exercises' : 'contents' : moduleId ? 'units' : levelId ? 'modules' : null;
+    const diagnostic = parts.includes('diagnostico'), diccionario = parts.includes('diccionario');
+    const resource: Resource | null = diccionario ? 'diccionario' : evaluationId ? 'questions' : diagnostic ? 'evaluations' : topicId ? 'exercises' : unitId ? params.get('tab') === 'evaluations' ? 'evaluations' : params.get('tab') === 'exercises' ? 'exercises' : 'contents' : moduleId ? 'units' : levelId ? 'modules' : null;
     const parentId = resource === 'modules' ? levelId : resource === 'units' ? moduleId : resource === 'questions' ? evaluationId : unitId;
     const page = Number(params.get('page') || 1);
     const path = resource ? `/admin/${resource}?page=${page}${parentId ? '&parent_id=' + parentId : ''}${topicId ? '&topic_id=' + topicId : ''}${diagnostic ? '&type=diagnostica' : ''}` : null;
@@ -54,7 +54,7 @@ export function AdminContentManager({ levels }: { levels: Level[] }) {
     async function save(event: FormEvent) {
         event.preventDefault(); if (busy || !resource) return;
         setBusy(true); setErrors({});
-        const payload = { ...form }; delete payload.id; delete payload.sort_order;
+        const payload: Record<string, unknown> = exercise ? { ...exerciseForSave(form as unknown as EditableExercise) } : { ...form }; delete payload.id; delete payload.sort_order;
         const parentKey = resource === 'modules' ? 'level_id' : resource === 'units' ? 'module_id' : resource === 'questions' ? 'evaluation_id' : 'unit_id';
         if (parentId) payload[parentKey] = parentId;
         if (topicId && resource === 'exercises') payload.topic_id = topicId;
@@ -88,7 +88,7 @@ export function AdminContentManager({ levels }: { levels: Level[] }) {
     }
     async function importCsv(file: File | undefined) {
         if (!file) return; setBusy(true); const payload = new FormData(); payload.append('file', file);
-        try { const result = await apiPost<{ message: string }>('/admin/glossary/import', payload); toast(result.message); await listing.refresh(); }
+        try { const result = await apiPost<{ message: string }>('/admin/diccionario/import', payload); toast(result.message); await listing.refresh(); }
         catch (reason) { fail(reason); } finally { setBusy(false); }
     }
     function field(key: string, label: string, multiline = false, required = true, maxLength = 180) {
@@ -109,30 +109,32 @@ export function AdminContentManager({ levels }: { levels: Level[] }) {
     const parentError = module.error || unit.error || topic.error || evaluation.error;
     return <div className="space-y-6">
         <nav aria-label="Migas de pan" className="flex flex-wrap items-center gap-2 text-sm">{crumbs.map(([href, label], i) => <span key={href} className="flex items-center gap-2">{i > 0 && <span aria-hidden>›</span>}<Link href={href} className="rounded px-2 py-3 font-bold text-forest">{label}</Link></span>)}</nav>
-        <div className="flex flex-wrap gap-3"><Link className="secondary-button" href={base}>Niveles</Link><Link className="secondary-button" href={base + '/diccionario'}>Diccionario</Link><Link className="secondary-button" href={base + '/diagnostico'}>Diagnóstico general</Link></div>
+        <div className="flex flex-wrap gap-3"><Link className="secondary-button" href={base}>Niveles</Link><Link className="secondary-button" href={base + '/diagnostico'}>Diagnóstico general</Link></div>
         {parentError ? <ErrorState message={parentError} /> : !resource ? <div className="grid gap-4 sm:grid-cols-2">{levels.map(level => <Link key={level.id} href={base + '/nivel/' + level.id} className="glass-panel card-hover p-6"><h2 className="font-serif text-3xl">{level.name}</h2><p className="mt-3">{level.children_count ?? 0} módulos</p><p className="mt-2 text-muted">{level.available ? 'Administrar contenido del Básico' : 'Estudiante: Próximamente'}</p></Link>)}</div> : <>
             {unitId && !topicId && !evaluationId && <div className="flex flex-wrap gap-2">{[['contents', 'Temas'], ['exercises', 'Actividades de la unidad'], ['evaluations', 'Evaluaciones']].map(([tab, label]) =>
                 <Link key={tab} className={resource === tab ? 'primary-button' : 'secondary-button'} href={unitPath + (tab === 'contents' ? '' : '?tab=' + tab)}>{label}</Link>)}</div>}
-            <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-serif text-2xl">{listing.data?.total ?? 0} registros · {titles[resource]}</h2>
+            <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-serif text-2xl">{exercise ? resource === 'questions' ? 'Preguntas de la evaluación' : topicId ? 'Ejercicios del tema' : 'Actividades de la unidad' : `${listing.data?.total ?? 0} registros · ${titles[resource]}`}</h2>{exercise && <p className="mt-2 break-words text-sm text-muted">{String(topic.data?.title ?? evaluation.data?.title ?? unit.data?.title ?? '')} · {listing.data?.total ?? 0} {resource === 'questions' ? 'preguntas' : 'ejercicios'}. Añade actividades para que el estudiante practique lo aprendido.</p>}</div>
                 <button className="primary-button" disabled={busy} onClick={begin}>Crear {titles[resource]}</button></div>
-            {glossary && <label className="glass-panel grid gap-2 p-4">Importar CSV (UTF-8, máximo 2 MB)<input type="file" accept=".csv" disabled={busy} onChange={e => void importCsv(e.target.files?.[0])} /><small>Columnas: kichwa, spanish; synonyms y notes opcionales. Se conservan los duplicados existentes.</small></label>}
+            {diccionario && <label className="glass-panel grid gap-2 p-4">Importar CSV (UTF-8, máximo 2 MB)<input type="file" accept=".csv" disabled={busy} onChange={e => void importCsv(e.target.files?.[0])} /><small>Columnas: kichwa, español. El id se genera automáticamente. Se conservan los duplicados existentes.</small></label>}
             {open && <form className="glass-panel space-y-4 p-5 sm:p-6" onSubmit={save} aria-busy={busy}>
                 <h3 className="font-serif text-2xl">{editing ? 'Editar' : 'Crear'} {titles[resource]}</h3>
+                {exercise && <p className="text-sm leading-6 text-muted">Completa los pasos, indica las respuestas correctas y prueba la actividad antes de guardarla.</p>}
                 {exercise ? <ExerciseEditor onBusyChange={setBusy} errors={errors} value={form as unknown as EditableExercise} onChange={value => setForm(current => ({ ...current, ...value }))} /> :
-                    glossary ? <>{field('kichwa', 'Palabra o expresión Kichwa', false, true, 200)}{field('spanish', 'Equivalencia en español', false, true, 250)}{field('synonyms', 'Sinónimos', true, false, 2000)}{field('notes', 'Notas', true, false, 5000)}</> : <>
+                    diccionario ? <>{field('kichwa', 'Palabra o expresión Kichwa', false, true, 200)}{field('español', 'Equivalencia en español', false, true, 250)}</> : <>
                     {field('title', 'Título', false, true, resource === 'modules' ? 150 : 180)}
                     {(resource === 'modules' || resource === 'units') && field('description', resource === 'modules' ? 'Descripción' : 'Objetivo de la unidad', true, true, 20000)}
                     {resource === 'contents' && <><label className="grid gap-2">Tipo de tema<select className="field" value={String(form.kind ?? 'vocabulary')} onChange={e => setForm({ ...form, kind: e.target.value })}><option value="vocabulary">Vocabulario</option><option value="grammar">Gramática</option><option value="culture">Cultura</option></select></label>{field('body', 'Contenido (texto plano)', true, true, 50000)}</>}
                 </>}
                 {resource === 'questions' && <label className="grid gap-2">Puntaje máximo<input className="field" type="number" required min=".01" max="999999.99" step=".01" value={Number(form.score ?? 10)} onChange={e => setForm({ ...form, score: Number(e.target.value) })} />{errors.score && <span className="form-error">{errors.score}</span>}</label>}
                 {['modules', 'units', 'contents'].includes(resource) && <p className="text-sm text-muted">Los registros nuevos se guardan como borrador. Publica después de revisar el contenido.</p>}
-                {Object.entries(errors).filter(([key]) => !['title', 'description', 'body', 'kichwa', 'spanish', 'synonyms', 'notes', 'score'].includes(key)).map(([key, values]) => <p key={key} className="form-error" role="alert">{values.join(' ')}</p>)}
-                <div className="flex gap-3"><button className="primary-button" type="submit" disabled={busy}>{busy ? 'Guardando…' : 'Guardar'}</button><button className="secondary-button" type="button" disabled={busy} onClick={() => setOpen(false)}>Cancelar</button></div>
+                {Object.entries(errors).filter(([key]) => !['title', 'description', 'body', 'kichwa', 'español', 'score'].includes(key)).map(([key, values]) => <p key={key} className="form-error" role="alert">{values.join(' ')}</p>)}
+                <div className="flex flex-wrap gap-3 border-t border-emerald-100 pt-4"><button className="primary-button" type="submit" disabled={busy}>{busy ? 'Guardando…' : exercise ? resource === 'questions' ? 'Guardar pregunta' : 'Guardar ejercicio' : 'Guardar'}</button><button className="secondary-button" type="button" disabled={busy} onClick={() => setOpen(false)}>Cancelar</button></div>
             </form>}
             {listing.loading ? <LoadingState /> : listing.error ? <ErrorState message={listing.error} /> : !listing.data?.data.length ?
                 <EmptyState title={'Todavía no hay ' + titles[resource]} description="Crea el primer registro dentro de este recorrido." action={<button className="primary-button" onClick={begin}>Crear primer {titles[resource]}</button>} /> :
                 <div className="grid gap-3">{listing.data.data.map(row => <article className="glass-panel flex flex-wrap items-center gap-3 p-4" key={row.id}>
                     <div className="min-w-0 flex-1">{childPath(row) ? <Link className="block break-words font-bold text-forest underline" href={childPath(row)!}>{display(row)}</Link> : <strong className="block break-words">{display(row)}</strong>}
+                        {diccionario && <p className="break-words text-muted">{String(row.español ?? '')}</p>}
                         <small className="text-muted">#{row.id}{row.sort_order ? ' · Orden ' + row.sort_order : ''}{'published' in row ? row.published ? ' · Publicado' : ' · Borrador' : ''}</small></div>
                     <div className="flex flex-wrap gap-2">{'published' in row && <button className="secondary-button" disabled={busy} onClick={() => void publish(row)}>{row.published ? 'Retirar publicación' : 'Publicar'}</button>}
                         {row.sort_order !== undefined && <><button className="secondary-button" disabled={busy} aria-label={'Subir ' + display(row)} onClick={() => void move(row, 'up')}>↑</button><button className="secondary-button" disabled={busy} aria-label={'Bajar ' + display(row)} onClick={() => void move(row, 'down')}>↓</button></>}

@@ -16,6 +16,7 @@ class FrontendAccessTest extends TestCase
 
         config()->set('sanctum.stateful', ['127.0.0.1:5173']);
         $this->withHeader('Origin', 'http://127.0.0.1:5173');
+        $this->withHeader('X-Tab-Session', str_repeat('a', 64));
     }
 
     public function test_spa_registration_creates_a_session_without_returning_a_token(): void

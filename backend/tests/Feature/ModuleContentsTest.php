@@ -12,6 +12,52 @@ class ModuleContentsTest extends TestCase
 {
     use UsesPostgreSQL;
 
+    public function test_published_units_are_visible_without_topics_and_publication_invalidates_cached_lists(): void
+    {
+        $admin = Usuario::factory()->administrador()->create();
+        $student = Usuario::factory()->create();
+        Sanctum::actingAs($admin);
+        $level = Nivel::where('orden_nivel', 1)->firstOrFail()->id_nivel;
+        $module = $this->createContent('modules', ['level_id' => $level, 'title' => 'Módulo publicado', 'description' => 'Objetivo', 'published' => true]);
+        $unit = $this->createContent('units', ['module_id' => $module, 'title' => 'Unidad sin temas', 'description' => 'En preparación']);
+        Sanctum::actingAs($student);
+        $this->getJson('/api/modules/'.$module.'/units')->assertOk()->assertJsonPath('total', 0);
+        $this->getJson('/api/modules/'.$module.'/contents')->assertOk()->assertJsonPath('total', 0);
+
+        Sanctum::actingAs($admin);
+        $this->patchJson('/api/admin/units/'.$unit, ['published' => true])->assertOk();
+        Sanctum::actingAs($student);
+        $this->getJson('/api/modules/'.$module.'/units')->assertOk()->assertJsonPath('total', 1)->assertJsonPath('data.0.id', $unit);
+        $this->getJson('/api/modules/'.$module.'/contents')->assertOk()->assertJsonPath('total', 0);
+
+        Sanctum::actingAs($admin);
+        $this->patchJson('/api/admin/units/'.$unit, ['published' => false])->assertOk();
+        Sanctum::actingAs($student);
+        $this->getJson('/api/modules/'.$module.'/units')->assertOk()->assertJsonPath('total', 0);
+        $this->getJson('/api/units/'.$unit)->assertNotFound();
+    }
+
+    public function test_admin_objective_updates_reach_student_lists_topics_and_unit_detail(): void
+    {
+        $admin = Usuario::factory()->administrador()->create();
+        $student = Usuario::factory()->create();
+        Sanctum::actingAs($admin);
+        $level = Nivel::where('orden_nivel', 1)->firstOrFail()->id_nivel;
+        $module = $this->createContent('modules', ['level_id' => $level, 'title' => 'Curso', 'description' => 'Objetivo', 'published' => true]);
+        $unit = $this->createContent('units', ['module_id' => $module, 'title' => 'Unidad', 'description' => "Aprender palabras.\nPracticar saludos.", 'published' => true]);
+        $this->createContent('contents', ['unit_id' => $unit, 'title' => 'Saludos', 'body' => 'Contenido', 'kind' => 'vocabulary', 'published' => true]);
+        Sanctum::actingAs($student);
+        $this->getJson('/api/modules/'.$module.'/units')->assertOk()->assertJsonPath('data.0.description', "Aprender palabras.\nPracticar saludos.");
+        $this->getJson('/api/modules/'.$module.'/contents')->assertOk()->assertJsonPath('data.0.unit_objective', "Aprender palabras.\nPracticar saludos.");
+        $this->getJson('/api/units/'.$unit)->assertOk()->assertJsonPath('description', "Aprender palabras.\nPracticar saludos.");
+        Sanctum::actingAs($admin);
+        $this->patchJson('/api/admin/units/'.$unit, ['description' => 'Objetivo actualizado'])->assertOk();
+        Sanctum::actingAs($student);
+        $this->getJson('/api/modules/'.$module.'/units')->assertOk()->assertJsonPath('data.0.description', 'Objetivo actualizado');
+        $this->getJson('/api/modules/'.$module.'/contents')->assertOk()->assertJsonPath('data.0.unit_objective', 'Objetivo actualizado');
+        $this->getJson('/api/units/'.$unit)->assertOk()->assertJsonPath('description', 'Objetivo actualizado');
+    }
+
     private function createContent(string $resource, array $data): int
     {
         return $this->postJson('/api/admin/'.$resource, $data)->assertCreated()->json('id');
@@ -39,7 +85,7 @@ class ModuleContentsTest extends TestCase
         $this->postJson('/api/exercises/'.$exercise.'/answer', ['answer' => ['textos' => ['a' => 'i']]])->assertOk();
         $response = $this->getJson('/api/modules/'.$module.'/contents')->assertOk()->assertJsonPath('total', 3)
             ->assertJsonPath('data.0.id', $first)->assertJsonPath('data.1.id', $later)->assertJsonPath('data.2.id', $last)
-            ->assertJsonPath('data.0.unit_title', 'Primera unidad')->assertJsonPath('data.0.exercise_count', 1)->assertJsonPath('data.0.percentage', 100)
+            ->assertJsonPath('data.0.unit_title', 'Primera unidad')->assertJsonPath('data.0.unit_objective', 'Objetivo')->assertJsonPath('data.0.exercise_count', 1)->assertJsonPath('data.0.percentage', 100)
             ->assertJsonPath('data.2.unit_order', 2);
         $this->assertArrayNotHasKey('body', $response->json('data.0'));
         $this->assertArrayNotHasKey('solution', $response->json('data.0'));

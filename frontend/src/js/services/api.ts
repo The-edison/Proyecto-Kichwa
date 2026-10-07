@@ -1,4 +1,5 @@
 import { queryClient } from './queryClient';
+import { tabSessionToken } from './tabSession';
 export class ApiError extends Error {
     constructor(
         message: string,
@@ -34,6 +35,8 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
         Accept: 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
     };
+    const tabToken = await tabSessionToken(/^\/auth\/(login|register|google\/prepare)$/.test(path));
+    if (tabToken) headers['X-Tab-Session'] = tabToken;
     if (options.data !== undefined && !(options.data instanceof FormData)) headers['Content-Type'] = 'application/json';
     if (method !== 'GET' && csrfToken()) headers['X-XSRF-TOKEN'] = csrfToken()!;
 
@@ -43,11 +46,15 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
         headers,
         body: options.data === undefined ? undefined : options.data instanceof FormData ? options.data : JSON.stringify(options.data),
         signal: options.signal,
+        cache: 'no-store',
     });
 
     if (response.status === 204) return undefined as T;
     const payload = await response.json().catch(() => null);
     if (!response.ok) {
+        if (response.status === 401 && !/^\/auth\/(login|register|google\/prepare)$/.test(path)) {
+            window.dispatchEvent(new Event('yachay:session-expired'));
+        }
         throw new ApiError(
             payload?.message ?? 'No se pudo completar la solicitud.',
             response.status,
@@ -55,16 +62,19 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
         );
     }
     if (method !== 'GET') {
-        const dictionaryChanged = path.startsWith('/admin/glossary');
+        const dictionaryChanged = path.startsWith('/admin/diccionario');
         const hierarchyChanged = /^\/admin\/(modules|units|contents|exercises|evaluations|questions)(\/|$)/.test(path);
         const progressChanged = /^\/(exercises\/\d+\/answer|evaluations\/\d+\/submit)$/.test(path);
-        void queryClient.invalidateQueries({ predicate: query => {
+        void queryClient.invalidateQueries({ refetchType: 'active', predicate: query => {
             const key = query.queryKey[1];
             if (query.queryKey[0] !== 'api' || typeof key !== 'string') return false;
-            if (dictionaryChanged) return /^\/(diccionario\/buscar|glossary)/.test(key);
+            if (dictionaryChanged) return /^\/diccionario(?:\/|\?|$)/.test(key);
             if (hierarchyChanged) return /^\/(levels|modules|units|evaluations|progress)(\/|\?|$)/.test(key);
             return progressChanged && (/^\/progress(\/|\?|$)/.test(key) || /^\/levels\/\d+\/modules/.test(key) || /^\/modules\/\d+\/(units|contents)/.test(key) || /^\/units\/\d+(\?|$)/.test(key));
-        }, refetchType: 'none' });
+        } });
+        if (hierarchyChanged) {
+            try { localStorage.setItem('yachay:catalog-changed', crypto.randomUUID()); } catch { /* La actualización local ya se realizó. */ }
+        }
     }
     return payload as T;
 }

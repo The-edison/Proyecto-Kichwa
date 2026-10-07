@@ -20,6 +20,7 @@ class GoogleAuthTest extends TestCase
         config()->set('services.google.client_secret', 'test-client-secret');
         config()->set('sanctum.stateful', ['127.0.0.1:5173']);
         $this->withHeader('Origin', 'http://127.0.0.1:5173');
+        $this->withHeader('X-Tab-Session', str_repeat('a', 64));
     }
 
     public function test_verified_google_user_registers_as_student_without_cedula_or_password(): void
@@ -31,6 +32,7 @@ class GoogleAuthTest extends TestCase
             'email_verified' => true,
         ]));
 
+        $this->postJson('/api/auth/google/prepare')->assertOk();
         $this->get('/auth/google')->assertRedirect('https://socialite.fake/google/authorize');
         $this->get('/auth/google/callback')->assertRedirect('http://127.0.0.1:5173/aprender');
 
@@ -59,6 +61,7 @@ class GoogleAuthTest extends TestCase
             'email_verified' => true,
         ]));
 
+        $this->postJson('/api/auth/google/prepare')->assertOk();
         $this->get('/auth/google')->assertRedirect();
         $response = $this->get('/auth/google/callback')->assertRedirect();
         $this->assertStringStartsWith('http://127.0.0.1:5173/iniciar-sesion?google_error=', (string) $response->headers->get('Location'));
@@ -77,7 +80,9 @@ class GoogleAuthTest extends TestCase
             'email_verified' => true,
         ]));
 
-        $this->actingAs($admin)->get('/cuenta/google')->assertRedirect();
+        $this->postJson('/api/auth/login', ['identifier' => $admin->correo_usuario, 'password' => 'PruebaSegura#2026'])->assertOk();
+        $this->postJson('/api/auth/google/link-prepare')->assertOk();
+        $this->get('/cuenta/google')->assertRedirect();
         $this->get('/auth/google/callback')->assertRedirect();
         $this->assertDatabaseHas('usuarios', ['id_usuario' => $admin->id_usuario, 'google_id' => 'google-admin']);
 
@@ -85,6 +90,7 @@ class GoogleAuthTest extends TestCase
         $this->assertGuest('web');
         $this->flushSession();
         $this->app['auth']->forgetGuards();
+        $this->postJson('/api/auth/google/prepare')->assertOk();
         $this->get('/auth/google')->assertRedirect('https://socialite.fake/google/authorize');
         $this->get('/auth/google/callback')->assertRedirect('http://127.0.0.1:5173/admin');
         $this->assertAuthenticatedAs($admin, 'web');
@@ -99,7 +105,9 @@ class GoogleAuthTest extends TestCase
             'email_verified' => true,
         ]));
 
-        $this->actingAs($student)->get('/cuenta/google')->assertRedirect();
+        $this->postJson('/api/auth/login', ['identifier' => $student->correo_usuario, 'password' => 'PruebaSegura#2026'])->assertOk();
+        $this->postJson('/api/auth/google/link-prepare')->assertOk();
+        $this->get('/cuenta/google')->assertRedirect();
         $response = $this->get('/auth/google/callback')->assertRedirect();
         $this->assertStringStartsWith('http://127.0.0.1:5173/cuenta?google_error=', (string) $response->headers->get('Location'));
         $this->assertDatabaseHas('usuarios', ['id_usuario' => $student->id_usuario, 'google_id' => null]);
@@ -114,6 +122,7 @@ class GoogleAuthTest extends TestCase
         ]));
 
         $this->get('/auth/google/callback')->assertRedirect();
+        $this->postJson('/api/auth/google/prepare')->assertOk();
         $this->get('/auth/google')->assertRedirect();
         $this->get('/auth/google/callback')->assertRedirect();
         $this->assertDatabaseCount('usuarios', 0);
@@ -125,6 +134,7 @@ class GoogleAuthTest extends TestCase
             throw new InvalidStateException;
         });
 
+        $this->postJson('/api/auth/google/prepare')->assertOk();
         $this->get('/auth/google')->assertRedirect();
         $this->get('/auth/google/callback')->assertRedirect();
         $this->assertGuest('web');

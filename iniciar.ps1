@@ -52,7 +52,13 @@ try {
     }
 } finally { Pop-Location }
 if (-not (Test-LocalPort 8000)) {
-    Start-Process -FilePath $phpExe -ArgumentList @('-c', ('"' + $phpIni + '"'), '-d', ('"extension_dir=' + $extensionDirectory + '"'), '-S', '127.0.0.1:8000', '-t', '.', ('"' + $router + '"')) -WorkingDirectory (Join-Path $backend 'public') -WindowStyle Hidden -RedirectStandardOutput (Join-Path $backend 'storage\logs\local-server.log') -RedirectStandardError (Join-Path $backend 'storage\logs\local-server-errors.log') | Out-Null
+    $serverPhpArguments = @('-c', ('"' + $phpIni + '"'), '-d', ('"extension_dir=' + $extensionDirectory + '"'))
+    $opcacheExtension = Join-Path $extensionDirectory 'php_opcache.dll'
+    if (Test-Path -LiteralPath $opcacheExtension) {
+        $serverPhpArguments += @('-d', ('"zend_extension=' + $opcacheExtension + '"'), '-d', 'opcache.enable_cli=1', '-d', 'opcache.validate_timestamps=1', '-d', 'opcache.revalidate_freq=0', '-d', 'opcache.memory_consumption=128', '-d', 'opcache.max_accelerated_files=20000')
+    }
+    $serverPhpArguments += @('-S', '127.0.0.1:8000', '-t', '.', ('"' + $router + '"'))
+    Start-Process -FilePath $phpExe -ArgumentList $serverPhpArguments -WorkingDirectory (Join-Path $backend 'public') -WindowStyle Hidden -RedirectStandardOutput (Join-Path $backend 'storage\logs\local-server.log') -RedirectStandardError (Join-Path $backend 'storage\logs\local-server-errors.log') | Out-Null
 }
 if (-not (Test-LocalPort 5173)) {
     Start-Process -FilePath $nodeExe -ArgumentList @(('"' + $viteEntry + '"'), '--host', '127.0.0.1', '--port', '5173', '--strictPort') -WorkingDirectory $frontend -WindowStyle Hidden -RedirectStandardOutput (Join-Path $backend 'storage\logs\vite.log') -RedirectStandardError (Join-Path $backend 'storage\logs\vite-errors.log') | Out-Null

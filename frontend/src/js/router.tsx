@@ -5,7 +5,7 @@ import { LoadingState } from './components/States';
 import { useApi } from './hooks/useApi';
 import type { Level } from './types';
 const Home = lazy(() => import('./pages/Home'));
-const Glossary = lazy(() => import('./pages/Glossary/Index'));
+const Dictionary = lazy(() => import('./pages/Dictionary/Index'));
 const Login = lazy(() => import('./pages/Auth/Login'));
 const Register = lazy(() => import('./pages/Auth/Register'));
 const PasswordRecovery = lazy(() => import('./pages/Auth/PasswordRecovery'));
@@ -16,7 +16,7 @@ const StudentModule = lazy(() => import('./pages/Student/Module'));
 const StudentUnit = lazy(() => import('./pages/Student/Unit'));
 const StudentEvaluation = lazy(() => import('./pages/Student/Evaluation'));
 const StudentProgress = lazy(() => import('./pages/Student/Progress'));
-const StudentGlossary = lazy(() => import('./pages/Student/Glossary'));
+const StudentDictionary = lazy(() => import('./pages/Student/Dictionary'));
 const AdminDashboard = lazy(() => import('./pages/Admin/Dashboard'));
 const AdminStudents = lazy(() => import('./pages/Admin/Students'));
 const AdminContentManager = lazy(() => import('./pages/Admin/ContentManager'));
@@ -48,7 +48,7 @@ export function AppRouter() {
     const { loading } = useAuth();
     if (loading) return <LoadingState />;
     return <Suspense fallback={<LoadingState />}><Routes>
-        <Route path="/" element={<Home />} /><Route path="/glosario" element={<Glossary />} />
+        <Route path="/" element={<Home />} /><Route path="/diccionario" element={<Dictionary />} />
         <Route path="/recuperar-contrasena" element={<PasswordRecovery />} />
         <Route path="/iniciar-sesion" element={<Guest />} /><Route path="/registro" element={<Guest register />} />
         <Route path="/cuenta" element={<AccountPage />} />
@@ -58,7 +58,7 @@ export function AppRouter() {
         </Route>
         <Route element={<Protected role="student" />}>
             <Route path="/aprender" element={<StudentDashboard />} /><Route path="/aprender/progreso" element={<StudentProgress />} />
-            <Route path="/aprender/diccionario" element={<StudentGlossary />} />
+            <Route path="/aprender/diccionario" element={<StudentDictionary />} />
             <Route path="/aprender/nivel/:id" element={<LevelPage />} /><Route path="/aprender/modulo/:id" element={<ParameterPage kind="module" />} />
             <Route path="/aprender/unidad/:id" element={<ParameterPage kind="unit" />} /><Route path="/aprender/evaluacion/:id" element={<ParameterPage kind="evaluation" />} />
         </Route>

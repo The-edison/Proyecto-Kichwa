@@ -7,6 +7,7 @@ use App\Http\Requests\RegisterRequest;
 use App\Models\Nivel;
 use App\Models\Usuario;
 use App\Models\UsuarioNivel;
+use App\Services\AutenticacionPestana;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
@@ -22,6 +23,9 @@ class AuthController extends Controller
 {
     public function register(RegisterRequest $request): JsonResponse
     {
+        if ($request->hasSession()) {
+            AutenticacionPestana::key($request);
+        }
         $data = $request->validated();
         $user = DB::transaction(function () use ($data) {
             $user = Usuario::create(['nombre_usuario' => $data['name'], 'correo_usuario' => $data['email'],
@@ -38,6 +42,9 @@ class AuthController extends Controller
 
     public function login(Request $request): JsonResponse
     {
+        if ($request->hasSession()) {
+            AutenticacionPestana::key($request);
+        }
         $data = $request->validate(['identifier' => ['required', 'string', 'max:254'], 'password' => ['required', 'string', 'max:1024']]);
         $identifier = mb_strtolower(trim($data['identifier']));
         $key = 'login:'.hash('sha256', $identifier.'|'.$request->ip());
@@ -59,6 +66,7 @@ class AuthController extends Controller
         if ($request->hasSession()) {
             Auth::guard('web')->login($user);
             $request->session()->regenerate();
+            AutenticacionPestana::bind($request, $user);
 
             return response()->json(['user' => $user->perfil()], $status);
         }
@@ -76,8 +84,9 @@ class AuthController extends Controller
     {
         $request->user()->tokens()->delete();
         if ($request->hasSession()) {
+            AutenticacionPestana::revoke($request);
             Auth::guard('web')->logout();
-            $request->session()->invalidate();
+            $request->session()->regenerate();
             $request->session()->regenerateToken();
         }
 
@@ -101,6 +110,9 @@ class AuthController extends Controller
         $user->tokens()->delete();
         DB::table('sessions')->where('user_id', $user->id_usuario)->delete();
         if ($request->hasSession()) {
+            $sessions = array_filter(AutenticacionPestana::sessions($request), fn (array $session): bool => $session['user_id'] !== $user->id_usuario);
+            $request->session()->put('tab_sessions', $sessions);
+            AutenticacionPestana::bind($request, $user);
             $request->session()->regenerate();
         }
 

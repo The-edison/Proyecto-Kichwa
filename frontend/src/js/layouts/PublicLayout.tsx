@@ -9,14 +9,14 @@ function Shell({ children }: { children: ReactNode }) {
     const [open, setOpen] = useState(false);
     const activeKey = location.pathname === '/'
         ? location.hash === '#como-funciona' ? 'como-funciona' : location.hash === '#cultura' ? 'cultura' : null
-        : location.pathname === '/glosario' ? 'glosario'
+        : location.pathname === '/diccionario' ? 'diccionario'
         : location.pathname === '/iniciar-sesion' ? 'iniciar-sesion'
         : location.pathname === '/registro' ? 'registro'
         : null;
     const links = [
         { key: 'como-funciona', href: '/#como-funciona', label: 'Cómo funciona' },
         { key: 'cultura', href: '/#cultura', label: 'Nuestra cultura' },
-        { key: 'glosario', href: '/glosario', label: 'Diccionario' },
+        { key: 'diccionario', href: '/diccionario', label: 'Diccionario' },
         { key: 'iniciar-sesion', href: '/iniciar-sesion', label: 'Iniciar sesión', className: 'nav-login' },
         { key: 'registro', href: '/registro', label: 'Comenzar ahora →', className: 'nav-start' },
     ];

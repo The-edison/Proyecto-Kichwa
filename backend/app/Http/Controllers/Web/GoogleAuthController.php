@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Nivel;
 use App\Models\Usuario;
 use App\Models\UsuarioNivel;
+use App\Services\AutenticacionPestana;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,9 +16,29 @@ use Throwable;
 
 class GoogleAuthController extends Controller
 {
+    public function prepare(Request $request): JsonResponse
+    {
+        $this->ensureConfigured();
+        abort_unless($request->hasSession(), 401);
+        $link = $request->route('intent') === 'link';
+        $request->session()->put('google_pending_tab', ['key' => AutenticacionPestana::key($request), 'intent' => $link ? 'link' : 'login', 'expires' => now()->timestamp + 300, 'user_id' => $link ? $request->user()->id_usuario : null]);
+
+        return response()->json(['url' => url($link ? '/cuenta/google' : '/auth/google')]);
+    }
+
+    private function preparedTab(Request $request, string $intent): array
+    {
+        $pending = $request->session()->pull('google_pending_tab');
+        abort_unless($pending && $pending['intent'] === $intent && $pending['expires'] > now()->timestamp, 403, 'Inicia el acceso con Google desde esta pestaña.');
+        $request->session()->put('google_auth_tab_key', $pending['key']);
+
+        return $pending;
+    }
+
     public function redirect(Request $request): RedirectResponse
     {
         $this->ensureConfigured();
+        $this->preparedTab($request, 'login');
         $request->session()->put('google_auth_intent', 'login');
         $request->session()->forget('google_link_user_id');
 
@@ -26,8 +48,9 @@ class GoogleAuthController extends Controller
     public function link(Request $request): RedirectResponse
     {
         $this->ensureConfigured();
+        $pending = $this->preparedTab($request, 'link');
         $request->session()->put('google_auth_intent', 'link');
-        $request->session()->put('google_link_user_id', Auth::guard('web')->id());
+        $request->session()->put('google_link_user_id', $pending['user_id']);
 
         return Socialite::driver('google')->redirect();
     }
@@ -36,8 +59,9 @@ class GoogleAuthController extends Controller
     {
         $intent = $request->session()->pull('google_auth_intent');
         $linkUserId = $request->session()->pull('google_link_user_id');
+        $tabKey = $request->session()->pull('google_auth_tab_key');
 
-        if (! $intent || $request->filled('error')) {
+        if (! $intent || ! $tabKey || $request->filled('error')) {
             return $this->fail($intent, 'No se completó el acceso con Google. Inténtalo de nuevo.');
         }
 
@@ -60,7 +84,8 @@ class GoogleAuthController extends Controller
         $linked = Usuario::where('google_id', $googleId)->first();
 
         if ($intent === 'link') {
-            $user = Auth::guard('web')->user();
+            $session = AutenticacionPestana::sessions($request)[$tabKey] ?? null;
+            $user = $session ? Usuario::find($session['user_id']) : null;
             if (! $user || $user->estado_usuario !== 'activo' || $user->id_usuario !== $linkUserId || mb_strtolower($user->correo_usuario) !== $email || ($linked && $linked->id_usuario !== $user->id_usuario)) {
                 return $this->fail('link', 'Usa la misma cuenta de Google que tu correo registrado.');
             }
@@ -102,6 +127,7 @@ class GoogleAuthController extends Controller
         }
         Auth::guard('web')->login($linked);
         $request->session()->regenerate();
+        AutenticacionPestana::bind($request, $linked, $tabKey);
 
         return redirect()->away($this->frontendPath($linked->rol_usuario === 'administrador' ? '/admin' : '/aprender'));
     }

@@ -7,13 +7,15 @@ use App\Http\Controllers\Api\KichwaAdminController;
 use App\Http\Controllers\Api\KichwaCatalogController;
 use App\Http\Controllers\Api\KichwaSubmissionController;
 use App\Http\Controllers\Api\TestimonialController;
+use App\Http\Controllers\Web\GoogleAuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
 Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
 Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:3,1');
 Route::post('/auth/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
-Route::get('/glossary', [KichwaCatalogController::class, 'glossary']);
+Route::post('/auth/google/prepare', [GoogleAuthController::class, 'prepare'])->middleware('throttle:10,1');
+Route::get('/diccionario', [KichwaCatalogController::class, 'diccionario']);
 Route::get('/diccionario/buscar', [DiccionarioController::class, 'search'])->middleware('throttle:120,1');
 Route::get('/testimonials', [TestimonialController::class, 'index']);
 Route::get('/media/{path}', [ArchivoController::class, 'show'])->where('path', '.*');
@@ -21,6 +23,7 @@ Route::get('/config', fn () => response()->json(['google' => ['enabled' => (bool
 Route::middleware(['auth:sanctum', 'active'])->group(function (): void {
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
+    Route::post('/auth/google/link-prepare', [GoogleAuthController::class, 'prepare'])->defaults('intent', 'link')->middleware('throttle:10,1');
     Route::post('/auth/change-password', [AuthController::class, 'changePassword'])->middleware('throttle:5,1');
     Route::post('/auth/verification-notification', [AuthController::class, 'resendVerification'])->middleware('throttle:3,1');
     Route::middleware('role:student')->group(function (): void {
@@ -46,11 +49,11 @@ Route::middleware(['auth:sanctum', 'active'])->group(function (): void {
     });
     Route::prefix('admin')->middleware('role:admin')->group(function (): void {
         Route::get('/overview', [KichwaAdminController::class, 'overview']);
-        Route::post('/glossary/import', [DiccionarioController::class, 'import'])->middleware('throttle:5,1');
+        Route::post('/diccionario/import', [DiccionarioController::class, 'import'])->middleware('throttle:5,1');
         Route::get('/students', [KichwaAdminController::class, 'students']);
         Route::patch('/students/{id}', [KichwaAdminController::class, 'block']);
         Route::post('/uploads', [ArchivoController::class, 'store'])->middleware('throttle:20,1');
-        foreach (['levels', 'modules', 'units', 'contents', 'exercises', 'evaluations', 'questions', 'glossary'] as $resource) {
+        foreach (['levels', 'modules', 'units', 'contents', 'exercises', 'evaluations', 'questions', 'diccionario'] as $resource) {
             Route::get('/'.$resource.'/{id}/dependencies', [KichwaAdminController::class, 'dependencies'])->defaults('resource', $resource);
             Route::patch('/'.$resource.'/{id}/move', [KichwaAdminController::class, 'move'])->defaults('resource', $resource);
             Route::get('/'.$resource, [KichwaAdminController::class, 'index'])->defaults('resource', $resource);

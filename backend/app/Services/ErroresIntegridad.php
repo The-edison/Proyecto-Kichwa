@@ -23,7 +23,7 @@ class ErroresIntegridad
             'temas_id_unidad_orden_tema_key' => ['sort_order', 'Ya existe un tema con ese orden en esta unidad.'],
             'actividades_id_unidad_orden_actividad_key' => ['sort_order', 'Ya existe una actividad con ese orden en esta unidad.'],
             'preguntas_id_evaluacion_orden_pregunta_key' => ['sort_order', 'Ya existe una pregunta con ese orden en esta evaluación.'],
-            'diccionario_palabra_kichwa_diccionario_palabra_espanol_dicc_key' => ['kichwa', 'Esta entrada del diccionario ya existe.'],
+            'diccionario_kichwa_espanol_unique' => ['kichwa', 'Esta entrada del diccionario ya existe.'],
             'usuarios_niveles_id_usuario_id_nivel_key' => ['level_id', 'El estudiante ya está inscrito en este nivel.'],
             'progreso_id_usuario_id_unidad_key' => ['unit_id', 'El progreso de esta unidad ya está registrado.'],
             'intentos_evaluacion_id_usuario_id_evaluacion_numero_intento_key' => ['attempt_id', 'El número de intento ya existe para esta evaluación.'],

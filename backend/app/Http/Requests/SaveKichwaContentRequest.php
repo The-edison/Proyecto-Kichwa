@@ -27,7 +27,7 @@ class SaveKichwaContentRequest extends FormRequest
             'exercises', 'questions' => [$resource === 'exercises' ? 'unit_id' : 'evaluation_id' => ['required', 'integer', $resource === 'exercises' ? $unitParent : 'exists:evaluaciones,id_evaluacion'],
                 'type' => ['required', 'string'], 'prompt' => ['required', 'string', 'max:10000'], 'elements' => ['required', 'array'], 'zones' => ['present', 'array'], 'solution' => ['required', 'array'], 'resource' => ['nullable', 'string', 'max:500']],
             'evaluations' => ['unit_id' => ['nullable', 'integer', $unitParent], 'type' => ['required', Rule::in(['unidad', 'diagnostica'])], 'title' => ['required', 'string', 'max:180']],
-            'glossary' => ['kichwa' => ['required', 'string', 'max:200'], 'spanish' => ['required', 'string', 'max:250']],
+            'diccionario' => ['kichwa' => ['required', 'string', 'max:200'], 'español' => ['required', 'string', 'max:250']],
             default => [],
         };
         if (isset(KichwaResource::FIELDS[$resource]['sort_order'])) {
@@ -49,13 +49,8 @@ class SaveKichwaContentRequest extends FormRequest
         if ($resource === 'exercises') {
             $rules['topic_id'] = ['sometimes', 'nullable', 'integer', Rule::exists('temas', 'id_tema')->where('id_unidad', $this->input('unit_id') ?? Actividad::find($this->route('id'))?->id_unidad)];
         }
-        if ($resource === 'glossary') {
-            $rules['synonyms'] = ['nullable', 'string', 'max:2000'];
-            $rules['notes'] = ['nullable', 'string', 'max:5000'];
-        }
-
         if (! app()->environment('local', 'testing')) {
-            foreach (['title', 'prompt', 'kichwa', 'spanish', 'body', 'description', 'synonyms', 'notes'] as $field) {
+            foreach (['title', 'prompt', 'kichwa', 'español', 'body', 'description'] as $field) {
                 if (isset($rules[$field])) {
                     $rules[$field][] = 'not_regex:/\[DEMO\]/i';
                 }

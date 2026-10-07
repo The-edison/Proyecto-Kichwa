@@ -2,11 +2,18 @@ import { Head } from '../../navigation';
 import { CheckCircle2, Mail, ShieldCheck } from 'lucide-react';
 import { AppLayout } from '../../layouts/AppLayout';
 import { useAuth } from '../../context/AuthContext';
-import { apiBaseUrl } from '../../services/api';
+import { apiPost } from '../../services/api';
+import { useState } from 'react';
 import { PasswordChange } from '../../components/PasswordChange';
 
 export default function Account() {
     const { user, googleEnabled } = useAuth();
+    const [linking, setLinking] = useState(false), [linkError, setLinkError] = useState('');
+    async function linkGoogle() {
+        setLinking(true); setLinkError('');
+        try { const result = await apiPost<{ url: string }>('/auth/google/link-prepare', {}); window.location.assign(result.url); }
+        catch { setLinkError('No se pudo iniciar la vinculación con Google.'); setLinking(false); }
+    }
     const search = new URLSearchParams(window.location.search);
     const status = search.get('google_status');
     const googleError = search.get('google_error');
@@ -30,13 +37,14 @@ export default function Account() {
                     ) : googleEnabled ? (
                         <>
                             <p className="mt-4 leading-7 text-muted">Usa el mismo correo de esta cuenta para poder entrar con Google la próxima vez.</p>
-                            <a className="secondary-button mt-5" href={`${apiBaseUrl}/cuenta/google`}><ShieldCheck size={18} />Vincular Google</a>
+                            <button type="button" className="secondary-button mt-5" disabled={linking} onClick={() => void linkGoogle()}><ShieldCheck size={18} />{linking ? 'Conectando…' : 'Vincular Google'}</button>
                         </>
                     ) : (
                         <p className="mt-4 text-muted">El acceso con Google estará disponible cuando se habilite en la plataforma.</p>
                     )}
                     {status && <p className="mt-4 rounded-xl bg-emerald-100 p-3 text-emerald-900" role="status">{status}</p>}
                     {googleError && <p className="form-error" role="alert">{googleError}</p>}
+                    {linkError && <p className="form-error" role="alert">{linkError}</p>}
                 </section>
             </div>
         </AppLayout>

@@ -41,7 +41,6 @@ function Shell({ title, subtitle, children }: { title: string; subtitle?: string
             ['/admin/estudiantes', 'Estudiantes', Users],
             ['/admin/contenidos', 'Contenidos y actividades', BookOpen],
             ['/cuenta', 'Mi cuenta', UserRound],
-            ['/glosario', 'Diccionario público', Languages],
         ]
         : [
             ['/aprender', 'Mi aprendizaje', House],

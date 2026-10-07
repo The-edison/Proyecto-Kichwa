@@ -2,7 +2,7 @@
 
 Dos niveles fijos con administración por módulos, unidades y temas, cuatro tipos de ejercicios, evaluaciones, diccionario y progreso. Intermedio figura como «Próximamente» hasta publicar su contenido. Nuevos módulos, unidades y temas nacen en borrador; publica sus padres para que los estudiantes puedan acceder. React Router y TanStack Query mantienen la navegación SPA y su caché.
 
-Backend Laravel **13.34**, PHP 8.4, Sanctum y Socialite; frontend React, TypeScript, Vite y Tailwind. Se conserva Laravel instalado en el proyecto. El MER usa 14 tablas españolas, cinco vistas y PL/pgSQL: **PostgreSQL 16+ es la única base soportada**. Las tablas y migraciones anteriores se conservan sin borrar datos.
+Backend Laravel **13.34**, PHP 8.4, Sanctum y Socialite; frontend React, TypeScript, Vite y Tailwind. Se conserva Laravel instalado en el proyecto. El MER usa 14 tablas españolas, cinco vistas y PL/pgSQL: **PostgreSQL 16+ es la única base soportada**. Las migraciones anteriores se conservan. La tabla histórica `glossary` se unifica en `diccionario`, conservando sus palabras y traducciones; el diccionario queda únicamente con `id`, `kichwa` y `español`.
 
 ## Paneles implementados
 
@@ -12,7 +12,7 @@ Backend Laravel **13.34**, PHP 8.4, Sanctum y Socialite; frontend React, TypeScr
 - **Estudiantes (`/admin/estudiantes`):** listado paginado, búsqueda por nombre o cédula y acciones para bloquear o activar cuentas.
 - **Contenidos (`/admin/contenidos`):** gestión de módulos, unidades y temas por nivel, con orden y estados de borrador o publicado. Los estudiantes acceden al contenido cuando sus padres también están publicados.
 - **Actividades y evaluaciones:** editor de selección múltiple, completar, relacionar y arrastrar, con imágenes, audio, soluciones y vista previa del estudiante; gestión de evaluaciones diagnósticas y de unidad y sus preguntas.
-- **Diccionario:** gestión de términos e importación de CSV UTF-8 con las columnas `kichwa`, `spanish` y, opcionalmente, `synonyms` y `notes`.
+- **Diccionario:** tabla `diccionario` con únicamente `id`, `kichwa` y `español`; gestión de términos e importación de CSV UTF-8 con las columnas `kichwa` y `español`. El `id` se genera automáticamente.
 
 ### Panel de estudiante
 
@@ -23,6 +23,10 @@ Backend Laravel **13.34**, PHP 8.4, Sanctum y Socialite; frontend React, TypeScr
 - **Diccionario (`/aprender/diccionario`):** búsqueda de vocabulario e intercambio entre kichwa y español.
 
 Ambos paneles requieren una sesión y el rol correspondiente. El registro crea cuentas de estudiante; el administrador inicial se configura mediante las variables `KICHWA_ADMIN_*`. La cuenta inicial debe cambiar su contraseña en **Mi cuenta (`/cuenta`)** antes de acceder al panel.
+
+El acceso del navegador es independiente por pestaña: copiar una URL en una pestaña nueva requiere iniciar sesión allí. Puedes mantener administrador y estudiante en pestañas separadas. La sesión vence tras 30 minutos sin solicitudes autenticadas; al cerrar sesión se limpia la información privada de esa pestaña. Cambiar o recuperar la contraseña revoca los accesos anteriores de esa cuenta. La actualización requiere volver a iniciar sesión en las pestañas abiertas antes de este cambio.
+
+El catálogo se actualiza al volver a la pestaña o abrir una sección, y las publicaciones hechas desde otra pestaña del mismo navegador notifican la actualización. Las unidades publicadas aparecen aunque aún no tengan temas; los borradores siguen ocultos.
 
 ## Arranque en este equipo
 
@@ -109,10 +113,11 @@ php artisan db:seed --class=DemostracionSeeder
 # Pruebas: requieren la base separada que termina en _test.
 php artisan test
 Set-Location ..\frontend
+npm.cmd test # Pruebas de aislamiento de pestañas y API; requieren Node.js 24+.
 npm.cmd run typecheck
 npm.cmd run build
 ```
 
 Las pruebas migran normalmente y revierten transacciones; no borran la base de trabajo. El arranque no cambia una contraseña inicial ya renovada.
 
-Consulta [correcciones, mediciones y pasos de actualización](documentacion/correcciones-y-optimizacion.md), [auditoría inicial](documentacion/auditoria.md), [contratos de ejercicios](documentacion/ejercicios.md) y [referencias del MER](documentacion-base/LEEME.md). El diccionario permite intercambio de idioma y CSV UTF-8 con kichwa,spanish y synonyms,notes opcionales. Limitaciones: publicación de opiniones reservada; Google real y entrega SMTP necesitan credenciales externas; no hay contenido docente final ni despliegue de producción incluido.
+Consulta [correcciones, mediciones y pasos de actualización](documentacion/correcciones-y-optimizacion.md), [auditoría inicial](documentacion/auditoria.md), [contratos de ejercicios](documentacion/ejercicios.md) y [referencias del MER](documentacion-base/LEEME.md). El diccionario permite intercambio de idioma y CSV UTF-8 con únicamente kichwa,español. Limitaciones: publicación de opiniones reservada; Google real y entrega SMTP necesitan credenciales externas; no hay contenido docente final ni despliegue de producción incluido.

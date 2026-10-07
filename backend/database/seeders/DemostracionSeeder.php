@@ -71,9 +71,9 @@ BEGIN
  INSERT INTO preguntas (id_evaluacion,tipo_pregunta,enunciado_pregunta,elementos_pregunta,solucion_pregunta,puntaje_pregunta,orden_pregunta)
  VALUES (diagnostica,'completar','[DEMO] Escribe el equivalente de dos.','[{"id":"h1","texto":"dos"}]','{"textos":{"h1":["ishkay"]}}',10,1);
  END IF;
- INSERT INTO diccionario (palabra_kichwa_diccionario,palabra_espanol_diccionario)
+ INSERT INTO diccionario (kichwa,español)
  VALUES ('shuk','uno'),('ishkay','dos'),('uma','cabeza')
- ON CONFLICT (palabra_kichwa_diccionario,palabra_espanol_diccionario) DO NOTHING;
+ ON CONFLICT (kichwa,español) DO NOTHING;
  UPDATE modulos SET publicado=true WHERE id_modulo=modulo;
  UPDATE unidades SET publicado=true WHERE id_unidad=unidad;
  UPDATE temas SET publicado=true WHERE id_unidad=unidad;

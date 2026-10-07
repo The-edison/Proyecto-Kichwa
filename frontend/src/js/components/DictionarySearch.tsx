@@ -4,9 +4,9 @@ import { useApi } from '../hooks/useApi';
 import { useToast } from './Toast';
 import { ErrorState, LoadingState } from './States';
 import { Pagination } from './Pagination';
-import type { Paginated, GlossaryTerm } from '../types';
+import type { Paginated, DictionaryTerm } from '../types';
 
-export function GlossarySearch() {
+export function DictionarySearch() {
     const [text, setText] = useState(''), [debounced, setDebounced] = useState('');
     const [direction, setDirection] = useState<'kichwa-es' | 'es-kichwa'>('kichwa-es');
     const [page, setPage] = useState(1);
@@ -16,7 +16,7 @@ export function GlossarySearch() {
         const timer = setTimeout(() => { setDebounced(text.trim()); setPage(1); }, 300);
         return () => clearTimeout(timer);
     }, [text]);
-    const result = useApi<Paginated<GlossaryTerm>>(`/diccionario/buscar?q=${encodeURIComponent(debounced)}&direccion=${direction}&page=${page}`);
+    const result = useApi<Paginated<DictionaryTerm>>(`/diccionario/buscar?q=${encodeURIComponent(debounced)}&direccion=${direction}&page=${page}`);
     const fromKichwa = direction === 'kichwa-es';
     const source = fromKichwa ? 'Kichwa' : 'Español';
     const target = fromKichwa ? 'Español' : 'Kichwa';
@@ -24,8 +24,8 @@ export function GlossarySearch() {
 
     function changeDirection(next: 'kichwa-es' | 'es-kichwa') { setDirection(next); setPage(1); }
     function clear() { setText(''); setDebounced(''); setPage(1); input.current?.focus(); }
-    async function copy(term: GlossaryTerm) {
-        try { await navigator.clipboard.writeText(fromKichwa ? term.spanish : term.kichwa); toast('Resultado copiado.'); }
+    async function copy(term: DictionaryTerm) {
+        try { await navigator.clipboard.writeText(fromKichwa ? term.español : term.kichwa); toast('Resultado copiado.'); }
         catch { toast('No se pudo copiar; selecciona el texto del resultado para copiarlo.', true); }
     }
 
@@ -66,7 +66,7 @@ export function GlossarySearch() {
                         <p>Escribe una palabra en {source}. Sus equivalencias en {target} aparecerán aquí.</p>
                         {!!result.data?.data.length && <div className="dictionary-suggestions">
                             <span>Prueba con una entrada</span>
-                            <div>{result.data.data.slice(0, 5).map(term => <button key={term.id} type="button" onClick={() => { setText(fromKichwa ? term.kichwa : term.spanish); input.current?.focus(); }}>{fromKichwa ? term.kichwa : term.spanish}</button>)}</div>
+                            <div>{result.data.data.slice(0, 5).map(term => <button key={term.id} type="button" onClick={() => { setText(fromKichwa ? term.kichwa : term.español); input.current?.focus(); }}>{fromKichwa ? term.kichwa : term.español}</button>)}</div>
                         </div>}
                         {!result.data?.data.length && <p className="dictionary-preparing">El docente está preparando las entradas del diccionario.</p>}
                     </div> : !result.data?.data.length ? <div className="dictionary-welcome">
@@ -76,10 +76,8 @@ export function GlossarySearch() {
                         <div className="dictionary-results-heading"><h2>{target}</h2><span>{result.data.total} {result.data.total === 1 ? 'coincidencia' : 'coincidencias'}</span></div>
                         <div className="dictionary-results">{result.data.data.map(term => <article className="dictionary-entry" key={term.id}>
                             <div className="dictionary-entry-main"><div className="min-w-0">
-                                <h3>{fromKichwa ? term.spanish : term.kichwa}</h3><p className="dictionary-equivalence">{term.kichwa} <span aria-hidden="true">↔</span> {term.spanish}</p>
-                            </div><button type="button" className="dictionary-icon-button shrink-0" aria-label={'Copiar ' + (fromKichwa ? term.spanish : term.kichwa)} onClick={() => void copy(term)}><Copy size={19} aria-hidden="true" /></button></div>
-                            {term.synonyms && <p className="dictionary-note"><strong>Sinónimos:</strong> {term.synonyms}</p>}
-                            {term.notes && <p className="dictionary-note"><strong>Notas:</strong> {term.notes}</p>}
+                                <h3>{fromKichwa ? term.español : term.kichwa}</h3><p className="dictionary-equivalence">{term.kichwa} <span aria-hidden="true">↔</span> {term.español}</p>
+                            </div><button type="button" className="dictionary-icon-button shrink-0" aria-label={'Copiar ' + (fromKichwa ? term.español : term.kichwa)} onClick={() => void copy(term)}><Copy size={19} aria-hidden="true" /></button></div>
                         </article>)}</div>
                         <Pagination page={page} lastPage={result.data.last_page} onChange={setPage} />
                     </>}
