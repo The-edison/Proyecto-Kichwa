@@ -23,7 +23,7 @@ class StudentListingTest extends TestCase
 
         $response = $this->getJson($url)->assertOk()->assertJsonPath('total', 2)
             ->assertJsonPath('data.0.id', $first->id_usuario)->assertJsonPath('data.1.id', $last->id_usuario)
-            ->assertJsonPath('data.1.state', 'bloqueado')->assertJsonPath('per_page', 20);
+            ->assertJsonPath('data.1.state', 'bloqueado')->assertJsonPath('per_page', 10);
         $this->assertArrayNotHasKey('contrasena_usuario', $response->json('data.0'));
         $this->assertArrayNotHasKey('remember_token', $response->json('data.0'));
     }
@@ -34,9 +34,9 @@ class StudentListingTest extends TestCase
         $students = Usuario::factory()->count(45)->create(['nombre_usuario' => 'Estudiante Registrado']);
 
         $ids = [];
-        foreach ([1 => 20, 2 => 20, 3 => 5] as $page => $count) {
+        foreach ([1 => 10, 2 => 10, 3 => 10, 4 => 10, 5 => 5] as $page => $count) {
             $response = $this->getJson('/api/admin/students?q=&page='.$page)->assertOk()->assertJsonPath('total', 45)
-                ->assertJsonPath('current_page', $page)->assertJsonPath('last_page', 3)->assertJsonCount($count, 'data');
+                ->assertJsonPath('current_page', $page)->assertJsonPath('last_page', 5)->assertJsonPath('per_page', 10)->assertJsonCount($count, 'data');
             $ids = array_merge($ids, array_column($response->json('data'), 'id'));
         }
         $this->assertSame($students->pluck('id_usuario')->all(), $ids);

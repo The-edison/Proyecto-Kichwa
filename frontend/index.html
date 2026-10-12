@@ -7,8 +7,17 @@
         <script>
             // Apply before the stylesheet and React to avoid a flash of the wrong theme.
             (function () {
-                var saved;
-                try { saved = localStorage.getItem('yachay-theme'); } catch (_) {}
+                var saved, scope = 'public', path = location.pathname;
+                if (path === '/admin' || path.indexOf('/admin/') === 0) scope = 'admin';
+                else if (path === '/aprender' || path.indexOf('/aprender/') === 0) scope = 'student';
+                else if (path === '/cuenta') {
+                    try {
+                        var accountScope = sessionStorage.getItem('yachay-theme-scope');
+                        if (accountScope === 'admin' || accountScope === 'student') scope = accountScope;
+                    } catch (_) {}
+                }
+                var key = scope === 'public' ? 'yachay-theme' : 'yachay-theme:' + scope;
+                try { saved = localStorage.getItem(key); } catch (_) {}
                 document.documentElement.dataset.theme = saved === 'dark' || saved === 'light'
                     ? saved : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             })();

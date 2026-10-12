@@ -1,10 +1,12 @@
 import { Moon, Sun } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 
-const key = 'yachay-theme';
-export function ThemeToggle() {
+type ThemeScope = 'public' | 'admin' | 'student';
+export function ThemeToggle({ scope = 'public' }: { scope?: ThemeScope }) {
+    // Keep the existing public preference; campus roles have separate keys.
+    const key = scope === 'public' ? 'yachay-theme' : `yachay-theme:${scope}`;
     const [theme, setTheme] = useState(() => document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
-    useEffect(() => {
+    useLayoutEffect(() => {
         const media = window.matchMedia('(prefers-color-scheme: dark)');
         const sync = () => {
             let saved: string | null = null;
@@ -13,10 +15,19 @@ export function ThemeToggle() {
             document.documentElement.dataset.theme = next;
             setTheme(next);
         };
+        const storageChanged = (event: StorageEvent) => {
+            if (event.key === key || event.key === null) sync();
+        };
+        // Mi cuenta has a shared URL. Remember its role only in this tab so
+        // the pre-render script can restore the right preference on reload.
+        if (scope !== 'public') {
+            try { sessionStorage.setItem('yachay-theme-scope', scope); } catch { /* Storage is optional. */ }
+        }
+        sync();
         media.addEventListener('change', sync);
-        window.addEventListener('storage', sync);
-        return () => { media.removeEventListener('change', sync); window.removeEventListener('storage', sync); };
-    }, []);
+        window.addEventListener('storage', storageChanged);
+        return () => { media.removeEventListener('change', sync); window.removeEventListener('storage', storageChanged); };
+    }, [key, scope]);
     function toggle() {
         const next = theme === 'dark' ? 'light' : 'dark';
         document.documentElement.dataset.theme = next;

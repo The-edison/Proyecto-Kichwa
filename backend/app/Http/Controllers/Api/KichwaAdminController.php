@@ -465,7 +465,7 @@ class KichwaAdminController extends Controller
             $query->where(fn ($q) => $q->where('nombre_usuario', 'ilike', $needle)->orWhere('correo_usuario', 'ilike', $needle)->orWhere('cedula_usuario', 'like', $needle));
         }
 
-        return response()->json($query->orderBy('nombre_usuario')->orderBy('id_usuario')->paginate(20)->through(fn ($u) => $u->perfil() + ['state' => $u->estado_usuario]));
+        return response()->json($query->orderBy('nombre_usuario')->orderBy('id_usuario')->paginate(10)->through(fn ($u) => $u->perfil() + ['state' => $u->estado_usuario]));
     }
 
     public function block(Request $request, int $id): JsonResponse

@@ -31,7 +31,7 @@ async function screen(initialSearch = '') {
                 requests.push(path);
                 const params = new URL('http://test' + path).searchParams;
                 const page = Number(params.get('page'));
-                return { loading: false, error: null, refresh: () => {}, data: { total: 45, current_page: page, last_page: 3, per_page: 20, data: [{ id: page, name: 'Estudiante página ' + page, cedula: null, email: 'student@example.com', state: 'activo' }] } };
+                return { loading: false, error: null, refresh: () => {}, data: { total: 25, current_page: page, last_page: 3, per_page: 10, data: [{ id: page, name: 'Estudiante página ' + page, cedula: null, email: 'student@example.com', state: 'activo' }] } };
             } }
             : specifier.endsWith('/States') ? { EmptyState: component('EmptyState'), ErrorState: component('ErrorState'), LoadingState: component('LoadingState') }
             : specifier.endsWith('/AppLayout') ? { AppLayout: component('AppLayout') }

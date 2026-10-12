@@ -164,7 +164,7 @@ function Shell({ title, subtitle, children }: { title: string; subtitle?: string
                         <form className="topbar-search" role="search" onSubmit={event => { event.preventDefault(); if (search.trim()) navigate(admin ? `/admin/estudiantes?q=${encodeURIComponent(search.trim())}` : `/aprender/diccionario?q=${encodeURIComponent(search.trim())}`); }}>
                             <Search size={18} aria-hidden="true" /><input aria-label={admin ? 'Buscar estudiantes' : 'Buscar en el diccionario'} placeholder={admin ? 'Buscar estudiante…' : 'Buscar una palabra…'} value={search} onChange={event => setSearch(event.target.value)} /><button type="submit" aria-label="Buscar"><Search size={16} /></button>
                         </form>
-                        <ThemeToggle />
+                        <ThemeToggle scope={user?.role ?? 'public'} />
                         <details className="topbar-dropdown notifications-menu" name="campus-popovers"><summary className="glass-icon-button" aria-label="Notificaciones" title="Notificaciones"><Bell size={20} aria-hidden="true" /></summary><div className="dropdown-panel notification-panel"><div className="notification-panel-heading"><span className="stat-icon tone-0"><Bell size={20} aria-hidden="true" /></span><div><span className="eyebrow">INFORMACIÓN DEL CAMPUS</span><strong>Avisos y confirmaciones</strong></div></div><p>{admin ? 'Los resultados de tus acciones aparecen como mensajes de confirmación al gestionar el campus.' : 'Los avisos de cada actividad aparecen en tu recorrido de aprendizaje.'}</p><Link href={admin ? '/admin' : '/aprender'}>Ir a mi espacio <ChevronRight size={16} aria-hidden="true" /></Link></div></details>
                         <ProfileMenu />
                     </div>
