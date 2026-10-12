@@ -4,7 +4,7 @@ import { ChakanaIllustration } from '../components/ChakanaIllustration';
 import { TestimonialsSection } from '../components/TestimonialsSection';
 import { PublicLayout } from '../layouts/PublicLayout';
 
-const heroCardClass = 'glass-panel card-hover flex min-h-24 min-w-0 items-center gap-3 p-4 text-sm text-ink shadow-xl';
+const heroCardClass = 'glass-panel card-hover flex min-h-24 min-w-0 items-center gap-3 p-4 text-sm text-ink ';
 
 export default function Home() {
     return (
@@ -58,7 +58,7 @@ export default function Home() {
                         <Link href="/registro" className="primary-button mt-7">Comenzar a aprender <ArrowRight size={17} /></Link>
                     </div>
                     <div className="flex items-center justify-center">
-                        <div className="rounded-[40px] bg-gradient-to-br from-[#d1ebe2] via-[#fff5d9] to-[#f4d5ba] p-10 text-center shadow-inner">
+                        <div className="rounded-[40px] bg-gradient-to-br from-tint via-card to-positive-soft p-10 text-center ">
                             <div className="text-7xl">✦</div>
                             <p className="mt-4 font-serif text-3xl text-ink">Cada palabra abre un camino.</p>
                         </div>

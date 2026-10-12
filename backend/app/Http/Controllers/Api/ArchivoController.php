@@ -12,6 +12,16 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ArchivoController extends Controller
 {
+    public function index(Request $request): JsonResponse
+    {
+        $request->validate(['kind' => ['required', 'in:imagen,audio'], 'page' => ['sometimes', 'integer', 'min:1']]);
+        $folder = $request->input('kind') === 'imagen' ? 'imagenes' : 'audio';
+        $files = collect(Storage::disk('public')->files('kichwa/'.$folder))->sort()->values();
+        $page = $request->integer('page', 1);
+
+        return response()->json(['data' => $files->slice(($page - 1) * 24, 24)->map(fn ($path) => ['path' => $path, 'name' => basename($path)])->values(), 'last_page' => max(1, (int) ceil($files->count() / 24)), 'current_page' => $page]);
+    }
+
     public function store(Request $request): JsonResponse
     {
         $request->validate(['kind' => ['required', 'in:imagen,audio'], 'file' => ['required', 'file', 'max:10240']]);
@@ -21,12 +31,20 @@ class ArchivoController extends Controller
         $request->validate(['file' => $rules]);
         $file = $request->file('file');
         if ($image) {
-            $source = match ($file->getMimeType()) {
-                'image/jpeg' => imagecreatefromjpeg($file->getPathname()),
-                'image/png' => imagecreatefrompng($file->getPathname()),
-                'image/webp' => imagecreatefromwebp($file->getPathname()),
-                default => false,
-            };
+            $dimensions = getimagesize($file->getPathname());
+            if (! $dimensions || $dimensions[0] * $dimensions[1] > 12000000) {
+                throw ValidationException::withMessages(['file' => 'La imagen debe tener como máximo 12 millones de píxeles. Reduce sus dimensiones e inténtalo nuevamente.']);
+            }
+            try {
+                $source = match ($file->getMimeType()) {
+                    'image/jpeg' => imagecreatefromjpeg($file->getPathname()),
+                    'image/png' => imagecreatefrompng($file->getPathname()),
+                    'image/webp' => imagecreatefromwebp($file->getPathname()),
+                    default => false,
+                };
+            } catch (\ErrorException) {
+                throw ValidationException::withMessages(['file' => 'La imagen no se puede leer.']);
+            }
             if (! $source) {
                 throw ValidationException::withMessages(['file' => 'La imagen no se puede leer.']);
             }
@@ -34,7 +52,7 @@ class ArchivoController extends Controller
             $height = imagesy($source);
             if (max($width, $height) > 1600) {
                 $ratio = 1600 / max($width, $height);
-                $resized = imagescale($source, (int) round($width * $ratio), (int) round($height * $ratio), IMG_BICUBIC);
+                $resized = imagescale($source, max(1, (int) round($width * $ratio)), max(1, (int) round($height * $ratio)), IMG_BICUBIC);
                 imagedestroy($source);
                 $source = $resized;
             }
@@ -43,9 +61,10 @@ class ArchivoController extends Controller
             $bytes = ob_get_clean();
             imagedestroy($source);
             $path = 'kichwa/imagenes/'.bin2hex(random_bytes(20)).'.webp';
-            Storage::disk('public')->put($path, $bytes);
+            abort_unless(Storage::disk('public')->put($path, $bytes), 503, 'No se pudo guardar el archivo. Intenta nuevamente.');
         } else {
             $path = $file->storeAs('kichwa/audio', bin2hex(random_bytes(20)).'.'.strtolower($file->getClientOriginalExtension()), 'public');
+            abort_unless(is_string($path) && $path !== '', 503, 'No se pudo guardar el audio.');
             ContratoEjercicio::file($path, 'audio');
         }
 

@@ -52,7 +52,7 @@ export function LoginForm() {
                 {processing ? <><LoaderCircle size={18} className="animate-spin" aria-hidden="true" />Iniciando sesión…</> : <>Iniciar sesión <ArrowRight size={18} aria-hidden="true" /></>}
             </button>
         </form>
-        <div className="border-t border-emerald-100 pt-5">
+        <div className="border-t border-line pt-5">
             <p className="text-center text-sm text-muted">¿Aún no tienes una cuenta?</p>
             {processing ? <span className="mt-2 block text-center text-sm font-semibold text-muted" aria-disabled="true">Crear una cuenta</span> :
                 <Link href="/registro" className="mt-1 flex min-h-11 items-center justify-center font-semibold text-forest hover:underline">Crear una cuenta</Link>}

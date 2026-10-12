@@ -3,6 +3,7 @@ import { Link } from '../navigation';
 import { Menu, X } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { Brand } from '../components/Brand';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 function Shell({ children }: { children: ReactNode }) {
     const location = useLocation();
@@ -27,6 +28,7 @@ function Shell({ children }: { children: ReactNode }) {
             <div className="aurora aurora-two" />
             <header className="public-header">
                 <Brand />
+                <ThemeToggle />
                 <button className="menu-button" type="button" aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
                     aria-expanded={open} aria-controls="public-navigation" onClick={() => setOpen(!open)}>
                     {open ? <X /> : <Menu />}

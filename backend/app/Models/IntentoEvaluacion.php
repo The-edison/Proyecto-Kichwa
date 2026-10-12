@@ -12,10 +12,10 @@ class IntentoEvaluacion extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['id_usuario', 'id_evaluacion', 'numero_intento', 'fecha_inicio_intento', 'fecha_fin_intento', 'estado_intento'];
+    protected $fillable = ['preguntas_seleccionadas', 'respuestas_borrador', 'resultado', 'id_usuario', 'id_evaluacion', 'numero_intento', 'fecha_inicio_intento', 'fecha_fin_intento', 'estado_intento'];
 
     protected function casts(): array
     {
-        return ['fecha_inicio_intento' => 'datetime', 'fecha_fin_intento' => 'datetime'];
+        return ['preguntas_seleccionadas' => 'array', 'respuestas_borrador' => 'array', 'resultado' => 'array', 'fecha_inicio_intento' => 'datetime', 'fecha_fin_intento' => 'datetime'];
     }
 }

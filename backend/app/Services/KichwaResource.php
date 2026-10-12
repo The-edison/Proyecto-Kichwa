@@ -43,14 +43,32 @@ class KichwaResource
             }
             $result[$key] = $record->getAttribute($column);
         }
+        if (in_array($resource, ['units', 'exercises', 'questions', 'evaluations'], true)) {
+            $result['config'] = $record->configuracion ?? [];
+            if (! $admin) {
+                unset($result['config']['explanation'], $result['config']['correct_feedback'], $result['config']['incorrect_feedback'], $result['config']['word_target'], $result['config']['missing_index'], $result['config']['reveal_highlight']);
+                if (($result['config']['presentation'] ?? '') === 'visual') {
+                    foreach ($result['elements'] as $index => &$element) {
+                        $element['texto'] = 'Tarjeta visual '.($index + 1);
+                    }
+                    unset($element);
+                }
+            }
+        }
+        if ($resource === 'evaluations') {
+            $result['topic_id'] = $record->id_tema;
+        }
+        if ($resource === 'contents') {
+            $result['lesson_key'] = $record->clave_leccion;
+        }
         if ($resource === 'levels') {
-            $result['code'] = $record->orden_nivel === 1 ? 'basic' : 'intermediate';
+            $result['code'] = $record->orden_nivel === 1 ? 'basic' : ($record->orden_nivel === 2 ? 'intermediate' : 'level-'.$record->id_nivel);
             $result['available'] = $record->orden_nivel === 1 || (bool) $record->getAttribute('has_published_modules');
         }
         if ($resource === 'contents') {
             $result['kind'] = ['vocabulario' => 'vocabulary', 'gramatica' => 'grammar', 'cultura' => 'culture'][$result['kind']];
         }
-        if (in_array($resource, ['modules', 'units', 'contents'], true)) {
+        if (in_array($resource, ['levels', 'modules', 'units', 'contents', 'exercises', 'questions', 'evaluations'], true)) {
             $result['published'] = (bool) $record->publicado;
         }
         if ($resource === 'exercises') {
@@ -66,7 +84,13 @@ class KichwaResource
             $data['kind'] = ['vocabulary' => 'vocabulario', 'grammar' => 'gramatica', 'culture' => 'cultura'][$data['kind']] ?? $data['kind'];
         }
         $result = [];
-        if (in_array($resource, ['modules', 'units', 'contents'], true) && array_key_exists('published', $data)) {
+        if (in_array($resource, ['units', 'exercises', 'questions', 'evaluations'], true) && array_key_exists('config', $data)) {
+            $result['configuracion'] = $data['config'];
+        }
+        if ($resource === 'evaluations' && array_key_exists('topic_id', $data)) {
+            $result['id_tema'] = $data['topic_id'];
+        }
+        if (in_array($resource, ['levels', 'modules', 'units', 'contents', 'exercises', 'questions', 'evaluations'], true) && array_key_exists('published', $data)) {
             $result['publicado'] = $data['published'];
         }
         if ($resource === 'exercises' && array_key_exists('topic_id', $data)) {

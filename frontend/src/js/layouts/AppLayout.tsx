@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Link } from '../navigation';
 import {
     BookOpen,
@@ -13,41 +13,95 @@ import {
     UserRound,
     Users,
     X,
+    Bell,
+    Search,
     type LucideIcon,
 } from 'lucide-react';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Brand } from '../components/Brand';
+import { ThemeToggle } from '../components/ThemeToggle';
+import { ProfileMenu } from '../components/ProfileMenu';
 import { useAuth } from '../context/AuthContext';
 
 const storageKey = 'yachay-sidebar-collapsed';
 
 function initialCollapsed(): boolean {
     try {
-        return typeof window === 'undefined' || window.localStorage.getItem(storageKey) !== 'false';
+        return typeof window !== 'undefined' && window.localStorage.getItem(storageKey) === 'true';
     } catch {
-        return true;
+        return false;
     }
 }
 
 function Shell({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
     const { user, logout } = useAuth();
     const location = useLocation();
+    const navigate = useNavigate();
+    const sidebar = useRef<HTMLElement>(null);
+    const menu = useRef<HTMLButtonElement>(null);
+    const [search, setSearch] = useState('');
     const [mobileOpen, setMobileOpen] = useState(false);
     const [collapsed, setCollapsed] = useState(initialCollapsed);
     const admin = user?.role === 'admin';
+    useEffect(() => {
+        document.querySelectorAll<HTMLDetailsElement>('.topbar-dropdown[open]').forEach(item => { item.open = false; });
+    }, [location.pathname, location.search, location.hash]);
+    useEffect(() => {
+        const close = (event: KeyboardEvent) => {
+            if (event.key !== 'Escape') return;
+            document.querySelectorAll<HTMLDetailsElement>('.topbar-dropdown[open]').forEach(item => {
+                item.open = false;
+                if (item.contains(document.activeElement)) item.querySelector<HTMLElement>('summary')?.focus();
+            });
+        };
+        const outside = (event: MouseEvent) => document.querySelectorAll<HTMLDetailsElement>('.topbar-dropdown[open]').forEach(item => {
+            if (!item.contains(event.target as Node)) item.open = false;
+        });
+        document.addEventListener('keydown', close);
+        document.addEventListener('click', outside);
+        return () => { document.removeEventListener('keydown', close); document.removeEventListener('click', outside); };
+    }, []);
+    useEffect(() => {
+        if (!mobileOpen) return;
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        sidebar.current?.querySelector<HTMLButtonElement>('.sidebar-close')?.focus();
+        function keyboard(event: KeyboardEvent) {
+            if (event.key === 'Escape') setMobileOpen(false);
+            if (event.key !== 'Tab') return;
+            const items = Array.from(sidebar.current?.querySelectorAll<HTMLElement>('a, button') ?? []).filter(item => item.getClientRects().length);
+            const first = items[0], last = items[items.length - 1];
+            if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+            else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+        }
+        document.addEventListener('keydown', keyboard);
+        return () => { document.body.style.overflow = previousOverflow; document.removeEventListener('keydown', keyboard); menu.current?.focus(); };
+    }, [mobileOpen]);
+    useEffect(() => {
+        const media = window.matchMedia('(min-width: 901px)');
+        const close = () => { if (media.matches) setMobileOpen(false); };
+        media.addEventListener('change', close);
+        return () => media.removeEventListener('change', close);
+    }, []);
     const links: Array<[string, string, LucideIcon]> = admin
         ? [
             ['/admin', 'Resumen', LayoutDashboard],
-            ['/admin/estudiantes', 'Estudiantes', Users],
             ['/admin/contenidos', 'Contenidos y actividades', BookOpen],
+            ['/admin/estudiantes', 'Estudiantes', Users],
             ['/cuenta', 'Mi cuenta', UserRound],
         ]
         : [
             ['/aprender', 'Mi aprendizaje', House],
             ['/aprender/progreso', 'Mi progreso', ChartNoAxesCombined],
-            ['/cuenta', 'Mi cuenta', UserRound],
             ['/aprender/diccionario', 'Diccionario', Languages],
+            ['/cuenta', 'Mi cuenta', UserRound],
         ];
+    const isActive = (href: string) => location.pathname === href
+        || (href === '/aprender' && /^\/aprender\/(nivel|modulo|unidad|evaluacion)\//.test(location.pathname))
+        || (!['/admin', '/aprender'].includes(href) && location.pathname.startsWith(href + '/'));
+    const navigationGroups = admin
+        ? [{ label: 'GESTIÓN DEL CAMPUS', links: links.filter(([href]) => href !== '/cuenta') }, { label: 'MI CUENTA', links: links.filter(([href]) => href === '/cuenta') }]
+        : [{ label: 'APRENDIZAJE', links: links.filter(([href]) => href === '/aprender' || href === '/aprender/progreso') }, { label: 'RECURSOS', links: links.filter(([href]) => href === '/aprender/diccionario') }, { label: 'MI CUENTA', links: links.filter(([href]) => href === '/cuenta') }];
 
     useEffect(() => {
         try {
@@ -63,7 +117,7 @@ function Shell({ title, subtitle, children }: { title: string; subtitle?: string
             <div className="aurora aurora-two" />
             {mobileOpen && <button className="sidebar-scrim" aria-label="Cerrar menú" onClick={() => setMobileOpen(false)} />}
 
-            <aside className={`app-sidebar glass-panel ${mobileOpen ? 'is-open' : ''}`} aria-label="Menú lateral">
+            <aside ref={sidebar} id="campus-navigation" className={`app-sidebar glass-panel ${mobileOpen ? 'is-open' : ''}`} aria-label="Menú lateral">
                 <div className="sidebar-top">
                     <Brand />
                     <button
@@ -78,22 +132,21 @@ function Shell({ title, subtitle, children }: { title: string; subtitle?: string
                     </button>
                     <button className="menu-button sidebar-close" type="button" aria-label="Cerrar menú" onClick={() => setMobileOpen(false)}><X /></button>
                 </div>
-                <span className="sidebar-caption">{admin ? 'ADMINISTRACIÓN' : 'TU ESPACIO'}</span>
                 <nav aria-label="Navegación de la aplicación">
-                    {links.map(([href, label, Icon]) => (
+                    {navigationGroups.map(group => <section className="sidebar-nav-group" aria-label={group.label} key={group.label}><span className="sidebar-caption">{group.label}</span>{group.links.map(([href, label, Icon]) => (
                         <Link
                             key={href}
                             href={href}
-                            className={`sidebar-link ${location.pathname === href ? 'is-active' : ''}`}
+                            className={`sidebar-link ${isActive(href) ? 'is-active' : ''}`}
                             aria-label={label}
-                            aria-current={location.pathname === href ? 'page' : undefined}
+                            aria-current={isActive(href) ? 'page' : undefined}
                             title={collapsed ? label : undefined}
                             onClick={() => setMobileOpen(false)}
                         >
                             <Icon size={19} aria-hidden="true" />
                             <span className="sidebar-link-label">{label}</span>
                         </Link>
-                    ))}
+                    ))}</section>)}
                 </nav>
                 <div className="sidebar-bottom">
                     <div className="user-avatar" aria-hidden="true">{user?.name.slice(0, 1).toUpperCase()}</div>
@@ -102,13 +155,21 @@ function Shell({ title, subtitle, children }: { title: string; subtitle?: string
                 </div>
             </aside>
 
-            <div className="app-main">
+            <div className="app-main" inert={mobileOpen || undefined}>
+                <a href="#main-content" className="skip-link">Saltar al contenido</a>
                 <header className="app-topbar">
-                    <button className="menu-button" type="button" aria-label="Abrir menú" aria-expanded={mobileOpen} onClick={() => setMobileOpen(true)}><Menu /></button>
+                    <button ref={menu} className="menu-button" type="button" aria-label="Abrir menú" aria-controls="campus-navigation" aria-expanded={mobileOpen} onClick={() => setMobileOpen(true)}><Menu /></button>
                     <div><span className="eyebrow">YACHAY · KICHWA VIVO</span><h1>{title}</h1>{subtitle && <p>{subtitle}</p>}</div>
-                    <Link href="/" className="topbar-home">Ver inicio ↗</Link>
+                    <div className="topbar-tools">
+                        <form className="topbar-search" role="search" onSubmit={event => { event.preventDefault(); if (search.trim()) navigate(admin ? `/admin/estudiantes?q=${encodeURIComponent(search.trim())}` : `/aprender/diccionario?q=${encodeURIComponent(search.trim())}`); }}>
+                            <Search size={18} aria-hidden="true" /><input aria-label={admin ? 'Buscar estudiantes' : 'Buscar en el diccionario'} placeholder={admin ? 'Buscar estudiante…' : 'Buscar una palabra…'} value={search} onChange={event => setSearch(event.target.value)} /><button type="submit" aria-label="Buscar"><Search size={16} /></button>
+                        </form>
+                        <ThemeToggle />
+                        <details className="topbar-dropdown notifications-menu" name="campus-popovers"><summary className="glass-icon-button" aria-label="Notificaciones" title="Notificaciones"><Bell size={20} aria-hidden="true" /></summary><div className="dropdown-panel notification-panel"><div className="notification-panel-heading"><span className="stat-icon tone-0"><Bell size={20} aria-hidden="true" /></span><div><span className="eyebrow">INFORMACIÓN DEL CAMPUS</span><strong>Avisos y confirmaciones</strong></div></div><p>{admin ? 'Los resultados de tus acciones aparecen como mensajes de confirmación al gestionar el campus.' : 'Los avisos de cada actividad aparecen en tu recorrido de aprendizaje.'}</p><Link href={admin ? '/admin' : '/aprender'}>Ir a mi espacio <ChevronRight size={16} aria-hidden="true" /></Link></div></details>
+                        <ProfileMenu />
+                    </div>
                 </header>
-                <main className="app-content">{children}</main>
+                <main id="main-content" tabIndex={-1} className="app-content">{children}</main>
             </div>
         </div>
     );

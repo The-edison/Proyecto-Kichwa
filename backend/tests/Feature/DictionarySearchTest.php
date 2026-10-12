@@ -16,6 +16,27 @@ class DictionarySearchTest extends TestCase
 {
     use UsesPostgreSQL;
 
+    public function test_search_preserves_entries_and_accents_when_unaccent_cannot_load(): void
+    {
+        $entry = Diccionario::create(['kichwa' => 'ÑÁÜ', 'español' => 's. niño, bebé.']);
+        DB::unprepared(<<<'SQL'
+CREATE OR REPLACE FUNCTION public.unaccent(regdictionary, text) RETURNS text
+LANGUAGE plpgsql STRICT AS $$
+BEGIN
+    RAISE EXCEPTION 'unaccent.dll cannot load' USING ERRCODE = '58P01';
+END
+$$;
+SQL
+        );
+        $migration = require database_path('migrations/2026_10_10_214852_make_dictionary_normalization_independent_of_unaccent.php');
+
+        $migration->up();
+
+        $this->getJson('/api/diccionario/buscar?q=NAU&direccion=kichwa-es')->assertOk()->assertJsonPath('total', 1)->assertJsonPath('data.0.id', $entry->id);
+        $this->getJson('/api/diccionario/buscar?'.http_build_query(['q' => "NIN\u{0303}O", 'direccion' => 'es-kichwa']))->assertOk()->assertJsonPath('data.0.id', $entry->id);
+        $this->assertDatabaseHas('diccionario', ['id' => $entry->id, 'kichwa' => 'ÑÁÜ', 'español' => 's. niño, bebé.']);
+    }
+
     public function test_migration_preserves_translations_and_unifies_legacy_entries(): void
     {
         Schema::drop('diccionario');

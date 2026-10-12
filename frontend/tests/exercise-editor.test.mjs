@@ -14,7 +14,7 @@ async function editor() {
         const dependency = specifier === 'react' ? { useState: initial => [initial, () => {}] }
             : specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx, Fragment: 'fragment' }
             : specifier === './ExerciseCard' ? { ExerciseInteraction: () => null, mediaUrl: path => path }
-            : { apiPost: () => {}, ApiError: class extends Error {} };
+            : { apiPost: () => {}, apiGet: () => {}, ApiError: class extends Error {} };
         return new vm.SyntheticModule(Object.keys(dependency), function () {
             for (const [key, value] of Object.entries(dependency)) this.setExport(key, value);
         }, { context });
@@ -67,4 +67,13 @@ test('removing a destination removes obsolete correct pairs without changing the
     nodes(tree).find(node => node.props['aria-label'] === 'Eliminar respuesta 1').props.onClick();
     assert.deepEqual(plain(value.elements.map(item => item.id)), ['k1', 'k2', 'd2']);
     assert.deepEqual(plain(value.solution.pares), [{ origen: 'k2', destino: 'd2' }]);
+});
+
+test('word builders derive the missing letter and create distinct repeated-letter tokens', async () => {
+    const api=await editor();let value={...api.newExercise('completar'),config:{presentation:'letter',word_target:'WASI',missing_index:2},elements:[{id:'word',texto:'WA_I',opciones:['S','M','N']}],solution:{textos:{word:['S']}}};
+    let tree=api.ExerciseEditor({value,onChange:next=>{value=next;}});nodes(tree).find(n=>n.type==='input'&&n.props.value==='WASI').props.onChange({target:{value:'SHUNKU'}});
+    assert.equal(value.elements[0].texto,'SH_NKU');assert.deepEqual(plain(value.solution.textos.word),['U']);
+    value={...api.newExercise('ordenar'),config:{presentation:'tiles',word_target:''}};tree=api.ExerciseEditor({value,onChange:next=>{value=next;}});
+    nodes(tree).find(n=>n.type==='input'&&n.props.maxLength===50).props.onChange({target:{value:'SISA'}});
+    assert.equal(new Set(value.elements.map(e=>e.id)).size,4);assert.equal(value.elements.filter(e=>e.texto==='S').length,2);
 });

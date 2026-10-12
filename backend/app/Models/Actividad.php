@@ -12,12 +12,12 @@ class Actividad extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['id_tema', 'id_unidad', 'tipo_actividad', 'enunciado_actividad', 'elementos_actividad', 'zonas_actividad', 'recurso_actividad', 'solucion_actividad', 'orden_actividad'];
+    protected $fillable = ['publicado', 'configuracion', 'id_tema', 'id_unidad', 'tipo_actividad', 'enunciado_actividad', 'elementos_actividad', 'zonas_actividad', 'recurso_actividad', 'solucion_actividad', 'orden_actividad'];
 
     protected $hidden = ['solucion_actividad'];
 
     protected function casts(): array
     {
-        return ['elementos_actividad' => 'array', 'zonas_actividad' => 'array', 'solucion_actividad' => 'array'];
+        return ['publicado' => 'boolean', 'configuracion' => 'array', 'elementos_actividad' => 'array', 'zonas_actividad' => 'array', 'solucion_actividad' => 'array'];
     }
 }

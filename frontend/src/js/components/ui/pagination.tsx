@@ -58,8 +58,8 @@ function PaginationLink({
           variant: isActive ? "outline" : "ghost",
           size,
         }),
-        "min-h-11 min-w-11 rounded-xl text-forest hover:bg-emerald-50 focus-visible:ring-forest/40",
-        isActive && "border-forest bg-emerald-100 font-bold",
+        "min-h-11 min-w-11 rounded-xl text-forest hover:bg-positive-soft focus-visible:ring-forest/40",
+        isActive && "border-forest bg-positive-soft font-bold",
         className
       )}
       {...props}

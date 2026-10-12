@@ -12,10 +12,10 @@ class Nivel extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['nombre_nivel', 'descripcion_nivel', 'orden_nivel'];
+    protected $fillable = ['publicado', 'nombre_nivel', 'descripcion_nivel', 'orden_nivel'];
 
     protected function casts(): array
     {
-        return [];
+        return ['publicado' => 'boolean'];
     }
 }

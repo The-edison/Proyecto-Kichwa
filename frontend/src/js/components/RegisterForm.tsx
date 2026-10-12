@@ -75,7 +75,7 @@ export function RegisterForm() {
             <button type="submit" className="primary-button w-full" disabled={processing}>{processing ?
                 <><LoaderCircle size={18} className="animate-spin" aria-hidden="true" />Creando tu cuenta…</> : <>Crear mi cuenta <ArrowRight size={18} aria-hidden="true" /></>}</button>
         </form>
-        <div className="border-t border-emerald-100 pt-5"><p className="text-center text-sm text-muted">¿Ya tienes una cuenta?</p>
+        <div className="border-t border-line pt-5"><p className="text-center text-sm text-muted">¿Ya tienes una cuenta?</p>
             {processing ? <span className="mt-2 block text-center text-sm font-semibold text-muted" aria-disabled="true">Iniciar sesión</span> :
                 <Link href="/iniciar-sesion" className="mt-1 flex min-h-11 items-center justify-center font-semibold text-forest hover:underline">Iniciar sesión</Link>}
         </div>

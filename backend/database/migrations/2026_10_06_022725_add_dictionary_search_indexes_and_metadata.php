@@ -9,10 +9,9 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement('CREATE EXTENSION IF NOT EXISTS unaccent');
         DB::statement('CREATE EXTENSION IF NOT EXISTS pg_trgm');
         DB::unprepared(<<<'SQL'
-CREATE FUNCTION public.kichwa_normalizar(text) RETURNS text LANGUAGE sql IMMUTABLE PARALLEL SAFE STRICT AS $$ SELECT lower(public.unaccent('public.unaccent', $1)) $$;
+CREATE FUNCTION public.kichwa_normalizar(text) RETURNS text LANGUAGE sql IMMUTABLE PARALLEL SAFE STRICT AS $$ SELECT lower(regexp_replace(normalize($1, NFD), U&'[\0300-\036f]', '', 'g')) $$;
 CREATE INDEX diccionario_kichwa_busqueda_gin ON diccionario USING gin (public.kichwa_normalizar(palabra_kichwa_diccionario) gin_trgm_ops);
 CREATE INDEX diccionario_espanol_busqueda_gin ON diccionario USING gin (public.kichwa_normalizar(palabra_espanol_diccionario) gin_trgm_ops);
 SQL

@@ -5,11 +5,15 @@ import { useToast } from './Toast';
 import { ErrorState, LoadingState } from './States';
 import { Pagination } from './Pagination';
 import type { Paginated, DictionaryTerm } from '../types';
+import { useSearchParams } from 'react-router-dom';
 
 export function DictionarySearch() {
-    const [text, setText] = useState(''), [debounced, setDebounced] = useState('');
+    const [params] = useSearchParams();
+    const initialSearch = (params.get('q') ?? '').slice(0, 100);
+    const [text, setText] = useState(initialSearch), [debounced, setDebounced] = useState(initialSearch);
     const [direction, setDirection] = useState<'kichwa-es' | 'es-kichwa'>('kichwa-es');
     const [page, setPage] = useState(1);
+    useEffect(() => { setText(initialSearch); setDebounced(initialSearch); setPage(1); }, [initialSearch]);
     const input = useRef<HTMLTextAreaElement>(null);
     const toast = useToast();
     useEffect(() => {

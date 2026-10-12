@@ -1,54 +1,51 @@
-import { Head, Link } from '../../navigation';
-import { ArrowRight, BookOpen, Sparkles } from 'lucide-react';
+﻿import { Head, Link } from '../../navigation';
+import { ArrowRight, BookOpen, CheckCheck, ClipboardCheck, Sparkles, Trophy, Zap, LockKeyhole } from 'lucide-react';
 import { EmptyState, ErrorState, LoadingState } from '../../components/States';
+import { ChakanaIllustration } from '../../components/ChakanaIllustration';
 import { useApi } from '../../hooks/useApi';
+import { useAuth } from '../../context/AuthContext';
 import { AppLayout } from '../../layouts/AppLayout';
-import type { Level, ProgressSummary } from '../../types';
+import type { Level, ProgressSummary, Mastery } from '../../types';
 
 export default function Dashboard() {
+    const { user } = useAuth();
     const levels = useApi<Level[]>('/levels');
     const progress = useApi<ProgressSummary[]>('/progress');
-
-    return (
-        <AppLayout title="Mi aprendizaje" subtitle="Elige un nivel y continúa a tu ritmo.">
-            <Head title="Mi aprendizaje" />
-            <div className="glass-panel mb-8 flex flex-wrap items-center gap-5 bg-gradient-to-r from-[#e0f3ea] to-[#fff4dd] p-8">
-                <span className="grid h-14 w-14 place-items-center rounded-2xl bg-white text-forest"><Sparkles /></span>
-                <div>
-                    <h2 className="font-serif text-2xl">Cada palabra es un nuevo comienzo.</h2>
-                    <p className="text-muted">Explora las lecciones y pon a prueba lo aprendido.</p>
-                </div>
-            </div>
-            <h2 className="mb-5 font-serif text-3xl">Tus niveles</h2>
-            {levels.loading ? <LoadingState /> : levels.error ? <ErrorState message={levels.error} /> : !levels.data?.length ? (
-                <EmptyState title="Próximamente" description="Todavía no hay niveles publicados." />
-            ) : (
-                <div className="grid gap-5 md:grid-cols-2">
-                    {levels.data.map((level, index) => {
-                        if (!level.available) return <article key={level.id} className="glass-panel p-7"><h3 className="font-serif text-3xl">{level.name}</h3><p className="mt-3 text-muted">Próximamente</p></article>;
-                        const summary = progress.data?.find((item) => item.level.id === level.id);
-                        return (
-                            <Link
-                                href={`/aprender/nivel/${level.id}`}
-                                key={level.id}
-                                className="level-glass-card glass-panel card-hover block p-7"
-                            >
-                                <div className="mb-8 flex items-center justify-between">
-                                    <span className="grid h-14 w-14 place-items-center rounded-2xl bg-emerald-100 text-forest"><BookOpen /></span>
-                                    <span className="glass-chip text-sm text-muted">Nivel {index + 1}</span>
-                                </div>
-                                <h3 className="font-serif text-3xl">{level.name}</h3>
-                                <p className="mt-2 text-muted">Descubre módulos, unidades y actividades.</p>
-                                <div className="mt-7 flex items-center justify-between text-sm font-bold text-forest">
-                                    <span>{summary ? `${summary.percentage}% completado` : 'Empezar nivel'}</span>
-                                    <ArrowRight size={19} />
-                                </div>
-                                <div className="progress-track mt-3"><div className="progress-fill" style={{ width: `${summary?.percentage ?? 0}%` }} /></div>
-                            </Link>
-                        );
-                    })}
-                </div>
-            )}
-        </AppLayout>
-    );
+    const mastery = useApi<Mastery>('/mastery');
+    const completed = progress.data?.reduce((sum, item) => sum + item.completed_activities, 0) ?? 0;
+    const total = progress.data?.reduce((sum, item) => sum + item.total_activities, 0) ?? 0;
+    const percentage = total ? Math.round(completed / total * 100) : 0;
+    const evaluations = progress.data?.reduce((sum, item) => sum + item.evaluation_results.length, 0) ?? 0;
+    const ongoing = levels.data?.find(level => level.available && progress.data?.some(item => item.level.id === level.id && item.percentage > 0 && item.percentage < 100));
+    const next = ongoing ?? levels.data?.find(level => level.available);
+    const stats = [
+        ['Progreso total', `${percentage}%`, BookOpen, 'De tus actividades de práctica'],
+        ['Actividades completadas', completed, CheckCheck, `${total} actividades en total`],
+        ['Experiencia ganada', mastery.data?.xp ?? '—', Zap, 'XP de tu aprendizaje'],
+        ['Evaluaciones realizadas', evaluations, ClipboardCheck, 'Con resultados registrados'],
+    ] as const;
+    return <AppLayout title={`¡Hola, ${user?.name.split(' ')[0] ?? 'estudiante'}!`} subtitle="Un pequeño paso hoy. Una nueva palabra para siempre.">
+        <Head title="Mi aprendizaje" />
+        <div className="dashboard-intro"><span className="eyebrow">TU CAMINO EN KICHWA</span><Link href="/aprender/progreso" className="text-link">Ver mi progreso <ArrowRight size={16} /></Link></div>
+        {progress.loading ? <LoadingState label="Cargando tus avances…" /> : progress.error ? <ErrorState message={progress.error} /> : <section className="stats-grid" aria-label="Resumen de aprendizaje">
+            {stats.map(([label, value, Icon, note], index) => <article className="stat-card glass-panel" key={label}><span className={`stat-icon tone-${index % 3}`}><Icon size={22} aria-hidden="true" /></span><span className="stat-label">{label}</span><strong className="stat-value">{value}</strong><small>{note}</small></article>)}
+        </section>}
+        <section className="continue-card glass-panel">
+            <div className="continue-copy"><span className="badge"><Sparkles size={15} aria-hidden="true" /> A TU RITMO</span><h2>{ongoing ? 'Continúa donde quedaste' : 'Tu próxima palabra te espera'}</h2><p>{next ? `${next.name}: explora la lengua, conecta con la cultura y sigue construyendo tu aprendizaje.` : 'Tu recorrido comienza con una palabra. Los niveles publicados aparecerán aquí.'}</p>{next && <Link href={`/aprender/nivel/${next.id}`} className="primary-button">{ongoing ? 'Continuar aprendiendo' : 'Comenzar a aprender'} <ArrowRight size={18} aria-hidden="true" /></Link>}</div>
+            <div className="continue-art"><ChakanaIllustration compact /><span>Aprender · Conectar · Crecer</span></div>
+        </section>
+        <div className="dashboard-columns"><section>
+            <div className="section-heading"><div><span className="eyebrow">EXPLORA Y DESCUBRE</span><h2>Tus niveles</h2></div><span className="badge neutral">{levels.data?.length ?? '—'} niveles</span></div>
+            {levels.loading ? <LoadingState /> : levels.error ? <ErrorState message={levels.error} /> : !levels.data?.length ? <EmptyState title="Próximamente" description="Todavía no hay niveles publicados." /> : <div className="course-grid">
+                {levels.data.map((level, index) => {
+                    const summary = progress.data?.find(item => item.level.id === level.id);
+                    const content = <><div className={`course-art tone-${index % 3}`}><BookOpen size={42} strokeWidth={1.5} aria-hidden="true" /><span>YACHAY / {String(index + 1).padStart(2, '0')}</span></div><div className="course-body"><div className="course-meta"><span className="eyebrow">NIVEL {index + 1}</span><span className="badge neutral">{!level.available ? 'Próximamente' : summary?.percentage === 100 ? 'Completado' : summary?.percentage ? 'En curso' : 'Disponible'}</span></div><h3>{level.name}</h3><p>Módulos, unidades y actividades para avanzar paso a paso.</p>{level.available ? <><div className="course-progress"><strong>{summary?.percentage ?? 0}% completado</strong><ArrowRight size={18} aria-hidden="true" /></div><div className="progress-track" role="progressbar" aria-label={`Progreso de ${level.name}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={summary?.percentage ?? 0}><div className="progress-fill" style={{ width: `${summary?.percentage ?? 0}%` }} /></div></> : <p className="locked-label"><LockKeyhole size={16} aria-hidden="true" /> Aún no disponible</p>}</div></>;
+                    return level.available ? <Link key={level.id} href={`/aprender/nivel/${level.id}`} className="course-card glass-panel card-hover">{content}</Link> : <article key={level.id} className="course-card glass-panel">{content}</article>;
+                })}
+            </div>}
+        </section><aside className="dashboard-side">
+            <section className="glass-panel achievement-panel"><span className="stat-icon tone-2"><Trophy aria-hidden="true" /></span><h2>Pequeños pasos, grandes logros</h2><p className="text-muted">Cada lección cuenta en tu recorrido.</p>{mastery.loading ? <LoadingState label="Cargando logros…" /> : mastery.error ? <ErrorState message={mastery.error} /> : <><div className="achievement-total"><strong>{mastery.data?.mastered_topics.length ?? 0}</strong><span>lecciones dominadas</span></div>{mastery.data?.medals.length ? <ul className="achievement-list">{mastery.data.medals.map(medal => <li key={medal}><Trophy size={18} aria-hidden="true" />{medal}</li>)}</ul> : <p className="soft-note">Completa tus primeras lecciones para conseguir insignias.</p>}</>}<Link href="/aprender/progreso" className="text-link">Explorar mis logros <ArrowRight size={16} /></Link></section>
+            <section className="glass-panel achievement-panel"><span className="eyebrow">SIGUIENTE PASO</span><h2>Sigue practicando</h2><p className="text-muted">Repasa palabras nuevas o explora tu próximo nivel.</p><Link href="/aprender/diccionario" className="quick-link"><BookOpen size={20} aria-hidden="true" /><span>Consultar el diccionario<small>Kichwa ↔ Español</small></span><ArrowRight size={18} aria-hidden="true" /></Link>{next && <Link href={`/aprender/nivel/${next.id}`} className="quick-link"><Sparkles size={20} aria-hidden="true" /><span>{next.name}<small>Explorar actividades disponibles</small></span><ArrowRight size={18} aria-hidden="true" /></Link>}</section>
+        </aside></div>
+    </AppLayout>;
 }

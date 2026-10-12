@@ -12,12 +12,12 @@ class Pregunta extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['id_evaluacion', 'tipo_pregunta', 'enunciado_pregunta', 'elementos_pregunta', 'zonas_pregunta', 'recurso_pregunta', 'solucion_pregunta', 'puntaje_pregunta', 'orden_pregunta'];
+    protected $fillable = ['publicado', 'configuracion', 'id_evaluacion', 'tipo_pregunta', 'enunciado_pregunta', 'elementos_pregunta', 'zonas_pregunta', 'recurso_pregunta', 'solucion_pregunta', 'puntaje_pregunta', 'orden_pregunta'];
 
     protected $hidden = ['solucion_pregunta'];
 
     protected function casts(): array
     {
-        return ['elementos_pregunta' => 'array', 'zonas_pregunta' => 'array', 'solucion_pregunta' => 'array', 'puntaje_pregunta' => 'decimal:2'];
+        return ['publicado' => 'boolean', 'configuracion' => 'array', 'elementos_pregunta' => 'array', 'zonas_pregunta' => 'array', 'solucion_pregunta' => 'array', 'puntaje_pregunta' => 'decimal:2'];
     }
 }

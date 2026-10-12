@@ -6,7 +6,7 @@ import { transformWithOxc } from 'vite';
 
 const { code } = await transformWithOxc(await readFile(new URL('../src/js/pages/Admin/Students.tsx', import.meta.url), 'utf8'), 'Students.tsx');
 
-async function screen() {
+async function screen(initialSearch = '') {
     let hook = 0;
     const states = [], effects = [], timers = new Map(), requests = [];
     const context = vm.createContext({
@@ -21,9 +21,13 @@ async function screen() {
         const dependency = specifier === 'react' ? {
             useState: initial => { const index = hook++; if (!(index in states)) states[index] = initial; return [states[index], value => { states[index] = value; }]; },
             useEffect: (callback, deps) => { const index = hook++; const previous = effects[index]; if (!previous || deps.some((value, position) => value !== previous.deps[position])) { previous?.cleanup?.(); effects[index] = { deps, cleanup: callback() }; } },
-        } : specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx, Fragment: 'fragment' }
+        } : specifier === 'react-router-dom' ? { useSearchParams: () => [new URLSearchParams(initialSearch)] }
+            : specifier === 'lucide-react' ? Object.fromEntries(['Ban', 'ChartNoAxesCombined', 'CheckCircle2', 'Search', 'ShieldCheck', 'UserCheck', 'Users'].map(name => [name, component(name)]))
+            : specifier.endsWith('/StudentResults') ? { StudentResults: component('StudentResults') }
+            : specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx, Fragment: 'fragment' }
             : specifier.endsWith('/ui/pagination') ? pagination
             : specifier.endsWith('/useApi') ? { useApi: path => {
+                if (path === null) return {loading:false,error:null,data:null};
                 requests.push(path);
                 const params = new URL('http://test' + path).searchParams;
                 const page = Number(params.get('page'));
@@ -83,4 +87,11 @@ test('typing a new search resets pagination together with the applied search', a
     view.render();
     assert.equal(view.requests.at(-1), '/admin/students?q=Ana&page=1');
     assert.equal(view.requests.includes('/admin/students?q=Ana&page=3'), false);
+});
+
+test('dashboard search opens the student list with the requested query', async () => {
+    const view = await screen('q=Ana%20Paz');
+    const tree = view.render();
+    assert.equal(view.requests.at(-1), '/admin/students?q=Ana%20Paz&page=1');
+    assert.equal(nodes(tree).find(node => node.props.id === 'student-search').props.value, 'Ana Paz');
 });

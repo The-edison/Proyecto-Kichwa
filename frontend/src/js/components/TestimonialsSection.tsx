@@ -96,7 +96,7 @@ export function TestimonialsSection() {
                 {visibleTestimonials.map((testimonial) => (
                     <article className="glass-panel card-hover flex min-h-[260px] flex-col p-7" key={testimonial.id}>
                         <div className="flex items-center gap-4">
-                            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-emerald-100 font-bold text-forest" aria-hidden="true">
+                            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-positive-soft font-bold text-forest" aria-hidden="true">
                                 {testimonial.isExample ? '✦' : testimonial.name.slice(0, 1).toUpperCase()}
                             </span>
                             <div className="min-w-0">
@@ -107,7 +107,7 @@ export function TestimonialsSection() {
                             </div>
                         </div>
                         <p className="mt-7 flex-1 text-lg leading-8 text-ink">“{testimonial.body}”</p>
-                        <div className="mt-6 border-t border-white/70 pt-4 text-xs font-semibold text-forest">
+                        <div className="mt-6 border-t border-line pt-4 text-xs font-semibold text-forest">
                             {testimonial.isExample ? 'Texto de muestra' : 'Experiencia compartida en Yachay'}
                         </div>
                     </article>
