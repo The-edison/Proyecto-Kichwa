@@ -85,7 +85,7 @@ export function TestimonialsSection() {
     ].slice(0, 6);
 
     return (
-        <section id="como-funciona" className="mx-auto max-w-[1440px] px-[5%] py-20">
+        <section id="historias" className="mx-auto max-w-[1440px] px-[5%] py-20">
             <span className="eyebrow">HISTORIAS DE ESTUDIANTES</span>
             <h2 className="section-title mt-4">Historias de quienes aprenden Kichwa.</h2>
             <p className="section-lead mt-4 max-w-[760px]">

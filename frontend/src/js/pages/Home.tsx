@@ -1,47 +1,37 @@
 import { Head, Link } from '../navigation';
 import { ArrowRight, BookOpen, Play } from 'lucide-react';
-import { ChakanaIllustration } from '../components/ChakanaIllustration';
 import { TestimonialsSection } from '../components/TestimonialsSection';
 import { PublicLayout } from '../layouts/PublicLayout';
-
-const heroCardClass = 'glass-panel card-hover flex min-h-24 min-w-0 items-center gap-3 p-4 text-sm text-ink ';
+import homeBackgroundVideo from '../../videos/home-background.mp4';
 
 export default function Home() {
     return (
         <PublicLayout>
             <Head title="Bienvenido a Yachay" />
 
-            <section className="mx-auto grid max-w-[1440px] grid-cols-1 gap-8 px-[5%] pb-24 pt-16 lg:min-h-[680px] lg:grid-cols-2 lg:gap-x-10">
-                <div className="relative z-[1]">
-                    <div className="flex flex-wrap items-center gap-4">
-                        <span className="eyebrow">● KAWSAYKAMA · BIENVENIDO A YACHAY</span>
-                    </div>
-                    <h1 className="mt-8 font-serif text-[clamp(4rem,7vw,7rem)] leading-[.97] tracking-[-.06em] text-ink">
+            <section className="home-hero" aria-labelledby="home-title">
+                <video className="home-hero-video" autoPlay muted loop playsInline preload="auto" aria-hidden="true" tabIndex={-1} disablePictureInPicture
+                    onLoadedMetadata={(event) => {
+                        event.currentTarget.defaultPlaybackRate = 0.25;
+                        event.currentTarget.playbackRate = 0.25;
+                    }}>
+                    <source src={homeBackgroundVideo} type="video/mp4" />
+                </video>
+                <div className="home-hero-content">
+                    <span className="home-hero-eyebrow">KAWSAYKAMA · BIENVENIDO A YACHAY</span>
+                    <h1 id="home-title" className="home-hero-title">
                         Aprende Kichwa.<br />
-                        <span className="text-coral">Vive tu raíz.</span>
+                        <span>Vive tu raíz.</span>
                     </h1>
-                </div>
-                <div className="relative z-[1] flex items-center justify-end lg:justify-start xl:-translate-x-45">
-                    <ChakanaIllustration compact />
-                </div>
-
-                <div className="hero-actions relative z-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <Link href="/registro" className={heroCardClass}>
-                        <Play size={20} className="shrink-0 text-coral" fill="currentColor" />
-                        <span className="min-w-0 flex-1">
-                            <strong className="block">Iniciar mi recorrido</strong>
-                            <small className="block text-muted">Empieza a aprender Kichwa</small>
-                        </span>
-                        <ArrowRight size={17} className="shrink-0 text-coral" />
-                    </Link>
-                    <a href="#como-funciona" className={heroCardClass}>
-                        <BookOpen size={20} className="shrink-0 text-coral" />
-                        <span className="min-w-0 flex-1">
-                            <strong className="block">Conocer más</strong>
-                            <small className="block text-muted">Descubre cómo funciona</small>
-                        </span>
-                        <ArrowRight size={17} className="shrink-0 text-coral" />
-                    </a>
+                    <p className="home-hero-description">Nuestra lengua, nuestra historia. Un nuevo camino para aprender Kichwa y conectar con nuestra cultura.</p>
+                    <div className="home-hero-actions">
+                        <Link href="/registro" className="primary-button">
+                            <Play size={17} fill="currentColor" aria-hidden="true" /> Iniciar mi recorrido <ArrowRight size={17} aria-hidden="true" />
+                        </Link>
+                        <Link href="/#historias" className="home-hero-secondary">
+                            <BookOpen size={18} aria-hidden="true" /> Conocer más <ArrowRight size={17} aria-hidden="true" />
+                        </Link>
+                    </div>
                 </div>
             </section>
 
