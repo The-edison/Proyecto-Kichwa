@@ -6,6 +6,13 @@ import { useApi } from '../../hooks/useApi';
 import { useAuth } from '../../context/AuthContext';
 import { AppLayout } from '../../layouts/AppLayout';
 import type { Level, ProgressSummary, Mastery } from '../../types';
+import indigenousLanguagesImage from '../../../images/indigenous-languages.jpg';
+import culturalDiversityImage from '../../../images/cultural-diversity.jpg';
+
+const courseCovers = [
+    { src: indigenousLanguagesImage, alt: 'Collage de lenguas indígenas, textiles y tradiciones' },
+    { src: culturalDiversityImage, alt: 'Ilustración de diversidad cultural y pueblos indígenas' },
+];
 
 export default function Dashboard() {
     const { user } = useAuth();
@@ -39,7 +46,11 @@ export default function Dashboard() {
             {levels.loading ? <LoadingState /> : levels.error ? <ErrorState message={levels.error} /> : !levels.data?.length ? <EmptyState title="Próximamente" description="Todavía no hay niveles publicados." /> : <div className="course-grid">
                 {levels.data.map((level, index) => {
                     const summary = progress.data?.find(item => item.level.id === level.id);
-                    const content = <><div className={`course-art tone-${index % 3}`}><BookOpen size={42} strokeWidth={1.5} aria-hidden="true" /><span>YACHAY / {String(index + 1).padStart(2, '0')}</span></div><div className="course-body"><div className="course-meta"><span className="eyebrow">NIVEL {index + 1}</span><span className="badge neutral">{!level.available ? 'Próximamente' : summary?.percentage === 100 ? 'Completado' : summary?.percentage ? 'En curso' : 'Disponible'}</span></div><h3>{level.name}</h3><p>Módulos, unidades y actividades para avanzar paso a paso.</p>{level.available ? <><div className="course-progress"><strong>{summary?.percentage ?? 0}% completado</strong><ArrowRight size={18} aria-hidden="true" /></div><div className="progress-track" role="progressbar" aria-label={`Progreso de ${level.name}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={summary?.percentage ?? 0}><div className="progress-fill" style={{ width: `${summary?.percentage ?? 0}%` }} /></div></> : <p className="locked-label"><LockKeyhole size={16} aria-hidden="true" /> Aún no disponible</p>}</div></>;
+                    const cover = courseCovers[index];
+                    const content = <><div className={`course-art tone-${index % 3}${cover ? ' has-image' : ''}`}>
+                        {cover ? <img src={cover.src} alt={cover.alt} loading="lazy" /> : <BookOpen size={42} strokeWidth={1.5} aria-hidden="true" />}
+                        <span>YACHAY / {String(index + 1).padStart(2, '0')}</span>
+                    </div><div className="course-body"><div className="course-meta"><span className="eyebrow">NIVEL {index + 1}</span><span className="badge neutral">{!level.available ? 'Próximamente' : summary?.percentage === 100 ? 'Completado' : summary?.percentage ? 'En curso' : 'Disponible'}</span></div><h3>{level.name}</h3><p>Módulos, unidades y actividades para avanzar paso a paso.</p>{level.available ? <><div className="course-progress"><strong>{summary?.percentage ?? 0}% completado</strong><ArrowRight size={18} aria-hidden="true" /></div><div className="progress-track" role="progressbar" aria-label={`Progreso de ${level.name}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={summary?.percentage ?? 0}><div className="progress-fill" style={{ width: `${summary?.percentage ?? 0}%` }} /></div></> : <p className="locked-label"><LockKeyhole size={16} aria-hidden="true" /> Aún no disponible</p>}</div></>;
                     return level.available ? <Link key={level.id} href={`/aprender/nivel/${level.id}`} className="course-card glass-panel card-hover">{content}</Link> : <article key={level.id} className="course-card glass-panel">{content}</article>;
                 })}
             </div>}
