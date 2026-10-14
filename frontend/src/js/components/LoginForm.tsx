@@ -1,5 +1,5 @@
 import { Link } from '../navigation';
-import { ArrowRight, LoaderCircle } from 'lucide-react';
+import { ArrowRight, KeyRound, LoaderCircle } from 'lucide-react';
 import { useRef, useState, type FormEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -30,6 +30,7 @@ export function LoginForm() {
 
     return <div className="space-y-6">
         {googleError && <p className="auth-alert" role="alert">{googleError}</p>}
+        {params.get('password_reset') === '1' && <p className="login-reset-success" role="status">Tu contraseña se actualizó. Ya puedes iniciar sesión con la nueva.</p>}
         <form onSubmit={submit} className="space-y-5" aria-label="Iniciar sesión con correo" aria-busy={processing}>
             <div>
                 <label className="field-label" htmlFor="identifier">Correo electrónico</label>
@@ -45,13 +46,13 @@ export function LoginForm() {
                     aria-invalid={Boolean(errors.password)} aria-describedby={errors.password ? 'password-error' : undefined}
                     onChange={event => setData({ ...data, password: event.target.value })} />
                 {errors.password && <p id="password-error" className="form-error" role="alert">{errors.password}</p>}
-                <div className="mt-2 flex justify-end">{processing ? <span className="inline-flex min-h-11 items-center text-sm text-muted" aria-disabled="true">¿Olvidaste tu contraseña?</span> : <Link href="/recuperar-contrasena" className="inline-flex min-h-11 items-center text-sm font-semibold text-forest hover:underline">¿Olvidaste tu contraseña?</Link>}</div>
             </div>
             {errors.form && <p className="auth-alert" role="alert">{errors.form}</p>}
             <button type="submit" className="primary-button w-full" disabled={processing}>
                 {processing ? <><LoaderCircle size={18} className="animate-spin" aria-hidden="true" />Iniciando sesión…</> : <>Iniciar sesión <ArrowRight size={18} aria-hidden="true" /></>}
             </button>
         </form>
+        <div className="login-recovery"><span className="login-recovery-icon" aria-hidden="true"><KeyRound size={20} /></span><div><strong>¿Olvidaste tu contraseña?</strong><p>Recibe un enlace seguro en tu correo.</p>{processing ? <span aria-disabled="true">Recuperar contraseña</span> : <Link href={`/recuperar-contrasena${data.identifier.trim() ? '?email=' + encodeURIComponent(data.identifier.trim()) : ''}`}>Recuperar contraseña <ArrowRight size={14} aria-hidden="true" /></Link>}</div></div>
         <div className="border-t border-line pt-5">
             <p className="text-center text-sm text-muted">¿Aún no tienes una cuenta?</p>
             {processing ? <span className="mt-2 block text-center text-sm font-semibold text-muted" aria-disabled="true">Crear una cuenta</span> :

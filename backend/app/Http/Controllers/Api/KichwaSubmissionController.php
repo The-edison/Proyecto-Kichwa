@@ -10,6 +10,7 @@ use App\Models\Pregunta;
 use App\Models\RespuestaActividad;
 use App\Models\RespuestaEvaluacion;
 use App\Models\Tema;
+use App\Models\Unidad;
 use App\Models\Usuario;
 use App\Services\ContratoEjercicio;
 use App\Services\DominioLecciones;
@@ -64,10 +65,47 @@ class KichwaSubmissionController extends Controller
                 'respuesta_actividad' => $data['answer'], 'acierto_actividad' => $correct,
                 'retroalimentacion_actividad' => $feedback]);
 
-            return ['is_correct' => $correct, 'feedback' => $feedback, 'highlight' => $record->configuracion['reveal_highlight'] ?? null] + DominioLecciones::rewardActivity($record, $answer);
+            return ['response_id' => $answer->id_respuesta_actividad, 'is_correct' => $correct, 'feedback' => $feedback, 'highlight' => $record->configuracion['reveal_highlight'] ?? null] + DominioLecciones::rewardActivity($record, $answer);
         });
 
         return response()->json($result);
+    }
+
+    public function guidedResult(Request $request, int $unit): JsonResponse
+    {
+        $record = KichwaCatalogController::publishedUnit($unit);
+        abort_unless(($record->configuracion['learning_mode'] ?? '') === 'guided', 404);
+        $exercises = Actividad::where('id_unidad', $unit)->where('publicado', true)->whereNull('id_tema')->orderBy('orden_actividad')->get();
+        abort_unless($exercises->count() === 2, 409, 'La unidad está en preparación.');
+        $data = $request->validate(['response_ids' => ['required', 'array', 'size:2'], 'response_ids.*' => ['required', 'integer', 'distinct', 'min:1']]);
+        $responses = RespuestaActividad::where('id_usuario', $request->user()->id_usuario)->whereIn('id_respuesta_actividad', $data['response_ids'])
+            ->whereIn('id_actividad', $exercises->pluck('id_actividad'))->get()->keyBy('id_actividad');
+        if ($responses->count() !== $exercises->count()) {
+            throw ValidationException::withMessages(['response_ids' => 'Responde las dos actividades de esta unidad antes de ver tu resultado.']);
+        }
+        $correctItems = 0;
+        $totalItems = 0;
+        $details = [];
+        foreach ($exercises as $exercise) {
+            $response = $responses[$exercise->id_actividad];
+            if ($exercise->tipo_actividad === 'relacionar') {
+                $pairs = $exercise->solucion_actividad['pares'];
+                $total = count($pairs);
+                $correct = collect($pairs)->filter(fn ($pair) => collect($response->respuesta_actividad['pares'] ?? [])
+                    ->contains(fn ($given) => ($given['origen'] ?? null) === $pair['origen'] && ($given['destino'] ?? null) === $pair['destino']))->count();
+            } else {
+                $total = 1;
+                $correct = $response->acierto_actividad ? 1 : 0;
+            }
+            $correctItems += $correct;
+            $totalItems += $total;
+            $details[] = ['exercise_id' => $exercise->id_actividad, 'title' => $exercise->configuracion['title'] ?? $exercise->enunciado_actividad, 'correct' => $correct, 'total' => $total];
+        }
+        $score = $totalItems > 0 ? (int) round(20 * $correctItems / $totalItems) : 0;
+        $next = Unidad::where('id_modulo', $record->id_modulo)->where('publicado', true)->where('orden_unidad', '>', $record->orden_unidad)->orderBy('orden_unidad')->value('id_unidad');
+
+        return response()->json(['score' => $score, 'max_score' => 20, 'correct_count' => $correctItems, 'total_items' => $totalItems,
+            'passed' => $score >= 16, 'details' => $details, 'next_unit_id' => $next]);
     }
 
     public function start(Request $request, int $evaluation): JsonResponse

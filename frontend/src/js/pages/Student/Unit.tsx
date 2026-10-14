@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Head, Link } from '../../navigation';
 import { AppLayout } from '../../layouts/AppLayout';
 import { UnitSequence } from '../../components/UnitSequence';
+import { GuidedUnit } from '../../components/GuidedUnit';
 import { ExerciseCard } from '../../components/ExerciseCard';
 import { EmptyState, ErrorState, LoadingState } from '../../components/States';
 import { Pagination } from '../../components/Pagination';
@@ -20,6 +21,7 @@ export default function Unit({ unitId }: { unitId: number }) {
     const mastery = useApi<Mastery>('/mastery');
     const topic = selectedTopic.data;
     useEffect(() => { setExercisePage(1); setEvaluationPage(1); }, [unitId, topicId]);
+    if (unit.data?.config?.learning_mode === 'guided') return <GuidedUnit key={unitId} unit={unit.data}/>;
     if (unit.data?.config?.learning_mode === 'sequence') return <UnitSequence key={unitId} unit={unit.data}/>;
     return <AppLayout title={unit.data?.title ?? 'Tu unidad'} subtitle={`Lee, escucha y practica. Avance de práctica: ${unit.data?.percentage ?? 0}%.`}><Head title="Unidad" />
         <nav aria-label="Migas de pan" className="mb-6 flex flex-wrap gap-3"><Link href="/aprender">Niveles</Link><span>›</span><Link href={'/aprender/nivel/' + unit.data?.level_id}>{unit.data?.level_name ?? 'Nivel'}</Link><span>›</span><Link href={'/aprender/modulo/' + unit.data?.module_id}>{unit.data?.module_name ?? 'Módulo'}</Link><span>›</span><Link href={'/aprender/unidad/' + unitId}>{unit.data?.title ?? 'Unidad'}</Link>{topic && <span>› {topic.title}</span>}</nav>

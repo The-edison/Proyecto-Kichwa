@@ -80,6 +80,7 @@ class ContratoEjercicio
             'config.missing_index' => ['sometimes', 'integer', 'between:0,49'],
             'config.context_text' => ['nullable', 'string', 'max:500'],
             'config.context_meaning' => ['nullable', 'string', 'max:500'],
+            'config.prompt_image' => ['nullable', 'string', 'max:500'],
             'config.reveal_highlight' => ['nullable', 'string', 'max:50'],
             'config.explanation' => ['nullable', 'string', 'max:2000'],
             'config.correct_feedback' => ['nullable', 'string', 'max:2000'],
@@ -119,6 +120,9 @@ class ContratoEjercicio
         }
         if (! empty($data['resource'])) {
             self::file($data['resource'], 'audio');
+        }
+        if (! empty($data['config']['prompt_image'])) {
+            self::file($data['config']['prompt_image'], 'imagenes');
         }
         foreach (array_merge($data['elements'], $data['zones']) as $element) {
             if (! empty($element['imagen'])) {

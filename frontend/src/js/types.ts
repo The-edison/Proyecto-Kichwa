@@ -1,4 +1,6 @@
 export type Role = 'admin' | 'student';
+export interface StudentTestimonial { id: number; name: string; body: string; created_at: string; }
+export interface TestimonialEligibility { has_commented: boolean; can_comment: boolean; testimonial: StudentTestimonial | null; }
 export interface AuthUser {
     id: number; name: string; email: string; cedula: string | null; role: Role;
     google_connected: boolean; debe_cambiar_contrasena: boolean; email_verified: boolean;
@@ -13,13 +15,13 @@ export interface ExerciseElement { id: string; texto: string; grupo?: 'origen' |
 export interface ExerciseZone { id: string; texto: string; x: number; y: number; imagen?: string; }
 export interface ExerciseAnswer { orden?: string[]; seleccion?: string[]; textos?: Record<string, string>; pares?: Array<{ origen: string; destino: string }>; }
 export interface ExerciseSolution { orden?: string[]; seleccion?: string[]; textos?: Record<string, string[]>; pares?: Array<{ origen: string; destino: string }>; }
-export interface ExerciseConfig { learning_mode?: 'classic' | 'sequence'; presentation?: 'buttons' | 'visual' | 'letter' | 'tiles' | 'writing'; word_target?: string; missing_index?: number; context_text?: string; context_meaning?: string; reveal_highlight?: string; sequence_mode?: boolean; fixed_order?: boolean; required_correct?: number; prerequisite_activities?: number[]; managed?: boolean; reviewed?: boolean; requires_audio?: boolean; requires_images?: boolean; max_selections?: number; exact_selections?: boolean; ignore_accents?: boolean; explanation?: string; correct_feedback?: string; incorrect_feedback?: string; title?: string; difficulty?: string; question_count?: number; pass_percentage?: number; final?: boolean; }
+export interface ExerciseConfig { learning_mode?: 'classic' | 'sequence' | 'guided'; presentation?: 'buttons' | 'visual' | 'letter' | 'tiles' | 'writing'; word_target?: string; missing_index?: number; context_text?: string; context_meaning?: string; prompt_image?: string; reveal_highlight?: string; sequence_mode?: boolean; fixed_order?: boolean; required_correct?: number; prerequisite_activities?: number[]; managed?: boolean; reviewed?: boolean; requires_audio?: boolean; requires_images?: boolean; max_selections?: number; exact_selections?: boolean; ignore_accents?: boolean; explanation?: string; correct_feedback?: string; incorrect_feedback?: string; title?: string; difficulty?: string; question_count?: number; pass_percentage?: number; final?: boolean; }
 export interface Exercise {
     config?: ExerciseConfig; published?: boolean;
     id: number; unit_id?: number; topic_id?: number | null; type: 'seleccion_multiple' | 'completar' | 'relacionar' | 'arrastrar' | 'ordenar';
     prompt: string; elements: ExerciseElement[]; zones: ExerciseZone[]; resource?: string | null; sort_order: number;
 }
-export interface ExerciseFeedback { highlight?: string | null; xp_earned?: number; xp_total?: number; is_correct: boolean; feedback: string; }
+export interface ExerciseFeedback { response_id?: number; highlight?: string | null; xp_earned?: number; xp_total?: number; is_correct: boolean; feedback: string; }
 export interface EvaluationQuestion extends Exercise { evaluation_id: number; score: string | number; }
 export interface Evaluation { prerequisite_topic_ids?: number[]; history?: Array<{id: number; number: number; state: string; result: EvaluationResult | null}>; config?: ExerciseConfig; topic_id?: number; id: number; level_id: number; unit_id: number | null; type: 'unidad' | 'diagnostica'; title: string; description: string; questions: EvaluationQuestion[]; }
 export interface EvaluationResult { passed?: boolean; stars?: number; xp_earned?: number; xp_total?: number; attempt_id: number; score: number; puntaje_obtenido: number; puntaje_maximo: number; correct_count: number; total_questions: number; results: Array<{ question_id: number; is_correct: boolean; feedback: string }>; }

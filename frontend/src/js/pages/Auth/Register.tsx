@@ -1,4 +1,4 @@
-import { UserRoundPlus } from 'lucide-react';
+import { BookOpen, ChartNoAxesCombined, UserRoundPlus } from 'lucide-react';
 import { Head } from '../../navigation';
 import { RegisterForm } from '../../components/RegisterForm';
 import { PublicLayout } from '../../layouts/PublicLayout';
@@ -6,13 +6,24 @@ import { PublicLayout } from '../../layouts/PublicLayout';
 export default function Register() {
     return <PublicLayout>
         <Head title="Crear cuenta" />
-        <section className="mx-auto max-w-[720px] px-4 py-10 sm:px-5 sm:py-14">
-            <div className="auth-panel glass-panel p-6 sm:p-9">
-                <span className="mb-5 grid h-12 w-12 place-items-center rounded-xl bg-positive-soft text-forest" aria-hidden="true"><UserRoundPlus size={24} /></span>
-                <p className="eyebrow">Comienza tu aprendizaje</p>
-                <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink">Crear tu cuenta</h1>
-                <p className="mb-7 mt-3 leading-6 text-muted">Regístrate para estudiar Kichwa y guardar tus avances.</p>
-                <RegisterForm />
+        <section className="register-page" aria-labelledby="register-title">
+            <div className="auth-panel register-panel">
+                <header className="register-welcome">
+                    <span className="register-welcome-icon" aria-hidden="true"><UserRoundPlus size={28} strokeWidth={1.6} /></span>
+                    <p className="eyebrow">COMIENZA CON YACHAY</p>
+                    <h1 id="register-title">Una cuenta.<br />Tu camino al <span>Kichwa.</span></h1>
+                    <p className="register-welcome-copy">Aprende a tu ritmo y conecta con nuestra lengua, una palabra a la vez.</p>
+                    <div className="register-benefits">
+                        <p><BookOpen size={20} aria-hidden="true" /><span>Lecciones y actividades para practicar.</span></p>
+                        <p><ChartNoAxesCombined size={20} aria-hidden="true" /><span>Tu progreso guardado en un solo lugar.</span></p>
+                    </div>
+                    <span className="register-welcome-footer">YACHAY · KICHWA VIVO</span>
+                </header>
+                <div className="register-main">
+                    <h2>Crear tu cuenta</h2>
+                    <p className="register-main-intro">Completa tus datos para empezar a aprender.</p>
+                    <RegisterForm />
+                </div>
             </div>
         </section>
     </PublicLayout>;

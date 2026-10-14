@@ -40,6 +40,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function (): void {
         Route::get('/modules/{module}', [KichwaCatalogController::class, 'module']);
         Route::get('/units/{unit}', [KichwaCatalogController::class, 'unit']);
         Route::get('/units/{unit}/sequence', [KichwaCatalogController::class, 'sequence']);
+        Route::get('/units/{unit}/guided', [KichwaCatalogController::class, 'guided']);
+        Route::post('/units/{unit}/guided/result', [KichwaSubmissionController::class, 'guidedResult'])->middleware('throttle:30,1,guided-result');
         Route::get('/units/{unit}/contents', [KichwaCatalogController::class, 'contents']);
         Route::get('/units/{unit}/topics/{topic}', [KichwaCatalogController::class, 'topic']);
         Route::get('/units/{unit}/exercises', [KichwaCatalogController::class, 'exercises']);
@@ -55,8 +57,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function (): void {
         Route::delete('/attempts/{attempt}', [KichwaSubmissionController::class, 'abandon']);
         Route::get('/progress', [KichwaCatalogController::class, 'progress']);
         Route::get('/progress/levels/{level}', [KichwaCatalogController::class, 'progress']);
-        Route::get('/testimonials/eligibility', fn () => response()->json(['completed_intermediate' => false, 'has_commented' => false, 'can_comment' => false]));
-        Route::post('/testimonials', fn () => abort(403, 'Disponible cuando se habilite Intermedio.'));
+        Route::get('/testimonials/eligibility', [TestimonialController::class, 'eligibility']);
+        Route::post('/testimonials', [TestimonialController::class, 'store'])->middleware('throttle:5,1');
     });
     Route::prefix('admin')->middleware('role:admin')->group(function (): void {
         Route::get('/overview', [KichwaAdminController::class, 'overview']);

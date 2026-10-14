@@ -147,6 +147,9 @@ class DominioLecciones
             });
         $rewards = DB::table('recompensas')->where('id_usuario', $user)->get(['clave', 'xp', 'medalla']);
         $sequenceUnits = Unidad::where('configuracion->learning_mode', 'sequence')->pluck('id_unidad');
+        $guidedUnits = Unidad::where('configuracion->learning_mode', 'guided')->pluck('id_unidad');
+        $completedGuidedUnits = DB::table('v_progreso')->where('id_usuario', $user)->whereIn('id_unidad', $guidedUnits)
+            ->where('porcentaje_progreso', 100)->pluck('id_unidad');
         $passedUnits = DB::table('intentos_evaluacion as i')->join('evaluaciones as e', 'e.id_evaluacion', '=', 'i.id_evaluacion')
             ->where('i.id_usuario', $user)->where('i.estado_intento', 'finalizado')->where('e.configuracion->sequence_mode', true)->where('i.resultado->passed', true)->pluck('e.id_unidad');
         $visibleTopics = Tema::where('publicado', true)->pluck('id_tema');
@@ -154,6 +157,6 @@ class DominioLecciones
 
         return ['lessons' => $lessons, 'xp' => (int) $rewards->sum('xp'), 'medals' => $rewards->whereNotNull('medalla')->pluck('medalla')->values(),
             'mastered_topics' => $rewards->filter(fn ($r) => str_starts_with($r->clave, 'dominio:') && $visibleTopics->contains((int) substr($r->clave, 8)))->map(fn ($r) => (int) substr($r->clave, 8))->values(),
-            'completed_units' => $rewards->filter(fn ($r) => str_starts_with($r->clave, 'final:') && (! $sequenceUnits->contains((int) substr($r->clave, 6)) || $passedUnits->contains((int) substr($r->clave, 6))))->map(fn ($r) => (int) substr($r->clave, 6))->values()];
+            'completed_units' => $rewards->filter(fn ($r) => str_starts_with($r->clave, 'final:') && ! $guidedUnits->contains((int) substr($r->clave, 6)) && (! $sequenceUnits->contains((int) substr($r->clave, 6)) || $passedUnits->contains((int) substr($r->clave, 6))))->map(fn ($r) => (int) substr($r->clave, 6))->merge($completedGuidedUnits->map(fn ($id) => (int) $id))->unique()->values()];
     }
 }

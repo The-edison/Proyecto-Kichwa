@@ -22,7 +22,8 @@ class FrontendAccessTest extends TestCase
     public function test_spa_registration_creates_a_session_without_returning_a_token(): void
     {
         $this->postJson('/api/auth/register', [
-            'name' => 'Ana Test',
+            'first_name' => 'Ana',
+            'last_name' => 'Test',
             'email' => 'ana@example.test',
             'password' => 'ClaveSegura#123',
             'password_confirmation' => 'ClaveSegura#123',

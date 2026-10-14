@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { LoaderCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { apiPost } from '../services/api';
+import { ApiError, apiPost } from '../services/api';
 
 export function GoogleAuthButton({ label = 'Continuar con Google', disabled = false }: { label?: string; disabled?: boolean }) {
     const { googleEnabled, googleLoading } = useAuth();
@@ -12,7 +12,7 @@ export function GoogleAuthButton({ label = 'Continuar con Google', disabled = fa
         if (leaving.current) return;
         leaving.current = true; setRedirecting(true); setError('');
         try { const response = await apiPost<{ url: string }>('/auth/google/prepare', {}); window.location.assign(response.url); }
-        catch { leaving.current = false; setRedirecting(false); setError('No se pudo iniciar el acceso con Google. Inténtalo de nuevo.'); }
+        catch (reason) { leaving.current = false; setRedirecting(false); setError(reason instanceof ApiError ? reason.message : 'No se pudo conectar con Google. Revisa tu conexión e inténtalo de nuevo.'); }
     }
     useEffect(() => {
         const reset = () => { leaving.current = false; setRedirecting(false); };

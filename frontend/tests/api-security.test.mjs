@@ -51,3 +51,13 @@ test('publishing refreshes active catalog queries and notifies other tabs', asyn
     assert.equal(filter.predicate({ queryKey: ['api', '/levels'] }), true);
     assert.deepEqual(browser.notifications, [['yachay:catalog-changed', 'revision']]);
 });
+
+test('publishing an opinion refreshes the public stories and the student opinion form', async () => {
+    const browser = await client();
+    await browser.api.apiPost('/testimonials', { body: 'Mi experiencia aprendiendo Kichwa.' });
+    const [filter] = browser.invalidations[0];
+    assert.equal(filter.refetchType, 'active');
+    assert.equal(filter.predicate({ queryKey: ['api', '/testimonials'] }), true);
+    assert.equal(filter.predicate({ queryKey: ['api', '/testimonials/eligibility'] }), true);
+    assert.equal(filter.predicate({ queryKey: ['api', '/levels'] }), false);
+});

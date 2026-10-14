@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class AuthController extends Controller
 {
@@ -28,7 +29,7 @@ class AuthController extends Controller
         }
         $data = $request->validated();
         $user = DB::transaction(function () use ($data) {
-            $user = Usuario::create(['nombre_usuario' => $data['name'], 'correo_usuario' => $data['email'],
+            $user = Usuario::create(['nombre_usuario' => $data['first_name'].' '.$data['last_name'], 'correo_usuario' => $data['email'],
                 'cedula_usuario' => $data['cedula'] ?? null, 'contrasena_usuario' => $data['password']]);
             $nivel = Nivel::where('orden_nivel', 1)->firstOrFail();
             UsuarioNivel::create(['id_usuario' => $user->id_usuario, 'id_nivel' => $nivel->id_nivel]);
@@ -121,34 +122,57 @@ class AuthController extends Controller
 
     public function forgotPassword(Request $request): JsonResponse
     {
-        $request->merge(['email' => mb_strtolower(trim((string) $request->input('email')))]);
-        $data = $request->validate(['email' => ['required', 'email:rfc', 'max:254']]);
-        Password::sendResetLink(['correo_usuario' => $data['email']]);
+        $this->normalizeEmail($request);
+        $data = $request->validate(['email' => ['bail', 'required', 'string', 'email:rfc', 'max:254']]);
+        try {
+            Password::sendResetLink(['correo_usuario' => $data['email'], 'estado_usuario' => 'activo']);
+        } catch (TransportExceptionInterface $exception) {
+            report($exception);
+            $user = Usuario::where('correo_usuario', $data['email'])->first();
+            if ($user) {
+                Password::deleteToken($user);
+            }
+
+            return response()->json(['message' => 'No se pudo enviar el correo en este momento. Inténtalo de nuevo en un minuto.'], 503);
+        }
 
         return response()->json(['message' => 'Si el correo está registrado, recibirás un enlace para recuperar tu contraseña.']);
     }
 
     public function resetPassword(Request $request): JsonResponse
     {
-        $request->merge(['email' => mb_strtolower(trim((string) $request->input('email')))]);
-        $data = $request->validate(['email' => ['required', 'email:rfc'], 'token' => ['required', 'string'],
-            'password' => ['required', 'confirmed', RegisterRequest::passwordRule()]]);
-        $status = Password::reset(['correo_usuario' => $data['email'], 'token' => $data['token'],
-            'password' => $data['password'], 'password_confirmation' => $request->input('password_confirmation')],
-            function (Usuario $user, string $password): void {
-                $user->contrasena_usuario = $password;
-                $user->debe_cambiar_contrasena = false;
-                $user->remember_token = null;
-                $user->save();
-                $user->tokens()->delete();
-                DB::table('sessions')->where('user_id', $user->id_usuario)->delete();
-                event(new PasswordReset($user));
-            });
+        $this->normalizeEmail($request);
+        $data = $request->validate(['email' => ['bail', 'required', 'string', 'email:rfc', 'max:254'], 'token' => ['required', 'string', 'max:255'],
+            'password' => ['required', 'string', RegisterRequest::passwordRule()],
+            'password_confirmation' => ['required', 'string', 'same:password']],
+            ['password_confirmation.same' => 'Las contraseñas no coinciden.']);
+        $status = DB::transaction(function () use ($data) {
+            DB::table(config('auth.passwords.users.table'))->where('email', $data['email'])->lockForUpdate()->first();
+
+            return Password::reset(['correo_usuario' => $data['email'], 'estado_usuario' => 'activo', 'token' => $data['token'],
+                'password' => $data['password'], 'password_confirmation' => $data['password_confirmation']],
+                function (Usuario $user, string $password): void {
+                    $user->contrasena_usuario = $password;
+                    $user->debe_cambiar_contrasena = false;
+                    $user->remember_token = null;
+                    $user->save();
+                    $user->tokens()->delete();
+                    DB::table('sessions')->where('user_id', $user->id_usuario)->delete();
+                    event(new PasswordReset($user));
+                });
+        });
         if ($status !== Password::PASSWORD_RESET) {
             throw ValidationException::withMessages(['email' => 'El enlace es inválido o venció. Solicita uno nuevo.']);
         }
 
         return response()->json(['message' => 'Contraseña actualizada. Inicia sesión.']);
+    }
+
+    private function normalizeEmail(Request $request): void
+    {
+        if (is_string($request->input('email'))) {
+            $request->merge(['email' => mb_strtolower(trim($request->input('email')))]);
+        }
     }
 
     public function resendVerification(Request $request): JsonResponse

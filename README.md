@@ -273,6 +273,8 @@ Para correo real configura el proveedor SMTP en `backend/.env`:
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.tu-proveedor.com
 MAIL_PORT=587
+MAIL_SCHEME=smtp
+MAIL_TIMEOUT=15
 MAIL_USERNAME="TU_USUARIO_SMTP"
 MAIL_PASSWORD="TU_SECRETO_SMTP"
 MAIL_FROM_ADDRESS="administracion@tu-dominio.com"
@@ -280,6 +282,10 @@ MAIL_FROM_NAME="Yachay"
 ```
 
 El puerto y `MAIL_SCHEME` deben coincidir con el proveedor; utiliza un remitente autorizado. Ejecuta `php artisan config:clear` en `backend` y reinicia el servidor. Las URLs de backend/frontend deben ser correctas para los enlaces.
+
+En **Iniciar sesión → Recuperar contraseña**, escribe el correo registrado. El mensaje se envía en español y enlaza al frontend; vence a los 60 minutos y se puede usar una sola vez. La contraseña nueva debe cumplir los mismos requisitos del registro. Al cambiarla se revocan las sesiones y tokens anteriores. Una cuenta bloqueada no puede recuperar acceso mediante este flujo. La respuesta inicial no revela si un correo está registrado.
+
+Para Gmail, habilita la verificación en dos pasos y genera una **contraseña de aplicación** para Yachay, si tu cuenta permite esta opción. Usa `MAIL_HOST=smtp.gmail.com`, `MAIL_PORT=465`, `MAIL_SCHEME=smtps`, tu dirección completa en `MAIL_USERNAME` y `MAIL_FROM_ADDRESS`, y la contraseña de aplicación en `MAIL_PASSWORD`. No uses la contraseña habitual de Gmail. Si tu organización impide contraseñas de aplicación, utiliza su proveedor SMTP autorizado. Referencias: [contraseñas de aplicación](https://support.google.com/accounts/answer/185833?hl=es), [SMTP de Google](https://knowledge.workspace.google.com/admin/gmail/send-email-from-a-printer-scanner-or-app).
 
 ### Google, opcional
 
@@ -298,9 +304,23 @@ GOOGLE_REDIRECT_URI=http://127.0.0.1:8000/auth/google/callback
 
 5. Limpia configuración, reinicia el backend y prueba el acceso.
 
+En Google Cloud, configura **Google Auth Platform → Branding** con nombre Yachay y correo de soporte; en **Audience** selecciona el público adecuado y añade las cuentas de prueba si estás en modo Testing. En **Clients**, crea un cliente de tipo Web application y registra el callback anterior en **Authorized redirect URIs**, sin cambiar puerto, ruta ni host. Los únicos permisos de identidad que usa el sistema son `openid`, `email` y `profile`; no necesita acceso a Gmail ni a Drive. Guarda el ID y el secreto únicamente en `backend/.env`.
+
 Socialite usa redirección de servidor. Si configuras orígenes JavaScript, el frontend es `http://127.0.0.1:5173`; los orígenes autorizados y el callback son ajustes distintos. En un despliegue utiliza las URLs HTTPS de ese entorno.
 
 La cuenta local existente se vincula desde **Mi cuenta**, con sesión activa y el mismo correo verificado. No se vincula automáticamente ni se promueven roles. Sin credenciales, Google queda deshabilitado. Referencia: [OAuth para aplicaciones web de Google](https://developers.google.com/identity/protocols/oauth2/web-server).
+
+Si PHP en Windows devuelve `cURL error 60` al conectarse con Google, configura un archivo PEM de autoridades de confianza. Puedes descargar [el paquete de Mozilla publicado por curl](https://curl.se/docs/caextract.html), verificar su SHA256 y guardarlo en `backend/storage/app/private/cacert.pem`. Define `GOOGLE_CA_BUNDLE` en `.env` con la ruta absoluta al archivo y limpia la configuración. El archivo local no se incluye en Git. En producción, deja esta variable vacía si el servidor ya dispone de un almacén de certificados válido; no copies la ruta de Windows. La verificación HTTPS permanece activa.
+
+### Comprobación con tus servicios reales
+
+1. Mantén `APP_URL=http://127.0.0.1:8000`, `FRONTEND_URL=http://127.0.0.1:5173` y `SANCTUM_STATEFUL_DOMAINS=127.0.0.1:5173` en local. Abre el frontend usando ese mismo host, sin alternarlo con `localhost`.
+2. Después de configurar credenciales y correo, ejecuta `php artisan config:clear` desde `backend`, reinicia el backend y recarga el frontend. El botón Google se habilita cuando están configurados el ID y el secreto.
+3. Prueba Google con una cuenta de prueba nueva: debe entrar al panel del estudiante. Cierra sesión y vuelve a entrar: no debe duplicar la cuenta. Prueba también cancelar el consentimiento. Si el correo ya tenía cuenta local, vincúlalo primero desde Mi cuenta.
+4. Solicita recuperación para una cuenta tuya, comprueba la recepción real del mensaje, abre el enlace y cambia la contraseña. Verifica que entra la nueva, falla la anterior y el enlace usado no vuelve a funcionar.
+5. En producción cambia las URLs y el callback a los dominios HTTPS reales, configura las cookies seguras y el remitente autorizado, y ajusta el público/estado de publicación en Google. Los enlaces locales solo funcionan en la computadora donde se ejecuta el proyecto.
+
+Las pruebas automáticas simulan Google y el correo: no sustituyen la comprobación con tus credenciales y una bandeja real. No se puede garantizar la ausencia de fallos de un proveedor externo, pero los errores de autorización, enlaces vencidos y fallos de envío se manejan en la interfaz.
 
 ## Pruebas
 

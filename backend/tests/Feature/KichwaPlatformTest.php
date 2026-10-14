@@ -34,7 +34,7 @@ class KichwaPlatformTest extends TestCase
     public function test_registration_normalizes_email_validates_cedula_and_cannot_assign_role(): void
     {
         Notification::fake();
-        $input = ['name' => 'Ana Yánez', 'email' => ' ANA@EXAMPLE.TEST ', 'cedula' => '1710034065',
+        $input = ['first_name' => 'Ana', 'last_name' => 'Yánez', 'email' => ' ANA@EXAMPLE.TEST ', 'cedula' => '1710034065',
             'password' => 'NuevaClave#2026', 'password_confirmation' => 'NuevaClave#2026'];
         $this->postJson('/api/auth/register', $input + ['role_id' => 1])->assertUnprocessable()->assertJsonValidationErrors('role_id');
         $this->postJson('/api/auth/register', array_replace($input, ['cedula' => '0201234567']))->assertUnprocessable()->assertJsonValidationErrors('cedula');
@@ -52,8 +52,8 @@ class KichwaPlatformTest extends TestCase
 
     public function test_registration_rejects_invalid_name_password_and_disposable_email(): void
     {
-        $this->postJson('/api/auth/register', ['name' => '<script>', 'email' => 'ana@mailinator.com', 'password' => 'corta', 'password_confirmation' => 'otra'])
-            ->assertUnprocessable()->assertJsonValidationErrors(['name', 'email', 'password']);
+        $this->postJson('/api/auth/register', ['first_name' => '<script>', 'last_name' => 'Prueba', 'email' => 'ana@mailinator.com', 'password' => 'corta', 'password_confirmation' => 'otra'])
+            ->assertUnprocessable()->assertJsonValidationErrors(['first_name', 'email', 'password']);
     }
 
     public function test_admin_password_change_is_mandatory_and_seed_is_idempotent(): void
@@ -73,7 +73,7 @@ class KichwaPlatformTest extends TestCase
     public function test_passwords_cannot_exceed_bcrypt_byte_limit(): void
     {
         $password = 'Aa1#'.str_repeat('é', 35);
-        $this->postJson('/api/auth/register', ['name' => 'Ana Prueba', 'email' => 'ana@example.test',
+        $this->postJson('/api/auth/register', ['first_name' => 'Ana', 'last_name' => 'Prueba', 'email' => 'ana@example.test',
             'password' => $password, 'password_confirmation' => $password])
             ->assertUnprocessable()->assertJsonValidationErrors('password');
         $this->assertDatabaseCount('usuarios', 0);

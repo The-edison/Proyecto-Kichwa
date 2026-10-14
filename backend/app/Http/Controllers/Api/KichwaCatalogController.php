@@ -123,6 +123,21 @@ class KichwaCatalogController extends Controller
         return response()->json(SecuenciaUnidad::present($record, $request->user()->id_usuario));
     }
 
+    public function guided(Request $request, int $unit): JsonResponse
+    {
+        $record = self::publishedUnit($unit);
+        abort_unless(($record->configuracion['learning_mode'] ?? '') === 'guided', 404);
+        $exercises = Actividad::where('id_unidad', $unit)->where('publicado', true)->whereNull('id_tema')->orderBy('orden_actividad')->get();
+        $completed = DB::table('respuestas_actividad')->where('id_usuario', $request->user()->id_usuario)
+            ->whereIn('id_actividad', $exercises->pluck('id_actividad'))->where('acierto_actividad', true)->distinct()->pluck('id_actividad');
+
+        return response()->json([
+            'exercises' => $exercises->map(fn (Actividad $exercise): array => KichwaResource::present('exercises', $exercise) + ['completed' => $completed->contains($exercise->id_actividad)])->values(),
+            'completed_count' => $completed->count(),
+            'total' => $exercises->count(),
+        ]);
+    }
+
     public function contents(Request $request, int $unit): JsonResponse
     {
         self::publishedUnit($unit);
