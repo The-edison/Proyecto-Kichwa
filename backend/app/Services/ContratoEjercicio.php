@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\String\UnicodeString;
 
 class ContratoEjercicio
 {
@@ -304,9 +305,7 @@ class ContratoEjercicio
 
     private static function normalize(string $text, bool $ignoreAccents = false): string
     {
-        if (class_exists(\Normalizer::class)) {
-            $text = \Normalizer::normalize($text, \Normalizer::FORM_C);
-        }
+        $text = (new UnicodeString($text))->toString();
         if ($ignoreAccents) {
             $text = strtr($text, ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'Á' => 'A', 'É' => 'E', 'Í' => 'I', 'Ó' => 'O', 'Ú' => 'U']);
         }
