@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -177,11 +178,14 @@ class ContratoEjercicio
 
     public static function file(string $path, string $folder): void
     {
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
+
         if (! preg_match('#^kichwa/'.preg_quote($folder, '#').'/[a-zA-Z0-9]+\\.(?:png|jpg|jpeg|webp|mp3|wav|ogg|m4a)$#', $path)
-            || ! Storage::disk('public')->exists($path)) {
+            || ! $disk->exists($path)) {
             self::fail('El archivo debe subirse desde el panel.', 'resource');
         }
-        $mime = Storage::disk('public')->mimeType($path);
+        $mime = $disk->mimeType($path);
         $allowed = $folder === 'imagenes' ? ['image/png', 'image/jpeg', 'image/webp'] :
             ['audio/mpeg', 'audio/wav', 'audio/x-wav', 'audio/ogg', 'application/ogg', 'audio/mp4', 'video/mp4', 'audio/x-m4a'];
         if (! in_array($mime, $allowed, true)) {
