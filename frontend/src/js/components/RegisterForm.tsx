@@ -68,7 +68,7 @@ export function RegisterForm() {
                 <div className="form-grid register-grid">
                     <div><label className="field-label" htmlFor="cedula">Cédula <span className="register-optional">Opcional</span></label>
                         <input id="cedula" name="cedula" className="field" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} placeholder="10 dígitos" value={data.cedula} onChange={event => update('cedula', event.target.value)} onBlur={() => { const error = cedulaError(data.cedula); if (error) setErrors(current => ({ ...current, cedula: error })); }} {...accessibility('cedula', 'cedula-help')} />
-                        <p id="cedula-help" className="register-help">Cédula ecuatoriana, sin espacios ni guiones.</p>
+                        <p id="cedula-help" className="register-help">Sin espacios ni guiones.</p>
                         {errorFor('cedula')}
                     </div>
                     <div><label className="field-label" htmlFor="email">Correo electrónico</label>
@@ -90,7 +90,7 @@ export function RegisterForm() {
                     </div>
                 </div>
                 <ul id="password-help" className="register-password-checks" aria-label="Requisitos de contraseña">
-                    {([['length', '12 caracteres como mínimo'], ['mixed', 'Mayúsculas y minúsculas'], ['number', 'Al menos un número'], ['symbol', 'Al menos un símbolo']] as const).map(([key, label]) => <li key={key} className={checks[key] ? 'is-met' : ''}><Check size={13} aria-hidden="true" /><span className="sr-only">{checks[key] ? 'Cumplido: ' : 'Pendiente: '}</span>{label}</li>)}
+                    {([['length', 'Mínimo 12 caracteres'], ['mixed', 'Mayúscula y minúscula'], ['number', 'Al menos un número'], ['symbol', 'Al menos un símbolo']] as const).map(([key, label]) => <li key={key} className={checks[key] ? 'is-met' : ''}><Check size={13} aria-hidden="true" /><span className="sr-only">{checks[key] ? 'Cumplido: ' : 'Pendiente: '}</span>{label}</li>)}
                 </ul>
             </fieldset>
             {errors.form && <p id="form" tabIndex={-1} className="auth-alert" role="alert">{errors.form}</p>}

@@ -194,7 +194,12 @@ class KichwaAdminController extends Controller
 
     public function overview(): JsonResponse
     {
-        return response()->json(DB::selectOne("SELECT (SELECT count(*) FROM usuarios WHERE rol_usuario='estudiante') AS students, (SELECT count(*) FROM temas) AS contents, (SELECT count(*) FROM actividades) AS exercises, (SELECT count(*) FROM diccionario) AS diccionario"));
+        return response()->json([
+            'students' => Usuario::where('rol_usuario', 'estudiante')->count(),
+            'contents' => Tema::where('publicado', true)->whereIn('id_unidad', PublicacionContenido::unitIds())->count(),
+            'exercises' => PublicacionContenido::exercises()->count(),
+            'diccionario' => DB::table('diccionario')->count(),
+        ]);
     }
 
     private function resource(Request $request): string

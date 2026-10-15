@@ -12,7 +12,7 @@ class RespuestaActividad extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['id_usuario', 'id_actividad', 'respuesta_actividad', 'acierto_actividad', 'retroalimentacion_actividad', 'fecha_respuesta_actividad'];
+    protected $fillable = ['id_usuario', 'id_actividad', 'respuesta_actividad', 'acierto_actividad', 'retroalimentacion_actividad', 'fecha_respuesta_actividad', 'id_sesion_practica', 'clave_envio'];
 
     protected function casts(): array
     {

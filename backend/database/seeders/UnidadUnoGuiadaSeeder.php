@@ -79,5 +79,6 @@ class UnidadUnoGuiadaSeeder extends Seeder
             Modulo::whereKey($unit->id_modulo)->update(['publicado' => true]);
         });
         PublicacionContenido::invalidate();
+        $this->call(UnidadUnoImagenesSeeder::class);
     }
 }

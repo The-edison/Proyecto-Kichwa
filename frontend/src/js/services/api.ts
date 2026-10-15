@@ -66,13 +66,17 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
         const testimonialsChanged = path === '/testimonials';
         const hierarchyChanged = /^\/admin\/(levels|modules|units|contents|exercises|evaluations|questions)(\/|$)/.test(path);
         const progressChanged = /^\/(exercises\/\d+\/answer|evaluations\/\d+\/submit)$/.test(path);
+        if (progressChanged) {
+            void queryClient.invalidateQueries({ refetchType: 'none', predicate: query =>
+                query.queryKey[0] === 'api' && typeof query.queryKey[1] === 'string' && /^\/units\/\d+\/guided$/.test(query.queryKey[1]) });
+        }
         void queryClient.invalidateQueries({ refetchType: 'active', predicate: query => {
             const key = query.queryKey[1];
             if (query.queryKey[0] !== 'api' || typeof key !== 'string') return false;
             if (dictionaryChanged) return /^\/diccionario(?:\/|\?|$)/.test(key);
             if (testimonialsChanged) return key === '/testimonials' || key === '/testimonials/eligibility';
-            if (hierarchyChanged) return /^\/(levels|modules|units|evaluations|progress)(\/|\?|$)/.test(key);
-            return progressChanged && (key === '/mastery' || /^\/evaluations\/\d+(\?|$)/.test(key) || /^\/progress(\/|\?|$)/.test(key) || /^\/levels\/\d+\/modules/.test(key) || /^\/modules\/\d+\/(units|contents)/.test(key) || /^\/units\/\d+(\/sequence|\/guided|\/contents|\?|$)/.test(key));
+            if (hierarchyChanged) return /^\/(admin\/overview|levels|modules|units|evaluations|progress)(\/|\?|$)/.test(key);
+            return progressChanged && (key === '/mastery' || /^\/admin\/learning-results\//.test(key) || /^\/evaluations\/\d+(\?|$)/.test(key) || /^\/progress(\/|\?|$)/.test(key) || /^\/levels\/\d+\/modules/.test(key) || /^\/modules\/\d+\/(units|contents)/.test(key) || /^\/units\/\d+(\/sequence|\/contents|\?|$)/.test(key));
         } });
         if (hierarchyChanged) {
             try { localStorage.setItem('yachay:catalog-changed', crypto.randomUUID()); } catch { /* La actualización local ya se realizó. */ }

@@ -35,15 +35,16 @@ class SaveKichwaContentRequest extends FormRequest
             $rules['sort_order'] = ['sometimes', 'integer', 'min:1', 'max:2147483646'];
         }
         if ($resource === 'units') {
-            $rules['config'] = ['sometimes', 'array:learning_mode'];
+            $rules['config'] = ['sometimes', 'array:learning_mode,guided_lesson'];
             $rules['config.learning_mode'] = ['sometimes', 'in:classic,sequence,guided'];
+            $rules['config.guided_lesson'] = ['sometimes', 'in:writing,greetings'];
         }
         if (in_array($resource, ['exercises', 'questions', 'evaluations'], true)) {
-            $rules['config'] = ['sometimes', 'array:managed,reviewed,requires_audio,requires_images,max_selections,exact_selections,ignore_accents,explanation,correct_feedback,incorrect_feedback,title,difficulty,question_count,pass_percentage,final,presentation,word_target,missing_index,context_text,context_meaning,prompt_image,reveal_highlight,sequence_mode,fixed_order,required_correct,prerequisite_activities'];
+            $rules['config'] = ['sometimes', 'array:managed,reviewed,requires_audio,requires_images,max_selections,exact_selections,ignore_accents,explanation,correct_feedback,incorrect_feedback,title,difficulty,question_count,pass_percentage,final,presentation,word_target,missing_index,context_text,context_meaning,prompt_image,prompt_image_alt,reveal_highlight,sequence_mode,fixed_order,required_correct,prerequisite_activities'];
             foreach (['managed', 'reviewed', 'requires_audio', 'requires_images', 'exact_selections', 'ignore_accents', 'final', 'sequence_mode', 'fixed_order'] as $flag) {
                 $rules['config.'.$flag] = ['sometimes', 'boolean'];
             }
-            foreach (['title', 'explanation', 'correct_feedback', 'incorrect_feedback', 'word_target', 'context_text', 'context_meaning', 'prompt_image', 'reveal_highlight'] as $text) {
+            foreach (['title', 'explanation', 'correct_feedback', 'incorrect_feedback', 'word_target', 'context_text', 'context_meaning', 'prompt_image', 'prompt_image_alt', 'reveal_highlight'] as $text) {
                 $rules['config.'.$text] = ['nullable', 'string', 'max:2000'];
             }
             $rules['config.max_selections'] = ['sometimes', 'integer', 'between:1,50'];

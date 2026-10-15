@@ -28,10 +28,10 @@ export function LoginForm() {
         }
     }
 
-    return <div className="space-y-6">
+    return <div className="login-form-content">
         {googleError && <p className="auth-alert" role="alert">{googleError}</p>}
         {params.get('password_reset') === '1' && <p className="login-reset-success" role="status">Tu contraseña se actualizó. Ya puedes iniciar sesión con la nueva.</p>}
-        <form onSubmit={submit} className="space-y-5" aria-label="Iniciar sesión con correo" aria-busy={processing}>
+        <form onSubmit={submit} className="login-fields" aria-label="Iniciar sesión con correo" aria-busy={processing}>
             <div>
                 <label className="field-label" htmlFor="identifier">Correo electrónico</label>
                 <input className="field" id="identifier" type="email" inputMode="email" autoComplete="username" autoCapitalize="none" spellCheck={false}
@@ -53,7 +53,7 @@ export function LoginForm() {
             </button>
         </form>
         <div className="login-recovery"><span className="login-recovery-icon" aria-hidden="true"><KeyRound size={20} /></span><div><strong>¿Olvidaste tu contraseña?</strong><p>Recibe un enlace seguro en tu correo.</p>{processing ? <span aria-disabled="true">Recuperar contraseña</span> : <Link href={`/recuperar-contrasena${data.identifier.trim() ? '?email=' + encodeURIComponent(data.identifier.trim()) : ''}`}>Recuperar contraseña <ArrowRight size={14} aria-hidden="true" /></Link>}</div></div>
-        <div className="border-t border-line pt-5">
+        <div className="login-create-account">
             <p className="text-center text-sm text-muted">¿Aún no tienes una cuenta?</p>
             {processing ? <span className="mt-2 block text-center text-sm font-semibold text-muted" aria-disabled="true">Crear una cuenta</span> :
                 <Link href="/registro" className="mt-1 flex min-h-11 items-center justify-center font-semibold text-forest hover:underline">Crear una cuenta</Link>}

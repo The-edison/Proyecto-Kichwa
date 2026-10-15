@@ -50,7 +50,7 @@ class LessonMasteryTest extends TestCase
         }, $questions);
     }
 
-    public function test_complete_learning_path_resumes_and_rewards_only_once(): void
+    public function test_complete_learning_path_resumes_and_rewards_each_new_attempt(): void
     {
         $this->prepareLessons();
         $user = Usuario::factory()->create();
@@ -72,10 +72,10 @@ class LessonMasteryTest extends TestCase
             $result = $this->postJson($url.'/submit', $payload)->assertOk()->assertJsonPath('score', 100)->assertJsonPath('stars', 3)->json();
             $this->postJson($url.'/submit', $payload)->assertOk()->assertExactJson($result);
             $retry = $this->postJson($url.'/attempts')->assertOk()->json();
-            $this->postJson($url.'/submit', ['attempt_id' => $retry['attempt_id'], 'answers' => $this->answers($retry['questions'])])->assertOk()->assertJsonPath('xp_earned', 0);
+            $this->postJson($url.'/submit', ['attempt_id' => $retry['attempt_id'], 'answers' => $this->answers($retry['questions'])])->assertOk()->assertJsonPath('xp_earned', $evaluation->configuracion['final'] ? 150 : 120);
         }
-        $this->getJson('/api/mastery')->assertOk()->assertJsonPath('xp', 410)->assertJsonCount(1, 'medals')->assertJsonCount(1, 'completed_units')->assertJsonCount(3, 'mastered_topics');
-        $this->assertDatabaseCount('recompensas', 34);
+        $this->getJson('/api/mastery')->assertOk()->assertJsonPath('xp', 1020)->assertJsonCount(1, 'medals')->assertJsonCount(1, 'completed_units')->assertJsonCount(3, 'mastered_topics');
+        $this->assertDatabaseCount('recompensas', 92);
         Sanctum::actingAs(Usuario::factory()->create());
         $this->getJson('/api/attempts/'.$start['attempt_id'])->assertNotFound();
         $this->patchJson('/api/attempts/'.$start['attempt_id'], ['answers' => $draft])->assertNotFound();
@@ -92,7 +92,7 @@ class LessonMasteryTest extends TestCase
         Sanctum::actingAs(Usuario::factory()->administrador()->create());
         $question = Pregunta::firstOrFail();
         $this->patchJson('/api/admin/questions/'.$question->id_pregunta, ['published' => true])->assertUnprocessable()->assertJsonValidationErrors('publication');
-        $evaluation = EvaluacionKichwa::firstOrFail();
+        $evaluation = EvaluacionKichwa::orderBy('id_evaluacion')->firstOrFail();
         $this->patchJson('/api/admin/evaluations/'.$evaluation->id_evaluacion, ['published' => true])->assertUnprocessable();
         $pending = Pregunta::where('configuracion->requires_audio', true)->firstOrFail();
         $config = $pending->configuracion;
@@ -121,7 +121,7 @@ class LessonMasteryTest extends TestCase
     {
         $this->prepareLessons();
         Sanctum::actingAs(Usuario::factory()->create());
-        $evaluation = EvaluacionKichwa::firstOrFail();
+        $evaluation = EvaluacionKichwa::orderBy('id_evaluacion')->firstOrFail();
         $start = $this->postJson('/api/evaluations/'.$evaluation->id_evaluacion.'/attempts')->assertOk()->json();
         $question = Pregunta::findOrFail($start['questions'][0]['id']);
         Sanctum::actingAs(Usuario::factory()->administrador()->create());
@@ -132,11 +132,11 @@ class LessonMasteryTest extends TestCase
         $this->assertSame(array_column($start['questions'], 'id'), IntentoEvaluacion::findOrFail($start['attempt_id'])->preguntas_seleccionadas);
     }
 
-    public function test_partial_scores_keep_the_best_result_and_reward_each_question_once(): void
+    public function test_partial_scores_keep_the_best_result_and_reward_each_attempt(): void
     {
         $this->prepareLessons();
         Sanctum::actingAs(Usuario::factory()->create());
-        $evaluation = EvaluacionKichwa::firstOrFail();
+        $evaluation = EvaluacionKichwa::orderBy('id_evaluacion')->firstOrFail();
         foreach ([7, 8, 9, 10, 7] as $correctCount) {
             $this->travel(61)->seconds();
             $start = $this->postJson('/api/evaluations/'.$evaluation->id_evaluacion.'/attempts')->assertOk()->json();
@@ -161,7 +161,7 @@ class LessonMasteryTest extends TestCase
             $this->postJson('/api/evaluations/'.$evaluation->id_evaluacion.'/submit', ['attempt_id' => $start['attempt_id'], 'answers' => $answers])
                 ->assertOk()->assertJsonPath('score', $correctCount * 10)->assertJsonPath('stars', $correctCount === 10 ? 3 : max(0, $correctCount - 7));
         }
-        $this->getJson('/api/mastery')->assertOk()->assertJsonPath('xp', 120)->assertJsonPath('lessons.0.best_score', 100)->assertJsonPath('lessons.0.latest_score', 70)->assertJsonPath('lessons.0.stars', 3);
+        $this->getJson('/api/mastery')->assertOk()->assertJsonPath('xp', 470)->assertJsonPath('lessons.0.best_score', 100)->assertJsonPath('lessons.0.latest_score', 70)->assertJsonPath('lessons.0.stars', 3);
     }
 
     public function test_admin_can_save_incomplete_drafts_review_banks_and_preview_without_progress(): void
@@ -172,7 +172,7 @@ class LessonMasteryTest extends TestCase
         $draft = $this->postJson('/api/admin/exercises', ['unit_id' => $unit->id_unidad, 'type' => 'seleccion_multiple', 'prompt' => '', 'elements' => [], 'zones' => [], 'solution' => [], 'published' => false, 'config' => ['managed' => true, 'reviewed' => false]])
             ->assertCreated()->assertJsonPath('published', false)->json('id');
         $this->patchJson('/api/admin/exercises/'.$draft, ['published' => true])->assertUnprocessable();
-        $evaluation = EvaluacionKichwa::firstOrFail();
+        $evaluation = EvaluacionKichwa::orderBy('id_evaluacion')->firstOrFail();
         $this->postJson('/api/admin/evaluations/'.$evaluation->id_evaluacion.'/review-bank', [])->assertUnprocessable();
         $this->postJson('/api/admin/evaluations/'.$evaluation->id_evaluacion.'/review-bank', ['confirmed' => true])->assertOk()->assertJsonPath('published_count', 10)->assertJsonCount(1, 'pending');
         $preview = $this->getJson('/api/admin/evaluations/'.$evaluation->id_evaluacion.'/preview')->assertOk()->assertJsonCount(10, 'questions')->json('questions');

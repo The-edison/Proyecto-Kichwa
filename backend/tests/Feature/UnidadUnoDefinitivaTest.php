@@ -85,18 +85,18 @@ class UnidadUnoDefinitivaTest extends TestCase
             $this->patchJson('/api/attempts/'.$start['attempt_id'], ['answers' => array_column($answers, 'answer', 'question_id')])->assertOk();
             $this->getJson('/api/attempts/'.$start['attempt_id'])->assertOk()->assertJsonPath('questions.0.id', $ids[0]);
             $payload = ['attempt_id' => $start['attempt_id'], 'answers' => $answers];
-            $result = $this->postJson('/api/evaluations/'.$evaluation->id_evaluacion.'/submit', $payload)->assertOk()->assertJsonPath('correct_count', $correctCount)->assertJsonPath('passed', $correctCount >= 5)->assertJsonPath('xp_earned', $correctCount === 5 ? 50 : 0)->json();
+            $result = $this->postJson('/api/evaluations/'.$evaluation->id_evaluacion.'/submit', $payload)->assertOk()->assertJsonPath('correct_count', $correctCount)->assertJsonPath('passed', $correctCount >= 5)->assertJsonPath('xp_earned', $correctCount * 10 + ($correctCount >= 5 ? 50 : 0))->json();
             $this->postJson('/api/evaluations/'.$evaluation->id_evaluacion.'/submit', $payload)->assertOk()->assertExactJson($result);
         }
         $this->getJson('/api/units/'.$unit->id_unidad.'/sequence')->assertOk()->assertJsonPath('first_score', 66.67)->assertJsonPath('best_score', 100)->assertJsonPath('passed', true);
-        $this->getJson('/api/mastery')->assertOk()->assertJsonPath('xp', 130);
+        $this->getJson('/api/mastery')->assertOk()->assertJsonPath('xp', 330);
         Sanctum::actingAs(Usuario::factory()->create());
         $this->getJson('/api/attempts/'.$start['attempt_id'])->assertNotFound();
         $this->getJson('/api/units/'.$unit->id_unidad.'/sequence')->assertOk()->assertJsonPath('completed_count', 0);
         $this->postJson('/api/admin/evaluations/'.$evaluation->id_evaluacion.'/preview', [])->assertForbidden();
     }
 
-    public function test_a_previously_awarded_unit_bonus_is_not_repeated_and_other_units_are_unchanged(): void
+    public function test_each_new_attempt_earns_a_unit_bonus_and_other_units_are_unchanged(): void
     {
         Storage::fake('public');
         $this->seed(UnidadUnoEjerciciosSeeder::class);
@@ -110,17 +110,17 @@ class UnidadUnoDefinitivaTest extends TestCase
             $answers = array_map(fn ($q) => ['question_id' => $q['id'], 'answer' => $this->answer(Pregunta::findOrFail($q['id']))], $start['questions']);
             $this->postJson('/api/evaluations/'.$evaluation->id_evaluacion.'/submit', ['attempt_id' => $start['attempt_id'], 'answers' => $answers])->assertOk();
         }
-        $this->getJson('/api/mastery')->assertJsonPath('xp', 410);
+        $this->getJson('/api/mastery')->assertJsonPath('xp', 510);
         $this->seed(UnidadUnoDefinitivaSeeder::class);
         $this->assertSame($otherSnapshot, $other->fresh()->toJson());
-        $this->getJson('/api/mastery')->assertJsonCount(0, 'completed_units')->assertJsonPath('xp', 410);
+        $this->getJson('/api/mastery')->assertJsonCount(0, 'completed_units')->assertJsonPath('xp', 510);
         foreach (Actividad::where('publicado', true)->where('id_unidad', $unit->id_unidad)->get() as $activity) {
             $this->postJson('/api/exercises/'.$activity->id_actividad.'/answer', ['answer' => $this->answer($activity)])->assertOk();
         }
         $evaluation = EvaluacionKichwa::where('publicado', true)->firstOrFail();
         $start = $this->postJson('/api/evaluations/'.$evaluation->id_evaluacion.'/attempts')->assertOk()->json();
         $answers = array_map(fn ($q) => ['question_id' => $q['id'], 'answer' => $this->answer(Pregunta::findOrFail($q['id']))], $start['questions']);
-        $this->postJson('/api/evaluations/'.$evaluation->id_evaluacion.'/submit', ['attempt_id' => $start['attempt_id'], 'answers' => $answers])->assertOk()->assertJsonPath('passed', true)->assertJsonPath('xp_earned', 0)->assertJsonPath('xp_total', 480);
+        $this->postJson('/api/evaluations/'.$evaluation->id_evaluacion.'/submit', ['attempt_id' => $start['attempt_id'], 'answers' => $answers])->assertOk()->assertJsonPath('passed', true)->assertJsonPath('xp_earned', 110)->assertJsonPath('xp_total', 690);
         $this->assertSame(1, DB::table('recompensas')->where('id_usuario', $student->id_usuario)->where('clave', 'final:'.$unit->id_unidad)->count());
     }
 

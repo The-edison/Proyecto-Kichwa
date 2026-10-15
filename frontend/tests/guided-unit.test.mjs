@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
+import { randomUUID } from 'node:crypto';
 import { transformWithOxc } from 'vite';
 
 const { code } = await transformWithOxc(await readFile(new URL('../src/js/components/GuidedUnit.tsx', import.meta.url), 'utf8'), 'GuidedUnit.tsx');
@@ -10,10 +11,10 @@ const choice = { id: 11, type: 'seleccion_multiple', prompt: 'Observa la imagen.
 const matching = { id: 12, type: 'relacionar', prompt: 'Selecciona una palabra y su pareja.', elements: [...['Flor', 'Oveja', 'Corazón', 'Caminar'].map((texto, index) => ({ id: ['flor', 'oveja', 'corazon', 'caminar'][index], texto, grupo: 'origen' })), ...['purina', 'shunku', 'sisa', 'llama'].map(id => ({ id, texto: id, grupo: 'destino' }))], zones: [], config: { title: 'Palabras en dos idiomas' } };
 const perfectScore = { score: 20, max_score: 20, correct_count: 5, total_items: 5, passed: true, next_unit_id: 5, details: [{ exercise_id: 11, title: '¿Qué palabra corresponde?', correct: 1, total: 1 }, { exercise_id: 12, title: 'Palabras en dos idiomas', correct: 4, total: 4 }] };
 
-async function screen({ completed = false, post } = {}) {
+async function screen({ completed = false, post, exercises = [choice, matching], config } = {}) {
     let cursor = 0, refreshes = 0;
     const states = [], requests = [];
-    const context = vm.createContext({ window: { scrollTo() {} } });
+    const context = vm.createContext({ crypto: { randomUUID }, window: { scrollTo() {} } });
     const jsx = (type, props) => ({ type, props });
     class ApiError extends Error { constructor(message) { super(message); this.errors = {}; } }
     const dependencies = {
@@ -25,8 +26,11 @@ async function screen({ completed = false, post } = {}) {
         'lucide-react': Object.fromEntries(['ArrowLeft', 'ArrowRight', 'BookOpen', 'CheckCircle2', 'LoaderCircle', 'RotateCcw', 'Star', 'X'].map(name => [name, name])),
         'guided-unit.css': {},
         navigation: { Head: 'Head', Link: 'Link' },
-        useApi: { useApi: () => ({ data: { exercises: [choice, matching].map(item => ({ ...item, completed })), total: 2, completed_count: completed ? 2 : 0 }, loading: false, error: '', refresh: async () => { refreshes++; } }) },
+        useApi: { useApi: () => ({ data: { exercises: exercises.map(item => ({ ...item, completed })), total: exercises.length, completed_count: completed ? exercises.length : 0 }, loading: false, error: '', refresh: async () => { refreshes++; } }) },
         api: { ApiError, apiBaseUrl: '', apiPost: async (path, payload) => { requests.push({ path, payload }); return post ? post({ path, payload, ApiError }) : path.endsWith('/guided/result') ? perfectScore : { response_id: requests.length + 100, is_correct: true, feedback: 'Respuesta correcta.' }; } },
+        LearningCompanion: { LearningCompanion: 'LearningCompanion' },
+        GuidedIntroduction: { GuidedIntroduction: 'GuidedIntroduction' },
+        GreetingsIntroduction: { GreetingsIntroduction: 'GreetingsIntroduction' },
         States: { ErrorState: 'ErrorState', LoadingState: 'LoadingState' },
     };
     const cache = new Map();
@@ -45,7 +49,7 @@ async function screen({ completed = false, post } = {}) {
     await interaction.link(link); await interaction.evaluate();
     const module = new vm.SourceTextModule(code, { context });
     await module.link(link); await module.evaluate();
-    return { requests, refreshes: () => refreshes, render: () => { cursor = 0; return module.namespace.GuidedUnit({ unit: { id: 4, module_id: 8, level_id: 1, title: 'Conociendo el Kichwa', level_name: 'Básico', module_name: 'Módulo 1', sort_order: 1 } }); } };
+    return { requests, refreshes: () => refreshes, render: () => { cursor = 0; return module.namespace.GuidedUnit({ unit: { config, id: 4, module_id: 8, level_id: 1, title: 'Conociendo el Kichwa', level_name: 'Básico', module_name: 'Módulo 1', sort_order: 1 } }); } };
 }
 function nodes(tree) { if (Array.isArray(tree)) return tree.flatMap(nodes); if (!tree?.props) return []; return [tree, ...nodes(tree.props.children)]; }
 function content(tree) { if (Array.isArray(tree)) return tree.map(content).join(''); return tree?.props ? content(tree.props.children) : typeof tree === 'string' || typeof tree === 'number' ? String(tree) : ''; }
@@ -63,8 +67,7 @@ async function complete(view) {
 
 test('three dedicated screens grade both exercises and show the server score with three working actions', async () => {
     const view = await screen();
-    assert.equal(nodes(view.render()).filter(node => node.type === 'section').length, 4);
-    assert.ok(content(view.render()).includes('La escritura del kichwa'));
+    assert.ok(nodes(view.render()).some(node => node.type === 'GuidedIntroduction'));
     click(view, 'Continuar');
     assert.equal(button(view, 'Comprobar').props.disabled, true);
     assert.equal(nodes(view.render()).find(node => node.type === 'img').props.src, '/api/media/kichwa/imagenes/casa.webp');
@@ -84,7 +87,7 @@ test('three dedicated screens grade both exercises and show the server score wit
     assert.ok(nodes(view.render()).some(node => node.type === 'Link' && content(node).trim() === 'Continuar' && node.props.href === '/aprender/unidad/5'));
     assert.ok(nodes(view.render()).some(node => node.type === 'Link' && content(node).trim() === 'Salir a unidades' && node.props.href === '/aprender/modulo/8'));
     assert.ok(button(view, 'Reintentar'));
-    assert.equal(view.refreshes(), 2);
+    assert.equal(view.refreshes(), 0);
 });
 
 test('wrong answers can be corrected and selection survives navigation backwards', async () => {
@@ -152,4 +155,139 @@ test('a failed score request can be retried without losing or resubmitting the e
     fail = false; await finish(view);
     assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === '20 de 20 puntos'));
     assert.equal(view.requests.filter(request => request.path.endsWith('/answer')).length, 2);
+});
+
+test('guided companion shows checked XP, clears stale feedback and sums only earned XP in the final score', async () => {
+    let checks = 0;
+    const view = await screen({ post: ({ path }) => path.endsWith('/guided/result') ? perfectScore : {
+        response_id: ++checks, is_correct: checks !== 1, feedback: 'Respuesta comprobada.', xp_earned: checks === 2 ? 10 : 0, xp_total: 40,
+    } });
+    const companion = () => nodes(view.render()).find(node => node.type === 'LearningCompanion')?.props;
+    assert.equal(companion(), undefined);
+    click(view, 'Continuar');
+    assert.equal(companion().xpEarned, undefined);
+    choose(view, 'sisa'); await check(view);
+    assert.equal(companion().xpEarned, 0);
+    choose(view, 'wasi');
+    assert.equal(companion().xpEarned, undefined);
+    choose(view, 'wasi'); await check(view);
+    assert.equal(companion().xpEarned, 10);
+    click(view, 'Continuar');
+    for (const [spanish, kichwa] of [['Flor', 'sisa'], ['Oveja', 'llama'], ['Corazón', 'shunku'], ['Caminar', 'purina']]) pair(view, spanish, kichwa);
+    await check(view); await finish(view);
+    assert.equal(companion().final, true);
+    assert.equal(companion().score, '20 / 20');
+    assert.equal(companion().xpEarned, 10);
+    click(view, 'Reintentar');
+    await complete(view);
+    assert.equal(companion().xpEarned, 0);
+});
+
+test('guided correct selections and matching answers stay locked when navigating backwards', async () => {
+    const view = await screen();
+    click(view, 'Continuar'); choose(view, 'wasi'); await check(view);
+    assert.equal(nodes(view.render()).find(node => node.props.className === 'guided-choice').props.disabled, true);
+    choose(view, 'sisa');
+    assert.equal(nodes(view.render()).find(node => node.props.value === 'wasi').props.checked, true);
+    assert.ok(button(view, 'Continuar'));
+    click(view, 'Continuar');
+    for (const [spanish, kichwa] of [['Flor', 'sisa'], ['Oveja', 'llama'], ['Corazón', 'shunku'], ['Caminar', 'purina']]) pair(view, spanish, kichwa);
+    await check(view);
+    assert.equal(nodes(view.render()).find(node => node.props.className === 'guided-matching').props.disabled, true);
+    pair(view, 'Flor', 'purina');
+    assert.equal(view.requests.length, 2);
+    click(view, 'Volver');
+    assert.equal(nodes(view.render()).find(node => node.props.className === 'guided-choice').props.disabled, true);
+    assert.equal(nodes(view.render()).find(node => node.props.value === 'wasi').props.checked, true);
+});
+
+test('four activities show house, flower and walking in order and score only after the matching activity', async () => {
+    const flower = { ...choice, id: 13, config: { ...choice.config, prompt_image: 'kichwa/imagenes/flor.webp', prompt_image_alt: 'Una flor rosada.' } };
+    const walking = { ...choice, id: 14, elements: [...choice.elements, { id: 'purina', texto: 'purina' }], config: { ...choice.config, prompt_image: 'kichwa/imagenes/purina.webp', prompt_image_alt: 'Una persona caminando.' } };
+    const view = await screen({ exercises: [choice, flower, walking, matching], post: ({ path }) => path.endsWith('/guided/result') ? {
+        ...perfectScore, correct_count: 7, total_items: 7,
+    } : { response_id: Number(path.split('/')[2]) + 100, is_correct: true, xp_earned: 10, feedback: 'Alli rurashka.' } });
+    assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Pantalla 1 de 5'));
+    click(view, 'Continuar');
+    for (const [id, word, image, alt] of [[11, 'wasi', 'casa', undefined], [13, 'sisa', 'flor', 'Una flor rosada.'], [14, 'purina', 'purina', 'Una persona caminando.']]) {
+        const picture = nodes(view.render()).find(node => node.type === 'img');
+        assert.equal(picture.props.src, `/api/media/kichwa/imagenes/${image}.webp`);
+        if (alt) assert.equal(picture.props.alt, alt);
+        assert.equal(button(view, 'Comprobar').props.disabled, true);
+        choose(view, word); await check(view);
+        assert.equal(view.requests.at(-1).path, `/exercises/${id}/answer`);
+        assert.equal(button(view, 'Ver mi puntaje'), undefined);
+        assert.equal(nodes(view.render()).find(node => node.type === 'LearningCompanion').props.xpEarned, 10);
+        click(view, 'Continuar');
+    }
+    assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Pantalla 5 de 5'));
+    click(view, 'Volver');
+    assert.equal(nodes(view.render()).find(node => node.props.value === 'purina').props.checked, true);
+    click(view, 'Continuar');
+    for (const [spanish, kichwa] of [['Flor', 'sisa'], ['Oveja', 'llama'], ['Corazón', 'shunku'], ['Caminar', 'purina']]) pair(view, spanish, kichwa);
+    await check(view); await finish(view);
+    assert.deepEqual(Array.from(view.requests.at(-1).payload.response_ids), [111, 113, 114, 112]);
+    assert.equal(view.refreshes(), 0);
+    const mascot = nodes(view.render()).find(node => node.type === 'LearningCompanion').props;
+    assert.equal(mascot.final, true);
+    assert.equal(mascot.score, '20 / 20');
+    assert.equal(mascot.xpEarned, 40);
+    assert.equal(nodes(view.render()).some(node => node.props.className === 'guided-unit-footer'), false);
+    click(view, 'Reintentar');
+    assert.ok(nodes(view.render()).some(node => node.type === 'GuidedIntroduction'));
+    click(view, 'Continuar');
+    assert.equal(button(view, 'Comprobar').props.disabled, true);
+});
+
+test('a guided retry starts with zero XP and a new attempt ID while the server keeps the accumulated total', async () => {
+    const attempts = new Map();
+    let total = 0;
+    const view = await screen({ post: ({ path, payload }) => {
+        if (path.endsWith('/guided/result')) return { ...perfectScore, xp_earned: attempts.get(payload.practice_attempt_id), xp_total: total };
+        const xp = (attempts.get(payload.practice_attempt_id) ?? 0) + 10;
+        attempts.set(payload.practice_attempt_id, xp); total += 10;
+        return { response_id: total, is_correct: true, feedback: 'Alli rurashka', xp_earned: 10, xp_attempt: xp, xp_total: total };
+    } });
+    await complete(view);
+    const first = view.requests[0].payload.practice_attempt_id;
+    assert.equal(nodes(view.render()).find(node => node.type === 'LearningCompanion').props.xpEarned, 20);
+    click(view, 'Reintentar');
+    assert.ok(content(view.render()).includes('0 XP en este intento'));
+    await complete(view);
+    const second = view.requests[3].payload.practice_attempt_id;
+    assert.notEqual(second, first);
+    assert.equal(view.requests[4].payload.practice_attempt_id, second);
+    assert.equal(view.requests[5].payload.practice_attempt_id, second);
+    assert.equal(nodes(view.render()).find(node => node.type === 'LearningCompanion').props.xpEarned, 20);
+    assert.equal(total, 40);
+});
+
+
+test('greetings unit uses its lesson and three images with locked successes, final score and fresh retry XP', async () => {
+    const words = ['puncha', 'chishi', 'tuta'];
+    const exercises = words.map((word, index) => ({ ...choice, id: 21 + index, elements: words.map(id => ({ id, texto: 'Alli ' + id })), config: { ...choice.config, context_text: ['08:00', '17:30', '21:00'][index], prompt_image: 'kichwa/imagenes/' + word + '.webp' } }));
+    const view = await screen({ config: { learning_mode: 'guided', guided_lesson: 'greetings' }, exercises,
+        post: ({ path, payload }) => path.endsWith('/guided/result')
+            ? { ...perfectScore, correct_count: 3, total_items: 3, xp_earned: 30 }
+            : { response_id: payload.answer.seleccion[0].length + 200, is_correct: true, xp_earned: 10 }
+    });
+    assert.ok(nodes(view.render()).some(node => node.type === 'GreetingsIntroduction'));
+    assert.ok(!nodes(view.render()).some(node => node.type === 'GuidedIntroduction'));
+    for (const word of words) {
+        click(view, 'Continuar');
+        assert.equal(nodes(view.render()).find(node => node.type === 'img').props.src, '/api/media/kichwa/imagenes/' + word + '.webp');
+        assert.ok(nodes(view.render()).some(node => node.type === 'figcaption' && content(node) === exercises[words.indexOf(word)].config.context_text));
+        choose(view, word); await check(view);
+        assert.equal(nodes(view.render()).find(node => node.type === 'fieldset').props.disabled, true);
+        choose(view, words.find(other => other !== word));
+        assert.equal(nodes(view.render()).find(node => node.props.value === word).props.checked, true);
+    }
+    await finish(view);
+    assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === '20 de 20 puntos'));
+    assert.equal(nodes(view.render()).find(node => node.type === 'LearningCompanion').props.xpEarned, 30);
+    const firstAttempt = view.requests[0].payload.practice_attempt_id;
+    click(view, 'Reintentar');
+    assert.ok(content(view.render()).includes('0 XP'));
+    click(view, 'Continuar'); choose(view, 'puncha'); await check(view);
+    assert.notEqual(view.requests.at(-1).payload.practice_attempt_id, firstAttempt);
 });

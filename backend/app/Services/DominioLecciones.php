@@ -19,7 +19,7 @@ class DominioLecciones
     public static function rewardActivity(Actividad $exercise, RespuestaActividad $answer): array
     {
         $earned = 0;
-        if ($answer->acierto_actividad && ($exercise->configuracion['managed'] ?? false)) {
+        if ($answer->acierto_actividad) {
             $key = 'actividad:'.($exercise->origen_reactivo ?? $exercise->id_actividad);
             if (str_starts_with($exercise->origen_reactivo ?? '', 'practice:')) {
                 $source = substr($exercise->origen_reactivo, 9);
@@ -27,11 +27,22 @@ class DominioLecciones
                     $key = 'reactivo:'.$source;
                 }
             }
+            if ($answer->id_sesion_practica !== null) {
+                $key = 'practica:'.$answer->id_sesion_practica.':'.hash('sha256', $key);
+            }
             $earned = DB::table('recompensas')->insertOrIgnore(['id_usuario' => $answer->id_usuario, 'id_respuesta_actividad' => $answer->id_respuesta_actividad,
                 'clave' => $key, 'xp' => 10]) * 10;
         }
 
-        return ['xp_earned' => $earned, 'xp_total' => (int) DB::table('recompensas')->where('id_usuario', $answer->id_usuario)->sum('xp')];
+        return ['xp_earned' => $earned, 'xp_total' => (int) DB::table('recompensas')->where('id_usuario', $answer->id_usuario)->sum('xp'),
+            'xp_attempt' => $answer->id_sesion_practica === null ? $earned : self::practiceXp($answer->id_usuario, $exercise->id_unidad, $answer->id_sesion_practica)];
+    }
+
+    public static function practiceXp(int $user, int $unit, string $session): int
+    {
+        return (int) DB::table('recompensas as r')->join('respuestas_actividad as a', 'a.id_respuesta_actividad', '=', 'r.id_respuesta_actividad')
+            ->join('actividades as e', 'e.id_actividad', '=', 'a.id_actividad')->where('r.id_usuario', $user)->where('a.id_sesion_practica', $session)
+            ->where('e.id_unidad', $unit)->sum('r.xp');
     }
 
     public static function prerequisites(EvaluacionKichwa $evaluation): Collection
@@ -112,19 +123,19 @@ class DominioLecciones
         $grant = function (string $key, int $xp, ?string $medal = null) use ($attempt): void {
             DB::table('recompensas')->insertOrIgnore(['id_usuario' => $attempt->id_usuario, 'id_intento' => $attempt->id_intento, 'clave' => $key, 'xp' => $xp, 'medalla' => $medal]);
         };
-        if ($evaluation->id_tema !== null && ($evaluation->configuracion['managed'] ?? false)) {
-            $questions = self::selected($attempt)->keyBy('id_pregunta');
-            foreach (($evaluation->configuracion['sequence_mode'] ?? false) ? [] : $results as $result) {
-                if ($result['is_correct']) {
-                    $q = $questions[$result['question_id']];
-                    $grant('reactivo:'.($q->origen_reactivo ?? $q->id_pregunta), 10);
-                }
+        foreach ($results as $result) {
+            if ($result['is_correct']) {
+                $grant('intento:'.$attempt->id_intento.':pregunta:'.$result['question_id'], 10);
             }
+        }
+        if ($evaluation->id_tema !== null && ($evaluation->configuracion['managed'] ?? false)) {
             if (($evaluation->configuracion['sequence_mode'] ?? false) ? count(array_filter($results, fn ($result) => $result['is_correct'])) >= ($evaluation->configuracion['required_correct'] ?? 5) : $score >= ($evaluation->configuracion['pass_percentage'] ?? 80)) {
                 if ($evaluation->configuracion['final'] ?? false) {
-                    $grant('final:'.$evaluation->id_unidad, 50, 'Mis primeras palabras en Kichwa');
+                    $grant('final:'.$evaluation->id_unidad, 0, 'Mis primeras palabras en Kichwa');
+                    $grant('intento:'.$attempt->id_intento.':final:'.$evaluation->id_unidad, 50);
                 } else {
-                    $grant('dominio:'.$evaluation->id_tema, 20);
+                    $grant('dominio:'.$evaluation->id_tema, 0);
+                    $grant('intento:'.$attempt->id_intento.':dominio:'.$evaluation->id_tema, 20);
                 }
             }
         }
@@ -145,7 +156,10 @@ class DominioLecciones
 
                 return ['topic_id' => (int) $row->id_tema, 'unit_id' => (int) $row->id_unidad, 'name' => $row->titulo_tema, 'attempt_count' => (int) $row->attempt_count, 'best_score' => $best, 'latest_score' => $row->latest_score === null ? null : (float) $row->latest_score, 'stars' => $best >= 100 ? 3 : ($best >= 90 ? 2 : ($best >= 80 ? 1 : 0))];
             });
-        $rewards = DB::table('recompensas')->where('id_usuario', $user)->get(['clave', 'xp', 'medalla']);
+        $xp = (int) DB::table('recompensas')->where('id_usuario', $user)->sum('xp');
+        $rewards = DB::table('recompensas')->where('id_usuario', $user)
+            ->where(fn ($query) => $query->where('clave', 'like', 'dominio:%')->orWhere('clave', 'like', 'final:%')->orWhereNotNull('medalla'))
+            ->get(['clave', 'medalla']);
         $sequenceUnits = Unidad::where('configuracion->learning_mode', 'sequence')->pluck('id_unidad');
         $guidedUnits = Unidad::where('configuracion->learning_mode', 'guided')->pluck('id_unidad');
         $completedGuidedUnits = DB::table('v_progreso')->where('id_usuario', $user)->whereIn('id_unidad', $guidedUnits)
@@ -155,7 +169,7 @@ class DominioLecciones
         $visibleTopics = Tema::where('publicado', true)->pluck('id_tema');
         $lessons = $lessons->filter(fn ($lesson) => $visibleTopics->contains($lesson['topic_id']))->values();
 
-        return ['lessons' => $lessons, 'xp' => (int) $rewards->sum('xp'), 'medals' => $rewards->whereNotNull('medalla')->pluck('medalla')->values(),
+        return ['lessons' => $lessons, 'xp' => $xp, 'medals' => $rewards->whereNotNull('medalla')->pluck('medalla')->values(),
             'mastered_topics' => $rewards->filter(fn ($r) => str_starts_with($r->clave, 'dominio:') && $visibleTopics->contains((int) substr($r->clave, 8)))->map(fn ($r) => (int) substr($r->clave, 8))->values(),
             'completed_units' => $rewards->filter(fn ($r) => str_starts_with($r->clave, 'final:') && ! $guidedUnits->contains((int) substr($r->clave, 6)) && (! $sequenceUnits->contains((int) substr($r->clave, 6)) || $passedUnits->contains((int) substr($r->clave, 6))))->map(fn ($r) => (int) substr($r->clave, 6))->merge($completedGuidedUnits->map(fn ($id) => (int) $id))->unique()->values()];
     }

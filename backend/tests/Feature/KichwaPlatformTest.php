@@ -183,7 +183,8 @@ class KichwaPlatformTest extends TestCase
         $payload = ['attempt_id' => $start, 'answers' => [['question_id' => $question, 'answer' => ['seleccion' => ['a']]]], 'score' => 0];
         $this->postJson('/api/evaluations/'.$evaluation.'/submit', $payload)->assertOk()->assertJsonPath('score', 100)->assertJsonPath('puntaje_obtenido', 10);
         $this->assertDatabaseHas('respuestas_evaluacion', ['id_intento' => $start, 'id_evaluacion' => $evaluation, 'id_pregunta' => $question, 'puntaje_respuesta_evaluacion' => 10]);
-        $this->postJson('/api/evaluations/'.$evaluation.'/submit', $payload)->assertStatus(409);
+        $this->postJson('/api/evaluations/'.$evaluation.'/submit', $payload)->assertOk()->assertJsonPath('xp_earned', 10);
+        $this->getJson('/api/mastery')->assertOk()->assertJsonPath('xp', 10);
         $second = $this->postJson('/api/evaluations/'.$evaluation.'/attempts')->assertJsonPath('numero_intento', 2)->json('attempt_id');
         Sanctum::actingAs(Usuario::factory()->create());
         $this->postJson('/api/evaluations/'.$evaluation.'/submit', array_replace($payload, ['attempt_id' => $second]))->assertNotFound();

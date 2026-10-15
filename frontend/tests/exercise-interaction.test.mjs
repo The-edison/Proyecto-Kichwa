@@ -16,7 +16,7 @@ async function interaction(exercise, initial = {}, checkPair, initialLockedPairs
             useState: value => { const index = cursor++; if (!(index in states)) states[index] = value; return [states[index], value => { states[index] = typeof value === 'function' ? value(states[index]) : value; }]; },
             useRef: value => ({ current: value }),
         } : specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx, Fragment: 'fragment' }
-            : { apiPost: () => {}, apiBaseUrl: '', ApiError: class extends Error {} };
+            : specifier.endsWith('/LearningCompanion') ? { LearningCompanion: 'LearningCompanion' } : { apiPost: () => {}, apiBaseUrl: '', ApiError: class extends Error {} };
         return new vm.SyntheticModule(Object.keys(dependency), function () { for (const [key, value] of Object.entries(dependency)) this.setExport(key, value); }, { context });
     });
     await module.evaluate();

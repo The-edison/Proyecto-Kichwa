@@ -353,17 +353,30 @@ h1, h2, h3 { line-height: 1.25; letter-spacing: -.035em; }
 .student-dashboard-content .course-body { display: flex; flex-direction: column; flex: 1; }
 .student-dashboard-content .course-body h3 { overflow-wrap: anywhere; }
 .student-dashboard-content .course-progress, .student-dashboard-content .course-body .locked-label { margin-top: auto; padding-top: 24px; }
-.student-dashboard-support { grid-column: 2; grid-row: 2; display: grid; grid-template-columns: minmax(0,1fr); gap: 20px; align-content: start; min-width: 0; }
-.student-dashboard-support .achievement-panel { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; padding: 20px; }
+.student-dashboard-support { grid-column: 2; grid-row: 2; display: grid; grid-template-columns: minmax(0,1fr); gap: 14px; align-content: start; min-width: 0; }
+.student-dashboard-support .achievement-panel { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; padding: 14px 16px; }
 .student-dashboard-support .achievement-panel > * { max-width: 100%; }
-.student-dashboard-support .achievement-panel h2 { font-size: 17px; line-height: 1.5; margin: 12px 0 8px; overflow-wrap: anywhere; }
-.student-dashboard-support .stat-icon { width: 40px; height: 40px; border-radius: 12px; }
-.student-dashboard-support .achievement-total { margin: 16px 0; }
-.student-dashboard-support .achievement-total strong { font-size: 32px; }
-.student-dashboard-support .soft-note { margin: 0; padding: 12px; font-size: 12px; }
-.student-dashboard-support .achievement-panel > .text-link { margin-top: auto; padding-top: 12px; }
-.student-dashboard-support .quick-link { align-self: stretch; min-width: 0; }
+.student-dashboard-support .achievement-panel h2 { font-size: 15px; line-height: 1.35; margin: 5px 0; overflow-wrap: anywhere; }
+.student-support-heading { display: flex; align-items: center; gap: 10px; }
+.student-dashboard-support .student-support-heading h2 { margin: 0; }
+.student-dashboard-support .stat-icon { flex: none; width: 32px; height: 32px; border-radius: 10px; }
+.student-dashboard-support .achievement-panel > p { font-size: 11px; line-height: 1.5; }
+.student-dashboard-support .achievement-panel > .eyebrow { font-size: 9px; }
+.student-dashboard-support .achievement-total { gap: 10px; margin: 10px 0; }
+.student-dashboard-support .achievement-total strong { font-size: 26px; }
+.student-dashboard-support .achievement-total span { font-size: 11px; }
+.student-dashboard-support .soft-note { margin: 0; padding: 8px 10px; font-size: 11px; line-height: 1.45; }
+.student-dashboard-support .achievement-panel > .text-link { margin-top: auto; padding-top: 8px; font-size: 12px; }
+.student-dashboard-support .achievement-list { gap: 6px; margin: 0; overflow-y: auto; }
+.student-dashboard-support .achievement-list li { padding: 6px 8px; font-size: 11px; }
+.student-dashboard-support .quick-link { align-self: stretch; min-width: 0; min-height: 44px; gap: 8px; padding: 8px 0; font-size: 12px; }
+.student-dashboard-support .quick-link small { font-size: 10px; margin-top: 2px; }
+.student-dashboard-support .quick-link:last-child { border-bottom: 0; padding-bottom: 0; }
 .student-dashboard-support .quick-link > span { min-width: 0; overflow-wrap: anywhere; }
+@media (min-width: 1281px) {
+    .student-dashboard-support { align-self: stretch; grid-template-rows: repeat(2,minmax(0,1fr)); align-content: stretch; contain: size; }
+    .student-dashboard-support .achievement-panel { min-height: 0; overflow-y: auto; }
+}
 @media (max-width: 1280px) {
     .student-dashboard-content { grid-template-columns: minmax(0,1fr); }
     .student-dashboard-support { grid-column: 1; grid-row: 3; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: stretch; }

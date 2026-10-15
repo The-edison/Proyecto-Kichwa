@@ -11,7 +11,7 @@ interface ApiUser extends Omit<AuthUser, 'role'> {
 
 function toAuthUser(user: ApiUser): AuthUser {
     return { id: user.id, name: user.name, email: user.email, cedula: user.cedula,
-        role: user.role.code, google_connected: user.google_connected,
+        avatar: user.avatar ?? null, role: user.role.code, google_connected: user.google_connected,
         debe_cambiar_contrasena: user.debe_cambiar_contrasena, email_verified: user.email_verified };
 }
 

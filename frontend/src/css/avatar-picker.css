@@ -1,0 +1,26 @@
+.system-avatar { overflow: hidden; }
+.system-avatar.has-avatar { background: var(--color-soft); color: var(--color-primary); }
+.system-avatar > img { width: 100%; height: 100%; object-fit: contain; padding: 3px; }
+.system-avatar.is-uploaded > img { object-fit: cover; padding: 0; }
+.system-avatar > svg { width: 60%; height: 60%; }
+.avatar-picker { position: relative; flex: none; }
+.avatar-picker-trigger { display: block; position: relative; border-radius: 24px; cursor: pointer; }
+.avatar-picker-trigger:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 4px; }
+.avatar-edit-badge { position: absolute; right: -4px; bottom: -4px; display: grid; place-items: center; width: 27px; height: 27px; border: 2px solid var(--color-surface); border-radius: 50%; background: var(--color-primary-button); color: var(--color-on-primary); }
+.account-profile-hero:has(.avatar-picker) { overflow: visible; margin-bottom: 24px; }
+.avatar-picker-panel { position: absolute; z-index: 60; top: calc(100% + 14px); left: 0; width: min(310px,calc(100vw - 80px)); max-height: min(520px,70dvh); overflow-y: auto; padding: 18px; border: 1px solid var(--color-border); border-radius: 18px; background: var(--color-surface); box-shadow: var(--shadow-hover); color: var(--color-text); text-align: left; }
+.avatar-picker-heading { display: flex; align-items: flex-start; gap: 8px; justify-content: space-between; margin-bottom: 16px; }
+.avatar-picker-heading h3 { font-size: 16px; font-weight: 750; }
+.avatar-picker-heading p { margin-top: 4px; font-size: 11px; line-height: 1.5; color: var(--color-text-secondary); }
+.avatar-picker-heading > button { flex: none; width: 28px; height: 28px; }
+.avatar-picker-options { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; margin-bottom: 16px; }
+.avatar-picker-options > button { display: grid; justify-items: center; align-content: start; gap: 6px; min-width: 0; padding: 8px 3px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-bg); }
+.avatar-picker-options > button:hover, .avatar-picker-options > button[aria-pressed='true'] { border-color: var(--color-primary); background: var(--color-soft); }
+.avatar-picker-options .system-avatar { width: 48px; height: 48px; border-radius: 12px; }
+.avatar-picker-options > button > span:last-child { font-size: 10px; line-height: 1.4; text-align: center; overflow-wrap: anywhere; }
+.avatar-upload-button { width: 100%; padding: 10px; font-size: 11px; justify-content: center; }
+.avatar-picker-hint { margin-top: 8px; color: var(--color-text-secondary); font-size: 10px; text-align: center; }
+.avatar-use-initial { display: block; margin: 12px auto 0; min-height: 32px; color: var(--color-primary); font-size: 12px; }
+.avatar-picker button:disabled { opacity: .55; cursor: not-allowed; }
+.avatar-picker-status { display: flex; align-items: center; gap: 6px; margin-top: 10px; color: var(--color-primary); font-size: 12px; }
+.avatar-picker-saved { position: absolute; top: calc(100% + 5px); left: 0; width: 150px; color: var(--color-success); font-size: 11px; }

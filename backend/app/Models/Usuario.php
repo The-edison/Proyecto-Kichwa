@@ -55,7 +55,7 @@ class Usuario extends Authenticatable implements MustVerifyEmailContract
     public function perfil(): array
     {
         return ['id' => $this->id_usuario, 'name' => $this->nombre_usuario,
-            'email' => $this->correo_usuario, 'cedula' => $this->cedula_usuario,
+            'email' => $this->correo_usuario, 'cedula' => $this->cedula_usuario, 'avatar' => $this->avatar_usuario,
             'google_connected' => $this->google_id !== null, 'email_verified' => $this->hasVerifiedEmail(),
             'debe_cambiar_contrasena' => $this->debe_cambiar_contrasena,
             'role' => ['code' => $this->rol_usuario === 'administrador' ? 'admin' : 'student']];

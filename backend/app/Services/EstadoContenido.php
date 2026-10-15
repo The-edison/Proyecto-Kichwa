@@ -26,6 +26,13 @@ class EstadoContenido
         } catch (ValidationException $exception) {
             $errors = array_merge(...array_values($exception->errors()));
         }
+
+        return array_values(array_unique(array_merge($errors, self::requirements($exercise))));
+    }
+
+    private static function requirements(array $exercise): array
+    {
+        $errors = [];
         $config = $exercise['config'] ?? [];
         if (($config['managed'] ?? false) && ! ($config['reviewed'] ?? false)) {
             $errors[] = 'Pendiente de validación lingüística docente.';
@@ -43,7 +50,7 @@ class EstadoContenido
     public static function assertReady(array $exercise): void
     {
         ContratoEjercicio::validate($exercise);
-        $errors = self::errors($exercise);
+        $errors = self::requirements($exercise);
         if ($errors !== []) {
             throw ValidationException::withMessages(['publication' => $errors]);
         }

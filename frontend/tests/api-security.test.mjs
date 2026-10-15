@@ -34,6 +34,17 @@ test('private requests send the tab credential and bypass browser caches', async
     assert.equal(request.cache, 'no-store');
 });
 
+test('avatar upload keeps multipart encoding and the authenticated request headers', async () => {
+    const browser = await client();
+    const data = new FormData(); data.append('image', new Blob(['image'], { type: 'image/png' }), 'foto.png');
+    await browser.api.apiPost('/auth/avatar', data);
+    const request = browser.requests[0].options;
+    assert.equal(request.body, data);
+    assert.equal(request.headers['Content-Type'], undefined);
+    assert.equal(request.headers['X-XSRF-TOKEN'], 'csrf');
+    assert.equal(request.headers['X-Tab-Session'], 'a'.repeat(64));
+});
+
 test('an expired session signals immediate removal of the private UI', async () => {
     const browser = await client(401);
     await assert.rejects(browser.api.apiGet('/auth/me'), error => error.status === 401);
@@ -49,6 +60,7 @@ test('publishing refreshes active catalog queries and notifies other tabs', asyn
     assert.equal(filter.predicate({ queryKey: ['api', '/modules/1/units?page=1'] }), true);
     assert.equal(filter.predicate({ queryKey: ['api', '/modules/1/contents?page=1'] }), true);
     assert.equal(filter.predicate({ queryKey: ['api', '/levels'] }), true);
+    assert.equal(filter.predicate({ queryKey: ['api', '/admin/overview'] }), true);
     assert.deepEqual(browser.notifications, [['yachay:catalog-changed', 'revision']]);
 });
 
@@ -60,4 +72,19 @@ test('publishing an opinion refreshes the public stories and the student opinion
     assert.equal(filter.predicate({ queryKey: ['api', '/testimonials'] }), true);
     assert.equal(filter.predicate({ queryKey: ['api', '/testimonials/eligibility'] }), true);
     assert.equal(filter.predicate({ queryKey: ['api', '/levels'] }), false);
+});
+
+test('graded attempts refresh the shared student XP and admin report queries', async () => {
+    for (const path of ['/exercises/1/answer', '/evaluations/2/submit']) {
+        const browser = await client();
+        await browser.api.apiPost(path, {});
+        const [deferred] = browser.invalidations[0];
+        assert.equal(deferred.refetchType, 'none');
+        assert.equal(deferred.predicate({ queryKey: ['api', '/units/1/guided'] }), true);
+        const [filter] = browser.invalidations[1];
+        assert.equal(filter.predicate({ queryKey: ['api', '/units/1/guided'] }), false);
+        assert.equal(filter.predicate({ queryKey: ['api', '/mastery'] }), true);
+        assert.equal(filter.predicate({ queryKey: ['api', '/admin/learning-results/7'] }), true);
+        assert.equal(filter.predicate({ queryKey: ['api', '/progress'] }), true);
+    }
 });

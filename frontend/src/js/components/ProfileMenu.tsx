@@ -1,3 +1,4 @@
+import { UserAvatar } from './UserAvatar';
 import { useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { BookOpen, ChartNoAxesCombined, ChevronDown, House, KeyRound, Languages, LayoutDashboard, LogOut, UserRound, Users, type LucideIcon } from 'lucide-react';
@@ -14,9 +15,9 @@ export function ProfileMenu() {
         ? [['/admin', 'Resumen del campus', LayoutDashboard], ['/admin/contenidos', 'Contenidos y actividades', BookOpen], ['/admin/estudiantes', 'Estudiantes', Users]]
         : [['/aprender', 'Mi aprendizaje', BookOpen], ['/aprender/progreso', 'Mi progreso', ChartNoAxesCombined], ['/aprender/diccionario', 'Diccionario', Languages]];
     return <details ref={menu} className="topbar-dropdown profile-menu" name="campus-popovers">
-        <summary className="profile-trigger" aria-label="Abrir opciones de perfil" title="Mi perfil"><span className="user-avatar" aria-hidden="true">{user?.name.slice(0, 1).toUpperCase()}</span><ChevronDown size={13} aria-hidden="true" /></summary>
+        <summary className="profile-trigger" aria-label="Abrir opciones de perfil" title="Mi perfil"><UserAvatar name={user?.name} avatar={user?.avatar} /><ChevronDown size={13} aria-hidden="true" /></summary>
         <div className="dropdown-panel profile-menu-panel">
-            <div className="profile-menu-identity"><span className="user-avatar" aria-hidden="true">{user?.name.slice(0, 1).toUpperCase()}</span><div><strong>{user?.name}</strong><small>{user?.email}</small><span className="badge">{admin ? 'Administrador' : 'Estudiante'}</span></div></div>
+            <div className="profile-menu-identity"><UserAvatar name={user?.name} avatar={user?.avatar} /><div><strong>{user?.name}</strong><small>{user?.email}</small><span className="badge">{admin ? 'Administrador' : 'Estudiante'}</span></div></div>
             <nav aria-label="Opciones de perfil">
                 <div className="dropdown-group"><p className="dropdown-group-title">MI CUENTA</p><Link href="/cuenta" onClick={close} aria-current={location.pathname === '/cuenta' && !location.hash ? 'page' : undefined}><UserRound size={18} aria-hidden="true" /><span>Mi cuenta<small>Perfil y métodos de acceso</small></span></Link><Link href="/cuenta#account-security" onClick={close}><KeyRound size={18} aria-hidden="true" /><span>Seguridad<small>Contraseña y verificación</small></span></Link></div>
                 <div className="dropdown-group"><p className="dropdown-group-title">{admin ? 'GESTIÓN DEL CAMPUS' : 'MI APRENDIZAJE'}</p>{campusLinks.map(([href, label, Icon]) => <Link key={href} href={href} onClick={close} aria-current={location.pathname === href ? 'page' : undefined}><Icon size={18} aria-hidden="true" /><span>{label}</span></Link>)}</div>

@@ -131,7 +131,11 @@ class SessionSecurityTest extends TestCase
     public function test_google_navigation_cannot_start_without_tab_preparation(): void
     {
         config(['services.google.client_id' => 'test', 'services.google.client_secret' => 'test']);
-        $this->get('/auth/google')->assertForbidden();
-        $this->get('/cuenta/google')->assertForbidden();
+        $login = $this->get('/auth/google')->assertRedirect();
+        $this->assertStringStartsWith('http://127.0.0.1:5173/iniciar-sesion?google_error=', $login->headers->get('Location'));
+        $link = $this->get('/cuenta/google')->assertRedirect();
+        $this->assertStringStartsWith('http://127.0.0.1:5173/cuenta?google_error=', $link->headers->get('Location'));
+        $this->assertGuest('web');
+        $this->assertDatabaseCount('personal_access_tokens', 0);
     }
 }

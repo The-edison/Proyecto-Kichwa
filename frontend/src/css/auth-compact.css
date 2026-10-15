@@ -1,0 +1,134 @@
+.auth-shell { display: flex; flex-direction: column; min-height: 100dvh; }
+.auth-shell .public-header { flex: none; min-height: 64px; padding: 8px 4%; gap: 16px; }
+.auth-shell .public-nav a { min-height: 40px; padding: 8px 12px; font-size: 13px; }
+.auth-shell > main { display: grid; align-items: center; flex: 1; width: 100%; padding: 12px 20px; }
+.auth-shell .public-footer { flex: none; width: 100%; max-width: none; min-height: 42px; margin-top: 0; padding: 6px 4%; gap: 16px; font-size: 10px; }
+.auth-shell .public-footer .brand { gap: 8px; }
+.auth-shell .public-footer .brand-icon { width: 26px; height: 26px; }
+.auth-shell .public-footer .brand-name { font-size: 14px; }
+.auth-shell .public-footer .brand-kicker { display: none; }
+.login-page { width: min(460px,100%); margin: 0 auto; }
+.login-panel { padding: 22px 26px; }
+.login-welcome { display: flex; align-items: center; gap: 12px; }
+.login-welcome-icon { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 12px; background: var(--color-soft); color: var(--color-primary); }
+.login-welcome .eyebrow { font-size: 9px; }
+.login-welcome h1 { margin-top: 3px; font-size: 26px; font-weight: 750; }
+.login-intro { margin: 10px 0 16px; color: var(--color-text-secondary); font-size: 13px; line-height: 1.5; }
+.login-form-content, .login-fields { display: grid; gap: 12px; }
+.login-create-account { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0 6px; padding-top: 8px; border-top: 1px solid var(--color-border); }
+.login-create-account > p, .login-create-account > a, .login-create-account > span { margin: 0; font-size: 12px; }
+.login-create-account > a { min-height: 32px; }
+.auth-shell .field-label { margin-bottom: 5px; font-size: 12px; line-height: 1.3; }
+.auth-shell .field { min-height: 42px; padding: 8px 11px; font-size: 14px; }
+.auth-shell .field + button { min-height: 40px; }
+.auth-shell .primary-button, .auth-shell .secondary-button { min-height: 42px; padding: 8px 14px; font-size: 13px; line-height: 1.35; }
+.auth-shell .google-mark { font-size: 18px; line-height: 1; }
+.auth-shell .login-recovery { align-items: center; gap: 10px; padding: 9px 12px; }
+.auth-shell .login-recovery-icon { width: 30px; height: 30px; border-radius: 9px; }
+.auth-shell .login-recovery strong { font-size: 12px; }
+.auth-shell .login-recovery > div { display: grid; gap: 1px; line-height: 1.3; }
+.auth-shell .login-recovery p { margin-top: 1px; font-size: 11px; line-height: 1.4; }
+.auth-shell .login-recovery a, .auth-shell .login-recovery div > span { min-height: 25px; font-size: 12px; }
+.auth-shell .google-auth-options { display: grid; gap: 7px; }
+.auth-shell .google-auth-options > * { margin-block: 0; }
+.auth-shell .google-auth-options > p { font-size: 11px; line-height: 1.4; }
+.auth-shell .google-auth-options > div { font-size: 10px; line-height: 1.3; }
+.auth-shell .auth-alert, .auth-shell .login-reset-success { padding: 8px 10px; font-size: 12px; line-height: 1.45; }
+.auth-shell .register-page { width: min(1100px,100%); max-width: none; margin: 0 auto; padding: 0; }
+.auth-shell .register-panel { grid-template-columns: minmax(0,.55fr) minmax(0,1.45fr); border-radius: 20px; }
+.auth-shell .register-welcome { padding: 24px; }
+.auth-shell .register-welcome-icon { width: 42px; height: 42px; margin-bottom: 18px; border-radius: 12px; }
+.auth-shell .register-welcome h1 { margin-top: 12px; font-size: 29px; }
+.auth-shell .register-welcome-copy { margin-top: 12px; font-size: 12px; line-height: 1.65; }
+.auth-shell .register-benefits { gap: 14px; margin: 22px 0; }
+.auth-shell .register-benefits p { gap: 8px; font-size: 11px; }
+.auth-shell .register-welcome-footer { padding-top: 16px; font-size: 9px; }
+.auth-shell .register-main { padding: 22px 26px; }
+.auth-shell .register-main > h2 { font-size: 24px; }
+.auth-shell .register-main-intro { margin: 5px 0 14px; font-size: 12px; }
+.auth-shell .register-form-content { gap: 10px; }
+.auth-shell .register-form-content > form { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 12px 18px; }
+.auth-shell .register-fieldset legend { gap: 7px; margin-bottom: 10px; font-size: 12px; line-height: 1.3; }
+.auth-shell .register-fieldset legend > span { width: 23px; height: 23px; font-size: 10px; }
+.auth-shell .register-security { margin: 0; padding: 0 0 0 18px; border-top: 0; border-left: 1px solid var(--color-border); }
+.auth-shell .register-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.auth-shell .register-security .register-grid { grid-template-columns: minmax(0,1fr); gap: 10px; }
+.auth-shell .register-help { margin-top: 5px; font-size: 10px; line-height: 1.45; }
+.auth-shell .register-fieldset > .register-help { margin-bottom: 10px; }
+.auth-shell .register-password-checks { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 4px 8px; margin-top: 10px; }
+.auth-shell .register-password-checks li { font-size: 9px; line-height: 1.5; }
+.auth-shell .register-submit { grid-column: 1 / -1; margin-top: 0; }
+.auth-shell .register-form-content form > .auth-alert { grid-column: 1 / -1; }
+.auth-shell .register-login { font-size: 12px; line-height: 1.3; }
+.auth-shell .register-login a { min-height: 28px; }
+@media (max-width: 1000px) {
+    .auth-shell .register-panel { grid-template-columns: minmax(0,1fr); max-width: 700px; margin: auto; }
+    .auth-shell .register-welcome { display: none; }
+}
+@media (max-width: 650px) {
+    .auth-shell .public-header { min-height: 54px; padding: 5px 16px; gap: 10px; }
+    .auth-shell .public-header .brand-icon { width: 32px; height: 32px; }
+    .auth-shell .public-header .brand-name { font-size: 20px; }
+    .auth-shell .public-header .brand-kicker { font-size: 8px; }
+    .auth-shell .public-header .menu-button, .auth-shell .public-header .theme-toggle { width: 36px; height: 36px; }
+    .auth-shell > main { padding: 8px 12px; }
+    .auth-shell .public-footer { flex-direction: row; align-items: center; padding: 4px 16px; min-height: 32px; gap: 8px; font-size: 9px; }
+    .auth-shell .public-footer > p { display: none; }
+    .auth-shell .public-footer .brand { gap: 5px; }
+    .auth-shell .public-footer .brand-icon { width: 22px; height: 22px; }
+    .auth-shell .register-main, .login-panel { padding: 12px 16px; }
+    .auth-shell .field { min-height: 40px; padding-block: 6px; font-size: 16px; line-height: 1.25; }
+    .auth-shell .field-label { margin-bottom: 3px; }
+    .auth-shell .register-main > h2 { font-size: 22px; }
+    .auth-shell .register-main-intro { display: none; }
+    .auth-shell .register-main > h2 { margin-bottom: 10px; }
+    .auth-shell .register-form-content > form { grid-template-columns: minmax(0,1fr); gap: 8px; }
+    .auth-shell .register-security { padding: 8px 0 0; border-left: 0; border-top: 1px solid var(--color-border); }
+    .auth-shell .register-security .register-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .auth-shell .register-grid { gap: 8px; }
+    .auth-shell .register-grid .field-label { font-size: 11px; }
+    .auth-shell .register-optional { font-size: 9px; margin-left: 2px; }
+    .auth-shell .register-password-checks { margin-top: 6px; }
+    .auth-shell .register-help { margin-top: 3px; font-size: 9px; }
+    .auth-shell .register-fieldset > .register-help { margin-bottom: 6px; }
+    .auth-shell .register-fieldset legend { margin-bottom: 6px; }
+    .auth-shell .register-fieldset legend > span { width: 20px; height: 20px; }
+    .auth-shell .login-welcome .eyebrow { display: none; }
+    .login-intro { margin-bottom: 12px; font-size: 12px; }
+    .login-form-content, .login-fields { gap: 10px; }
+}
+@media (max-height: 650px) {
+    .auth-shell > main { padding-block: 6px; }
+    .auth-shell .public-header { min-height: 48px; padding-block: 3px; }
+    .auth-shell .public-footer { min-height: 28px; padding-block: 2px; }
+    .auth-shell .login-panel, .auth-shell .register-main { padding: 12px 16px; }
+    .auth-shell .field { min-height: 36px; padding-block: 6px; }
+    .auth-shell .field + button { min-height: 36px; }
+    .auth-shell .primary-button, .auth-shell .secondary-button { min-height: 36px; padding-block: 6px; }
+    .auth-shell .login-welcome h1 { font-size: 23px; }
+    .auth-shell .login-welcome .eyebrow { display: none; }
+    .auth-shell .login-welcome { margin-bottom: 8px; }
+    .auth-shell .login-intro { display: none; }
+    .auth-shell .login-intro { margin-block: 6px 10px; }
+    .auth-shell .login-form-content, .auth-shell .login-fields { gap: 8px; }
+    .auth-shell .login-recovery { padding-block: 6px; }
+    .auth-shell .login-create-account { padding-top: 4px; }
+    .auth-shell .register-main-intro { margin-block: 3px 8px; }
+    .auth-shell .register-fieldset legend > span { width: 19px; height: 19px; }
+    .auth-shell .register-fieldset legend { margin-bottom: 5px; }
+    .auth-shell .register-form-content, .auth-shell .register-form-content > form { gap: 7px; }
+    .auth-shell .register-security { padding-top: 6px; }
+    .auth-shell .register-login a { min-height: 24px; }
+    .auth-shell .register-main > h2 { margin-bottom: 6px; }
+    .auth-shell .register-fieldset legend { font-size: 11px; }
+}
+@media (max-width: 650px) and (max-height: 650px) {
+    .auth-shell .register-main { padding: 8px 12px; }
+    .auth-shell .register-main > h2 { font-size: 20px; margin-bottom: 4px; }
+    .auth-shell .register-fieldset legend { margin-bottom: 3px; }
+    .auth-shell .register-fieldset legend > span { width: 16px; height: 16px; font-size: 9px; }
+    .auth-shell .register-fieldset > .register-help { margin-bottom: 3px; }
+    .auth-shell .register-security { padding-top: 4px; }
+    .auth-shell .register-form-content, .auth-shell .register-form-content > form { gap: 5px; }
+    .auth-shell .register-form-content .google-auth-options { gap: 4px; }
+}

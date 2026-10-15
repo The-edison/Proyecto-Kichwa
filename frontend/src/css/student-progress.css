@@ -1,0 +1,38 @@
+.student-progress-page { display: grid; gap: 24px; }
+.student-progress-page > .dashboard-intro { margin-bottom: -4px; }
+.student-progress-page > .stats-grid { grid-template-columns: repeat(4,minmax(0,1fr)); margin-bottom: 0; }
+.student-progress-columns { display: grid; grid-template-columns: minmax(0,1.65fr) minmax(280px,1fr); gap: 24px; align-items: start; }
+.student-progress-columns > * { min-width: 0; }
+.student-progress-levels { display: grid; gap: 16px; }
+.student-progress-level { padding: 24px; }
+.student-progress-level-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 22px; }
+.student-progress-level h3 { font-size: 21px; font-weight: 750; overflow-wrap: anywhere; }
+.student-progress-level > .text-link { margin-top: 20px; }
+.student-progress-evaluations { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--color-border); }
+.student-progress-evaluations h4 { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 750; }
+.student-progress-evaluations ul { display: grid; gap: 10px; margin-top: 12px; }
+.student-progress-evaluations li { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; color: var(--color-text-secondary); font-size: 12px; }
+.student-progress-evaluations strong { color: var(--color-primary); }
+.student-progress-pending { margin-top: 18px; color: var(--color-text-secondary); font-size: 12px; line-height: 1.7; }
+.student-progress-achievements { padding: 26px; }
+.student-progress-achievements > .eyebrow { display: block; margin: 20px 0 8px; }
+.student-progress-achievements h2 { margin-bottom: 22px; font-size: 24px; font-weight: 750; }
+.student-progress-achievements h3 { margin: 22px 0 12px; font-size: 14px; font-weight: 750; }
+.student-progress-milestones { display: grid; gap: 12px; }
+.student-progress-milestones > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--color-border); }
+.student-progress-milestones dt { display: flex; align-items: center; gap: 8px; color: var(--color-text-secondary); font-size: 12px; }
+.student-progress-milestones svg { flex: none; color: var(--color-primary); }
+.student-progress-milestones dd { color: var(--color-text); font-size: 25px; font-weight: 750; }
+.student-progress-medals { display: grid; gap: 10px; }
+.student-progress-medals li { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 12px; background: var(--color-warning-bg); color: var(--color-warning); font-size: 12px; font-weight: 650; overflow-wrap: anywhere; }
+.student-progress-medals svg { flex: none; }
+.student-progress-tip { margin-top: 22px; color: var(--color-text-secondary); font-size: 12px; line-height: 1.8; }
+@media (max-width: 1100px) { .student-progress-page > .stats-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 1000px) { .student-progress-columns { grid-template-columns: minmax(0,1fr); } }
+@media (max-width: 650px) {
+    .student-progress-page { gap: 20px; }
+    .student-progress-page .dashboard-intro { align-items: flex-start; flex-wrap: wrap; gap: 12px; }
+    .student-progress-level, .student-progress-achievements { padding: 20px; }
+    .student-progress-level-heading { align-items: flex-start; }
+    .student-progress-level h3 { font-size: 19px; }
+}

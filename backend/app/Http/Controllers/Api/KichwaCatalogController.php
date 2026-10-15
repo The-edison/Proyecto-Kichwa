@@ -15,7 +15,6 @@ use App\Models\Tema;
 use App\Models\Unidad;
 use App\Models\UsuarioNivel;
 use App\Models\VistaIntento;
-use App\Models\VistaProgresoNivel;
 use App\Services\DominioLecciones;
 use App\Services\EstadoContenido;
 use App\Services\KichwaResource;
@@ -127,12 +126,14 @@ class KichwaCatalogController extends Controller
     {
         $record = self::publishedUnit($unit);
         abort_unless(($record->configuracion['learning_mode'] ?? '') === 'guided', 404);
-        $exercises = Actividad::where('id_unidad', $unit)->where('publicado', true)->whereNull('id_tema')->orderBy('orden_actividad')->get();
-        $completed = DB::table('respuestas_actividad')->where('id_usuario', $request->user()->id_usuario)
-            ->whereIn('id_actividad', $exercises->pluck('id_actividad'))->where('acierto_actividad', true)->distinct()->pluck('id_actividad');
+        $exercises = PublicacionContenido::exercises($unit)->orderBy('orden_actividad')->get();
+        $completed = DB::table('respuestas_actividad as r')->join('actividades as a', 'a.id_actividad', '=', 'r.id_actividad')
+            ->where('r.id_usuario', $request->user()->id_usuario)->where('a.id_unidad', $unit)->where('r.acierto_actividad', true)
+            ->whereIn(DB::raw('COALESCE(a.origen_reactivo,a.id_actividad::text)'), $exercises->map(fn (Actividad $exercise) => SecuenciaUnidad::origin($exercise)))
+            ->selectRaw('DISTINCT COALESCE(a.origen_reactivo,a.id_actividad::text) as origin')->get()->pluck('origin');
 
         return response()->json([
-            'exercises' => $exercises->map(fn (Actividad $exercise): array => KichwaResource::present('exercises', $exercise) + ['completed' => $completed->contains($exercise->id_actividad)])->values(),
+            'exercises' => $exercises->map(fn (Actividad $exercise): array => KichwaResource::present('exercises', $exercise) + ['completed' => $completed->contains(SecuenciaUnidad::origin($exercise))])->values(),
             'completed_count' => $completed->count(),
             'total' => $exercises->count(),
         ]);
@@ -153,7 +154,7 @@ class KichwaCatalogController extends Controller
     {
         $progress = DB::table('actividades as a')->leftJoin('respuestas_actividad as r', function ($join) use ($request) {
             $join->whereRaw('r.id_actividad IN (SELECT h.id_actividad FROM actividades h WHERE h.id_unidad=a.id_unidad AND COALESCE(h.origen_reactivo,h.id_actividad::text)=COALESCE(a.origen_reactivo,a.id_actividad::text))')->where('r.id_usuario', $request->user()->id_usuario)->where('r.acierto_actividad', true);
-        })->where('a.publicado', true)->whereIn('a.id_tema', array_column($data['data'], 'id'))->groupBy('a.id_tema')->selectRaw('a.id_tema, count(distinct COALESCE(a.origen_reactivo,a.id_actividad::text)) as exercise_count, round(100.0 * count(distinct CASE WHEN r.id_actividad IS NOT NULL THEN COALESCE(a.origen_reactivo,a.id_actividad::text) END) / nullif(count(distinct COALESCE(a.origen_reactivo,a.id_actividad::text)), 0), 2) as percentage')->get()->keyBy('id_tema');
+        })->whereIn('a.id_actividad', PublicacionContenido::exercises()->select('id_actividad'))->whereIn('a.id_tema', array_column($data['data'], 'id'))->groupBy('a.id_tema')->selectRaw('a.id_tema, count(distinct COALESCE(a.origen_reactivo,a.id_actividad::text)) as exercise_count, round(100.0 * count(distinct CASE WHEN r.id_actividad IS NOT NULL THEN COALESCE(a.origen_reactivo,a.id_actividad::text) END) / nullif(count(distinct COALESCE(a.origen_reactivo,a.id_actividad::text)), 0), 2) as percentage')->get()->keyBy('id_tema');
         $masteryData = DominioLecciones::progress($request->user()->id_usuario);
         $mastery = collect($masteryData['lessons'])->keyBy('topic_id');
         $evaluations = EvaluacionKichwa::whereIn('id_unidad', array_unique(array_column($data['data'], 'unit_id')))->where('configuracion->managed', true)->orderByDesc('id_evaluacion')->get();
@@ -187,14 +188,9 @@ class KichwaCatalogController extends Controller
 
     public function exercises(Request $request, int $unit): JsonResponse
     {
-        $unitRecord = self::publishedUnit($unit);
+        self::publishedUnit($unit);
         $request->validate(['topic_id' => ['sometimes', 'integer', 'exists:temas,id_tema'], 'page' => ['sometimes', 'integer', 'min:1']]);
-        $query = Actividad::where('publicado', true)->where('id_unidad', $unit)->where(fn ($q) => $q->whereNull('id_tema')->orWhereIn('id_tema', Tema::where('publicado', true)->select('id_tema')))
-            ->whereRaw('id_actividad = (SELECT max(a2.id_actividad) FROM actividades a2 WHERE a2.id_unidad=actividades.id_unidad AND a2.publicado AND COALESCE(a2.origen_reactivo,a2.id_actividad::text)=COALESCE(actividades.origen_reactivo,actividades.id_actividad::text) AND (a2.id_tema IS NULL OR EXISTS(SELECT 1 FROM temas t2 WHERE t2.id_tema=a2.id_tema AND t2.publicado)))');
-        if (($unitRecord->configuracion['learning_mode'] ?? '') === 'sequence') {
-            $evaluation = SecuenciaUnidad::evaluation($unit);
-            $query->whereIn('id_actividad', $evaluation ? SecuenciaUnidad::practices($evaluation)->pluck('id_actividad') : []);
-        }
+        $query = PublicacionContenido::exercises($unit);
         if ($request->filled('topic_id')) {
             $topic = Tema::where('publicado', true)->where('id_unidad', $unit)->findOrFail($request->integer('topic_id'));
             $query->where('id_tema', $topic->id_tema);
@@ -267,12 +263,19 @@ class KichwaCatalogController extends Controller
     private function levelProgress(Request $request, Nivel $level): array
     {
         UsuarioNivel::firstOrCreate(['id_usuario' => $request->user()->id_usuario, 'id_nivel' => $level->id_nivel]);
-        $activities = Actividad::where('publicado', true)->whereIn('id_unidad', PublicacionContenido::unitIds($level->id_nivel))->where(fn ($q) => $q->whereNull('id_tema')->orWhereIn('id_tema', Tema::where('publicado', true)->select('id_tema')));
-        $total = (clone $activities)->selectRaw('COALESCE(origen_reactivo,id_actividad::text) as lineage')->get()->unique('lineage')->count();
-        $visibleLineages = (clone $activities)->selectRaw('COALESCE(origen_reactivo,id_actividad::text) as lineage')->get()->pluck('lineage');
-        $completed = DB::table('respuestas_actividad as r')->join('actividades as a', 'a.id_actividad', '=', 'r.id_actividad')
+        $activities = PublicacionContenido::exercises()->whereIn('id_unidad', PublicacionContenido::unitIds($level->id_nivel));
+        $visibleExercises = (clone $activities)->select('id_unidad')->selectRaw("id_unidad::text || ':' || COALESCE(origen_reactivo,id_actividad::text) as lineage")->get();
+        $visibleLineages = $visibleExercises->pluck('lineage');
+        $total = $visibleLineages->unique()->count();
+        $completedExercises = DB::table('respuestas_actividad as r')->join('actividades as a', 'a.id_actividad', '=', 'r.id_actividad')
             ->where('r.id_usuario', $request->user()->id_usuario)->where('r.acierto_actividad', true)->whereIn('a.id_unidad', PublicacionContenido::unitIds($level->id_nivel))
-            ->whereIn(DB::raw('COALESCE(a.origen_reactivo,a.id_actividad::text)'), $visibleLineages)->selectRaw('COALESCE(a.origen_reactivo,a.id_actividad::text) as lineage')->get()->unique('lineage')->count();
+            ->whereIn(DB::raw("a.id_unidad::text || ':' || COALESCE(a.origen_reactivo,a.id_actividad::text)"), $visibleLineages)
+            ->selectRaw("a.id_unidad, a.id_unidad::text || ':' || COALESCE(a.origen_reactivo,a.id_actividad::text) as lineage")->get()->unique('lineage');
+        $completed = $completedExercises->count();
+        $totalsByUnit = $visibleExercises->groupBy('id_unidad')->map(fn ($items) => $items->unique('lineage')->count());
+        $completedByUnit = $completedExercises->groupBy('id_unidad')->map(fn ($items) => $items->count());
+        $percentage = PublicacionContenido::unitIds($level->id_nivel)->pluck('unidades.id_unidad')
+            ->avg(fn ($id) => ($totalsByUnit[$id] ?? 0) > 0 ? 100 * ($completedByUnit[$id] ?? 0) / $totalsByUnit[$id] : 0) ?? 0;
         $results = VistaIntento::where('id_usuario', $request->user()->id_usuario)->where('estado_intento', 'finalizado')->whereIn('id_evaluacion', EvaluacionKichwa::where(function ($q) use ($level) {
             $q->whereIn('id_unidad', PublicacionContenido::unitIds($level->id_nivel));
             if ($level->orden_nivel === 1) {
@@ -282,7 +285,7 @@ class KichwaCatalogController extends Controller
             ->selectRaw('id_evaluacion as evaluation_id,max(porcentaje_calificacion) as best_score,max(fecha_fin_intento) as completed_at')->groupBy('id_evaluacion')->get();
         $mastery = DominioLecciones::progress($request->user()->id_usuario);
         $result = ['mastery' => $mastery, 'level' => ['id' => $level->id_nivel, 'name' => $level->nombre_nivel], 'completed_activities' => $completed, 'total_activities' => $total,
-            'percentage' => (float) (VistaProgresoNivel::where('id_usuario', $request->user()->id_usuario)->where('id_nivel', $level->id_nivel)->value('porcentaje_progreso_nivel') ?? 0), 'evaluation_results' => $results];
+            'percentage' => round($percentage, 2), 'evaluation_results' => $results];
 
         return $result;
     }

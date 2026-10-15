@@ -1,3 +1,4 @@
+import { UserAvatar } from '../components/UserAvatar';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Link } from '../navigation';
 import {
@@ -149,7 +150,7 @@ function Shell({ title, subtitle, children }: { title: string; subtitle?: string
                     ))}</section>)}
                 </nav>
                 <div className="sidebar-bottom">
-                    <div className="user-avatar" aria-hidden="true">{user?.name.slice(0, 1).toUpperCase()}</div>
+                    <UserAvatar name={user?.name} avatar={user?.avatar} />
                     <div className="user-meta"><strong>{user?.name}</strong><small>{admin ? 'Administrador' : 'Estudiante'}</small></div>
                     <button className="glass-icon-button" type="button" aria-label="Cerrar sesión" title="Cerrar sesión" onClick={logout}><LogOut size={19} /></button>
                 </div>

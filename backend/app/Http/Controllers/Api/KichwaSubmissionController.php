@@ -16,6 +16,7 @@ use App\Services\ContratoEjercicio;
 use App\Services\DominioLecciones;
 use App\Services\EstadoContenido;
 use App\Services\KichwaResource;
+use App\Services\PublicacionContenido;
 use App\Services\SecuenciaUnidad;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -44,10 +45,17 @@ class KichwaSubmissionController extends Controller
 
     public function activity(Request $request, int $exercise): JsonResponse
     {
-        $data = $request->validate(['answer' => ['required', 'array']]);
+        $data = $request->validate(['answer' => ['required', 'array'],
+            'practice_attempt_id' => ['nullable', 'uuid', 'required_with:submission_id'],
+            'submission_id' => ['nullable', 'uuid', 'required_with:practice_attempt_id']]);
+        foreach (['practice_attempt_id', 'submission_id'] as $key) {
+            if (! empty($data[$key])) {
+                $data[$key] = strtolower($data[$key]);
+            }
+        }
         $result = DB::transaction(function () use ($request, $exercise, $data): array {
             Usuario::whereKey($request->user()->id_usuario)->lockForUpdate()->firstOrFail();
-            $record = Actividad::whereKey($exercise)->lockForUpdate()->firstOrFail();
+            $record = Actividad::whereKey($exercise)->sharedLock()->firstOrFail();
             $unit = KichwaCatalogController::publishedUnit($record->id_unidad);
             if (($unit->configuracion['learning_mode'] ?? '') === 'sequence') {
                 $evaluation = SecuenciaUnidad::evaluation($unit->id_unidad);
@@ -57,13 +65,31 @@ class KichwaSubmissionController extends Controller
                 abort_unless(Tema::whereKey($record->id_tema)->where('publicado', true)->exists(), 404);
             }
             abort_unless($record->publicado, 404);
-            EstadoContenido::assertReady(KichwaResource::present('exercises', $record, true));
-            $correct = ContratoEjercicio::grade(KichwaResource::present('exercises', $record, true), $data['answer']);
-            $feedback = ContratoEjercicio::feedback(KichwaResource::present('exercises', $record, true), $correct);
+            if (! empty($data['submission_id'])) {
+                $existing = RespuestaActividad::where('id_usuario', $request->user()->id_usuario)->where('clave_envio', $data['submission_id'])->first();
+                if ($existing) {
+                    abort_unless($existing->id_actividad === $exercise && $existing->id_sesion_practica === $data['practice_attempt_id'] && $existing->respuesta_actividad == $data['answer'], 409, 'Este envío ya corresponde a otra respuesta.');
+
+                    return ['response_id' => $existing->id_respuesta_actividad, 'is_correct' => $existing->acierto_actividad, 'feedback' => $existing->retroalimentacion_actividad,
+                        'highlight' => $record->configuracion['reveal_highlight'] ?? null,
+                        'xp_earned' => (int) DB::table('recompensas')->where('id_respuesta_actividad', $existing->id_respuesta_actividad)->sum('xp'),
+                        'xp_total' => (int) DB::table('recompensas')->where('id_usuario', $existing->id_usuario)->sum('xp'),
+                        'xp_attempt' => DominioLecciones::practiceXp($existing->id_usuario, $record->id_unidad, $existing->id_sesion_practica)];
+                }
+            }
+            if (! empty($data['practice_attempt_id'])) {
+                $correctAnswer = RespuestaActividad::where('id_usuario', $request->user()->id_usuario)->where('id_actividad', $exercise)
+                    ->where('id_sesion_practica', $data['practice_attempt_id'])->where('acierto_actividad', true)->first();
+                abort_if($correctAnswer && $correctAnswer->respuesta_actividad != $data['answer'], 409, 'Esta actividad ya está correcta. Inicia un nuevo intento para cambiar la respuesta.');
+            }
+            $content = KichwaResource::present('exercises', $record, true);
+            EstadoContenido::assertReady($content);
+            $correct = ContratoEjercicio::grade($content, $data['answer']);
+            $feedback = ContratoEjercicio::feedback($content, $correct);
             $answer = RespuestaActividad::create([
                 'id_usuario' => $request->user()->id_usuario, 'id_actividad' => $exercise,
                 'respuesta_actividad' => $data['answer'], 'acierto_actividad' => $correct,
-                'retroalimentacion_actividad' => $feedback]);
+                'retroalimentacion_actividad' => $feedback, 'id_sesion_practica' => $data['practice_attempt_id'] ?? null, 'clave_envio' => $data['submission_id'] ?? null]);
 
             return ['response_id' => $answer->id_respuesta_actividad, 'is_correct' => $correct, 'feedback' => $feedback, 'highlight' => $record->configuracion['reveal_highlight'] ?? null] + DominioLecciones::rewardActivity($record, $answer);
         });
@@ -75,13 +101,15 @@ class KichwaSubmissionController extends Controller
     {
         $record = KichwaCatalogController::publishedUnit($unit);
         abort_unless(($record->configuracion['learning_mode'] ?? '') === 'guided', 404);
-        $exercises = Actividad::where('id_unidad', $unit)->where('publicado', true)->whereNull('id_tema')->orderBy('orden_actividad')->get();
-        abort_unless($exercises->count() === 2, 409, 'La unidad está en preparación.');
-        $data = $request->validate(['response_ids' => ['required', 'array', 'size:2'], 'response_ids.*' => ['required', 'integer', 'distinct', 'min:1']]);
+        $exercises = PublicacionContenido::exercises($unit)->orderBy('orden_actividad')->get();
+        abort_if($exercises->isEmpty(), 409, 'La unidad está en preparación.');
+        $data = $request->validate(['response_ids' => ['required', 'array', 'size:'.$exercises->count()], 'response_ids.*' => ['required', 'integer', 'distinct', 'min:1'],
+            'practice_attempt_id' => ['nullable', 'uuid']]);
         $responses = RespuestaActividad::where('id_usuario', $request->user()->id_usuario)->whereIn('id_respuesta_actividad', $data['response_ids'])
+            ->when(! empty($data['practice_attempt_id']), fn ($query) => $query->where('id_sesion_practica', $data['practice_attempt_id']))
             ->whereIn('id_actividad', $exercises->pluck('id_actividad'))->get()->keyBy('id_actividad');
         if ($responses->count() !== $exercises->count()) {
-            throw ValidationException::withMessages(['response_ids' => 'Responde las dos actividades de esta unidad antes de ver tu resultado.']);
+            throw ValidationException::withMessages(['response_ids' => 'Responde todas las actividades de esta unidad antes de ver tu resultado.']);
         }
         $correctItems = 0;
         $totalItems = 0;
@@ -104,8 +132,12 @@ class KichwaSubmissionController extends Controller
         $score = $totalItems > 0 ? (int) round(20 * $correctItems / $totalItems) : 0;
         $next = Unidad::where('id_modulo', $record->id_modulo)->where('publicado', true)->where('orden_unidad', '>', $record->orden_unidad)->orderBy('orden_unidad')->value('id_unidad');
 
+        $rewards = empty($data['practice_attempt_id']) ? [] : [
+            'xp_earned' => DominioLecciones::practiceXp($request->user()->id_usuario, $unit, $data['practice_attempt_id']),
+            'xp_total' => (int) DB::table('recompensas')->where('id_usuario', $request->user()->id_usuario)->sum('xp')];
+
         return response()->json(['score' => $score, 'max_score' => 20, 'correct_count' => $correctItems, 'total_items' => $totalItems,
-            'passed' => $score >= 16, 'details' => $details, 'next_unit_id' => $next]);
+            'passed' => $score >= 16, 'details' => $details, 'next_unit_id' => $next] + $rewards);
     }
 
     public function start(Request $request, int $evaluation): JsonResponse
@@ -149,7 +181,7 @@ class KichwaSubmissionController extends Controller
         $results = DB::transaction(function () use ($request, $evaluation, $data, $record): array {
             Usuario::whereKey($request->user()->id_usuario)->lockForUpdate()->firstOrFail();
             $attempt = IntentoEvaluacion::where('id_usuario', $request->user()->id_usuario)->where('id_evaluacion', $evaluation)->lockForUpdate()->findOrFail($data['attempt_id']);
-            if ($attempt->estado_intento === 'finalizado' && $attempt->resultado !== null && ($record->configuracion['managed'] ?? false)) {
+            if ($attempt->estado_intento === 'finalizado' && $attempt->resultado !== null) {
                 return $attempt->resultado;
             }
             abort_unless($attempt->estado_intento === 'en_curso', 409, 'Este intento ya finalizó.');

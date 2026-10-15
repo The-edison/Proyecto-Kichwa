@@ -20,14 +20,14 @@ export function GoogleAuthButton({ label = 'Continuar con Google', disabled = fa
         return () => window.removeEventListener('pageshow', reset);
     }, []);
     const busy = disabled || redirecting;
-    return <div className="space-y-3">
+    return <div className="space-y-3 google-auth-options">
         <div className="flex items-center gap-3 text-xs text-muted"><span className="h-px flex-1 bg-positive-soft" />O continúa con<span className="h-px flex-1 bg-positive-soft" /></div>
         {googleEnabled && !busy ? <button type="button" className="secondary-button w-full" aria-label={label} onClick={() => void start()}><span className="google-mark" aria-hidden="true">G</span>{label}</button> :
             <button type="button" className="secondary-button w-full disabled:cursor-not-allowed disabled:opacity-60" disabled aria-busy={googleLoading || redirecting}>
                 {googleLoading || redirecting ? <LoaderCircle size={18} className="animate-spin" aria-hidden="true" /> : <span className="google-mark" aria-hidden="true">G</span>}
                 {redirecting ? 'Conectando con Google…' : googleLoading ? 'Comprobando disponibilidad…' : label}
             </button>}
-        {!googleLoading && !googleEnabled && <p className="text-center text-xs leading-5 text-muted">El acceso con Google no está disponible en este momento. Puedes ingresar con tu correo o crear una cuenta.</p>}
+        {!googleLoading && !googleEnabled && <p className="text-center text-xs leading-5 text-muted">Google no está disponible. Usa tu correo.</p>}
         {error && <p className="form-error" role="alert">{error}</p>}
     </div>;
 }

@@ -49,12 +49,12 @@ class UnidadUnoEjerciciosTest extends TestCase
 
                 return ['question_id' => $q['id'], 'answer' => $answer];
             }, $start['questions']);
-            $this->postJson('/api/evaluations/'.$evaluation->id_evaluacion.'/submit', ['attempt_id' => $start['attempt_id'], 'answers' => $answers])->assertOk()->assertJsonPath('score', 100)->assertJsonPath('xp_earned', $evaluation->configuracion['final'] ? 50 : 20);
+            $this->postJson('/api/evaluations/'.$evaluation->id_evaluacion.'/submit', ['attempt_id' => $start['attempt_id'], 'answers' => $answers])->assertOk()->assertJsonPath('score', 100)->assertJsonPath('xp_earned', $evaluation->configuracion['final'] ? 150 : 120);
         }
-        $this->getJson('/api/mastery')->assertOk()->assertJsonPath('xp', 430)->assertJsonCount(1, 'medals');
+        $this->getJson('/api/mastery')->assertOk()->assertJsonPath('xp', 830)->assertJsonCount(1, 'medals');
         $this->getJson('/api/modules/'.$module->id_modulo.'/contents')->assertOk()->assertJsonPath('data.3.evaluation_locked', false);
         $this->assertDatabaseCount('actividades', 32);
-        $this->assertDatabaseCount('recompensas', 36);
+        $this->assertDatabaseCount('recompensas', 80);
     }
 
     public function test_reseeding_does_not_duplicate_exercises_or_overwrite_admin_retirement(): void

@@ -4,10 +4,12 @@ import { Menu, X } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { Brand } from '../components/Brand';
 import { ThemeToggle } from '../components/ThemeToggle';
+import '../../css/auth-compact.css';
 
 function Shell({ children }: { children: ReactNode }) {
     const location = useLocation();
     const [open, setOpen] = useState(false);
+    const compactAuth = location.pathname === '/iniciar-sesion' || location.pathname === '/registro';
     const activeKey = location.pathname === '/'
         ? location.hash === '#historias' ? 'historias' : location.hash === '#cultura' ? 'cultura' : null
         : location.pathname === '/diccionario' ? 'diccionario'
@@ -22,7 +24,7 @@ function Shell({ children }: { children: ReactNode }) {
     ];
 
     return (
-        <div className={location.pathname === '/' ? 'page-shell home-shell' : 'page-shell'}>
+        <div className={location.pathname === '/' ? 'page-shell home-shell' : `page-shell${compactAuth ? ' auth-shell' : ''}`}>
             <div className="aurora aurora-one" />
             <div className="aurora aurora-two" />
             <header className="public-header">
