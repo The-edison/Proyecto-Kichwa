@@ -29,7 +29,7 @@ export function TestimonialsSection() {
         {testimonials.loading ? <p className="mt-8 text-muted" role="status">Cargando experiencias…</p> : testimonials.error ?
             <div className="mt-8"><p className="form-error" role="alert">No se pudieron cargar las opiniones.</p><button type="button" className="secondary-button mt-3" onClick={() => void testimonials.refresh()}>Volver a intentar</button></div> :
             <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {visibleTestimonials.map(testimonial => <article className="glass-panel card-hover flex min-h-[260px] flex-col p-7" key={testimonial.id}>
+                {visibleTestimonials.map(testimonial => <article className="glass-panel card-hover testimonial-card flex min-h-[260px] flex-col p-7" key={testimonial.id}>
                     <div className="flex items-center gap-4">
                         <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-positive-soft font-bold text-forest" aria-hidden="true">{testimonial.isExample ? '✦' : testimonial.name.slice(0, 1).toUpperCase()}</span>
                         <div className="min-w-0"><h3 className="break-words font-bold text-ink">{testimonial.name}</h3><p className="text-sm text-muted">{testimonial.isExample ? 'Opinión de ejemplo' : 'Estudiante de Yachay'}</p></div>
@@ -38,9 +38,12 @@ export function TestimonialsSection() {
                     <div className="mt-6 border-t border-line pt-4 text-xs font-semibold text-forest">{testimonial.isExample ? 'Texto de muestra' : 'Experiencia compartida en Yachay'}</div>
                 </article>)}
             </div>}
-        {user?.role !== 'admin' && <div className="glass-panel mt-8 flex flex-col gap-4 p-6 md:p-8">
-            <div className="flex items-center gap-3"><MessageCircle className="text-forest" size={24} aria-hidden="true" /><h3 className="font-serif text-2xl text-ink">Comparte tu experiencia</h3></div>
-            {user?.role === 'student' ? <StudentOpinionForm /> : <p className="text-muted"><Link href="/iniciar-sesion" className="font-bold text-forest underline">Inicia sesión como estudiante</Link> para publicar tu opinión sobre la plataforma.</p>}
+        {user?.role === 'student' && <details className="glass-panel student-opinion-composer">
+            <summary><MessageCircle size={21} aria-hidden="true" /><span>Escribe tu opinión sobre Yachay...</span><span className="student-opinion-composer-action">Comentar</span></summary>
+            <div className="student-opinion-composer-body"><StudentOpinionForm compact /></div>
+        </details>}
+        {!user && <div className="glass-panel student-opinion-composer student-opinion-composer-guest">
+            <MessageCircle size={21} aria-hidden="true" /><span>Comparte tu experiencia con otros estudiantes.</span><Link href="/iniciar-sesion">Iniciar sesión</Link>
         </div>}
     </section>;
 }

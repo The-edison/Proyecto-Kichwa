@@ -25,8 +25,10 @@ export default function Home() {
                     </h1>
                     <p className="home-hero-description">Nuestra lengua, nuestra historia. Un nuevo camino para aprender Kichwa y conectar con nuestra cultura.</p>
                     <div className="home-hero-actions">
-                        <Link href="/registro" className="primary-button">
-                            <Play size={17} fill="currentColor" aria-hidden="true" /> Iniciar mi recorrido <ArrowRight size={17} aria-hidden="true" />
+                        <Link href="/registro" className="primary-button home-hero-primary">
+                            <Play size={17} fill="currentColor" aria-hidden="true" />
+                            <span className="home-hero-primary-copy"><span>Explorar</span><small lang="qu">Maskay</small></span>
+                            <ArrowRight size={17} aria-hidden="true" />
                         </Link>
                         <Link href="/#historias" className="home-hero-secondary">
                             <BookOpen size={18} aria-hidden="true" /> Conocer más <ArrowRight size={17} aria-hidden="true" />
@@ -37,20 +39,32 @@ export default function Home() {
 
             <TestimonialsSection />
 
-            <section id="cultura" className="mx-auto max-w-[1440px] px-[5%] py-16">
-                <div className="glass-panel grid gap-8 p-8 md:grid-cols-2 md:p-14">
-                    <div>
+            <section id="cultura" className="culture-section" aria-labelledby="culture-title">
+                <div className="culture-panel glass-panel">
+                    <div className="culture-copy">
                         <span className="eyebrow">IDIOMA Y MEMORIA</span>
-                        <h2 className="section-title mt-4">Una lengua que nos conecta.</h2>
-                        <p className="section-lead mt-5">
-                            El Kichwa forma parte de la vida, la historia y los saberes de nuestras comunidades. Este espacio propone aprenderlo con respeto, curiosidad y constancia.
-                        </p>
-                        <Link href="/registro" className="primary-button mt-7">Comenzar a aprender <ArrowRight size={17} /></Link>
+                        <h2 id="culture-title" className="section-title">Una lengua que nos conecta.</h2>
+                        <p className="section-lead">El kichwa es una lengua viva de la familia quechua. En Ecuador, su historia se entrelaza con los intercambios entre pueblos andinos, la expansión inca y las generaciones que la han seguido hablando.</p>
+                        <p>Hoy se escucha en comunidades de la Sierra y la Amazonía. Sus palabras guardan formas de contar la vida, compartir saberes y recordar de dónde venimos.</p>
+                        <p className="culture-source">Fuentes: <a href="https://educacion.gob.ec/wp-content/plugins/download-monitor/download.php?id=3113" target="_blank" rel="noreferrer">diccionario kichwa del Ministerio de Educación</a> y <a href="https://www.patrimoniocultural.gob.ec/wp-content/uploads/2023/03/Memoria-Saraguro.pdf" target="_blank" rel="noreferrer">Memoria oral del pueblo Saraguro (INPC)</a>.</p>
+                        <Link href="/registro" className="primary-button culture-action">Comenzar a aprender <ArrowRight size={17} aria-hidden="true" /></Link>
                     </div>
-                    <div className="flex items-center justify-center">
-                        <div className="rounded-[40px] bg-gradient-to-br from-tint via-card to-positive-soft p-10 text-center ">
-                            <div className="text-7xl">✦</div>
-                            <p className="mt-4 font-serif text-3xl text-ink">Cada palabra abre un camino.</p>
+                    <div className="culture-video-card">
+                        <div className="culture-video-frame">
+                            <iframe
+                                src="https://www.youtube-nocookie.com/embed/O0qVbgG6fuY"
+                                title="La historia del Kichwa en Ecuador, video de Kichwa Runa"
+                                loading="lazy"
+                                referrerPolicy="strict-origin-when-cross-origin"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowFullScreen
+                            />
+                        </div>
+                        <div className="culture-video-caption">
+                            <span className="eyebrow">PARA VER Y ESCUCHAR</span>
+                            <h3>La historia del Kichwa en Ecuador</h3>
+                            <p>Un recorrido audiovisual por la lengua y su presencia en nuestro país.</p>
+                            <a href="https://www.youtube.com/watch?v=O0qVbgG6fuY" target="_blank" rel="noreferrer">Ver el video en YouTube</a>
                         </div>
                     </div>
                 </div>

@@ -6,6 +6,7 @@ import { useApi } from './hooks/useApi';
 import type { Level } from './types';
 const Home = lazy(() => import('./pages/Home'));
 const Dictionary = lazy(() => import('./pages/Dictionary/Index'));
+const PublicInfo = lazy(() => import('./pages/PublicInfo'));
 const Login = lazy(() => import('./pages/Auth/Login'));
 const Register = lazy(() => import('./pages/Auth/Register'));
 const PasswordRecovery = lazy(() => import('./pages/Auth/PasswordRecovery'));
@@ -49,6 +50,7 @@ export function AppRouter() {
     if (loading) return <LoadingState />;
     return <Suspense fallback={<LoadingState />}><Routes>
         <Route path="/" element={<Home />} /><Route path="/diccionario" element={<Dictionary />} />
+        <Route path="/informacion/:topic" element={<PublicInfo />} />
         <Route path="/recuperar-contrasena" element={<PasswordRecovery />} />
         <Route path="/iniciar-sesion" element={<Guest />} /><Route path="/registro" element={<Guest register />} />
         <Route path="/cuenta" element={<AccountPage />} />

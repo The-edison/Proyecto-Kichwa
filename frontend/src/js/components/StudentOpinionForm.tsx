@@ -5,7 +5,7 @@ import { useApi } from '../hooks/useApi';
 import { ApiError, apiPost } from '../services/api';
 import type { StudentTestimonial, TestimonialEligibility } from '../types';
 
-export function StudentOpinionForm() {
+export function StudentOpinionForm({ compact = false }: { compact?: boolean } = {}) {
     const id = useId();
     const eligibility = useApi<TestimonialEligibility>('/testimonials/eligibility');
     const [body, setBody] = useState('');
@@ -40,10 +40,10 @@ export function StudentOpinionForm() {
     if (eligibility.loading) return <p role="status">Cargando tu espacio de opiniones…</p>;
     if (eligibility.error) return <div><p className="form-error" role="alert">{eligibility.error}</p><button type="button" className="secondary-button" onClick={() => void eligibility.refresh()}>Volver a intentar</button></div>;
 
-    return <form className="student-opinion-form" onSubmit={submit} aria-busy={saving}>
-        <p className="student-opinion-intro">Tu experiencia puede animar a otros a aprender Kichwa.</p>
+    return <form className={compact ? 'student-opinion-form is-compact' : 'student-opinion-form'} onSubmit={submit} aria-busy={saving}>
+        {!compact && <p className="student-opinion-intro">Tu experiencia puede animar a otros a aprender Kichwa.</p>}
         <label htmlFor={id} className="field-label">Tu opinión sobre Yachay</label>
-        <textarea id={id} className="field" rows={5} minLength={20} maxLength={500} required disabled={saving}
+        <textarea id={id} className="field" rows={compact ? 3 : 5} minLength={20} maxLength={500} required disabled={saving}
             aria-describedby={`${id}-help ${id}-count${error ? ` ${id}-error` : ''}`} aria-invalid={Boolean(error)}
             placeholder="¿Qué te ha gustado de la plataforma? ¿Cómo ha sido aprender aquí?"
             value={body} onChange={event => { setBody(event.target.value); setError(''); setSuccess(false); }} />

@@ -1,26 +1,35 @@
 import { useLocation } from 'react-router-dom';
 import { Link } from '../navigation';
-import { Menu, X } from 'lucide-react';
+import { CircleHelp, Menu, X } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { Brand } from '../components/Brand';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { useAuth } from '../context/AuthContext';
 import '../../css/auth-compact.css';
 
 function Shell({ children }: { children: ReactNode }) {
     const location = useLocation();
+    const { user } = useAuth();
     const [open, setOpen] = useState(false);
+    const sessionHref = user?.debe_cambiar_contrasena ? '/cuenta' : user?.role === 'admin' ? '/admin' : '/aprender';
     const compactAuth = location.pathname === '/iniciar-sesion' || location.pathname === '/registro';
     const activeKey = location.pathname === '/'
-        ? location.hash === '#historias' ? 'historias' : location.hash === '#cultura' ? 'cultura' : null
+        ? location.hash === '#cultura' ? 'cultura' : null
         : location.pathname === '/diccionario' ? 'diccionario'
         : location.pathname === '/iniciar-sesion' ? 'iniciar-sesion'
         : location.pathname === '/registro' ? 'registro'
         : null;
     const links = [
-        { key: 'historias', href: '/#historias', label: 'Historias' },
         { key: 'cultura', href: '/#cultura', label: 'Nuestra cultura' },
         { key: 'diccionario', href: '/diccionario', label: 'Diccionario' },
-        { key: 'iniciar-sesion', href: '/iniciar-sesion', label: 'Iniciar sesión' },
+        { key: 'iniciar-sesion', href: user ? sessionHref : '/iniciar-sesion', label: user ? 'Continuar' : 'Iniciar sesión' },
+    ];
+    const footerLinks = [
+        { href: '/informacion/terminos', label: 'Términos de uso' },
+        { href: '/informacion/privacidad', label: 'Aviso de privacidad' },
+        { href: '/informacion/accesibilidad', label: 'Accesibilidad' },
+        { href: '/informacion/enfoque', label: 'Nuestro enfoque' },
+        { href: '/informacion/preguntas', label: 'Preguntas frecuentes' },
     ];
 
     return (
@@ -43,9 +52,13 @@ function Shell({ children }: { children: ReactNode }) {
             </header>
             <main>{children}</main>
             <footer className="public-footer">
-                <Brand />
-                <p>Una experiencia de aprendizaje del Kichwa de la Sierra Centro del Ecuador.</p>
-                <span>Universidad Estatal de Bolívar</span>
+                <nav className="public-footer-links" aria-label="Información del sitio">
+                    {footerLinks.map(link => <Link key={link.href} href={link.href}>{link.label}</Link>)}
+                </nav>
+                <div className="public-footer-meta">
+                    <span>Yachay · Universidad Estatal de Bolívar</span>
+                    <Link href="/informacion/ayuda" className="public-footer-help"><CircleHelp size={17} aria-hidden="true" />Ayuda</Link>
+                </div>
             </footer>
         </div>
     );

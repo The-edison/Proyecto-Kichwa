@@ -3,6 +3,9 @@
 .auth-shell .public-nav a { min-height: 40px; padding: 8px 12px; font-size: 13px; }
 .auth-shell > main { display: grid; align-items: center; flex: 1; width: 100%; padding: 12px 20px; }
 .auth-shell .public-footer { flex: none; width: 100%; max-width: none; min-height: 42px; margin-top: 0; padding: 6px 4%; gap: 16px; font-size: 10px; }
+.auth-shell .public-footer-links a { min-height: 28px; padding: 3px 7px; }
+.auth-shell .public-footer-meta { gap: 10px; }
+.auth-shell .public-footer-help { min-height: 28px; padding: 5px 10px; }
 .auth-shell .public-footer .brand { gap: 8px; }
 .auth-shell .public-footer .brand-icon { width: 26px; height: 26px; }
 .auth-shell .public-footer .brand-name { font-size: 14px; }
