@@ -14,12 +14,13 @@ const pages = {
     },
     privacidad: {
         title: 'Aviso de privacidad',
-        intro: 'Yachay usa datos personales para crear cuentas, proteger el acceso y registrar el aprendizaje. Este aviso describe el funcionamiento actual; el plazo de conservación debe definirse antes de publicar el servicio.',
+        intro: 'Yachay usa datos personales para crear cuentas, proteger el acceso y registrar el aprendizaje. Este aviso describe qué datos utiliza y durante cuánto tiempo los conserva.',
         sections: [
             { title: 'Datos que utiliza el sistema', text: 'Al registrarte se solicitan nombres, apellidos, correo y contraseña; la cédula es opcional. La plataforma guarda tus respuestas, resultados y progreso. También puede guardar un avatar y una opinión si decides añadirlos.' },
             { title: 'Para qué se usan', text: 'Los datos permiten autenticarte, mostrar tu avance, administrar los cursos y recuperar el acceso. Las contraseñas se guardan protegidas mediante hash. Si publicas una opinión, se muestra con tu nombre abreviado; tu correo y cédula no aparecen en esa sección.' },
             { title: 'Servicios externos y sesión', text: 'El acceso con Google es opcional y solo se habilita si la instalación está configurada para ello. El video de la sección cultural se reproduce desde YouTube. La sesión se gestiona por pestaña y se cierra tras un período de inactividad.' },
-            { title: 'Consultas sobre tus datos', text: 'Puedes solicitar acceso, corrección o eliminación de tus datos al responsable de esta instalación mediante el correo indicado abajo. El plazo de conservación de los datos todavía debe definirse antes de ofrecer Yachay públicamente.' },
+            { title: 'Conservación de los datos', text: 'La cuenta, el progreso y las opiniones se conservan mientras mantengas tu cuenta y sean necesarios para ofrecerte el servicio. Actualmente no hay un borrado automático por inactividad. Si dejas de usar Yachay, puedes solicitar la eliminación de tus datos; el responsable revisará la solicitud y conservará únicamente lo que deba mantener por una obligación aplicable.' },
+            { title: 'Consultas sobre tus datos', text: 'Puedes solicitar acceso, corrección o eliminación de tus datos al responsable de esta instalación mediante el correo indicado abajo.' },
         ],
     },
     accesibilidad: {
