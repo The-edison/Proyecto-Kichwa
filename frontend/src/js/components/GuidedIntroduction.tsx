@@ -18,7 +18,7 @@ export function GuidedIntroduction() {
                 <span className="cometa-lesson-eyebrow">APRENDE CON COMETA</span>
                 <h1>La escritura del kichwa</h1>
                 <p>Primero, descubre las letras. Después, únelas para reconocer tus primeras palabras.</p>
-                <div className="cometa-lesson-tip"><Lightbulb size={19} aria-hidden="true" /><span>En las palabras de esta unidad usarás las vocales <strong>a, i y u.</strong></span></div>
+                <div className="cometa-lesson-tip"><Lightbulb size={19} aria-hidden="true" /><span>En la lengua kichwa solo se usan tres vocales: <strong>a, i y u.</strong></span></div>
             </div>
             <figure className="cometa-lesson-teacher">
                 <span className="cometa-lesson-greeting">¡Te muestro cómo!</span>
@@ -57,6 +57,5 @@ export function GuidedIntroduction() {
                 <p className="cometa-builder-note"><span aria-hidden="true">✦</span> Completa con <strong>i</strong> y lee la palabra entera: <strong>sisa.</strong></p>
             </section>
         </div>
-        <p className="cometa-lesson-ready">A tu ritmo, una palabra a la vez. <strong>Cuando estés listo, pulsa Continuar.</strong></p>
     </div>;
 }

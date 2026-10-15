@@ -39,6 +39,8 @@ test('correct and incorrect responses use different portraits and server-confirm
     assert.match(content(retry), /\+0 XP/);
     assert.match(content(success), /Alli rurashka/);
     assert.match(content(retry), /Kutin rurapay/);
+    assert.equal(nodes(success).find(n => n.props.className === 'learning-companion-translation').props.children, 'Bien hecho');
+    assert.equal(nodes(retry).find(n => n.props.className === 'learning-companion-translation').props.children, 'Reinténtalo');
     for (const view of [success, retry]) {
         assert.doesNotMatch(content(view), /ganados en esta actividad|Total acumulado|70 XP/);
     }
@@ -80,6 +82,20 @@ async function card(post) {
 const companion = view => nodes(view.render()).find(n => n.type === 'LearningCompanion').props;
 const select = view => nodes(view.render()).find(n => typeof n.type === 'function').props.onChange({ seleccion: ['wasi'] });
 const check = view => nodes(view.render()).find(n => n.type === 'button').props.onClick();
+
+test('exercise feedback leaves Cometa greetings out and preserves the explanation', async () => {
+    for (const [message, expected] of [
+        ['Alli rurashka. Sisa significa flor.', 'Sisa significa flor.'],
+        ['Kutin rurapay. Observa la flor y vuelve a intentarlo.', 'Observa la flor y vuelve a intentarlo.'],
+        ['Respuesta correcta.', 'Respuesta correcta.'],
+        ['Alli rurashka', ''],
+    ]) {
+        const view = await card(() => ({ response_id: 4, is_correct: true, feedback: message }));
+        select(view); await check(view);
+        const notice = nodes(view.render()).find(n => n.type === 'p' && n.props.role === 'status');
+        assert.equal(notice ? content(notice) : '', expected);
+    }
+});
 
 test('a correct activity locks its answer and keeps its graded feedback', async () => {
     const view = await card(() => ({ response_id: 4, is_correct: true, feedback: 'Correcto', xp_earned: 10, xp_total: 30 }));

@@ -7,7 +7,7 @@ export function Brand({ compact = false }: { compact?: boolean }) {
                 <span className="brand-rainbow" />
                 <span className="brand-sun" />
             </span>
-            {!compact && <span className="leading-none"><strong className="brand-name block">Yachay</strong><small className="brand-kicker">KICHWA VIVO</small></span>}
+            {!compact && <span className="leading-none"><strong className="brand-name block">Yachay</strong><small className="brand-kicker">KICHWA</small></span>}
         </Link>
     );
 }

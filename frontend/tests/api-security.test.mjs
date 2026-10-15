@@ -60,6 +60,7 @@ test('publishing refreshes active catalog queries and notifies other tabs', asyn
     assert.equal(filter.predicate({ queryKey: ['api', '/modules/1/units?page=1'] }), true);
     assert.equal(filter.predicate({ queryKey: ['api', '/modules/1/contents?page=1'] }), true);
     assert.equal(filter.predicate({ queryKey: ['api', '/levels'] }), true);
+    assert.equal(filter.predicate({ queryKey: ['api', '/learning-navigation'] }), true);
     assert.equal(filter.predicate({ queryKey: ['api', '/admin/overview'] }), true);
     assert.deepEqual(browser.notifications, [['yachay:catalog-changed', 'revision']]);
 });

@@ -17,7 +17,7 @@ export default function Register() {
                         <p><BookOpen size={20} aria-hidden="true" /><span>Lecciones y actividades para practicar.</span></p>
                         <p><ChartNoAxesCombined size={20} aria-hidden="true" /><span>Tu progreso guardado en un solo lugar.</span></p>
                     </div>
-                    <span className="register-welcome-footer">YACHAY · KICHWA VIVO</span>
+                    <span className="register-welcome-footer">YACHAY · KICHWA</span>
                 </header>
                 <div className="register-main">
                     <h2>Crear tu cuenta</h2>

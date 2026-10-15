@@ -22,6 +22,7 @@ import { Brand } from '../components/Brand';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { ProfileMenu } from '../components/ProfileMenu';
 import { StudentOpinionMenu } from '../components/StudentOpinionMenu';
+import { StudentLearningNav } from '../components/StudentLearningNav';
 import { useAuth } from '../context/AuthContext';
 
 const storageKey = 'yachay-sidebar-collapsed';
@@ -34,7 +35,7 @@ function initialCollapsed(): boolean {
     }
 }
 
-function Shell({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
+function Shell({ title, subtitle, children, immersive = false }: { title: string; subtitle?: string; children: ReactNode; immersive?: boolean }) {
     const { user, logout } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
@@ -98,7 +99,6 @@ function Shell({ title, subtitle, children }: { title: string; subtitle?: string
             ['/cuenta', 'Mi cuenta', UserRound],
         ];
     const isActive = (href: string) => location.pathname === href
-        || (href === '/aprender' && /^\/aprender\/(nivel|modulo|unidad|evaluacion)\//.test(location.pathname))
         || (!['/admin', '/aprender'].includes(href) && location.pathname.startsWith(href + '/'));
     const navigationGroups = admin
         ? [{ label: 'GESTIÓN DEL CAMPUS', links: links.filter(([href]) => href !== '/cuenta') }, { label: 'MI CUENTA', links: links.filter(([href]) => href === '/cuenta') }]
@@ -113,7 +113,7 @@ function Shell({ title, subtitle, children }: { title: string; subtitle?: string
     }, [collapsed]);
 
     return (
-        <div className={`app-shell ${collapsed ? 'is-collapsed' : ''}`}>
+        <div className={`app-shell ${collapsed ? 'is-collapsed' : ''} ${immersive ? 'is-learning' : ''}`}>
             <div className="aurora aurora-one" />
             <div className="aurora aurora-two" />
             {mobileOpen && <button className="sidebar-scrim" aria-label="Cerrar menú" onClick={() => setMobileOpen(false)} />}
@@ -147,7 +147,7 @@ function Shell({ title, subtitle, children }: { title: string; subtitle?: string
                             <Icon size={19} aria-hidden="true" />
                             <span className="sidebar-link-label">{label}</span>
                         </Link>
-                    ))}</section>)}
+                    ))}{!admin && group.label === 'APRENDIZAJE' && <StudentLearningNav onExpand={() => setCollapsed(false)} onNavigate={() => setMobileOpen(false)} />}</section>)}
                 </nav>
                 <div className="sidebar-bottom">
                     <UserAvatar name={user?.name} avatar={user?.avatar} />
@@ -160,7 +160,7 @@ function Shell({ title, subtitle, children }: { title: string; subtitle?: string
                 <a href="#main-content" className="skip-link">Saltar al contenido</a>
                 <header className="app-topbar">
                     <button ref={menu} className="menu-button" type="button" aria-label="Abrir menú" aria-controls="campus-navigation" aria-expanded={mobileOpen} onClick={() => setMobileOpen(true)}><Menu /></button>
-                    <div><span className="eyebrow">YACHAY · KICHWA VIVO</span><h1>{title}</h1>{subtitle && <p>{subtitle}</p>}</div>
+                    <div><span className="eyebrow">YACHAY · KICHWA</span><h1>{title}</h1>{subtitle && <p>{subtitle}</p>}</div>
                     <div className="topbar-tools">
                         <form className="topbar-search" role="search" onSubmit={event => { event.preventDefault(); if (search.trim()) navigate(admin ? `/admin/estudiantes?q=${encodeURIComponent(search.trim())}` : `/aprender/diccionario?q=${encodeURIComponent(search.trim())}`); }}>
                             <Search size={18} aria-hidden="true" /><input aria-label={admin ? 'Buscar estudiantes' : 'Buscar en el diccionario'} placeholder={admin ? 'Buscar estudiante…' : 'Buscar una palabra…'} value={search} onChange={event => setSearch(event.target.value)} /><button type="submit" aria-label="Buscar"><Search size={16} /></button>
@@ -176,6 +176,6 @@ function Shell({ title, subtitle, children }: { title: string; subtitle?: string
     );
 }
 
-export function AppLayout(props: { title: string; subtitle?: string; children: ReactNode }) {
+export function AppLayout(props: { title: string; subtitle?: string; children: ReactNode; immersive?: boolean }) {
     return <Shell {...props} />;
 }

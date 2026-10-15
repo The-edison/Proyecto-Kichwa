@@ -64,6 +64,27 @@ class KichwaCatalogController extends Controller
         return response()->json(PublicacionContenido::remember('student-levels', fn () => Nivel::where('publicado', true)->addSelect(['has_published_modules' => Modulo::selectRaw('count(*) > 0')->whereColumn('modulos.id_nivel', 'niveles.id_nivel')->where('publicado', true)])->orderBy('orden_nivel')->get()->map(fn ($r) => KichwaResource::present('levels', $r))->all()));
     }
 
+    public function navigation(): JsonResponse
+    {
+        return response()->json(PublicacionContenido::remember('student-navigation:v1', function (): array {
+            $levels = Nivel::where('publicado', true)->orderBy('orden_nivel')->orderBy('id_nivel')->get(['id_nivel', 'nombre_nivel', 'orden_nivel']);
+            $modules = Modulo::where('publicado', true)->whereIn('id_nivel', $levels->modelKeys())->orderBy('orden_modulo')->orderBy('id_modulo')->get(['id_modulo', 'id_nivel', 'nombre_modulo']);
+            $units = Unidad::where('publicado', true)->whereIn('id_modulo', $modules->modelKeys())->orderBy('orden_unidad')->orderBy('id_unidad')->get(['id_unidad', 'id_modulo', 'titulo_unidad'])->groupBy('id_modulo');
+            $modulesByLevel = $modules->groupBy('id_nivel');
+
+            return $levels->map(fn ($level) => [
+                'id' => $level->id_nivel,
+                'name' => $level->nombre_nivel,
+                'available' => $level->orden_nivel === 1 || $modulesByLevel->has($level->id_nivel),
+                'modules' => $modulesByLevel->get($level->id_nivel, collect())->map(fn ($module) => [
+                    'id' => $module->id_modulo,
+                    'title' => $module->nombre_modulo,
+                    'units' => $units->get($module->id_modulo, collect())->map(fn ($unit) => ['id' => $unit->id_unidad, 'title' => $unit->titulo_unidad])->values()->all(),
+                ])->values()->all(),
+            ])->all();
+        }));
+    }
+
     public function modules(Request $request, int $level): JsonResponse
     {
         $this->publishedLevel($level);

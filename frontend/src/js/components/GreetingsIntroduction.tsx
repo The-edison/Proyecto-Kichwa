@@ -52,6 +52,5 @@ export function GreetingsIntroduction() {
                 <p className="greetings-dialogue-note">La respuesta trata del mismo tema que la pregunta.</p>
             </section>
         </div>
-        <p className="cometa-lesson-ready">Ahora mira cada imagen y reconoce el momento del día. <strong>Pulsa Continuar para practicar.</strong></p>
     </div>;
 }

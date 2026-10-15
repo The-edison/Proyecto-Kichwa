@@ -1,5 +1,5 @@
 ﻿import { useState } from 'react';
-import { ArrowRight, BookOpen, Check, ChevronRight, Compass, Layers, ClipboardCheck, Sparkles } from 'lucide-react';
+import { ArrowRight, BookOpen, Check, ChevronRight, ClipboardCheck, Sparkles } from 'lucide-react';
 import { Head, Link } from '../../navigation';
 import { AppLayout } from '../../layouts/AppLayout';
 import { EmptyState, ErrorState, LoadingState } from '../../components/States';
@@ -28,11 +28,7 @@ export default function Level({ level }: { level: { id: number; name: string; co
         <nav aria-label="Migas de pan" className="learning-breadcrumb">
             <Link href="/aprender">Mi aprendizaje</Link><ChevronRight size={14} aria-hidden="true" /><span aria-current="page">{level.name}</span>
         </nav>
-        <section className="learning-overview glass-panel" aria-labelledby="level-overview-title">
-            <div className="learning-overview-copy"><span className="badge"><Compass size={15} aria-hidden="true" /> TU RECORRIDO</span><h2 id="level-overview-title">Una nueva lengua,<br />un mundo por descubrir.</h2><p>Explora cada módulo, practica lo aprendido y avanza a tu ritmo. Cada paso te acerca al Kichwa.</p><div className="learning-overview-meta">{modules.data && <span><Layers size={17} aria-hidden="true" /><strong>{modules.data.total}</strong> {modules.data.total === 1 ? 'módulo disponible' : 'módulos disponibles'}</span>}{summary && <span><Check size={17} aria-hidden="true" /><strong>{summary.completed_activities}</strong> actividades completadas</span>}</div></div>
-            <div className="learning-overview-progress">{summary ? <LearningProgressRing value={summary.percentage} label={'Progreso del nivel ' + level.name} /> : <span className="learning-overview-emblem" aria-hidden="true"><BookOpen size={54} strokeWidth={1.3} /></span>}<span>{progress.loading ? 'Cargando tu progreso…' : summary ? 'Tu progreso en este nivel' : 'Paso a paso, a tu ritmo'}</span><Link href="/aprender/progreso" className="text-link">Ver mi progreso <ArrowRight size={15} aria-hidden="true" /></Link></div>
-        </section>
-        <div className="section-heading learning-section-heading"><div><span className="eyebrow">EXPLORA TU CURSO</span><h2>Módulos de aprendizaje</h2><p>Elige un módulo para descubrir sus unidades y actividades.</p></div>{modules.data && <span className="badge neutral">{modules.data.total} {modules.data.total === 1 ? 'módulo' : 'módulos'}</span>}</div>
+        <div className="section-heading learning-section-heading level-module-heading"><div><span className="eyebrow">EXPLORA TU CURSO</span><h2>Módulos de aprendizaje</h2><p>Elige un módulo para descubrir sus unidades y actividades.</p></div><div className="level-module-summary">{modules.data && <span className="badge neutral">{modules.data.total} {modules.data.total === 1 ? 'módulo' : 'módulos'}</span>}{summary ? <Link href="/aprender/progreso" className="level-progress-corner" aria-label={'Ver mi progreso en el nivel ' + level.name}><LearningProgressRing value={summary.percentage} label={'Progreso del nivel ' + level.name} /></Link> : progress.loading ? <span className="level-progress-status" role="status">Cargando avance…</span> : progress.error ? <span className="level-progress-status" role="status">Avance no disponible</span> : null}</div></div>
         {modules.loading ? <LoadingState /> : modules.error ? <ErrorState message={modules.error} /> : !modules.data?.data.length ?
             <EmptyState title="Todavía no hay módulos publicados" description="El administrador está preparando el contenido de este nivel." /> :
             <ol aria-label="Módulos del nivel" className="learning-module-grid">

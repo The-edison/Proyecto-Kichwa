@@ -20,6 +20,7 @@ export function LearningCompanion({ correct, xpEarned, score, final = false }: C
         </div>
         <div className="learning-companion-message" role="status" aria-live="polite" aria-atomic="true">
             <strong>{correct === undefined ? '¡Vamos paso a paso!' : correct ? 'Alli rurashka' : 'Kutin rurapay'}</strong>
+            {correct !== undefined && <span className="learning-companion-translation">{correct ? 'Bien hecho' : 'Reinténtalo'}</span>}
             {score !== undefined && <span className="learning-companion-score"><small>Puntuación final</small>{score}</span>}
             {xpEarned !== undefined && <span className="learning-companion-xp">+{xpEarned} XP</span>}
             {correct === true && xpEarned === 0 && !final && <small>Los XP de esta actividad ya cuentan en este intento.</small>}

@@ -14,14 +14,15 @@ export default function Unit({ unitId }: { unitId: number }) {
     const [params, setParams] = useSearchParams(); const topicId = Number(params.get('tema')) || null;
     const [page, setPage] = useState(1), [exercisePage, setExercisePage] = useState(1), [evaluationPage, setEvaluationPage] = useState(1);
     const unit = useApi<UnitData & { level_id: number; level_name: string; module_name: string }>('/units/' + unitId);
-    const contents = useApi<Paginated<Content>>(`/units/${unitId}/contents?page=${page}`);
-    const exercises = useApi<Paginated<Exercise>>(`/units/${unitId}/exercises?page=${exercisePage}${topicId ? '&topic_id=' + topicId : ''}`);
-    const evaluations = useApi<Paginated<Evaluation>>(unit.data ? `/levels/${unit.data.level_id}/evaluations?unit_id=${unitId}&page=${evaluationPage}` : null);
-    const selectedTopic = useApi<Content>(topicId ? `/units/${unitId}/topics/${topicId}` : null);
-    const mastery = useApi<Mastery>('/mastery');
+    const classic = Boolean(unit.data && !['guided', 'sequence'].includes(unit.data.config?.learning_mode ?? 'classic'));
+    const contents = useApi<Paginated<Content>>(classic ? `/units/${unitId}/contents?page=${page}` : null);
+    const exercises = useApi<Paginated<Exercise>>(classic ? `/units/${unitId}/exercises?page=${exercisePage}${topicId ? '&topic_id=' + topicId : ''}` : null);
+    const evaluations = useApi<Paginated<Evaluation>>(classic && unit.data ? `/levels/${unit.data.level_id}/evaluations?unit_id=${unitId}&page=${evaluationPage}` : null);
+    const selectedTopic = useApi<Content>(classic && topicId ? `/units/${unitId}/topics/${topicId}` : null);
+    const mastery = useApi<Mastery>(classic ? '/mastery' : null);
     const topic = selectedTopic.data;
     useEffect(() => { setExercisePage(1); setEvaluationPage(1); }, [unitId, topicId]);
-    if (unit.data?.config?.learning_mode === 'guided') return <GuidedUnit key={unitId} unit={unit.data}/>;
+    if (unit.data?.config?.learning_mode === 'guided') return <AppLayout title={unit.data.title} immersive><GuidedUnit key={unitId} unit={unit.data}/></AppLayout>;
     if (unit.data?.config?.learning_mode === 'sequence') return <UnitSequence key={unitId} unit={unit.data}/>;
     return <AppLayout title={unit.data?.title ?? 'Tu unidad'} subtitle={`Lee, escucha y practica. Avance de práctica: ${unit.data?.percentage ?? 0}%.`}><Head title="Unidad" />
         <nav aria-label="Migas de pan" className="mb-6 flex flex-wrap gap-3"><Link href="/aprender">Niveles</Link><span>›</span><Link href={'/aprender/nivel/' + unit.data?.level_id}>{unit.data?.level_name ?? 'Nivel'}</Link><span>›</span><Link href={'/aprender/modulo/' + unit.data?.module_id}>{unit.data?.module_name ?? 'Módulo'}</Link><span>›</span><Link href={'/aprender/unidad/' + unitId}>{unit.data?.title ?? 'Unidad'}</Link>{topic && <span>› {topic.title}</span>}</nav>

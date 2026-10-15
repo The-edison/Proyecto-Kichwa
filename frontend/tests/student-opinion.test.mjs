@@ -100,7 +100,7 @@ async function dashboard(role) {
             : specifier === 'react-router-dom' ? { useLocation: () => ({ pathname: role === 'admin' ? '/admin' : '/aprender' }), useNavigate: () => () => {} }
             : specifier === 'lucide-react' ? Object.fromEntries(['BookOpen', 'ChartNoAxesCombined', 'ChevronLeft', 'ChevronRight', 'House', 'Languages', 'LayoutDashboard', 'LogOut', 'Menu', 'UserRound', 'Users', 'X', 'Search'].map(name => [name, name]))
             : specifier.endsWith('/useAuth') || specifier.endsWith('/AuthContext') ? { useAuth: () => ({ user: { role, name: 'Ana' }, logout: () => {} }) }
-            : Object.fromEntries(['Link', 'Brand', 'ThemeToggle', 'ProfileMenu', 'UserAvatar', 'StudentOpinionMenu'].map(name => [name, name]));
+            : Object.fromEntries(['Link', 'Brand', 'ThemeToggle', 'ProfileMenu', 'UserAvatar', 'StudentOpinionMenu', 'StudentLearningNav'].map(name => [name, name]));
         return new vm.SyntheticModule(Object.keys(dependency), function () { for (const [key, value] of Object.entries(dependency)) this.setExport(key, value); }, { context });
     });
     await module.evaluate();

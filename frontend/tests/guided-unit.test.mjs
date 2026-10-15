@@ -7,20 +7,24 @@ import { transformWithOxc } from 'vite';
 
 const { code } = await transformWithOxc(await readFile(new URL('../src/js/components/GuidedUnit.tsx', import.meta.url), 'utf8'), 'GuidedUnit.tsx');
 const { code: interactionCode } = await transformWithOxc(await readFile(new URL('../src/js/components/ExerciseCard.tsx', import.meta.url), 'utf8'), 'ExerciseCard.tsx');
+const { code: persistenceCode } = await transformWithOxc(await readFile(new URL('../src/js/services/guidedAttempt.ts', import.meta.url), 'utf8'), 'guidedAttempt.ts');
 const choice = { id: 11, type: 'seleccion_multiple', prompt: 'Observa la imagen.', elements: ['shunku', 'sisa', 'wasi', 'llama'].map(id => ({ id, texto: id })), zones: [], config: { title: '¿Qué palabra corresponde?', prompt_image: 'kichwa/imagenes/casa.webp', max_selections: 1, exact_selections: true } };
 const matching = { id: 12, type: 'relacionar', prompt: 'Selecciona una palabra y su pareja.', elements: [...['Flor', 'Oveja', 'Corazón', 'Caminar'].map((texto, index) => ({ id: ['flor', 'oveja', 'corazon', 'caminar'][index], texto, grupo: 'origen' })), ...['purina', 'shunku', 'sisa', 'llama'].map(id => ({ id, texto: id, grupo: 'destino' }))], zones: [], config: { title: 'Palabras en dos idiomas' } };
 const perfectScore = { score: 20, max_score: 20, correct_count: 5, total_items: 5, passed: true, next_unit_id: 5, details: [{ exercise_id: 11, title: '¿Qué palabra corresponde?', correct: 1, total: 1 }, { exercise_id: 12, title: 'Palabras en dos idiomas', correct: 4, total: 4 }] };
 
-async function screen({ completed = false, post, exercises = [choice, matching], config } = {}) {
+async function screen({ completed = false, post, exercises = [choice, matching], config, storage = new Map(), userId = 3, unitId = 4, blockedStorage = false } = {}) {
     let cursor = 0, refreshes = 0;
     const states = [], requests = [];
-    const context = vm.createContext({ crypto: { randomUUID }, window: { scrollTo() {} } });
+    const effects = [], effectDeps = [];
+    const context = vm.createContext({ crypto: { randomUUID }, Image: class { }, window: { scrollTo() {}, sessionStorage: { getItem(key) { if (blockedStorage) throw Error('blocked'); return storage.get(key) ?? null; }, setItem(key, value) { if (blockedStorage) throw Error('blocked'); storage.set(key, value); } } } });
     const jsx = (type, props) => ({ type, props });
     class ApiError extends Error { constructor(message) { super(message); this.errors = {}; } }
     const dependencies = {
         react: {
             useState: initial => { const index = cursor++; if (!(index in states)) states[index] = initial; return [states[index], value => { states[index] = typeof value === 'function' ? value(states[index]) : value; }]; },
-            useRef: initial => { const index = cursor++; return states[index] ??= { current: initial }; }, useEffect() {},
+            useRef: initial => { const index = cursor++; return states[index] ??= { current: initial }; },
+            useSyncExternalStore: (_subscribe, getSnapshot) => getSnapshot(),
+            useEffect(callback, deps) { const index = cursor++; if (!effectDeps[index] || deps.some((value, i) => value !== effectDeps[index][i])) { effectDeps[index] = deps; effects.push(callback); } },
         },
         'react/jsx-runtime': { jsx, jsxs: jsx, Fragment: 'fragment' },
         'lucide-react': Object.fromEntries(['ArrowLeft', 'ArrowRight', 'BookOpen', 'CheckCircle2', 'LoaderCircle', 'RotateCcw', 'Star', 'X'].map(name => [name, name])),
@@ -32,11 +36,16 @@ async function screen({ completed = false, post, exercises = [choice, matching],
         GuidedIntroduction: { GuidedIntroduction: 'GuidedIntroduction' },
         GreetingsIntroduction: { GreetingsIntroduction: 'GreetingsIntroduction' },
         States: { ErrorState: 'ErrorState', LoadingState: 'LoadingState' },
+        AuthContext: { useAuth: () => ({ user: { id: userId } }) },
     };
     const cache = new Map();
     const interaction = new vm.SourceTextModule(interactionCode, { context });
+    const persistence = new vm.SourceTextModule(persistenceCode, { context });
+    await persistence.link(() => { throw Error('Unexpected persistence dependency'); });
+    await persistence.evaluate();
     async function link(specifier) {
         if (specifier.endsWith('/ExerciseCard')) return interaction;
+        if (specifier.endsWith('/guidedAttempt')) return persistence;
         const key = specifier.split('/').at(-1);
         const name = dependencies[specifier] ? specifier : key;
         if (!cache.has(name)) {
@@ -49,7 +58,8 @@ async function screen({ completed = false, post, exercises = [choice, matching],
     await interaction.link(link); await interaction.evaluate();
     const module = new vm.SourceTextModule(code, { context });
     await module.link(link); await module.evaluate();
-    return { requests, refreshes: () => refreshes, render: () => { cursor = 0; return module.namespace.GuidedUnit({ unit: { config, id: 4, module_id: 8, level_id: 1, title: 'Conociendo el Kichwa', level_name: 'Básico', module_name: 'Módulo 1', sort_order: 1 } }); } };
+    const render = () => { cursor = 0; const tree = module.namespace.GuidedUnit({ unit: { config, id: unitId, module_id: 8, level_id: 1, title: 'Conociendo el Kichwa', level_name: 'Básico', module_name: 'Módulo 1', sort_order: 1 } }); effects.splice(0).forEach(callback => callback()); return tree; };
+    return { requests, storage, refreshes: () => refreshes, render, remount() { states.length = 0; effectDeps.length = 0; effects.length = 0; render(); } };
 }
 function nodes(tree) { if (Array.isArray(tree)) return tree.flatMap(nodes); if (!tree?.props) return []; return [tree, ...nodes(tree.props.children)]; }
 function content(tree) { if (Array.isArray(tree)) return tree.map(content).join(''); return tree?.props ? content(tree.props.children) : typeof tree === 'string' || typeof tree === 'number' ? String(tree) : ''; }
@@ -111,6 +121,29 @@ test('changing a pair removes its previous destination and never duplicates a de
     const pairs = view.requests[1].payload.answer.pares;
     assert.equal(new Set(pairs.map(item => item.destino)).size, 4);
     assert.equal(pairs.find(item => item.origen === 'oveja').destino, 'sisa');
+});
+
+test('clicking either side of an existing pair removes both highlights and its answer', async () => {
+    const view = await screen();
+    click(view, 'Continuar'); choose(view, 'wasi'); await check(view); click(view, 'Continuar');
+    pair(view, 'Flor', 'sisa'); pair(view, 'Oveja', 'llama');
+    click(view, 'Flor');
+    assert.equal(button(view, 'Flor').props.className.trim(), '');
+    assert.equal(button(view, 'sisa').props.className, '');
+    assert.equal(button(view, 'Flor').props['aria-pressed'], false);
+    assert.ok(content(view.render()).includes('1 de 4 parejas seleccionadas'));
+    assert.equal(button(view, 'llama').props.disabled, false);
+    click(view, 'llama');
+    assert.equal(button(view, 'Oveja').props.className.trim(), '');
+    assert.equal(button(view, 'llama').props.className, '');
+    assert.ok(content(view.render()).includes('0 de 4 parejas seleccionadas'));
+    assert.equal(button(view, 'Comprobar').props.disabled, true);
+    for (const [spanish, kichwa] of [['Flor', 'sisa'], ['Oveja', 'llama'], ['Corazón', 'shunku'], ['Caminar', 'purina']]) pair(view, spanish, kichwa);
+    await check(view);
+    assert.equal(view.requests.at(-1).payload.answer.pares.length, 4);
+    click(view, 'Flor'); click(view, 'sisa');
+    assert.match(button(view, 'Flor').props.className, /is-paired/);
+    assert.match(button(view, 'sisa').props.className, /is-paired/);
 });
 
 test('network failure keeps the answer and repeated clicks send only one request', async () => {
@@ -207,8 +240,9 @@ test('four activities show house, flower and walking in order and score only aft
     const view = await screen({ exercises: [choice, flower, walking, matching], post: ({ path }) => path.endsWith('/guided/result') ? {
         ...perfectScore, correct_count: 7, total_items: 7,
     } : { response_id: Number(path.split('/')[2]) + 100, is_correct: true, xp_earned: 10, feedback: 'Alli rurashka.' } });
-    assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Pantalla 1 de 5'));
+    assert.equal(nodes(view.render()).some(node => node.props['aria-label']?.startsWith('Ejercicio ')), false);
     click(view, 'Continuar');
+    assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Ejercicio 1 de 4'));
     for (const [id, word, image, alt] of [[11, 'wasi', 'casa', undefined], [13, 'sisa', 'flor', 'Una flor rosada.'], [14, 'purina', 'purina', 'Una persona caminando.']]) {
         const picture = nodes(view.render()).find(node => node.type === 'img');
         assert.equal(picture.props.src, `/api/media/kichwa/imagenes/${image}.webp`);
@@ -220,7 +254,7 @@ test('four activities show house, flower and walking in order and score only aft
         assert.equal(nodes(view.render()).find(node => node.type === 'LearningCompanion').props.xpEarned, 10);
         click(view, 'Continuar');
     }
-    assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Pantalla 5 de 5'));
+    assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Ejercicio 4 de 4'));
     click(view, 'Volver');
     assert.equal(nodes(view.render()).find(node => node.props.value === 'purina').props.checked, true);
     click(view, 'Continuar');
@@ -239,6 +273,20 @@ test('four activities show house, flower and walking in order and score only aft
     assert.equal(button(view, 'Comprobar').props.disabled, true);
 });
 
+test('guided feedback shows the explanation without repeating Cometa and keeps numbering after returning to the lesson', async () => {
+    const view = await screen({ post: () => ({ response_id: 1, is_correct: false, feedback: 'Kutin rurapay. Observa la flor y vuelve a intentarlo.' }) });
+    assert.equal(nodes(view.render()).some(node => node.props.className === 'guided-attempt-progress'), false);
+    click(view, 'Continuar');
+    choose(view, 'sisa'); await check(view);
+    const notice = nodes(view.render()).find(node => node.props.className === 'guided-feedback is-incorrect');
+    assert.equal(content(notice), 'Observa la flor y vuelve a intentarlo.');
+    assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Ejercicio 1 de 2'));
+    click(view, 'Volver');
+    assert.equal(nodes(view.render()).some(node => node.props['aria-label']?.startsWith('Ejercicio ')), false);
+    click(view, 'Continuar');
+    assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Ejercicio 1 de 2'));
+});
+
 test('a guided retry starts with zero XP and a new attempt ID while the server keeps the accumulated total', async () => {
     const attempts = new Map();
     let total = 0;
@@ -252,7 +300,7 @@ test('a guided retry starts with zero XP and a new attempt ID while the server k
     const first = view.requests[0].payload.practice_attempt_id;
     assert.equal(nodes(view.render()).find(node => node.type === 'LearningCompanion').props.xpEarned, 20);
     click(view, 'Reintentar');
-    assert.ok(content(view.render()).includes('0 XP en este intento'));
+    assert.equal(nodes(view.render()).some(node => node.props.className === 'guided-attempt-progress'), false);
     await complete(view);
     const second = view.requests[3].payload.practice_attempt_id;
     assert.notEqual(second, first);
@@ -287,7 +335,105 @@ test('greetings unit uses its lesson and three images with locked successes, fin
     assert.equal(nodes(view.render()).find(node => node.type === 'LearningCompanion').props.xpEarned, 30);
     const firstAttempt = view.requests[0].payload.practice_attempt_id;
     click(view, 'Reintentar');
-    assert.ok(content(view.render()).includes('0 XP'));
-    click(view, 'Continuar'); choose(view, 'puncha'); await check(view);
+    assert.equal(nodes(view.render()).some(node => node.props.className === 'guided-attempt-progress'), false);
+    click(view, 'Continuar');
+    assert.ok(content(view.render()).includes('0 XP en este intento'));
+    choose(view, 'puncha'); await check(view);
     assert.notEqual(view.requests.at(-1).payload.practice_attempt_id, firstAttempt);
+});
+
+test('returning from the dictionary restores the exercise, unfinished pairs, checked answers and attempt XP', async () => {
+    const storage = new Map();
+    const post = ({ path }) => path.endsWith('/guided/result') ? { ...perfectScore, xp_earned: 20 } : { response_id: path.includes('/11/') ? 101 : 102, is_correct: true, feedback: 'Correcto.', xp_earned: 10 };
+    const first = await screen({ storage, post });
+    click(first, 'Continuar'); choose(first, 'wasi'); await check(first); click(first, 'Continuar');
+    pair(first, 'Flor', 'sisa'); click(first, 'Oveja');
+    const attemptId = first.requests[0].payload.practice_attempt_id;
+    const resumed = await screen({ storage, post });
+    assert.ok(nodes(resumed.render()).some(node => node.props['aria-label'] === 'Ejercicio 2 de 2'));
+    assert.ok(content(resumed.render()).includes('1 de 4 parejas seleccionadas'));
+    assert.equal(button(resumed, 'Oveja').props['aria-pressed'], true);
+    assert.ok(content(resumed.render()).includes('10 XP en este intento'));
+    click(resumed, 'Volver');
+    assert.equal(nodes(resumed.render()).find(node => node.props.value === 'wasi').props.checked, true);
+    assert.equal(nodes(resumed.render()).find(node => node.type === 'fieldset').props.disabled, true);
+    click(resumed, 'Continuar'); click(resumed, 'Oveja'); click(resumed, 'llama');
+    pair(resumed, 'Corazón', 'shunku'); pair(resumed, 'Caminar', 'purina');
+    await check(resumed); await finish(resumed);
+    assert.equal(resumed.requests[0].payload.practice_attempt_id, attemptId);
+    assert.deepEqual(Array.from(resumed.requests[1].payload.response_ids), [101, 102]);
+    const result = await screen({ storage, post });
+    assert.ok(nodes(result.render()).some(node => node.props['aria-label'] === '20 de 20 puntos'));
+    assert.equal(nodes(result.render()).find(node => node.type === 'LearningCompanion').props.xpEarned, 20);
+    click(result, 'Reintentar');
+    const fresh = await screen({ storage, post });
+    assert.ok(nodes(fresh.render()).some(node => node.type === 'GuidedIntroduction'));
+    click(fresh, 'Continuar');
+    assert.ok(content(fresh.render()).includes('0 XP en este intento'));
+    choose(fresh, 'wasi'); await check(fresh);
+    assert.notEqual(fresh.requests[0].payload.practice_attempt_id, attemptId);
+});
+
+test('unchecked choices survive return while another student or unit starts independently', async () => {
+    const storage = new Map();
+    const first = await screen({ storage });
+    click(first, 'Continuar'); choose(first, 'sisa');
+    const resumed = await screen({ storage });
+    assert.equal(nodes(resumed.render()).find(node => node.props.value === 'sisa').props.checked, true);
+    assert.equal(button(resumed, 'Comprobar').props.disabled, false);
+    assert.equal(resumed.requests.length, 0);
+    for (const options of [{ userId: 8 }, { unitId: 9 }]) {
+        const independent = await screen({ storage, ...options });
+        assert.ok(nodes(independent.render()).some(node => node.type === 'GuidedIntroduction'));
+    }
+});
+
+test('a failed submission retains its idempotency IDs across leaving and returning', async () => {
+    const storage = new Map();
+    const first = await screen({ storage, post: () => { throw Error('offline'); } });
+    click(first, 'Continuar'); choose(first, 'wasi'); await check(first);
+    const resumed = await screen({ storage });
+    await check(resumed);
+    assert.equal(resumed.requests[0].payload.submission_id, first.requests[0].payload.submission_id);
+    assert.equal(resumed.requests[0].payload.practice_attempt_id, first.requests[0].payload.practice_attempt_id);
+});
+
+test('invalid drafts are ignored and changed exercise content starts a compatible attempt', async () => {
+    const key = 'yachay:guided-attempt:v1:3:4';
+    const malformed = await screen({ storage: new Map([[key, '{broken json']]) });
+    assert.ok(nodes(malformed.render()).some(node => node.type === 'GuidedIntroduction'));
+    const storage = new Map();
+    const first = await screen({ storage });
+    click(first, 'Continuar'); choose(first, 'sisa');
+    const changed = await screen({ storage, exercises: [{ ...choice, id: 99 }, matching] });
+    changed.render();
+    assert.ok(nodes(changed.render()).some(node => node.type === 'GuidedIntroduction'));
+});
+
+test('navigation preserves the attempt in memory when browser storage is blocked', async () => {
+    const view = await screen({ blockedStorage: true });
+    click(view, 'Continuar'); choose(view, 'sisa');
+    view.remount();
+    assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Ejercicio 1 de 2'));
+    assert.equal(nodes(view.render()).find(node => node.props.value === 'sisa').props.checked, true);
+});
+
+test('a response received after leaving updates the resumed attempt and cannot overwrite a newer choice', async () => {
+    let resolve;
+    const view = await screen({ post: () => new Promise(done => { resolve = done; }) });
+    click(view, 'Continuar'); choose(view, 'wasi'); click(view, 'Comprobar');
+    view.remount();
+    resolve({ response_id: 101, is_correct: true, feedback: 'Correcto.', xp_earned: 10 });
+    await new Promise(done => setImmediate(done));
+    assert.equal(nodes(view.render()).find(node => node.type === 'fieldset').props.disabled, true);
+    assert.ok(content(view.render()).includes('10 XP en este intento'));
+
+    const changed = await screen({ post: () => new Promise(done => { resolve = done; }) });
+    click(changed, 'Continuar'); choose(changed, 'sisa'); click(changed, 'Comprobar');
+    changed.remount(); choose(changed, 'wasi');
+    resolve({ response_id: 102, is_correct: false, feedback: 'Revisa la imagen.', xp_earned: 0 });
+    await new Promise(done => setImmediate(done));
+    assert.equal(nodes(changed.render()).find(node => node.props.value === 'wasi').props.checked, true);
+    assert.equal(nodes(changed.render()).find(node => node.type === 'fieldset').props.disabled, false);
+    assert.equal(nodes(changed.render()).find(node => node.type === 'LearningCompanion').props.correct, undefined);
 });

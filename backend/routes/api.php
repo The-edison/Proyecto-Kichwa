@@ -37,6 +37,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function (): void {
     Route::post('/auth/verification-notification', [AuthController::class, 'resendVerification'])->middleware('throttle:3,1');
     Route::middleware('role:student')->group(function (): void {
         Route::get('/levels', [KichwaCatalogController::class, 'levels']);
+        Route::get('/learning-navigation', [KichwaCatalogController::class, 'navigation']);
         Route::get('/levels/{level}/modules', [KichwaCatalogController::class, 'modules']);
         Route::get('/modules/{module}/units', [KichwaCatalogController::class, 'units']);
         Route::get('/modules/{module}/contents', [KichwaCatalogController::class, 'moduleContents']);

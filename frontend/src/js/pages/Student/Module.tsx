@@ -15,6 +15,7 @@ export default function Module({ moduleId }: { moduleId: number }) {
 
     return <AppLayout title={module.data?.title ?? 'Unidades del módulo'} subtitle="Elige una unidad para empezar o continuar tu aprendizaje.">
         <Head title={module.data?.title ?? 'Módulo'} />
+        <div className="module-units-page">
         <nav aria-label="Migas de pan" className="learning-breadcrumb">
             <Link href="/aprender">Mi aprendizaje</Link>
             {module.data && <><ChevronRight size={14} aria-hidden="true" /><Link href={'/aprender/nivel/' + module.data.level_id}>{module.data.level_name}</Link><ChevronRight size={14} aria-hidden="true" /><span aria-current="page">{module.data.title}</span></>}
@@ -39,18 +40,22 @@ export default function Module({ moduleId }: { moduleId: number }) {
                             const objective = unit.description.replace(/^Objetivo(?: de la unidad)?\s*:\s*/iu, '').trim();
                             return <li key={unit.id}>
                                 <Link href={'/aprender/unidad/' + unit.id} className={`student-unit-row${completed ? ' is-completed' : percentage > 0 ? ' is-in-progress' : ''}`}>
-                                    <span className="student-unit-number" aria-hidden="true">{String(number).padStart(2, '0')}</span>
-                                    <div className="student-unit-copy">
-                                        <span className="student-unit-label">Unidad {number}</span>
-                                        <h3>{unit.title.replace(/^Unidad\s+\d+\s*[:.\-–—]?\s*/iu, '')}</h3>
-                                        {objective && <p className="student-unit-objective"><strong>Objetivo:</strong> {objective}</p>}
+                                    <div className="student-unit-heading">
+                                        <span className="student-unit-number" aria-hidden="true">{String(number).padStart(2, '0')}</span>
+                                        <div className="student-unit-copy">
+                                            <span className="student-unit-label">Unidad {number}</span>
+                                            <h3>{unit.title.replace(/^Unidad\s+\d+\s*[:.\-–—]?\s*/iu, '')}</h3>
+                                        </div>
                                         <span className={`student-unit-status${completed ? ' is-completed' : ''}`}>
                                             {completed && <CheckCircle2 size={14} aria-hidden="true" />}
                                             {completed ? 'Completada' : percentage > 0 ? 'En curso' : 'Sin empezar'}
                                         </span>
                                     </div>
-                                    <div className="student-unit-progress" role="group" aria-label={`Progreso de la unidad ${number}`}><LearningProgress value={percentage} label="Avance" /></div>
-                                    <span className="student-unit-action">{completed ? 'Repasar' : percentage > 0 ? 'Continuar' : 'Abrir unidad'}<ArrowRight size={18} aria-hidden="true" /></span>
+                                    {objective && <p className="student-unit-objective"><strong>Objetivo:</strong> {objective}</p>}
+                                    <div className="student-unit-footer">
+                                        <div className="student-unit-progress" role="group" aria-label={`Progreso de la unidad ${number}`}><LearningProgress value={percentage} label="Avance" /></div>
+                                        <span className="student-unit-action">{completed ? 'Repasar' : percentage > 0 ? 'Continuar' : 'Abrir unidad'}<ArrowRight size={18} aria-hidden="true" /></span>
+                                    </div>
                                 </Link>
                             </li>;
                         })}
@@ -58,5 +63,6 @@ export default function Module({ moduleId }: { moduleId: number }) {
                 <Pagination page={page} lastPage={units.data?.last_page ?? 1} onChange={setPage} />
             </section>
         </>}
+        </div>
     </AppLayout>;
 }
