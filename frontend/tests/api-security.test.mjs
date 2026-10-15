@@ -72,6 +72,8 @@ test('publishing an opinion refreshes the public stories and the student opinion
     assert.equal(filter.refetchType, 'active');
     assert.equal(filter.predicate({ queryKey: ['api', '/testimonials'] }), true);
     assert.equal(filter.predicate({ queryKey: ['api', '/testimonials/eligibility'] }), true);
+    assert.equal(filter.predicate({ queryKey: ['api', '/testimonials?language=qu'] }), true);
+    assert.equal(filter.predicate({ queryKey: ['api', '/testimonials/eligibility?language=qu'] }), true);
     assert.equal(filter.predicate({ queryKey: ['api', '/levels'] }), false);
 });
 

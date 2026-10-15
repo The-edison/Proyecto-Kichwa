@@ -1,5 +1,5 @@
 export type Role = 'admin' | 'student';
-export interface StudentTestimonial { id: number; name: string; body: string; created_at: string; }
+export interface StudentTestimonial { id: number; name: string; body: string; language: 'es' | 'qu'; created_at: string; }
 export interface TestimonialEligibility { has_commented: boolean; can_comment: boolean; testimonial: StudentTestimonial | null; }
 export interface AuthUser {
     avatar?: string | null;

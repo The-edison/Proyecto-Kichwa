@@ -4,9 +4,22 @@ $projectRoot = $PSScriptRoot
 $backend = Join-Path $projectRoot 'backend'
 $frontend = Join-Path $projectRoot 'frontend'
 $phpIni = Join-Path $projectRoot 'php.ini'
-$phpExe = (Get-Command php.exe -ErrorAction Stop).Source
 $nodeExe = (Get-Command node.exe -ErrorAction Stop).Source
-$extensionDirectory = Join-Path (Split-Path $phpExe) 'ext'
+$requiredPhpExtensions = @('curl', 'fileinfo', 'gd', 'intl', 'mbstring', 'openssl', 'pdo_pgsql', 'pgsql')
+$phpExe = $null
+$extensionDirectory = $null
+foreach ($candidate in (Get-Command php.exe -All -ErrorAction Stop | Select-Object -ExpandProperty Source -Unique)) {
+    $candidateExtensions = Join-Path (Split-Path $candidate) 'ext'
+    if (-not (Test-Path -LiteralPath $candidateExtensions)) { continue }
+    $versionId = & $candidate -n -r 'echo PHP_VERSION_ID;' 2>$null
+    if ($LASTEXITCODE -ne 0 -or [int]$versionId -lt 80401) { continue }
+    $loadedExtensions = & $candidate -c $phpIni -d "extension_dir=$candidateExtensions" -m 2>$null
+    if ($LASTEXITCODE -ne 0 -or @($requiredPhpExtensions | Where-Object { $_ -notin $loadedExtensions }).Count -gt 0) { continue }
+    $phpExe = $candidate
+    $extensionDirectory = $candidateExtensions
+    break
+}
+if (-not $phpExe) { throw 'No se encontró PHP 8.4.1 o superior con las extensiones necesarias. Revisa php.ini y las instalaciones de PHP del PATH.' }
 $viteEntry = Join-Path $frontend 'node_modules\vite\bin\vite.js'
 $router = Join-Path $backend 'vendor\laravel\framework\src\Illuminate\Foundation\resources\server.php'
 $envPath = Join-Path $backend '.env'

@@ -24,7 +24,7 @@ class TestimonialApiTest extends TestCase
 
         $response = $this->postJson('/api/testimonials', ['body' => '  Me gusta aprender Kichwa con las actividades de Yachay.  ', 'usuario_id' => $other->id_usuario, 'user_id' => 999]);
 
-        $response->assertCreated()->assertExactJson(['id' => $response->json('id'), 'name' => 'Ana P.', 'body' => 'Me gusta aprender Kichwa con las actividades de Yachay.', 'created_at' => now()->toDateString()]);
+        $response->assertCreated()->assertExactJson(['id' => $response->json('id'), 'name' => 'Ana P.', 'body' => 'Me gusta aprender Kichwa con las actividades de Yachay.', 'language' => 'es', 'created_at' => now()->toDateString()]);
         $this->assertDatabaseHas('testimonials', ['usuario_id' => $student->id_usuario, 'user_id' => null, 'body' => 'Me gusta aprender Kichwa con las actividades de Yachay.']);
         $this->assertDatabaseMissing('testimonials', ['usuario_id' => $other->id_usuario]);
         $this->getJson('/api/testimonials')->assertOk()->assertExactJson([$response->json()]);
@@ -47,6 +47,39 @@ class TestimonialApiTest extends TestCase
         $this->assertDatabaseCount('testimonials', 2);
         $this->assertDatabaseHas('testimonials', ['id' => $id, 'usuario_id' => $first->id_usuario, 'body' => 'Mi experiencia actualizada con Yachay.']);
         $this->assertDatabaseHas('testimonials', ['usuario_id' => $second->id_usuario, 'body' => 'Otra experiencia de aprendizaje.']);
+    }
+
+    public function test_each_language_has_its_own_public_opinion_and_editable_draft(): void
+    {
+        Sanctum::actingAs(Usuario::factory()->create());
+
+        $spanish = $this->postJson('/api/testimonials', ['body' => 'Aprendo nuevas palabras cada día en Yachay.', 'language' => 'es'])
+            ->assertCreated()->assertJsonPath('language', 'es');
+        $this->getJson('/api/testimonials?language=qu')->assertOk()->assertExactJson([]);
+        $this->getJson('/api/testimonials/eligibility?language=qu')->assertOk()->assertJsonPath('testimonial', null);
+
+        $kichwa = $this->postJson('/api/testimonials', ['body' => 'Yachaypi mushuk shimikunata punchantin yachakuni.', 'language' => 'qu'])
+            ->assertCreated()->assertJsonPath('language', 'qu');
+
+        $this->assertNotSame($spanish->json('id'), $kichwa->json('id'));
+        $this->assertDatabaseCount('testimonials', 2);
+        $this->getJson('/api/testimonials?language=es')->assertOk()->assertExactJson([$spanish->json()]);
+        $this->getJson('/api/testimonials?language=qu')->assertOk()->assertExactJson([$kichwa->json()]);
+        $this->getJson('/api/testimonials/eligibility?language=es')->assertJsonPath('testimonial.id', $spanish->json('id'));
+        $this->getJson('/api/testimonials/eligibility?language=qu')->assertJsonPath('testimonial.id', $kichwa->json('id'));
+
+        $this->postJson('/api/testimonials', ['body' => 'Kichwata yachakushpa ñukanchik shimita kawsachini.', 'language' => 'qu'])
+            ->assertOk()->assertJsonPath('id', $kichwa->json('id'));
+        $this->assertDatabaseCount('testimonials', 2);
+    }
+
+    public function test_an_unknown_opinion_language_is_rejected(): void
+    {
+        Sanctum::actingAs(Usuario::factory()->create());
+
+        $this->postJson('/api/testimonials', ['body' => 'Esta opinión tiene suficiente longitud.', 'language' => 'fr'])
+            ->assertUnprocessable()->assertJsonValidationErrors('language');
+        $this->assertDatabaseCount('testimonials', 0);
     }
 
     public function test_guests_cannot_publish_and_administrators_cannot_use_student_opinions(): void

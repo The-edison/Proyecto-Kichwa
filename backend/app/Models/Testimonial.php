@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Testimonial extends Model
 {
-    protected $fillable = ['user_id', 'usuario_id', 'body'];
+    protected $fillable = ['user_id', 'usuario_id', 'language', 'body'];
 
     public function usuario(): BelongsTo
     {

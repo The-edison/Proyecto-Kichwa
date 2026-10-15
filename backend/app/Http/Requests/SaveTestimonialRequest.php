@@ -24,6 +24,7 @@ class SaveTestimonialRequest extends FormRequest
     {
         return [
             'body' => ['required', 'string', 'min:20', 'max:500'],
+            'language' => ['sometimes', 'in:es,qu'],
         ];
     }
 
@@ -34,6 +35,7 @@ class SaveTestimonialRequest extends FormRequest
             'body.string' => 'La opinión debe ser un texto.',
             'body.min' => 'La opinión debe tener al menos 20 caracteres.',
             'body.max' => 'La opinión no puede superar los 500 caracteres.',
+            'language.in' => 'El idioma de la opinión no es válido.',
         ];
     }
 }

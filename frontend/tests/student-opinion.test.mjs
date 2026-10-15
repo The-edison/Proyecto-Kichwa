@@ -6,7 +6,7 @@ import { transformWithOxc } from 'vite';
 
 const { code } = await transformWithOxc(await readFile(new URL('../src/js/components/StudentOpinionForm.tsx', import.meta.url), 'utf8'), 'StudentOpinionForm.tsx');
 
-async function screen({ testimonial = null, loading = false, error = null, post } = {}) {
+async function screen({ testimonial = null, loading = false, error = null, post, language = 'es' } = {}) {
     let hook = 0;
     const states = [], effects = [], pendingEffects = [], requests = [];
     const context = vm.createContext({});
@@ -23,11 +23,11 @@ async function screen({ testimonial = null, loading = false, error = null, post 
             : specifier === 'lucide-react' ? { ArrowRight: 'ArrowRight', CheckCircle2: 'CheckCircle2', Send: 'Send' }
             : specifier.endsWith('/navigation') ? { Link: 'Link' }
             : specifier.endsWith('/useApi') ? { useApi: () => ({ loading, error, data: { can_comment: true, has_commented: Boolean(testimonial), testimonial } }) }
-            : { ApiError, apiPost: async (path, payload) => { requests.push({ path, body: payload.body }); return post ? post(ApiError) : { body: payload.body }; } };
+            : { ApiError, apiPost: async (path, payload) => { requests.push({ path, body: payload.body, language: payload.language }); return post ? post(ApiError) : { body: payload.body }; } };
         return new vm.SyntheticModule(Object.keys(dependency), function () { for (const [key, value] of Object.entries(dependency)) this.setExport(key, value); }, { context });
     });
     await module.evaluate();
-    const render = () => { hook = 0; const tree = module.namespace.StudentOpinionForm(); pendingEffects.splice(0).forEach(callback => callback()); return tree; };
+    const render = () => { hook = 0; const tree = module.namespace.StudentOpinionForm({ language }); pendingEffects.splice(0).forEach(callback => callback()); return tree; };
     render();
     return { render, requests };
 }
@@ -45,8 +45,17 @@ test('the form loads the existing opinion and publishes trimmed text', async () 
     assert.equal(find(view.render(), 'textarea').props.value, 'Mi experiencia anterior con Yachay.');
     find(view.render(), 'textarea').props.onChange({ target: { value: '  Mi nueva experiencia con la plataforma.  ' } });
     await submit(view.render());
-    assert.deepEqual(view.requests, [{ path: '/testimonials', body: 'Mi nueva experiencia con la plataforma.' }]);
+    assert.deepEqual(view.requests, [{ path: '/testimonials', body: 'Mi nueva experiencia con la plataforma.', language: 'es' }]);
     assert.ok(nodes(view.render()).some(node => node.props.role === 'status'));
+});
+
+test('the kichwa form publishes the opinion with its language', async () => {
+    const view = await screen({ language: 'qu' });
+    const tree = view.render();
+    assert.ok(nodes(tree).some(node => node.type === 'label' && node.props.children === 'Kichwapi Yachaymanta kampa yuyay'));
+    find(tree, 'textarea').props.onChange({ target: { value: 'Yachaypi mushuk shimikunata punchantin yachakuni.' } });
+    await submit(view.render());
+    assert.deepEqual(view.requests, [{ path: '/testimonials', body: 'Yachaypi mushuk shimikunata punchantin yachakuni.', language: 'qu' }]);
 });
 
 test('invalid short opinions do not reach the server', async () => {

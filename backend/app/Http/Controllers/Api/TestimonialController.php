@@ -14,9 +14,11 @@ use Illuminate\Support\Str;
 
 class TestimonialController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
+        $language = in_array($request->query('language'), ['es', 'qu'], true) ? $request->query('language') : 'es';
         $testimonials = Testimonial::with(['user:id,name', 'usuario:id_usuario,nombre_usuario'])
+            ->where('language', $language)
             ->where(function (Builder $query): void {
                 $query->whereHas('usuario', fn (Builder $user) => $user->where('rol_usuario', 'estudiante')->where('estado_usuario', 'activo'))
                     ->orWhere(fn (Builder $legacy) => $legacy->whereNull('usuario_id')->whereHas('user'));
@@ -31,8 +33,9 @@ class TestimonialController extends Controller
 
     public function eligibility(Request $request): JsonResponse
     {
+        $language = in_array($request->query('language'), ['es', 'qu'], true) ? $request->query('language') : 'es';
         $testimonial = Testimonial::with('usuario:id_usuario,nombre_usuario')
-            ->where('usuario_id', $request->user()->getKey())->first();
+            ->where('usuario_id', $request->user()->getKey())->where('language', $language)->first();
 
         return response()->json([
             'has_commented' => $testimonial !== null,
@@ -47,7 +50,7 @@ class TestimonialController extends Controller
             Usuario::whereKey($request->user()->getKey())->lockForUpdate()->firstOrFail();
 
             return Testimonial::updateOrCreate(
-                ['usuario_id' => $request->user()->getKey()],
+                ['usuario_id' => $request->user()->getKey(), 'language' => $request->validated('language') ?? 'es'],
                 ['body' => $request->validated('body')],
             );
         });
@@ -68,6 +71,7 @@ class TestimonialController extends Controller
             'id' => $testimonial->id,
             'name' => $displayName,
             'body' => $testimonial->body,
+            'language' => $testimonial->language,
             'created_at' => $testimonial->created_at?->toDateString(),
         ];
     }
