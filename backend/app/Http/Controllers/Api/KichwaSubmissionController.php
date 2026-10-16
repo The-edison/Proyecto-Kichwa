@@ -111,33 +111,23 @@ class KichwaSubmissionController extends Controller
         if ($responses->count() !== $exercises->count()) {
             throw ValidationException::withMessages(['response_ids' => 'Responde todas las actividades de esta unidad antes de ver tu resultado.']);
         }
-        $correctItems = 0;
-        $totalItems = 0;
+        $totalItems = $exercises->count();
         $details = [];
         foreach ($exercises as $exercise) {
             $response = $responses[$exercise->id_actividad];
-            if ($exercise->tipo_actividad === 'relacionar') {
-                $pairs = $exercise->solucion_actividad['pares'];
-                $total = count($pairs);
-                $correct = collect($pairs)->filter(fn ($pair) => collect($response->respuesta_actividad['pares'] ?? [])
-                    ->contains(fn ($given) => ($given['origen'] ?? null) === $pair['origen'] && ($given['destino'] ?? null) === $pair['destino']))->count();
-            } else {
-                $total = 1;
-                $correct = $response->acierto_actividad ? 1 : 0;
+            if (! $response->acierto_actividad) {
+                throw ValidationException::withMessages(['response_ids' => 'Corrige todos los ejercicios de esta unidad antes de ver tu resultado.']);
             }
-            $correctItems += $correct;
-            $totalItems += $total;
-            $details[] = ['exercise_id' => $exercise->id_actividad, 'title' => $exercise->configuracion['title'] ?? $exercise->enunciado_actividad, 'correct' => $correct, 'total' => $total];
+            $details[] = ['exercise_id' => $exercise->id_actividad, 'title' => $exercise->configuracion['title'] ?? $exercise->enunciado_actividad, 'correct' => 1, 'total' => 1];
         }
-        $score = $totalItems > 0 ? (int) round(20 * $correctItems / $totalItems) : 0;
         $next = Unidad::where('id_modulo', $record->id_modulo)->where('publicado', true)->where('orden_unidad', '>', $record->orden_unidad)->orderBy('orden_unidad')->value('id_unidad');
 
         $rewards = empty($data['practice_attempt_id']) ? [] : [
             'xp_earned' => DominioLecciones::practiceXp($request->user()->id_usuario, $unit, $data['practice_attempt_id']),
             'xp_total' => (int) DB::table('recompensas')->where('id_usuario', $request->user()->id_usuario)->sum('xp')];
 
-        return response()->json(['score' => $score, 'max_score' => 20, 'correct_count' => $correctItems, 'total_items' => $totalItems,
-            'passed' => $score >= 16, 'details' => $details, 'next_unit_id' => $next] + $rewards);
+        return response()->json(['score' => $totalItems, 'max_score' => $totalItems, 'correct_count' => $totalItems, 'total_items' => $totalItems,
+            'passed' => true, 'details' => $details, 'next_unit_id' => $next] + $rewards);
     }
 
     public function start(Request $request, int $evaluation): JsonResponse

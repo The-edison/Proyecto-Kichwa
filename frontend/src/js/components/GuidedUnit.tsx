@@ -9,6 +9,7 @@ import { ErrorState, LoadingState } from './States';
 import { LearningCompanion } from './LearningCompanion';
 import { GuidedIntroduction } from './GuidedIntroduction';
 import { GreetingsIntroduction } from './GreetingsIntroduction';
+import { MissingVowelExercise } from './MissingVowelExercise';
 import { useAuth } from '../context/AuthContext';
 import { emptyGuidedAttempt, readGuidedAttempt, writeGuidedAttempt, subscribeGuidedAttempt, type GuidedAttempt, type GuidedResult } from '../services/guidedAttempt';
 import type { Exercise, ExerciseAnswer, ExerciseFeedback, Unit } from '../types';
@@ -36,11 +37,32 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
     const [error, setError] = useState('');
     const sending = useRef(false);
     const heading = useRef<HTMLHeadingElement>(null);
+    const exercises = sequence.data?.exercises ?? [];
+    function panelStart(position: number) {
+        if (position < 1 || unit.config?.guided_lesson === 'greetings') return position;
+        const start = Math.floor((position - 1) / 2) * 2 + 1;
+        const candidates = exercises.slice(start - 1, start + 1);
+        return candidates.length === 2 && candidates.every(exercise => exercise.type === 'seleccion_multiple' && exercise.config?.prompt_image) ? start : position;
+    }
+    const groupStart = panelStart(step);
+    const candidates = exercises.slice(groupStart - 1, groupStart + 1);
+    const groupedChoices = step > 0 && unit.config?.guided_lesson !== 'greetings' && candidates.length === 2
+        && candidates.every(exercise => exercise.type === 'seleccion_multiple' && exercise.config?.prompt_image) ? candidates : [];
+    const isGrouped = groupedChoices.length === 2;
+    const lastPanelStep = isGrouped ? groupStart + 1 : step;
+    const previousStep = panelStart((isGrouped ? groupStart : step) - 1);
     const current = step > 0 ? sequence.data?.exercises[step - 1] : undefined;
     const answer = current ? answers[current.id] ?? {} : {};
     const result = current ? feedback[current.id] : undefined;
     const feedbackText = result ? feedbackMessage(result.feedback) : '';
-    const checked = Boolean(result?.response_id);
+    const checked = isGrouped ? groupedChoices.every(exercise => feedback[exercise.id]?.response_id) : Boolean(result?.response_id);
+    const correct = isGrouped ? groupedChoices.every(exercise => feedback[exercise.id]?.is_correct === true) : result?.is_correct === true;
+    const canCheck = isGrouped ? groupedChoices.every(exercise => feedback[exercise.id]?.is_correct || answerComplete(exercise, answers[exercise.id] ?? {})) : Boolean(current && answerComplete(current, answer));
+    const displayResult = isGrouped ? (checked ? {
+        is_correct: groupedChoices.every(exercise => feedback[exercise.id]?.is_correct),
+        xp_earned: groupedChoices.reduce((total, exercise) => total + (feedback[exercise.id]?.xp_earned ?? 0), 0),
+        response_id: groupedChoices.map(exercise => feedback[exercise.id]?.response_id).join('-'),
+    } : undefined) : result;
     const activityCount = sequence.data?.exercises.length ?? 0;
     const screenCount = activityCount + 1;
     const ready = activityCount > 0 && sequence.data?.total === activityCount;
@@ -52,6 +74,14 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
         const saved = readGuidedAttempt(draftKey);
         if ((saved.catalog && saved.catalog !== catalog) || saved.step > screenCount) {
             writeGuidedAttempt(draftKey, emptyGuidedAttempt(catalog));
+            return;
+        }
+        const incomplete = exercises.findIndex(exercise => saved.feedback[exercise.id]?.is_correct !== true);
+        const allowedStep = incomplete < 0 ? screenCount : panelStart(incomplete + 1);
+        if (saved.step > allowedStep) {
+            writeGuidedAttempt(draftKey, { ...saved, catalog, step: allowedStep, summary: null });
+        } else if (saved.summary && incomplete < 0 && saved.summary.max_score !== activityCount) {
+            writeGuidedAttempt(draftKey, { ...saved, catalog, summary: { ...saved.summary, score: activityCount, max_score: activityCount, correct_count: activityCount, total_items: activityCount, passed: true } });
         } else if (!saved.catalog) {
             writeGuidedAttempt(draftKey, { ...saved, catalog });
         }
@@ -69,13 +99,14 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
         });
     }, [sequence.data, step]);
 
-    function update(value: ExerciseAnswer) {
-        if (!current || busy || result?.is_correct) return;
-        setAnswers(previous => ({ ...previous, [current.id]: value }));
-        setFeedback(previous => ({ ...previous, [current.id]: undefined }));
-        setField('submissions', previous => ({ ...previous, [current.id]: undefined }));
+    function updateExercise(exercise: Exercise, value: ExerciseAnswer) {
+        if (busy || readGuidedAttempt(draftKey).feedback[exercise.id]?.is_correct) return;
+        setAnswers(previous => ({ ...previous, [exercise.id]: value }));
+        setFeedback(previous => ({ ...previous, [exercise.id]: undefined }));
+        setField('submissions', previous => ({ ...previous, [exercise.id]: undefined }));
         setError('');
     }
+    function update(value: ExerciseAnswer) { if (current) updateExercise(current, value); }
     function selectOrigin(origin: string) {
         if (busy || result?.is_correct) return;
         if (answer.pares?.some(item => item.origen === origin)) {
@@ -96,14 +127,19 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
         update({ pares: [...(answer.pares ?? []).filter(item => item.origen !== selectedOrigin && item.destino !== destination), { origen: selectedOrigin, destino: destination }] });
         setSelectedOrigin('');
     }
-    function move(next: number) { setStep(next); setSelectedOrigin(''); setError(''); }
+    function move(next: number) {
+        const saved = readGuidedAttempt(draftKey);
+        if (next > saved.step && exercises.slice(0, next - 1).some(exercise => saved.feedback[exercise.id]?.is_correct !== true)) return;
+        setStep(next); setSelectedOrigin(''); setError('');
+    }
     function retry() {
         writeGuidedAttempt(draftKey, emptyGuidedAttempt(catalog ?? ''));
         setError('');
     }
     async function finish() {
-        const responseIds = sequence.data?.exercises.map(exercise => feedback[exercise.id]?.response_id);
-        if (sending.current || !responseIds || responseIds.some(id => !id)) return;
+        const saved = readGuidedAttempt(draftKey);
+        const responseIds = exercises.map(exercise => saved.feedback[exercise.id]?.response_id);
+        if (sending.current || !ready || responseIds.some(id => !id) || exercises.some(exercise => saved.feedback[exercise.id]?.is_correct !== true)) return;
         sending.current = true; setBusy(true); setError('');
         const finishingAttemptId = readGuidedAttempt(draftKey).practiceAttemptId;
         try {
@@ -115,18 +151,27 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
         } finally { sending.current = false; setBusy(false); }
     }
     async function check() {
-        if (!current || result?.is_correct || !answerComplete(current, answer) || sending.current) return;
+        const targets = (isGrouped ? groupedChoices : current ? [current] : []).filter(exercise => !feedback[exercise.id]?.is_correct);
+        if (!targets.length || targets.some(exercise => !answerComplete(exercise, answers[exercise.id] ?? {})) || sending.current) return;
         sending.current = true; setBusy(true); setError('');
         try {
             const saved = readGuidedAttempt(draftKey);
-            writeGuidedAttempt(draftKey, { ...saved, practiceAttemptId: saved.practiceAttemptId ?? crypto.randomUUID(), submissions: { ...saved.submissions, [current.id]: saved.submissions[current.id] ?? crypto.randomUUID() } });
+            const submissions = { ...saved.submissions };
+            targets.forEach(exercise => { submissions[exercise.id] ??= crypto.randomUUID(); });
+            writeGuidedAttempt(draftKey, { ...saved, practiceAttemptId: saved.practiceAttemptId ?? crypto.randomUUID(), submissions });
             const pending = readGuidedAttempt(draftKey);
-            const response = await apiPost<ExerciseFeedback>(`/exercises/${current.id}/answer`, { answer, practice_attempt_id: pending.practiceAttemptId, submission_id: pending.submissions[current.id] });
-            const latest = readGuidedAttempt(draftKey);
-            if (latest.practiceAttemptId !== pending.practiceAttemptId || latest.submissions[current.id] !== pending.submissions[current.id]
-                || (response.response_id !== undefined && latest.feedback[current.id]?.response_id === response.response_id)) return;
-            setFeedback(previous => ({ ...previous, [current.id]: response }));
-            setXpEarned(previous => response.xp_attempt ?? previous + (response.xp_earned ?? 0));
+            for (const exercise of targets) {
+                const before = readGuidedAttempt(draftKey);
+                if (before.practiceAttemptId !== pending.practiceAttemptId || before.submissions[exercise.id] !== pending.submissions[exercise.id]) return;
+                if (before.feedback[exercise.id]?.is_correct) continue;
+                const submittedAnswer = pending.answers[exercise.id] ?? {};
+                const response = await apiPost<ExerciseFeedback>(`/exercises/${exercise.id}/answer`, { answer: submittedAnswer, practice_attempt_id: pending.practiceAttemptId, submission_id: pending.submissions[exercise.id] });
+                const latest = readGuidedAttempt(draftKey);
+                if (latest.practiceAttemptId !== pending.practiceAttemptId || latest.submissions[exercise.id] !== pending.submissions[exercise.id]
+                    || (response.response_id !== undefined && latest.feedback[exercise.id]?.response_id === response.response_id)) return;
+                setFeedback(previous => ({ ...previous, [exercise.id]: response }));
+                setXpEarned(previous => response.xp_attempt ?? previous + (response.xp_earned ?? 0));
+            }
         } catch (reason) {
             setError(reason instanceof ApiError ? Object.values(reason.errors).flat().join(' ') || reason.message : 'No se pudo guardar tu respuesta. Se conserva tu selección; vuelve a intentarlo.');
         } finally { sending.current = false; setBusy(false); }
@@ -144,13 +189,14 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
         <section className="guided-unit-main" aria-label="Contenido de la unidad" aria-busy={sequence.loading || busy}>
             {sequence.loading ? <LoadingState label="Preparando tu unidad…" /> : sequence.error ? <ErrorState message={sequence.error} /> : !ready ? <ErrorState message="Las actividades de esta unidad están en preparación." /> : summary && step === screenCount ? <section className="guided-result" aria-labelledby="guided-result-title">
                 <p className="eyebrow">RESULTADO DE LA UNIDAD</p>
-                <LearningCompanion final correct={summary.passed} score={`${summary.score} / ${summary.max_score}`} xpEarned={summary.xp_earned ?? xpEarned} />
+                <LearningCompanion final portraitOnly correct={summary.passed} score={`${summary.score} / ${summary.max_score}`} xpEarned={summary.xp_earned ?? xpEarned} />
                 <h1 id="guided-result-title" ref={heading} tabIndex={-1}>{summary.passed ? '¡Buen trabajo!' : 'Sigue practicando'}</h1>
-                <p className="guided-result-score" aria-label={`${summary.score} de ${summary.max_score} puntos`}>{summary.score}<span> / {summary.max_score}</span></p>
                 <p className={`guided-result-status ${summary.passed ? 'is-passed' : ''}`}>{summary.passed ? 'Meta alcanzada' : 'Por debajo de la meta'}</p>
-                <p className="guided-result-caption">{summary.correct_count} de {summary.total_items} respuestas correctas · Meta: 16/20 puntos</p>
-                <div className="guided-result-details">{summary.details.map(detail => <div key={detail.exercise_id}><span>{detail.title}</span><strong>{detail.correct} / {detail.total}</strong></div>)}</div>
-                <p className="guided-result-note">El puntaje se calcula con tus respuestas correctas sobre {summary.max_score} puntos. Puedes volver a practicar para mejorar tu resultado.</p>
+                <div className="guided-result-metrics">
+                    <div><span>EJERCICIOS CORRECTOS</span><p className="guided-result-score" aria-label={`${summary.score} de ${summary.max_score} ejercicios correctos`}>{summary.score}<span> / {summary.max_score}</span></p></div>
+                    <div><span>XP DE ESTE INTENTO</span><p className="guided-result-earned">+{summary.xp_earned ?? xpEarned}<span> XP</span></p></div>
+                </div>
+                <p className="guided-result-note">Cada ejercicio correcto suma <strong>10 XP</strong>.</p>
                 <div className="guided-result-actions">
                     <button type="button" className="secondary-button" onClick={retry}><RotateCcw size={18} aria-hidden="true" />Reintentar</button>
                     <Link className="primary-button" href={summary.next_unit_id ? `/aprender/unidad/${summary.next_unit_id}` : `/aprender/nivel/${unit.level_id}`}>Continuar <ArrowRight size={18} aria-hidden="true" /></Link>
@@ -158,8 +204,24 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
                 </div>
             </section> : <>
                 {step > 0 && <div className="exercise-companion-header"><div><h1 className="guided-exercise-heading" ref={heading} tabIndex={-1}>{current?.config?.title}</h1>
-                <p className="guided-unit-description">{current?.prompt}</p></div><LearningCompanion key={result ? `response-${result.response_id}` : `ready-${current?.id}`} correct={result?.is_correct} xpEarned={result?.xp_earned} xpTotal={result?.xp_total} /></div>}
-                {step === 0 ? (unit.config?.guided_lesson === 'greetings' ? <GreetingsIntroduction /> : <GuidedIntroduction />) : current?.type === 'seleccion_multiple' ? <fieldset className="guided-choice" disabled={busy || result?.is_correct === true}>
+                <p className="guided-unit-description">{isGrouped ? 'Observa las dos imágenes. Selecciona el nombre en kichwa de cada una.' : current?.prompt}</p></div><LearningCompanion key={displayResult ? `response-${displayResult.response_id}` : `ready-${current?.id}`} correct={displayResult?.is_correct} xpEarned={displayResult?.xp_earned} xpTotal={isGrouped ? undefined : result?.xp_total} /></div>}
+                {step === 0 ? (unit.config?.guided_lesson === 'greetings' ? <GreetingsIntroduction /> : <GuidedIntroduction />) : isGrouped ? <section className="guided-choice-panel" aria-label="Reconoce las dos imágenes">
+                    {groupedChoices.map((exercise, index) => {
+                        const selection = answers[exercise.id] ?? {};
+                        const graded = feedback[exercise.id];
+                        const message = graded ? feedbackMessage(graded.feedback) : '';
+                        return <article className="guided-choice-panel-item" key={exercise.id}>
+                            <fieldset className="guided-choice" disabled={busy || graded?.is_correct === true}>
+                                <legend className="guided-choice-panel-label">Imagen {index + 1}</legend>
+                                <figure className="guided-choice-visual"><img className="guided-choice-image" src={mediaUrl(exercise.config?.prompt_image)} alt={exercise.config?.prompt_image_alt ?? 'Imagen para reconocer una palabra en kichwa'} width={280} height={210} decoding="async" fetchPriority="high" /></figure>
+                                <div className="guided-choice-options">{exercise.elements.map(option => <label key={option.id} className={selection.seleccion?.includes(option.id) ? 'is-selected' : ''}>
+                                    <input type="radio" name={`guided-${exercise.id}`} value={option.id} checked={selection.seleccion?.includes(option.id) ?? false} onChange={() => updateExercise(exercise, { seleccion: [option.id] })} /><span>{option.texto}</span>
+                                </label>)}</div>
+                            </fieldset>
+                            {graded && message && <p className={`guided-feedback ${graded.is_correct ? 'is-correct' : 'is-incorrect'}`} role="status">{graded.is_correct && <CheckCircle2 size={20} aria-hidden="true" />}<span>{message}</span></p>}
+                        </article>;
+                    })}
+                </section> : current?.type === 'seleccion_multiple' ? <fieldset className="guided-choice" disabled={busy || result?.is_correct === true}>
                     <legend className="sr-only">Selecciona el nombre en kichwa de la imagen</legend>
                     <figure className="guided-choice-visual">
                         <img className="guided-choice-image" src={mediaUrl(current.config?.prompt_image)} alt={current.config?.prompt_image_alt ?? "Imagen del ejercicio para reconocer una palabra en kichwa"} width={280} height={210} decoding="async" fetchPriority="high" />
@@ -168,26 +230,32 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
                     <div className="guided-choice-options">{current.elements.map(option => <label key={option.id} className={answer.seleccion?.includes(option.id) ? 'is-selected' : ''}>
                         <input type="radio" name={`guided-${current.id}`} value={option.id} checked={answer.seleccion?.includes(option.id) ?? false} onChange={() => update({ seleccion: [option.id] })} /><span>{option.texto}</span>
                     </label>)}</div>
-                </fieldset> : <fieldset className="guided-matching" disabled={busy || result?.is_correct === true}>
+                </fieldset> : current?.type === 'completar' && current.config?.listening_vowels ? <MissingVowelExercise key={current.id} exercise={current} answer={answer} disabled={busy || result?.is_correct === true} onChange={update} /> : <section className="guided-matching-panel" aria-label="Asociación de palabras">
+                    <header className="guided-matching-intro">
+                        <div className="guided-matching-progress"><span><strong>{answer.pares?.length ?? 0}<small> / {origins.length}</small></strong><span>parejas</span></span><progress value={answer.pares?.length ?? 0} max={origins.length || 1} aria-label="Parejas seleccionadas" /></div>
+                    </header>
+                    <fieldset className="guided-matching" disabled={busy || result?.is_correct === true}>
                     <legend className="sr-only">Relaciona las cuatro palabras en español con sus parejas en kichwa</legend>
-                    <div className="guided-matching-column"><h2>ESPAÑOL</h2>{origins.map((origin, index) => <button type="button" key={origin.id} className={`${selectedOrigin === origin.id ? 'is-selected' : ''}${answer.pares?.some(item => item.origen === origin.id) ? ' is-paired' : ''}`} aria-pressed={selectedOrigin === origin.id || answer.pares?.some(item => item.origen === origin.id) === true} onClick={() => selectOrigin(origin.id)}>
-                        <span>{origin.texto}</span>{answer.pares?.some(item => item.origen === origin.id) && <span className="guided-pair-number" aria-label={`Pareja ${index + 1}`}>{index + 1}</span>}
+                    <div className="guided-matching-column"><div className="guided-matching-column-heading"><h3>ESPAÑOL</h3></div>{origins.map((origin, index) => <button type="button" key={origin.id} className={`${selectedOrigin === origin.id ? 'is-selected' : ''}${answer.pares?.some(item => item.origen === origin.id) ? ' is-paired' : ''}`} aria-label={origin.texto} aria-pressed={selectedOrigin === origin.id || answer.pares?.some(item => item.origen === origin.id) === true} onClick={() => selectOrigin(origin.id)}>
+                        <span className="guided-matching-word"><strong>{origin.texto}</strong></span>{answer.pares?.some(item => item.origen === origin.id) ? <span className="guided-pair-number" aria-label={`Pareja ${index + 1}`}>{index + 1}</span> : <span className="guided-matching-dot" aria-hidden="true" />}
                     </button>)}</div>
-                    <div className="guided-matching-column"><h2>KICHWA</h2>{destinations.map(destination => {
+                    <div className="guided-matching-column"><div className="guided-matching-column-heading"><h3>KICHWA</h3></div>{destinations.map(destination => {
                         const matched = answer.pares?.find(item => item.destino === destination.id);
                         const number = matched ? origins.findIndex(origin => origin.id === matched.origen) + 1 : 0;
-                        return <button type="button" key={destination.id} className={matched ? 'is-paired' : ''} aria-pressed={Boolean(matched)} disabled={(!selectedOrigin && !matched) || busy} onClick={() => pair(destination.id)}><span>{destination.texto}</span>{number > 0 && <span className="guided-pair-number" aria-label={`Pareja ${number}`}>{number}</span>}</button>;
+                        return <button type="button" key={destination.id} className={matched ? 'is-paired' : ''} aria-label={destination.texto} aria-pressed={Boolean(matched)} disabled={(!selectedOrigin && !matched) || busy} onClick={() => pair(destination.id)}><span className="guided-matching-word"><strong>{destination.texto}</strong></span>{number > 0 ? <span className="guided-pair-number" aria-label={`Pareja ${number}`}>{number}</span> : <span className="guided-matching-dot" aria-hidden="true" />}</button>;
                     })}</div>
-                    <p className="guided-matching-help" role="status">{answer.pares?.length ?? 0} de 4 parejas seleccionadas. Puedes cambiar una pareja antes de comprobar.</p>
-                </fieldset>}
-                {result && feedbackText && <p className={`guided-feedback ${result.is_correct ? 'is-correct' : 'is-incorrect'}`} role="status">{result.is_correct && <CheckCircle2 size={20} aria-hidden="true" />}<span>{feedbackText}</span></p>}
+                    <p className="sr-only" role="status">{answer.pares?.length ?? 0} de {origins.length} parejas seleccionadas. {result?.is_correct ? 'Las parejas están comprobadas.' : selectedOrigin ? `Ahora elige la pareja de «${origins.find(origin => origin.id === selectedOrigin)?.texto}» en kichwa.` : 'Puedes cambiar una pareja antes de comprobar.'}</p>
+                    </fieldset>
+
+                </section>}
+                {!isGrouped && result && feedbackText && <p className={`guided-feedback ${result.is_correct ? 'is-correct' : 'is-incorrect'}`} role="status">{result.is_correct && <CheckCircle2 size={20} aria-hidden="true" />}<span>{feedbackText}</span></p>}
                 {error && <p className="form-error" role="alert">{error}</p>}
             </>}
         </section>
         {step < screenCount && <footer className="guided-unit-footer">
-            {step === 0 ? <Link href={moduleHref} className="guided-back"><ArrowLeft size={16} aria-hidden="true" />Volver</Link> : <button type="button" className="guided-back" disabled={busy} onClick={() => move(step - 1)}><ArrowLeft size={16} aria-hidden="true" />Volver</button>}
-            {step > 0 && <div className="guided-attempt-progress"><span className="guided-step" aria-label={`Ejercicio ${step} de ${activityCount}`}>{String(step).padStart(2, '0')} <span>/ {String(activityCount).padStart(2, '0')}</span></span><span className="guided-attempt-xp">{xpEarned} XP en este intento</span></div>}
-            {ready && !sequence.error && !sequence.loading && (step === 0 ? <button type="button" className="primary-button" onClick={() => move(1)}>Continuar <ArrowRight size={17} aria-hidden="true" /></button> : checked ? <button type="button" className="primary-button" disabled={busy} onClick={() => step === activityCount ? void finish() : move(step + 1)}>{busy ? <><LoaderCircle size={17} className="animate-spin" aria-hidden="true" />Calculando…</> : step === activityCount ? <>Ver mi puntaje <ArrowRight size={17} aria-hidden="true" /></> : <>Continuar <ArrowRight size={17} aria-hidden="true" /></>}</button> : <button type="button" className="primary-button" disabled={busy || !current || !answerComplete(current, answer)} onClick={() => void check()}>{busy && <LoaderCircle size={17} className="animate-spin" aria-hidden="true" />}{busy ? 'Comprobando…' : 'Comprobar'}</button>)}
+            {step === 0 ? <Link href={moduleHref} className="guided-back"><ArrowLeft size={16} aria-hidden="true" />Volver</Link> : <button type="button" className="guided-back" disabled={busy} onClick={() => move(previousStep)}><ArrowLeft size={16} aria-hidden="true" />Volver</button>}
+            {step > 0 && <div className="guided-attempt-progress"><span className="guided-step" aria-label={isGrouped ? `Ejercicios ${groupStart} y ${lastPanelStep} de ${activityCount}` : `Ejercicio ${step} de ${activityCount}`}>{isGrouped ? `${String(groupStart).padStart(2, '0')}–${String(lastPanelStep).padStart(2, '0')}` : String(step).padStart(2, '0')} <span>/ {String(activityCount).padStart(2, '0')}</span></span><span className="guided-attempt-xp">{xpEarned} XP en este intento</span></div>}
+            {ready && !sequence.error && !sequence.loading && (step === 0 ? <button type="button" className="primary-button" onClick={() => move(1)}>Continuar <ArrowRight size={17} aria-hidden="true" /></button> : correct ? <button type="button" className="primary-button" disabled={busy} onClick={() => lastPanelStep === activityCount ? void finish() : move(lastPanelStep + 1)}>{busy ? <><LoaderCircle size={17} className="animate-spin" aria-hidden="true" />Calculando…</> : lastPanelStep === activityCount ? <>Ver mi puntaje <ArrowRight size={17} aria-hidden="true" /></> : <>Continuar <ArrowRight size={17} aria-hidden="true" /></>}</button> : <button type="button" className="primary-button" disabled={busy || !canCheck} onClick={() => void check()}>{busy && <LoaderCircle size={17} className="animate-spin" aria-hidden="true" />}{busy ? 'Comprobando…' : 'Comprobar'}</button>)}
         </footer>}
     </div>;
 }

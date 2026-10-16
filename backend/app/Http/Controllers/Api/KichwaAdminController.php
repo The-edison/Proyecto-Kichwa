@@ -219,6 +219,17 @@ class KichwaAdminController extends Controller
             return response()->json(PublicacionContenido::remember('admin-levels', fn () => $model::query()->select('niveles.*')->selectSub(DB::table('modulos')->selectRaw('count(*)')->whereColumn('modulos.id_nivel', 'niveles.id_nivel'), 'children_count')->orderBy('orden_nivel')->get()->map(fn ($r) => KichwaResource::present($resource, $r, true) + ['children_count' => (int) $r->children_count])->all()));
         }
         $query = $model::query();
+        if ($resource === 'diccionario') {
+            $data = $request->validate(['q' => ['nullable', 'string', 'max:100'], 'page' => ['sometimes', 'integer', 'min:1']]);
+            $word = trim($data['q'] ?? '');
+            if ($word !== '') {
+                $literal = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $word);
+                $query->whereRaw("(public.kichwa_normalizar(kichwa) LIKE '%' || public.kichwa_normalizar(?) || '%' OR public.kichwa_normalizar(español) LIKE '%' || public.kichwa_normalizar(?) || '%')", [$literal, $literal]);
+            }
+
+            return response()->json($query->orderByDesc('id')->paginate($request->integer('per_page', 20))
+                ->through(fn ($entry) => KichwaResource::present('diccionario', $entry)));
+        }
         if ($resource === 'evaluations' && $request->input('type') === 'diagnostica') {
             $query->where('tipo_evaluacion', 'diagnostica');
         }

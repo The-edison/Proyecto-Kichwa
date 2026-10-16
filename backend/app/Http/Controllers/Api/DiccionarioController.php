@@ -96,6 +96,9 @@ class DiccionarioController extends Controller
             $rows[] = ['kichwa' => $kichwa, 'español' => $espanol];
         }
         fclose($handle);
+        if ($rows === []) {
+            throw ValidationException::withMessages(['file' => 'El CSV debe contener al menos una palabra además de los encabezados.']);
+        }
         $inserted = DB::transaction(function () use ($rows): int {
             $total = 0;
             foreach (array_chunk($rows, 500) as $chunk) {
@@ -105,6 +108,8 @@ class DiccionarioController extends Controller
             return $total;
         });
 
-        return response()->json(['inserted' => $inserted, 'skipped' => count($rows) - $inserted, 'message' => "$inserted entradas importadas; los duplicados se conservaron."], 201);
+        $skipped = count($rows) - $inserted;
+
+        return response()->json(['inserted' => $inserted, 'skipped' => $skipped, 'message' => "$inserted palabras añadidas; $skipped duplicadas omitidas."], 201);
     }
 }

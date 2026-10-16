@@ -75,6 +75,7 @@ class ContratoEjercicio
             'config.exact_selections' => ['sometimes', 'boolean'],
             'config.ignore_accents' => ['sometimes', 'boolean'],
             'config.requires_audio' => ['sometimes', 'boolean'],
+            'config.listening_vowels' => ['sometimes', 'boolean'],
             'config.requires_images' => ['sometimes', 'boolean'],
             'config.reviewed' => ['sometimes', 'boolean'],
             'config.presentation' => ['sometimes', 'in:buttons,visual,letter,tiles,writing'],
@@ -90,6 +91,11 @@ class ContratoEjercicio
         ], ['required' => 'El campo :attribute es obligatorio.', 'distinct' => 'No repitas identificadores.',
             'array' => 'La estructura de :attribute no es válida.', 'between' => 'Las coordenadas deben estar entre 0 y 1.'])->validate();
         $presentation = $data['config']['presentation'] ?? '';
+        if (($data['config']['listening_vowels'] ?? false) && ($data['type'] !== 'completar' || $presentation !== 'writing'
+            || array_column($data['elements'], 'id') !== ['audio1', 'audio2', 'audio3']
+            || collect($data['elements'])->contains(fn ($element) => ! preg_match('/^[a-z]+_[a-z]+$/', $element['texto'])))) {
+            self::fail('El ejercicio de audio requiere tres palabras con una vocal faltante.', 'config');
+        }
         if (($presentation === 'letter' || $presentation === 'writing') && $data['type'] !== 'completar'
             || ($presentation === 'buttons' || $presentation === 'visual') && $data['type'] !== 'seleccion_multiple'
             || $presentation === 'tiles' && $data['type'] !== 'ordenar') {

@@ -65,6 +65,13 @@ test('final score appears below the portrait for both passed and below-target re
     }
 });
 
+test('portrait-only results leave the grade and XP to the result panel', () => {
+    const view = LearningCompanion({ final: true, portraitOnly: true, correct: true, score: '20 / 20', xpEarned: 50 });
+    assert.equal(nodes(view).filter(node => node.type === 'img').length, 1);
+    assert.equal(nodes(view).some(node => node.props.className === 'learning-companion-message'), false);
+    assert.doesNotMatch(content(view), /20 \/ 20|50 XP|Puntuación final/);
+});
+
 async function card(post) {
     let cursor = 0;
     const states = [], requests = [];

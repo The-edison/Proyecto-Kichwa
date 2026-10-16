@@ -1,0 +1,25 @@
+.admin-dictionary { display: grid; gap: 24px; }
+.admin-dictionary-forms { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.admin-dictionary-card { display: grid; align-content: start; gap: 20px; min-width: 0; padding: 26px; }
+.admin-dictionary-heading { display: flex; align-items: center; gap: 13px; }
+.admin-dictionary-heading > span { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; border-radius: 13px; background: var(--color-soft); color: var(--color-primary); }
+.admin-dictionary-heading h2 { margin: 0; font-size: 1.15rem; font-weight: 750; }
+.admin-dictionary-heading p { margin: 4px 0 0; color: var(--color-muted); font-size: .88rem; }
+.admin-dictionary-card input:not([type=file]) { width: 100%; min-width: 0; min-height: 46px; padding: 10px 13px; border: 1px solid var(--color-control-border); border-radius: 10px; background: var(--color-surface); color: var(--color-text); }
+.admin-dictionary-card .primary-button { justify-content: center; }
+.admin-dictionary-template { display: inline-flex; align-items: center; gap: 8px; width: fit-content; font-size: .9rem; font-weight: 600; color: var(--color-primary, #7839ee); }
+.admin-dictionary-upload { display: grid; justify-items: center; gap: 10px; padding: 20px 14px; border: 1px dashed var(--color-line); border-radius: 14px; text-align: center; }
+.admin-dictionary-upload > span { font-size: .8rem; color: var(--color-muted); }
+.admin-dictionary-upload input { max-width: 100%; font-size: .85rem; }
+.admin-dictionary-notice { padding: 14px 20px; border-radius: 14px; background: var(--color-positive-soft, #e6f5ef); color: var(--color-forest, #087c73); }
+.admin-dictionary-list-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.admin-dictionary-search { display: flex; gap: 8px; max-width: 100%; }
+.admin-dictionary-table table { width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left; }
+.admin-dictionary-table th { padding: 12px 16px; background: var(--color-surface); color: var(--color-muted); font-size: .8rem; }
+.admin-dictionary-table td { padding: 14px 16px; border-bottom: 1px solid var(--color-line); overflow-wrap: anywhere; }
+.admin-dictionary-table td:first-child { font-weight: 600; }
+@media (max-width: 800px) {
+    .admin-dictionary-forms { grid-template-columns: 1fr; }
+    .admin-dictionary-card { padding: 20px; }
+    .admin-dictionary-search { width: 100%; }
+}

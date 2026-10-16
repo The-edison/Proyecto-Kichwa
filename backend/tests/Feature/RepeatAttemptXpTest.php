@@ -51,17 +51,17 @@ class RepeatAttemptXpTest extends TestCase
         $house = Actividad::where('origen_reactivo', 'u1-guided-v3-1')->firstOrFail();
         $exercises = Actividad::where('id_unidad', $house->id_unidad)->where('publicado', true)->orderBy('orden_actividad')->get();
         $firstIds = [];
-        foreach ([40, 80] as $total) {
+        foreach ([60, 120] as $total) {
             $session = (string) Str::uuid();
             $ids = [];
             foreach ($exercises as $exercise) {
-                $ids[] = $this->postJson('/api/exercises/'.$exercise->id_actividad.'/answer', ['answer' => $exercise->solucion_actividad,
+                $ids[] = $this->postJson('/api/exercises/'.$exercise->id_actividad.'/answer', ['answer' => $exercise->tipo_actividad === 'completar' ? ['textos' => array_map(fn (array $variants): string => $variants[0], $exercise->solucion_actividad['textos'])] : $exercise->solucion_actividad,
                     'practice_attempt_id' => $session, 'submission_id' => (string) Str::uuid()])->assertOk()->assertJsonPath('xp_earned', 10)->json('response_id');
             }
             $payload = ['response_ids' => $ids, 'practice_attempt_id' => $session, 'xp_earned' => 99999];
             $url = '/api/units/'.$house->id_unidad.'/guided/result';
-            $this->postJson($url, $payload)->assertOk()->assertJsonPath('xp_earned', 40)->assertJsonPath('xp_total', $total)->assertJsonPath('score', 20);
-            $this->postJson($url, $payload)->assertOk()->assertJsonPath('xp_earned', 40)->assertJsonPath('xp_total', $total);
+            $this->postJson($url, $payload)->assertOk()->assertJsonPath('xp_earned', 60)->assertJsonPath('xp_total', $total)->assertJsonPath('score', 6)->assertJsonPath('max_score', 6);
+            $this->postJson($url, $payload)->assertOk()->assertJsonPath('xp_earned', 60)->assertJsonPath('xp_total', $total);
             if ($firstIds !== []) {
                 $mixed = $ids;
                 $mixed[0] = $firstIds[0];
@@ -69,10 +69,10 @@ class RepeatAttemptXpTest extends TestCase
             }
             $firstIds = $ids;
         }
-        $this->getJson('/api/mastery')->assertOk()->assertJsonPath('xp', 80);
-        $this->assertDatabaseCount('recompensas', 8);
+        $this->getJson('/api/mastery')->assertOk()->assertJsonPath('xp', 120);
+        $this->assertDatabaseCount('recompensas', 12);
         Sanctum::actingAs(Usuario::factory()->administrador()->create());
-        $this->getJson('/api/admin/learning-results/'.$student->id_usuario)->assertOk()->assertJsonPath('xp', 80);
+        $this->getJson('/api/admin/learning-results/'.$student->id_usuario)->assertOk()->assertJsonPath('xp', 120);
         Sanctum::actingAs(Usuario::factory()->create());
         $this->getJson('/api/mastery')->assertOk()->assertJsonPath('xp', 0);
         $this->getJson('/api/admin/learning-results/'.$student->id_usuario)->assertForbidden();

@@ -1,25 +1,54 @@
-.greetings-times { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
-.greetings-time { min-width: 0; padding: 18px; border: 1px solid var(--lesson-border); border-radius: var(--lesson-radius); background: var(--color-surface); }
-.greetings-sky { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 0 12px; margin-bottom: 14px; border-bottom: 1px solid var(--lesson-border); color: var(--color-text-secondary); font-size: 13px; font-weight: 600; }
-.greetings-sky svg { width: 26px; height: 26px; color: var(--lesson-accent); }
-.greetings-time h3 { font-size: clamp(21px,2vw,25px); font-weight: 650; letter-spacing: -.015em; line-height: 1.35; }
-.greetings-time > p { margin-top: 4px; color: var(--color-text-secondary); font-size: 14px; }
-.greetings-details { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; margin-top: 20px; }
-.greetings-details .cometa-lesson-card { padding: 18px; }
-.greetings-details .cometa-card-heading h2 { font-size: 16px; }
+﻿.greetings-section { padding: 26px; border: 1px solid var(--lesson-border); border-radius: var(--lesson-radius); background: var(--color-surface); }
+.greetings-times { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.greetings-time { --greeting-tone: var(--lesson-accent); --greeting-fill: var(--color-secondary-soft); min-width: 0; padding: 20px; border: 1px solid var(--lesson-border); border-top: 3px solid var(--greeting-tone); border-radius: 9px; background: var(--lesson-fill); }
+.greetings-afternoon { --greeting-tone: var(--color-warning); --greeting-fill: var(--color-warning-bg); }
+.greetings-night { --greeting-tone: var(--color-info); --greeting-fill: var(--color-info-bg); }
+.greetings-sky { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; color: var(--color-text-secondary); font-size: 11px; font-weight: 600; letter-spacing: .05em; }
+.greetings-sky svg { box-sizing: content-box; width: 24px; height: 24px; padding: 10px; border-radius: 50%; color: var(--greeting-tone); background: var(--greeting-fill); }
+.greetings-time h3 { font-size: clamp(21px, 2vw, 25px); font-weight: 650; letter-spacing: -.025em; line-height: 1.35; }
+.greetings-time > p { margin-top: 6px; color: var(--color-text-secondary); font-size: 13px; }
+.greetings-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 20px; }
 .greetings-phrases { margin: 0; }
-.greetings-phrases > div { padding: 10px 0; border-bottom: 1px solid var(--lesson-border); }
+.greetings-phrases > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .85fr); align-items: baseline; gap: 12px; padding: 15px 0; border-bottom: 1px solid var(--lesson-border); }
 .greetings-phrases > div:first-child { padding-top: 0; }
 .greetings-phrases > div:last-child { padding-bottom: 0; border-bottom: 0; }
-.greetings-phrases dt { font-size: 15px; font-weight: 650; overflow-wrap: anywhere; }
-.greetings-phrases dd { margin: 3px 0 0; color: var(--color-text-secondary); font-size: 13px; line-height: 1.6; }
-.greetings-dialogue .cometa-card-heading > svg { flex: none; color: var(--lesson-accent); width: 20px; height: 20px; }
-.greetings-bubble { display: grid; gap: 4px; padding: 12px; border: 1px solid var(--lesson-border); border-left: 2px solid var(--lesson-accent); border-radius: 4px; background: var(--lesson-fill); }
-.greetings-bubble > span { color: var(--color-text-secondary); font-size: 10px; font-weight: 600; letter-spacing: .05em; }
-.greetings-bubble strong { font-size: 15px; font-weight: 650; }
-.greetings-bubble p { color: var(--color-text-secondary); font-size: 12px; }
-.greetings-reply { margin-top: 10px; }
-.greetings-dialogue-note { margin-top: 12px; color: var(--color-text-secondary); font-size: 12px; line-height: 1.7; }
-@media (max-width: 1000px) { .greetings-details { grid-template-columns: repeat(2,minmax(0,1fr)); } .greetings-dialogue { grid-column: 1 / -1; } }
-@media (max-width: 700px) { .greetings-times { gap: 10px; } .greetings-time { padding: 14px; } .greetings-sky { gap: 8px; font-size: 12px; } .greetings-sky svg { width: 22px; height: 22px; } .greetings-time h3 { font-size: 19px; } .greetings-time > p { font-size: 12px; } }
-@media (max-width: 480px) { .greetings-times, .greetings-details { grid-template-columns: minmax(0,1fr); } .greetings-time { padding: 16px; } .greetings-sky { padding-bottom: 10px; margin-bottom: 10px; font-size: 13px; } .greetings-time h3 { font-size: 22px; } .greetings-time > p { font-size: 14px; } .greetings-dialogue { grid-column: auto; } }
+.greetings-phrases dt { font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+.greetings-phrases dd { margin: 0; color: var(--color-text-secondary); font-size: 12px; line-height: 1.7; }
+.greetings-dialogue { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; grid-column: 1 / -1; }
+.greetings-dialogue .cometa-card-heading { grid-column: 1 / -1; }
+.greetings-bubble { display: grid; gap: 7px; padding: 20px; border: 1px solid var(--lesson-border); border-radius: 10px 10px 10px 0; background: var(--lesson-fill); }
+.greetings-bubble > span { color: var(--color-text-secondary); font-size: 9px; font-weight: 600; letter-spacing: .09em; }
+.greetings-bubble strong { font-size: 20px; font-weight: 600; letter-spacing: -.02em; }
+.greetings-bubble p { color: var(--color-text-secondary); font-size: 13px; }
+.greetings-reply { border-radius: 10px 10px 0 10px; background: var(--color-secondary-soft); }
+.greetings-reply strong { color: var(--lesson-accent); }
+.greetings-dialogue-note { grid-column: 1 / -1; margin-top: 16px; color: var(--color-text-secondary); font-size: 12px; line-height: 1.8; }
+.greetings-dialogue-note strong { color: var(--color-text); font-weight: 600; }
+@media (max-width: 900px) {
+    .greetings-section { padding: 22px; }
+    .greetings-time { padding: 16px; }
+    .greetings-phrases > div { grid-template-columns: minmax(0, 1fr); gap: 3px; }
+}
+@media (max-width: 700px) {
+    .greetings-times { gap: 10px; }
+    .greetings-time { padding: 14px 10px; }
+    .greetings-sky { gap: 8px; font-size: 10px; flex-wrap: wrap; }
+    .greetings-sky svg { width: 20px; height: 20px; padding: 8px; }
+    .greetings-time h3 { font-size: 18px; }
+    .greetings-time > p { font-size: 12px; }
+    .greetings-details { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .greetings-phrases > div { grid-template-columns: minmax(0, 1fr) minmax(0, .85fr); gap: 12px; }
+}
+@media (max-width: 480px) {
+    .greetings-section { padding: 20px 16px; }
+    .greetings-times { grid-template-columns: minmax(0, 1fr); }
+    .greetings-time { position: relative; padding: 18px 18px 18px 78px; }
+    .greetings-sky { margin-bottom: 8px; }
+    .greetings-sky svg { position: absolute; left: 18px; top: 22px; }
+    .greetings-time h3 { font-size: 22px; }
+    .greetings-dialogue { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+    .greetings-dialogue .cometa-card-heading { margin-bottom: 6px; }
+    .greetings-bubble { margin-right: 16px; }
+    .greetings-reply { margin-right: 0; margin-left: 16px; }
+    .greetings-dialogue-note { margin-top: 0; }
+}

@@ -43,11 +43,11 @@ class UnidadDosGuiadaTest extends TestCase
         }
         $this->assertCount(3, array_unique(array_column(array_column($data, 'config'), 'prompt_image')));
         $this->getJson('/api/units/'.$unit->id_unidad.'/exercises')->assertOk()->assertJsonPath('total', 3);
-        $this->getJson('/api/progress')->assertOk()->assertJsonPath('0.total_activities', 7);
+        $this->getJson('/api/progress')->assertOk()->assertJsonPath('0.total_activities', 9);
         $first = Unidad::findOrFail(Tema::where('clave_leccion', UnidadUnoGuiadaSeeder::LESSON_KEY)->value('id_unidad'));
-        $this->getJson('/api/units/'.$first->id_unidad.'/guided')->assertOk()->assertJsonPath('total', 4);
+        $this->getJson('/api/units/'.$first->id_unidad.'/guided')->assertOk()->assertJsonPath('total', 6);
         Sanctum::actingAs(Usuario::factory()->administrador()->create());
-        $this->getJson('/api/admin/overview')->assertOk()->assertJsonPath('exercises', 7)->assertJsonPath('contents', 2);
+        $this->getJson('/api/admin/overview')->assertOk()->assertJsonPath('exercises', 9)->assertJsonPath('contents', 2);
         $adminExercise = $this->getJson('/api/admin/exercises/'.$data[0]['id'])->assertOk()->json();
         $this->patchJson('/api/admin/exercises/'.$data[0]['id'], $adminExercise)->assertOk();
         $this->patchJson('/api/admin/units/'.$unit->id_unidad, ['module_id' => $unit->id_modulo, 'title' => $unit->titulo_unidad,
@@ -77,14 +77,14 @@ class UnidadDosGuiadaTest extends TestCase
                 $this->postJson($url, ['answer' => ['seleccion' => [$index === 2 ? 'puncha' : 'tuta']], 'practice_attempt_id' => $session, 'submission_id' => (string) Str::uuid()])->assertConflict();
             }
             $this->postJson('/api/units/'.$unit->id_unidad.'/guided/result', ['response_ids' => $ids, 'practice_attempt_id' => $session])
-                ->assertOk()->assertJsonPath('score', 20)->assertJsonPath('max_score', 20)->assertJsonPath('correct_count', 3)
+                ->assertOk()->assertJsonPath('score', 3)->assertJsonPath('max_score', 3)->assertJsonPath('correct_count', 3)
                 ->assertJsonPath('total_items', 3)->assertJsonPath('passed', true)->assertJsonPath('xp_earned', 30)->assertJsonPath('xp_total', $total);
         }
         $this->seed(UnidadDosGuiadaSeeder::class);
         $this->assertSame($exercises->pluck('id_actividad')->all(), Actividad::where('id_unidad', $unit->id_unidad)->where('publicado', true)->orderBy('orden_actividad')->pluck('id_actividad')->all());
         $this->assertDatabaseCount('respuestas_actividad', 8);
         $this->getJson('/api/mastery')->assertOk()->assertJsonPath('xp', 60)->assertJsonPath('completed_units.0', $unit->id_unidad);
-        $this->getJson('/api/progress')->assertOk()->assertJsonPath('0.total_activities', 7)->assertJsonPath('0.completed_activities', 3);
+        $this->getJson('/api/progress')->assertOk()->assertJsonPath('0.total_activities', 9)->assertJsonPath('0.completed_activities', 3);
         Sanctum::actingAs(Usuario::factory()->administrador()->create());
         $this->getJson('/api/admin/learning-results/'.$student->id_usuario)->assertOk()->assertJsonPath('xp', 60);
     }
@@ -103,8 +103,14 @@ class UnidadDosGuiadaTest extends TestCase
         }
         $url = '/api/units/'.$unit->id_unidad.'/guided/result';
         $payload = ['response_ids' => $ids, 'practice_attempt_id' => $session, 'score' => 20];
-        $this->postJson($url, $payload)->assertOk()->assertJsonPath('score', 13)->assertJsonPath('correct_count', 2)
-            ->assertJsonPath('total_items', 3)->assertJsonPath('passed', false)->assertJsonPath('xp_earned', 20);
+        $this->postJson($url, $payload)->assertUnprocessable()
+            ->assertJsonPath('errors.response_ids.0', 'Corrige todos los ejercicios de esta unidad antes de ver tu resultado.');
+        $this->getJson('/api/mastery')->assertOk()->assertJsonPath('xp', 20);
+        $ids[2] = $this->postJson('/api/exercises/'.$exercise->id_actividad.'/answer', [
+            'answer' => $exercise->solucion_actividad, 'practice_attempt_id' => $session, 'submission_id' => (string) Str::uuid(),
+        ])->assertOk()->json('response_id');
+        $this->postJson($url, ['response_ids' => $ids, 'practice_attempt_id' => $session])->assertOk()
+            ->assertJsonPath('score', 3)->assertJsonPath('max_score', 3)->assertJsonPath('xp_earned', 30);
         $this->postJson($url, ['response_ids' => array_slice($ids, 0, 2), 'practice_attempt_id' => $session])->assertUnprocessable();
         $this->postJson($url, array_replace($payload, ['practice_attempt_id' => (string) Str::uuid()]))->assertUnprocessable();
         Sanctum::actingAs(Usuario::factory()->create());
@@ -133,6 +139,6 @@ class UnidadDosGuiadaTest extends TestCase
         $this->seed(UnidadDosGuiadaSeeder::class);
         $this->getJson('/api/units/'.$unit->id_unidad.'/guided')->assertOk()->assertExactJson($data);
         Sanctum::actingAs(Usuario::factory()->administrador()->create());
-        $this->getJson('/api/admin/overview')->assertOk()->assertJsonPath('exercises', 7);
+        $this->getJson('/api/admin/overview')->assertOk()->assertJsonPath('exercises', 9);
     }
 }

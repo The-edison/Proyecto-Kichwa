@@ -16,7 +16,7 @@ class UnidadUnoImagenesSeeder extends Seeder
 {
     public function run(): void
     {
-        $images = ['sisa' => $this->imagePath('flor.png'), 'purina' => $this->imagePath('purina.png')];
+        $images = ['sisa' => $this->imagePath('flor.png'), 'purina' => $this->imagePath('purina.png'), 'yura' => $this->imagePath('yura.png')];
         DB::transaction(function () use ($images): void {
             DB::select('SELECT pg_advisory_xact_lock(20261011)');
             $topic = Tema::where('clave_leccion', UnidadUnoGuiadaSeeder::LESSON_KEY)->firstOrFail();
@@ -29,6 +29,9 @@ class UnidadUnoImagenesSeeder extends Seeder
                 'purina' => ['choices' => ['wasi', 'shunku', 'purina', 'sisa'], 'alt' => 'Una mujer andina caminando por un sendero, con una pierna adelantada y los brazos en movimiento.',
                     'prompt' => 'Observa la imagen. Selecciona la acción en kichwa.',
                     'correct' => 'Alli rurashka. Purina significa caminar.', 'incorrect' => 'Kutin rurapay. Observa la acción de la persona y vuelve a intentarlo.'],
+                'yura' => ['choices' => ['sisa', 'yura', 'wasi', 'purina'], 'alt' => 'Un árbol de tronco marrón y copa verde, completo y de pie sobre el césped.',
+                    'prompt' => 'Observa la imagen. Selecciona su nombre en kichwa.',
+                    'correct' => 'Alli rurashka. Yura significa árbol.', 'incorrect' => 'Kutin rurapay. Observa el tronco, las ramas y las hojas del árbol y vuelve a intentarlo.'],
             ];
             foreach ($bank as $word => $item) {
                 $origin = 'u1-guided-image-'.$word.'-v1';
@@ -56,6 +59,9 @@ class UnidadUnoImagenesSeeder extends Seeder
                 $record->publicado = true;
                 $record->save();
                 $previous = $record;
+            }
+            if (! str_contains($topic->contenido_tema, 'yura = árbol')) {
+                $topic->update(['contenido_tema' => $topic->contenido_tema."\n\nyura = árbol. Reconoce el tronco, las ramas y las hojas del árbol."]);
             }
         });
         PublicacionContenido::invalidate();

@@ -34,6 +34,16 @@ test('private requests send the tab credential and bypass browser caches', async
     assert.equal(request.cache, 'no-store');
 });
 
+test('adding dictionary words refreshes public searches, admin listings and the dashboard count', async () => {
+    const browser = await client();
+    await browser.api.apiPost('/admin/diccionario', { kichwa: 'wasi', español: 'casa' });
+    const [filter] = browser.invalidations[0];
+    for (const path of ['/diccionario/buscar?q=wasi&direccion=kichwa-es', '/admin/diccionario?page=1&q=', '/admin/overview']) {
+        assert.equal(filter.predicate({ queryKey: ['api', path] }), true);
+    }
+    assert.equal(filter.predicate({ queryKey: ['api', '/admin/students'] }), false);
+});
+
 test('avatar upload keeps multipart encoding and the authenticated request headers', async () => {
     const browser = await client();
     const data = new FormData(); data.append('image', new Blob(['image'], { type: 'image/png' }), 'foto.png');

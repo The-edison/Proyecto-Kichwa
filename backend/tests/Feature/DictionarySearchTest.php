@@ -61,7 +61,7 @@ SQL
         $this->assertDatabaseHas('diccionario', ['kichwa' => '[DEMO] anterior', 'español' => 'Traducción anterior']);
     }
 
-    public function test_admin_can_create_edit_list_and_delete_three_field_entries(): void
+    public function test_admin_can_add_and_list_words_but_cannot_modify_or_delete_existing_entries(): void
     {
         $this->postJson('/api/admin/diccionario', ['kichwa' => '[DEMO] entrada', 'español' => 'Traducción'])->assertUnauthorized();
         Sanctum::actingAs(Usuario::factory()->create());
@@ -75,11 +75,56 @@ SQL
         $this->assertDatabaseHas('diccionario', ['id' => $id, 'kichwa' => '[DEMO] entrada', 'español' => 'Traducción']);
         $this->getJson('/api/admin/overview')->assertOk()->assertJsonPath('diccionario', 1)->assertJsonMissingPath('glossary');
         $this->getJson('/api/admin/diccionario')->assertOk()->assertJsonPath('data.0', ['id' => $id, 'kichwa' => '[DEMO] entrada', 'español' => 'Traducción']);
-        $this->patchJson('/api/admin/diccionario/'.$id, ['español' => 'Corregida'])->assertOk()->assertExactJson(['id' => $id, 'kichwa' => '[DEMO] entrada', 'español' => 'Corregida']);
-        $this->assertDatabaseHas('diccionario', ['id' => $id, 'español' => 'Corregida']);
-        $this->postJson('/api/admin/diccionario', ['kichwa' => '[DEMO] entrada', 'español' => 'Corregida'])->assertUnprocessable()->assertJsonValidationErrors('kichwa');
-        $this->deleteJson('/api/admin/diccionario/'.$id)->assertNoContent();
-        $this->assertDatabaseMissing('diccionario', ['id' => $id]);
+        $this->patchJson('/api/admin/diccionario/'.$id, ['español' => 'Corregida'])->assertMethodNotAllowed();
+        $this->deleteJson('/api/admin/diccionario/'.$id)->assertMethodNotAllowed();
+        $this->postJson('/api/admin/diccionario/'.$id.'/version')->assertNotFound();
+        $this->patchJson('/api/admin/diccionario/'.$id.'/move', ['sort_order' => 1])->assertNotFound();
+        $this->assertDatabaseHas('diccionario', ['id' => $id, 'kichwa' => '[DEMO] entrada', 'español' => 'Traducción']);
+        $this->postJson('/api/admin/diccionario', ['kichwa' => '[DEMO] entrada', 'español' => 'Traducción'])->assertUnprocessable()->assertJsonValidationErrors('kichwa');
+        $this->assertDatabaseCount('diccionario', 1);
+    }
+
+    public function test_admin_dictionary_filters_both_languages_and_lists_newest_words_first(): void
+    {
+        Sanctum::actingAs(Usuario::factory()->administrador()->create());
+        Diccionario::create(['kichwa' => 'wasi', 'español' => 'casa']);
+        $tree = Diccionario::create(['kichwa' => 'yura', 'español' => 'árbol']);
+        $flower = Diccionario::create(['kichwa' => 'sisa', 'español' => 'flor']);
+
+        $this->getJson('/api/admin/diccionario?per_page=2')->assertOk()->assertJsonPath('total', 3)->assertJsonPath('data.0.id', $flower->id)->assertJsonPath('last_page', 2);
+        $this->getJson('/api/admin/diccionario?q=arbol')->assertOk()->assertJsonPath('total', 1)->assertJsonPath('data.0.id', $tree->id);
+        $this->getJson('/api/admin/diccionario?q=YURA')->assertOk()->assertJsonPath('total', 1)->assertJsonPath('data.0.id', $tree->id);
+        $this->getJson('/api/admin/diccionario?q=%25')->assertOk()->assertJsonPath('total', 0);
+    }
+
+    public function test_csv_import_is_admin_only_and_preserves_existing_words_while_skipping_duplicates(): void
+    {
+        $tree = Diccionario::create(['kichwa' => 'yura', 'español' => 'árbol']);
+        $file = UploadedFile::fake()->createWithContent('palabras.csv', "kichwa,español\nyura,árbol\nwasi,casa\nwasi,casa\nsisa,flor\n");
+        $this->postJson('/api/admin/diccionario/import', ['file' => $file])->assertUnauthorized();
+        Sanctum::actingAs(Usuario::factory()->create());
+        $this->postJson('/api/admin/diccionario/import', ['file' => $file])->assertForbidden();
+        $this->getJson('/api/admin/diccionario')->assertForbidden();
+        Sanctum::actingAs(Usuario::factory()->administrador()->create());
+
+        $this->postJson('/api/admin/diccionario/import', ['file' => $file])->assertCreated()->assertJsonPath('inserted', 2)->assertJsonPath('skipped', 2);
+
+        $this->assertDatabaseCount('diccionario', 3);
+        $this->assertDatabaseHas('diccionario', ['id' => $tree->id, 'kichwa' => 'yura', 'español' => 'árbol']);
+        $this->getJson('/api/diccionario/buscar?q=wasi&direccion=kichwa-es')->assertOk()->assertJsonPath('data.0.español', 'casa');
+        $this->getJson('/api/diccionario/buscar?q=sisa&direccion=kichwa-es')->assertOk()->assertJsonPath('data.0.español', 'flor');
+    }
+
+    #[TestWith(["kichwa,español\n"])]
+    #[TestWith(["kichwa,español\nwasi,casa\nsisa,\n"])]
+    public function test_invalid_csv_does_not_import_any_words(string $csv): void
+    {
+        Sanctum::actingAs(Usuario::factory()->administrador()->create());
+
+        $this->postJson('/api/admin/diccionario/import', ['file' => UploadedFile::fake()->createWithContent('palabras.csv', $csv)])
+            ->assertUnprocessable()->assertJsonValidationErrors('file');
+
+        $this->assertDatabaseCount('diccionario', 0);
     }
 
     public function test_csv_rejects_extra_and_duplicate_headers_without_importing_entries(): void

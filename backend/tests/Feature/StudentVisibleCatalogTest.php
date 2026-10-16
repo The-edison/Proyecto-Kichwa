@@ -33,7 +33,7 @@ class StudentVisibleCatalogTest extends TestCase
             'orden_unidad' => 1 + (int) Unidad::where('id_modulo', $module)->max('orden_unidad'), 'publicado' => $published]);
     }
 
-    public function test_admin_overview_and_student_progress_count_only_the_four_visible_guided_activities(): void
+    public function test_admin_overview_and_student_progress_count_only_the_six_visible_guided_activities(): void
     {
         $this->seed(UnidadUnoGuiadaSeeder::class);
         $house = Actividad::where('origen_reactivo', 'u1-guided-v3-1')->firstOrFail();
@@ -41,10 +41,10 @@ class StudentVisibleCatalogTest extends TestCase
         $this->activity($unit, false);
         $this->activity($unit, true, Tema::where('clave_leccion', UnidadUnoGuiadaSeeder::LESSON_KEY)->value('id_tema'));
         Sanctum::actingAs(Usuario::factory()->create());
-        $this->getJson('/api/units/'.$unit->id_unidad.'/guided')->assertOk()->assertJsonPath('total', 4);
-        $this->getJson('/api/progress')->assertOk()->assertJsonPath('0.total_activities', 4)->assertJsonPath('0.completed_activities', 0);
+        $this->getJson('/api/units/'.$unit->id_unidad.'/guided')->assertOk()->assertJsonPath('total', 6);
+        $this->getJson('/api/progress')->assertOk()->assertJsonPath('0.total_activities', 6)->assertJsonPath('0.completed_activities', 0);
         Sanctum::actingAs(Usuario::factory()->administrador()->create());
-        $this->getJson('/api/admin/overview')->assertOk()->assertJsonPath('exercises', 4)->assertJsonPath('contents', 1);
+        $this->getJson('/api/admin/overview')->assertOk()->assertJsonPath('exercises', 6)->assertJsonPath('contents', 1);
         $this->assertDatabaseHas('actividades', ['id_actividad' => $house->id_actividad]);
     }
 
@@ -69,12 +69,12 @@ class StudentVisibleCatalogTest extends TestCase
         $copy->orden_actividad = 1 + (int) Actividad::where('id_unidad', $unit->id_unidad)->max('orden_actividad');
         $copy->save();
         Sanctum::actingAs(Usuario::factory()->create());
-        $catalog = $this->getJson('/api/units/'.$unit->id_unidad.'/exercises')->assertOk()->assertJsonPath('total', 4)->json('data');
+        $catalog = $this->getJson('/api/units/'.$unit->id_unidad.'/exercises')->assertOk()->assertJsonPath('total', 6)->json('data');
         $this->assertContains($copy->id_actividad, array_column($catalog, 'id'));
         $this->assertNotContains($house->id_actividad, array_column($catalog, 'id'));
-        $this->getJson('/api/progress')->assertOk()->assertJsonPath('0.total_activities', 4);
+        $this->getJson('/api/progress')->assertOk()->assertJsonPath('0.total_activities', 6);
         Sanctum::actingAs(Usuario::factory()->administrador()->create());
-        $this->getJson('/api/admin/overview')->assertOk()->assertJsonPath('exercises', 4)->assertJsonPath('contents', 1);
+        $this->getJson('/api/admin/overview')->assertOk()->assertJsonPath('exercises', 6)->assertJsonPath('contents', 1);
     }
 
     public function test_sequence_counts_exclude_published_activities_outside_the_student_route(): void
@@ -99,10 +99,10 @@ class StudentVisibleCatalogTest extends TestCase
         $topic = Tema::where('clave_leccion', UnidadUnoGuiadaSeeder::LESSON_KEY)->firstOrFail();
         $this->activity($unit, true, $topic->id_tema);
         Sanctum::actingAs(Usuario::factory()->create());
-        $this->getJson('/api/units/'.$unit->id_unidad.'/exercises')->assertOk()->assertJsonPath('total', 4);
+        $this->getJson('/api/units/'.$unit->id_unidad.'/exercises')->assertOk()->assertJsonPath('total', 6);
         $this->getJson('/api/units/'.$unit->id_unidad.'/exercises?topic_id='.$topic->id_tema)->assertOk()->assertJsonPath('total', 1);
-        $this->getJson('/api/progress')->assertOk()->assertJsonPath('0.total_activities', 5);
+        $this->getJson('/api/progress')->assertOk()->assertJsonPath('0.total_activities', 7);
         Sanctum::actingAs(Usuario::factory()->administrador()->create());
-        $this->getJson('/api/admin/overview')->assertOk()->assertJsonPath('exercises', 5);
+        $this->getJson('/api/admin/overview')->assertOk()->assertJsonPath('exercises', 7);
     }
 }

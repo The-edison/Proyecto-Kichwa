@@ -71,13 +71,16 @@ Route::middleware(['auth:sanctum', 'active'])->group(function (): void {
         Route::post('/evaluations/{id}/preview', [KichwaAdminController::class, 'previewEvaluation']);
         Route::post('/evaluations/{id}/synchronize-bank', [KichwaAdminController::class, 'synchronizeFinalBank']);
         Route::post('/diccionario/import', [DiccionarioController::class, 'import'])->middleware('throttle:5,1');
+        Route::get('/diccionario', [KichwaAdminController::class, 'index'])->defaults('resource', 'diccionario');
+        Route::get('/diccionario/{id}', [KichwaAdminController::class, 'show'])->defaults('resource', 'diccionario');
+        Route::post('/diccionario', [KichwaAdminController::class, 'store'])->defaults('resource', 'diccionario');
         Route::get('/students', [KichwaAdminController::class, 'students']);
         Route::patch('/students/{id}', [KichwaAdminController::class, 'block']);
         Route::post('/preview', [KichwaAdminController::class, 'preview']);
         Route::get('/media', [ArchivoController::class, 'index']);
         Route::get('/learning-results/{id}', fn (int $id) => response()->json(DominioLecciones::progress($id)));
         Route::post('/uploads', [ArchivoController::class, 'store'])->middleware('throttle:20,1');
-        foreach (['levels', 'modules', 'units', 'contents', 'exercises', 'evaluations', 'questions', 'diccionario'] as $resource) {
+        foreach (['levels', 'modules', 'units', 'contents', 'exercises', 'evaluations', 'questions'] as $resource) {
             Route::post('/'.$resource.'/{id}/version', [KichwaAdminController::class, 'version'])->defaults('resource', $resource);
             Route::get('/'.$resource.'/{id}/dependencies', [KichwaAdminController::class, 'dependencies'])->defaults('resource', $resource);
             Route::patch('/'.$resource.'/{id}/move', [KichwaAdminController::class, 'move'])->defaults('resource', $resource);

@@ -89,6 +89,7 @@ function Shell({ title, subtitle, children, immersive = false }: { title: string
         ? [
             ['/admin', 'Resumen', LayoutDashboard],
             ['/admin/contenidos', 'Contenidos y actividades', BookOpen],
+            ['/admin/diccionario', 'Diccionario', Languages],
             ['/admin/estudiantes', 'Estudiantes', Users],
             ['/cuenta', 'Mi cuenta', UserRound],
         ]

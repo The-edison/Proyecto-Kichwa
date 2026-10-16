@@ -80,5 +80,6 @@ class UnidadUnoGuiadaSeeder extends Seeder
         });
         PublicacionContenido::invalidate();
         $this->call(UnidadUnoImagenesSeeder::class);
+        $this->call(UnidadUnoAudioSeeder::class);
     }
 }
