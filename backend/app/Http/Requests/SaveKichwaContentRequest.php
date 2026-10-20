@@ -37,11 +37,11 @@ class SaveKichwaContentRequest extends FormRequest
         if ($resource === 'units') {
             $rules['config'] = ['sometimes', 'array:learning_mode,guided_lesson'];
             $rules['config.learning_mode'] = ['sometimes', 'in:classic,sequence,guided'];
-            $rules['config.guided_lesson'] = ['sometimes', 'in:writing,greetings'];
+            $rules['config.guided_lesson'] = ['sometimes', 'in:writing,greetings,pronouns,numbers,calendar,animals-colors,body,nature,verbs'];
         }
         if (in_array($resource, ['exercises', 'questions', 'evaluations'], true)) {
-            $rules['config'] = ['sometimes', 'array:managed,reviewed,requires_audio,requires_images,max_selections,exact_selections,ignore_accents,explanation,correct_feedback,incorrect_feedback,title,difficulty,question_count,pass_percentage,final,presentation,word_target,missing_index,context_text,context_meaning,prompt_image,prompt_image_alt,reveal_highlight,sequence_mode,fixed_order,required_correct,prerequisite_activities'];
-            foreach (['managed', 'reviewed', 'requires_audio', 'requires_images', 'exact_selections', 'ignore_accents', 'final', 'sequence_mode', 'fixed_order'] as $flag) {
+            $rules['config'] = ['sometimes', 'array:conversation_group,conversation_pairs,listening_greetings,listening_questions,managed,reviewed,requires_audio,requires_images,max_selections,exact_selections,ignore_accents,explanation,correct_feedback,incorrect_feedback,title,difficulty,question_count,pass_percentage,final,presentation,word_target,missing_index,context_text,context_meaning,prompt_image,prompt_image_alt,reveal_highlight,sequence_mode,fixed_order,required_correct,prerequisite_activities'];
+            foreach (['conversation_pairs', 'listening_greetings', 'listening_questions', 'managed', 'reviewed', 'requires_audio', 'requires_images', 'exact_selections', 'ignore_accents', 'final', 'sequence_mode', 'fixed_order'] as $flag) {
                 $rules['config.'.$flag] = ['sometimes', 'boolean'];
             }
             foreach (['title', 'explanation', 'correct_feedback', 'incorrect_feedback', 'word_target', 'context_text', 'context_meaning', 'prompt_image', 'prompt_image_alt', 'reveal_highlight'] as $text) {
@@ -50,6 +50,7 @@ class SaveKichwaContentRequest extends FormRequest
             $rules['config.max_selections'] = ['sometimes', 'integer', 'between:1,50'];
             $rules['config.question_count'] = ['sometimes', 'integer', 'between:1,100'];
             $rules['config.pass_percentage'] = ['sometimes', 'integer', 'between:1,100'];
+            $rules['config.conversation_group'] = ['sometimes', 'in:q,a,d,c'];
             $rules['config.presentation'] = ['sometimes', 'in:buttons,visual,letter,tiles,writing'];
             $rules['config.missing_index'] = ['sometimes', 'integer', 'between:0,49'];
             $rules['config.required_correct'] = ['sometimes', 'integer', 'between:1,100'];

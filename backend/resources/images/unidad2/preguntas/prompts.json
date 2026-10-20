@@ -1,0 +1,23 @@
+{
+  "tool": "Built-in image_gen",
+  "images": [
+    {
+      "name": "imatak",
+      "prompt": "Educational storybook illustration, landscape 4:3. Warm painted natural colors, clear friendly composition, everyday Ecuadorian Andean setting, respectful ordinary clothing with subtle woven details. No labels or written words except a single question mark. An adult Andean artisan at a courtyard table pointing inquisitively to a small clay vessel. Another adult listens. A simple small speech bubble with one question mark.",
+      "source": "C:\\Users\\Edgar\\.codex\\generated_images\\01a1546f-358f-7720-9f90-e42dec903cdf\\exec-a657604e-2805-45a2-91f6-a8e0a147987b.png",
+      "asset": "imatak.png"
+    },
+    {
+      "name": "pitak-kan",
+      "prompt": "Educational storybook illustration, landscape 4:3. Warm painted natural colors, clear friendly composition, everyday Ecuadorian Andean setting, respectful ordinary clothing with subtle woven details. No labels or written words except a single question mark. Two adult women in an Andean village courtyard. One gestures inquisitively toward a friendly older man arriving at the distant gate. A simple small speech bubble with one question mark.",
+      "source": "C:\\Users\\Edgar\\.codex\\generated_images\\01a1546f-358f-7720-9f90-e42dec903cdf\\exec-bf1c1912-952b-4623-a4d3-2563331e1146.png",
+      "asset": "pitak-kan.png"
+    },
+    {
+      "name": "imamanta",
+      "prompt": "Educational storybook illustration, landscape 4:3. Warm painted natural colors, clear friendly composition, everyday Ecuadorian Andean setting, respectful ordinary clothing with subtle woven details. No labels or written words except a single question mark. Two adult gardeners in an Andean village courtyard discussing a wilted potted plant with dry soil. One gestures inquisitively at the drooping plant. A simple small speech bubble with one question mark.",
+      "source": "C:\\Users\\Edgar\\.codex\\generated_images\\01a1546f-358f-7720-9f90-e42dec903cdf\\exec-b468529a-009d-4af0-b503-b399eb4b0705.png",
+      "asset": "imamanta.png"
+    }
+  ]
+}

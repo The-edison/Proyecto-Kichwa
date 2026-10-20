@@ -1,6 +1,11 @@
 @import 'tailwindcss';
 @source '../js/**/*.tsx';
 
+.exercise-matching-columns { column-gap: clamp(48px,8vw,120px); }
+@media (max-width: 700px) {
+    .exercise-matching-columns { column-gap: clamp(16px,4vw,28px); }
+}
+
 /* Theme contract: all paint values live here. Decorative borders are distinct
    from control borders, which must meet the 3:1 non-text contrast requirement. */
 :root {

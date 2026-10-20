@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Lightbulb } from 'lucide-react';
 import cometaTeaching from '../../images/cometa-teaching.webp';
+import '../../css/lesson-notebook.css';
 
 type LessonOverviewProps = {
     unit: string;

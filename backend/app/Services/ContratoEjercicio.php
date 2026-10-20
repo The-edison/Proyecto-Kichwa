@@ -76,6 +76,10 @@ class ContratoEjercicio
             'config.ignore_accents' => ['sometimes', 'boolean'],
             'config.requires_audio' => ['sometimes', 'boolean'],
             'config.listening_vowels' => ['sometimes', 'boolean'],
+            'config.listening_questions' => ['sometimes', 'boolean'],
+            'config.listening_greetings' => ['sometimes', 'boolean'],
+            'config.conversation_pairs' => ['sometimes', 'boolean'],
+            'config.conversation_group' => ['sometimes', 'in:q,a,d,c'],
             'config.requires_images' => ['sometimes', 'boolean'],
             'config.reviewed' => ['sometimes', 'boolean'],
             'config.presentation' => ['sometimes', 'in:buttons,visual,letter,tiles,writing'],
@@ -91,6 +95,32 @@ class ContratoEjercicio
         ], ['required' => 'El campo :attribute es obligatorio.', 'distinct' => 'No repitas identificadores.',
             'array' => 'La estructura de :attribute no es válida.', 'between' => 'Las coordenadas deben estar entre 0 y 1.'])->validate();
         $presentation = $data['config']['presentation'] ?? '';
+        if ($data['config']['conversation_pairs'] ?? false) {
+            $origins = array_merge(array_map(fn ($index) => 'q-'.$index, range(0, 5)), array_map(fn ($index) => 'a-'.$index, range(0, 5)));
+            if (isset($data['config']['conversation_group'])) {
+                $group = $data['config']['conversation_group'];
+                $count = match ($group) {
+                    'd' => 5, 'c' => 4, default => 6
+                };
+                $origins = array_map(fn ($index) => $group.'-'.$index, range(0, $count - 1));
+            }
+            $actualOrigins = array_column(array_filter($data['elements'], fn ($element) => ($element['grupo'] ?? '') === 'origen'), 'id');
+            $actualDestinations = array_column(array_filter($data['elements'], fn ($element) => ($element['grupo'] ?? '') === 'destino'), 'id');
+            if ($data['type'] !== 'relacionar' || ! self::sameKeys($origins, $actualOrigins)
+                || ! self::sameKeys(array_map(fn ($id) => 'es-'.$id, $origins), $actualDestinations)) {
+                self::fail('El panel necesita todas las expresiones y sus significados en español.', 'config');
+            }
+        }
+        if (($data['config']['listening_greetings'] ?? false) && ($data['type'] !== 'completar'
+            || array_column($data['elements'], 'id') !== ['alli-puncha-churi', 'alli-chishi-kusa', 'alli-tuta-tayta']
+            || collect($data['elements'])->contains(fn ($element) => substr_count($element['texto'], '_____') !== 1 || empty($element['opciones'])))) {
+            self::fail('El panel de saludos necesita las tres oraciones con sus opciones y una palabra que falta.', 'config');
+        }
+        if (($data['config']['listening_questions'] ?? false) && ($data['type'] === 'completar'
+            ? array_column($data['elements'], 'id') !== ['imatak', 'pitak-kan', 'imamanta'] || collect($data['elements'])->contains(fn ($element) => empty($element['imagen']) || empty($element['opciones']))
+            : $data['type'] !== 'relacionar' || array_column(array_values(array_filter($data['elements'], fn ($element) => ($element['grupo'] ?? '') === 'origen')), 'id') !== ['imatak', 'pitak-kan', 'imamanta'])) {
+            self::fail('El ejercicio de preguntas necesita los tres audios: Imatak, Pitak kan e Imamanta.', 'config');
+        }
         if (($data['config']['listening_vowels'] ?? false) && ($data['type'] !== 'completar' || $presentation !== 'writing'
             || array_column($data['elements'], 'id') !== ['audio1', 'audio2', 'audio3']
             || collect($data['elements'])->contains(fn ($element) => ! preg_match('/^[a-z]+_[a-z]+$/', $element['texto'])))) {

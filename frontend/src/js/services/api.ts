@@ -66,9 +66,14 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
         const testimonialsChanged = path === '/testimonials';
         const hierarchyChanged = /^\/admin\/(levels|modules|units|contents|exercises|evaluations|questions)(\/|$)/.test(path);
         const progressChanged = /^\/(exercises\/\d+\/answer|evaluations\/\d+\/submit)$/.test(path);
+        const guidedUnitDetail = (query: { queryKey: readonly unknown[]; state?: { data?: unknown } }) => {
+            const data = query.state?.data as { config?: { learning_mode?: string } } | undefined;
+            return query.queryKey[0] === 'api' && typeof query.queryKey[1] === 'string'
+                && /^\/units\/\d+$/.test(query.queryKey[1]) && data?.config?.learning_mode === 'guided';
+        };
         if (progressChanged) {
             void queryClient.invalidateQueries({ refetchType: 'none', predicate: query =>
-                query.queryKey[0] === 'api' && typeof query.queryKey[1] === 'string' && /^\/units\/\d+\/guided$/.test(query.queryKey[1]) });
+                guidedUnitDetail(query) || query.queryKey[0] === 'api' && typeof query.queryKey[1] === 'string' && /^\/units\/\d+\/guided$/.test(query.queryKey[1]) });
         }
         void queryClient.invalidateQueries({ refetchType: 'active', predicate: query => {
             const key = query.queryKey[1];
@@ -76,6 +81,7 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
             if (dictionaryChanged) return /^\/(?:diccionario|admin\/diccionario|admin\/overview)(?:\/|\?|$)/.test(key);
             if (testimonialsChanged) return /^\/testimonials(?:\/eligibility)?(?:\?|$)/.test(key);
             if (hierarchyChanged) return /^\/(admin\/overview|levels|modules|units|evaluations|progress|learning-navigation)(\/|\?|$)/.test(key);
+            if (progressChanged && guidedUnitDetail(query)) return false;
             return progressChanged && (key === '/mastery' || /^\/admin\/learning-results\//.test(key) || /^\/evaluations\/\d+(\?|$)/.test(key) || /^\/progress(\/|\?|$)/.test(key) || /^\/levels\/\d+\/modules/.test(key) || /^\/modules\/\d+\/(units|contents)/.test(key) || /^\/units\/\d+(\/sequence|\/contents|\?|$)/.test(key));
         } });
         if (hierarchyChanged) {

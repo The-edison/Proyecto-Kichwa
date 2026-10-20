@@ -1,5 +1,6 @@
 import { Head, Link } from '../../navigation';
 import { useEffect, useRef, useState } from 'react';
+import { useAnswerSound } from '../../hooks/useAnswerSound';
 import { AppLayout } from '../../layouts/AppLayout';
 import { ExerciseInteraction, answerComplete } from '../../components/ExerciseCard';
 import { LearningCompanion } from '../../components/LearningCompanion';
@@ -8,6 +9,7 @@ import { useApi } from '../../hooks/useApi';
 import { apiGet, apiPost, apiPatch, apiDelete, ApiError } from '../../services/api';
 import type { Evaluation as EvaluationData, EvaluationResult, ExerciseAnswer, EvaluationQuestion } from '../../types';
 export default function Evaluation({ evaluationId }: { evaluationId: number }) {
+    const playAnswerSound = useAnswerSound();
     const { data, loading, error } = useApi<EvaluationData>(`/evaluations/${evaluationId}`);
     const [questions, setQuestions] = useState<EvaluationQuestion[]>([]);
     const [saved, setSaved] = useState('');
@@ -35,7 +37,7 @@ export default function Evaluation({ evaluationId }: { evaluationId: number }) {
     async function submit() {
         if (!data || !attempt) return;
         setBusy(true); setSubmitError('');
-        try { await saveQueue.current; try { await apiPatch(`/attempts/${attempt}`, {answers}); } catch(reason) { if (!(reason instanceof ApiError && reason.status === 409)) throw reason; } setResult(await apiPost<EvaluationResult>(`/evaluations/${data.id}/submit`, { attempt_id: attempt, answers: questions.map(q => ({ question_id: q.id, answer: answers[q.id] })) })); setAttempt(null); }
+        try { await saveQueue.current; try { await apiPatch(`/attempts/${attempt}`, {answers}); } catch(reason) { if (!(reason instanceof ApiError && reason.status === 409)) throw reason; } const response = await apiPost<EvaluationResult>(`/evaluations/${data.id}/submit`, { attempt_id: attempt, answers: questions.map(q => ({ question_id: q.id, answer: answers[q.id] })) }); setResult(response); playAnswerSound(response.correct_count === response.total_questions); setAttempt(null); }
         catch (reason) { setSubmitError(reason instanceof ApiError ? Object.values(reason.errors).flat().join(' ') || reason.message : 'No se pudo enviar.'); }
         finally { setBusy(false); }
     }

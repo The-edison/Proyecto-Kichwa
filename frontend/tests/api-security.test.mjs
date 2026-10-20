@@ -34,6 +34,21 @@ test('private requests send the tab credential and bypass browser caches', async
     assert.equal(request.cache, 'no-store');
 });
 
+test('checking guided answers marks their catalog stale without refetching it while progress and classic units still update', async () => {
+    const browser = await client();
+    await browser.api.apiPost('/exercises/11/answer', { answer: { seleccion: ['nuka'] } });
+    const [deferred] = browser.invalidations[0];
+    const [active] = browser.invalidations[1];
+    const guided = { queryKey: ['api', '/units/6'], state: { data: { config: { learning_mode: 'guided' } } } };
+    const classic = { queryKey: ['api', '/units/7'], state: { data: { config: { learning_mode: 'classic' } } } };
+    assert.equal(deferred.refetchType, 'none');
+    assert.equal(deferred.predicate(guided), true);
+    assert.equal(active.predicate(guided), false);
+    assert.equal(active.predicate(classic), true);
+    assert.equal(active.predicate({ queryKey: ['api', '/progress'] }), true);
+    assert.equal(active.predicate({ queryKey: ['api', '/modules/8/units?page=1'] }), true);
+});
+
 test('adding dictionary words refreshes public searches, admin listings and the dashboard count', async () => {
     const browser = await client();
     await browser.api.apiPost('/admin/diccionario', { kichwa: 'wasi', español: 'casa' });

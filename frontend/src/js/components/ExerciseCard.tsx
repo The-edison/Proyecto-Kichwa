@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { LearningCompanion } from './LearningCompanion';
+import { useAnswerSound } from '../hooks/useAnswerSound';
 import { apiPost, ApiError, apiBaseUrl } from '../services/api';
 import type { Exercise, ExerciseAnswer, ExerciseFeedback } from '../types';
 
@@ -19,6 +20,7 @@ function ElementLabel({ element }: { element: { texto: string; imagen?: string }
     return <span className="flex items-center gap-3">{element.imagen && !failed && <img onError={() => setFailed(true)} loading="lazy" decoding="async" src={mediaUrl(element.imagen)} alt={element.texto} className="h-20 w-20 rounded-xl object-contain" />}<span>{element.texto}</span></span>;
 }
 export function ExerciseInteraction({ exercise, answer, onChange, name, onCheckPair, initialLockedPairs = [], corrected }: { corrected?: {highlight?: string | null}; initialLockedPairs?: string[]; onCheckPair?: (origin: string, destination: string) => Promise<boolean>; exercise: Exercise; answer: ExerciseAnswer; onChange: (answer: ExerciseAnswer) => void; name: string }) {
+    const playAnswerSound = useAnswerSound();
     const [locked, setLocked] = useState<string[]>(initialLockedPairs);
     const [pairFeedback, setPairFeedback] = useState('');
     const [checkingPair, setCheckingPair] = useState(false);
@@ -32,11 +34,32 @@ export function ExerciseInteraction({ exercise, answer, onChange, name, onCheckP
     const limit = exercise.config?.max_selections ?? 50;
     const dragSource = useRef('');
     const setPair = (origin: string, destination: string) => onChange({ pares: [...(answer.pares ?? []).filter(p => p.origen !== origin && p.destino !== destination), ...(destination ? [{ origen: origin, destino: destination }] : [])] });
+    function selectMatchingOrigin(origin: string) {
+        if (checkingPair || locked.includes(origin)) return;
+        if (answer.pares?.some(pair => pair.origen === origin)) {
+            onChange({ pares: answer.pares.filter(pair => pair.origen !== origin) });
+            setSelected('');
+        } else {
+            setSelected(previous => previous === origin ? '' : origin);
+        }
+        setPairFeedback('');
+    }
+    function selectMatchingDestination(destination: string) {
+        const paired = answer.pares?.find(pair => pair.destino === destination);
+        if (checkingPair || paired && locked.includes(paired.origen)) return;
+        if (paired) {
+            onChange({ pares: answer.pares?.filter(pair => pair.destino !== destination) });
+            setSelected('');
+            setPairFeedback('');
+        } else {
+            void choosePair(selected, destination);
+        }
+    }
     async function choosePair(origin: string, destination: string) {
         if (!origin || !destination || checkingPair || locked.includes(origin)) return;
         if (!onCheckPair) { setPair(origin,destination); setSelected(''); return; }
         setCheckingPair(true); setPairFeedback('');
-        try { const correct = await onCheckPair(origin,destination); if (correct) { setPair(origin,destination); setLocked(old=>[...old,origin]); setSelected(''); } setPairFeedback(correct ? 'Pareja correcta.' : 'Esta pareja no corresponde. Intenta nuevamente.'); }
+        try { const correct = await onCheckPair(origin,destination); playAnswerSound(correct); if (correct) { setPair(origin,destination); setLocked(old=>[...old,origin]); setSelected(''); } setPairFeedback(correct ? 'Pareja correcta.' : 'Esta pareja no corresponde. Intenta nuevamente.'); }
         catch { setPairFeedback('No se pudo comprobar la pareja. Intenta nuevamente.'); }
         finally { setCheckingPair(false); }
     }
@@ -53,13 +76,14 @@ export function ExerciseInteraction({ exercise, answer, onChange, name, onCheckP
         : exercise.type === 'ordenar' ? <div className="space-y-3">{presentation === 'tiles' && <div className="flex flex-wrap gap-2" aria-label="Espacios de la palabra">{exercise.elements.map((_,index)=><span className="grid h-14 w-14 place-items-center rounded-xl border-2 border-dashed border-line text-xl font-bold" key={index}>{exercise.elements.find(e=>e.id===answer.orden?.[index])?.texto ?? '·'}</span>)}</div>}<p>Toca las letras en orden. Toca una letra elegida para quitarla.</p><div className="flex flex-wrap gap-2" aria-label="Secuencia elegida">{(answer.orden ?? []).map((id, i) => <button type="button" className="primary-button" key={id} onClick={() => onChange({orden: answer.orden?.filter(key => key !== id)})} aria-label={'Quitar letra ' + (i + 1)}>{exercise.elements.find(e => e.id === id)?.texto}</button>)}</div><div className="flex flex-wrap gap-2">{exercise.elements.map(e => <button type="button" className="secondary-button" key={e.id} disabled={answer.orden?.includes(e.id)} onClick={() => onChange({orden: [...(answer.orden ?? []), e.id]})}>{e.texto}</button>)}</div>{presentation === 'tiles' && <><button className="secondary-button" type="button" disabled={!answer.orden?.length} onClick={()=>onChange({orden:answer.orden?.slice(0,-1) ?? []})}>Borrar última</button><div className="flex flex-wrap gap-3">{answer.orden?.map((id,index)=><div className="flex gap-2" key={id}><button type="button" className="secondary-button" aria-label={'Mover ficha '+(index+1)+' a la izquierda'} disabled={index===0} onClick={()=>moveTile(index,-1)}>←</button><button type="button" className="secondary-button" aria-label={'Mover ficha '+(index+1)+' a la derecha'} disabled={index===(answer.orden?.length ?? 0)-1} onClick={()=>moveTile(index,1)}>→</button></div>)}</div></>}<button className="secondary-button" type="button" onClick={() => onChange({orden: []})}>Reiniciar secuencia</button></div>
         : exercise.type === 'seleccion_multiple' ? <fieldset className="grid gap-3"><legend className="mb-2 text-sm text-muted">{limit === 1 ? 'Selecciona una respuesta.' : exercise.config?.exact_selections ? `Selecciona exactamente ${limit} respuestas.` : `Selecciona hasta ${limit} respuestas.`}</legend>{exercise.elements.map(e => <label key={e.id} className="exercise-selection-option flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-line p-3"><input type={limit === 1 ? "radio" : "checkbox"} name={name} disabled={limit > 1 && !answer.seleccion?.includes(e.id) && (answer.seleccion?.length ?? 0) >= limit} checked={answer.seleccion?.includes(e.id) ?? false} onChange={event => onChange({ seleccion: event.target.checked ? (limit === 1 ? [e.id] : [...(answer.seleccion ?? []), e.id]) : (answer.seleccion ?? []).filter(id => id !== e.id) })} /><ElementLabel element={e} /></label>)}</fieldset>
         : exercise.type === 'completar' ? <div className="grid gap-4">{exercise.elements.map(e => <label key={e.id} className="grid gap-2"><ElementLabel element={e} />{e.opciones?.length ? <select className="field" value={answer.textos?.[e.id] ?? ''} onChange={event => onChange({ textos: { ...answer.textos, [e.id]: event.target.value } })}><option value="">Escoge la palabra</option>{e.opciones.map(o => <option key={o}>{o}</option>)}</select> : <input className="field" maxLength={500} value={answer.textos?.[e.id] ?? ''} placeholder="Escribe la palabra que falta" onChange={event => onChange({ textos: { ...answer.textos, [e.id]: event.target.value } })} />}</label>)}</div>
-        : exercise.type === 'relacionar' ? <><p>Toca una palabra y después su pareja. {onCheckPair ? 'Las parejas correctas quedan fijas; las incorrectas puedes reintentarlas.' : 'Puedes cambiar la pareja antes de comprobar.'}</p><div className="grid grid-cols-2 gap-3"><div className="grid gap-2">{origins.map(o => <button type="button" key={o.id} className={selected === o.id ? 'primary-button' : 'secondary-button'} aria-pressed={selected === o.id} disabled={checkingPair || locked.includes(o.id)} onClick={() => setSelected(o.id)}><ElementLabel element={o} />{answer.pares?.some(p => p.origen === o.id) && (onCheckPair ? ' ✓' : ' ↔')}</button>)}</div><div className="grid gap-2">{destinations.map(d => <button type="button" className="secondary-button" key={d.id} disabled={!selected || checkingPair || answer.pares?.some(p=>p.destino===d.id && locked.includes(p.origen))} onClick={() => void choosePair(selected,d.id)}><ElementLabel element={d} /></button>)}</div></div>{pairControls}<p role="status">{pairFeedback}</p></>
+        : exercise.type === 'relacionar' ? <><p>Toca una palabra y después su pareja. {onCheckPair ? 'Las parejas correctas quedan fijas; las incorrectas puedes reintentarlas.' : 'Puedes cambiar la pareja antes de comprobar.'}</p><div className="exercise-matching-columns grid grid-cols-2 gap-3"><div className="grid gap-2">{origins.map(o => <button type="button" key={o.id} className={selected === o.id || answer.pares?.some(pair => pair.origen === o.id) ? 'primary-button' : 'secondary-button'} aria-pressed={selected === o.id || Boolean(answer.pares?.some(pair => pair.origen === o.id))} disabled={checkingPair || locked.includes(o.id)} onClick={() => selectMatchingOrigin(o.id)}><ElementLabel element={o} />{answer.pares?.some(p => p.origen === o.id) && (onCheckPair ? ' ✓' : ' ↔')}</button>)}</div><div className="grid gap-2">{destinations.map(d => <button type="button" className={answer.pares?.some(pair => pair.destino === d.id) ? 'primary-button' : 'secondary-button'} aria-pressed={Boolean(answer.pares?.some(pair => pair.destino === d.id))} key={d.id} disabled={(!selected && !answer.pares?.some(pair => pair.destino === d.id)) || checkingPair || answer.pares?.some(p=>p.destino===d.id && locked.includes(p.origen))} onClick={() => selectMatchingDestination(d.id)}><ElementLabel element={d} /></button>)}</div></div>{pairControls}<p role="status">{pairFeedback}</p></>
         : <><p className="text-sm text-muted">Arrastra una etiqueta o tócala y después toca una zona. También puedes usar los selectores.</p><div className="flex flex-wrap gap-2">{origins.map(e => <button key={e.id} type="button" draggable className={selected === e.id ? 'primary-button' : 'secondary-button'} onClick={() => setSelected(e.id)} onDragStart={event => { dragSource.current = e.id; event.dataTransfer.setData('text/plain', e.id); }} onPointerDown={() => { dragSource.current = e.id; }}
             onPointerUp={event => { const zone = document.elementFromPoint(event.clientX, event.clientY)?.closest('[data-zone]')?.getAttribute('data-zone'); if (zone) { setPair(e.id, zone); setSelected(''); } }}><ElementLabel element={e} /></button>)}</div>
             <div className={background ? 'relative min-h-64 overflow-hidden rounded-xl border border-line' : 'flex flex-wrap gap-3'}>{background && <img loading="lazy" decoding="async" src={mediaUrl(background)} alt="Imagen del ejercicio para ubicar las etiquetas" className="w-full" draggable={false} />}{exercise.zones.map(z => <button key={z.id} data-zone={z.id} type="button" className="min-h-11 min-w-11 rounded-xl border-2 border-forest bg-card px-3 py-2 text-sm text-ink" style={background ? { position: 'absolute', left: `${z.x * 100}%`, top: `${z.y * 100}%`, transform: 'translate(-50%, -50%)', maxWidth: '45%' } : undefined} onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); const origin = e.dataTransfer.getData('text/plain') || dragSource.current; if (origins.some(o => o.id === origin)) setPair(origin, z.id); }} onClick={() => { if (selected) { setPair(selected, z.id); setSelected(''); } }}><strong>{z.texto}</strong>{answer.pares?.filter(p => p.destino === z.id).map(p => <span className="block" key={p.origen}>{origins.find(o => o.id === p.origen)?.texto}</span>)}</button>)}</div>{pairControls}</>}
     </div>;
 }
 export function ExerciseCard({ exercise, index, onFeedback }: { exercise: Exercise; index: number; onFeedback?: (feedback: ExerciseFeedback)=>void }) {
+    const playAnswerSound = useAnswerSound();
     const [answer, setAnswer] = useState<ExerciseAnswer>({});
     const [feedback, setFeedback] = useState<ExerciseFeedback | null>(null);
     const [error, setError] = useState('');
@@ -76,7 +100,7 @@ export function ExerciseCard({ exercise, index, onFeedback }: { exercise: Exerci
         if (sending.current || feedback?.is_correct || !answerComplete(exercise, answer)) return;
         sending.current = true;
         setBusy(true); setError('');
-        try { const response=await apiPost<ExerciseFeedback>(`/exercises/${exercise.id}/answer`, {answer, practice_attempt_id: practiceAttempt.current ??= crypto.randomUUID(), submission_id: submission.current ??= crypto.randomUUID()});setFeedback(response);onFeedback?.(response); }
+        try { const response=await apiPost<ExerciseFeedback>(`/exercises/${exercise.id}/answer`, {answer, practice_attempt_id: practiceAttempt.current ??= crypto.randomUUID(), submission_id: submission.current ??= crypto.randomUUID()});setFeedback(response);playAnswerSound(response.is_correct);onFeedback?.(response); }
         catch (reason) { setError(reason instanceof ApiError ? Object.values(reason.errors).flat().join(' ') || reason.message : 'No se pudo enviar la respuesta.'); }
         finally { sending.current = false; setBusy(false); }
     }

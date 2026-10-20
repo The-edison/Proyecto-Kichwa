@@ -1,0 +1,21 @@
+{
+  "generator": "image_gen (built-in)",
+  "images": [
+    {
+      "file": "yo.png",
+      "prompt": "Square friendly educational storybook illustration of ONE fully clothed adult woman with a dark braid and an orange sweater. She faces the viewer, smiling gently and indicating herself with an open hand against her upper sweater, a conventional gesture for the personal pronoun I. A small blank speech bubble beside her face. Warm cream background, subtle distant green mountains, polished soft clay-like 3D illustration, excellent natural anatomy, sparse composition. No text, no letters, no watermark. Intended as a neutral language classroom vocabulary picture."
+    },
+    {
+      "file": "tu.png",
+      "prompt": "Create one square educational illustration for a Kichwa language learning app, warm polished storybook 3D clay illustration, friendly human Andean Ecuadorian school-age teens in contemporary clothing with subtle woven textile accents, natural respectful facial features, cream uncluttered background with faint mountain silhouettes, soft lighting, excellent anatomy and clearly readable gestures, framed waist-up or three-quarter bodies filling center 75%, no text, no letters, no written labels, no watermark. Consistent lead speaker: young Andean woman with dark braid, terracotta orange sweater and subtle woven waistband. This is a pronoun-recognition exercise, so the relationship between the speaker and indicated people MUST be visually clear. Illustrate the second person singular YOU. TWO PEOPLE: lead speaker shown from behind at left in the near foreground, visibly talking to one young Andean boy wearing a sage green sweater at right. She gestures gently toward him with one open hand, and looks at him. The boy faces the speaker and viewer and listens attentively. Small empty speech bubble from the near speaker. Make listener the prominent figure. No other people. Warm sage accent."
+    },
+    {
+      "file": "nosotros.png",
+      "prompt": "Square friendly educational storybook illustration of THREE fully clothed adult friends standing closely together facing the viewer. Center woman has a dark braid, orange sweater, and an open hand indicating herself as she speaks. Her two friends wear green and blue sweaters and stand shoulder to shoulder with her. A single small blank speech bubble next to the center woman's face indicates she is speaking on behalf of their whole group, including herself, to illustrate the personal pronoun WE. Warm cream background and subtle distant green mountains. Polished soft clay-like 3D illustration, excellent natural anatomy, sparse composition. No text, no letters, no watermark. Neutral language classroom vocabulary picture."
+    },
+    {
+      "file": "ellos.png",
+      "prompt": "Create one square educational illustration for a Kichwa language learning app, warm polished storybook 3D clay illustration, friendly human Andean Ecuadorian school-age teens in contemporary clothing with subtle woven textile accents, natural respectful facial features, cream uncluttered background with faint mountain silhouettes, soft lighting, excellent anatomy and clearly readable gestures, framed waist-up or three-quarter bodies filling center 75%, no text, no letters, no written labels, no watermark. Consistent lead speaker: young Andean woman with dark braid, terracotta orange sweater and subtle woven waistband. This is a pronoun-recognition exercise, so the relationship between the speaker and indicated people MUST be visually clear. Illustrate the third person plural THEY, a speaker pointing to ANOTHER group that does NOT include herself. One lead speaker seen in rear three-quarter view in LEFT foreground with braid and orange sweater, points with open hand toward THREE OTHER FRIENDS standing together on RIGHT in the middle distance. The foreground speaker is clearly separated from their group by empty space and is not a member of that group. Other group three teens in blue, green and cream clothes. Small empty speech bubble originates ONLY at foreground speaker. Warm pale sky-blue accent."
+    }
+  ]
+}

@@ -1,0 +1,181 @@
+/* The notebook palette belongs only to the lesson screen. */
+.guided-unit-shell:has(.guided-introduction) {
+    --color-bg: #eee7d7;
+    --color-surface: #f7f0df;
+    --color-text: #302a20;
+    --color-text-secondary: #625843;
+    --color-secondary: #53613d;
+    --color-secondary-soft: #e1e5ca;
+    --color-primary: #615039;
+    --color-primary-button: #53613d;
+    --color-primary-hover: #3f4c2d;
+    --color-on-primary: #fffbed;
+    --color-border: #d1c4aa;
+    --color-control-border: #978266;
+    --notebook-paper: #f7f0df;
+    --notebook-panel: #f4ecd8;
+    --notebook-wood: #ac8b64;
+    --notebook-edge: #806343;
+    --notebook-grain: #bba88015;
+    background: radial-gradient(ellipse at 50% 0, #fbf7ee, transparent 75%), var(--color-bg);
+}
+.guided-unit-shell:has(.guided-introduction) .guided-unit-header {
+    background: var(--notebook-paper);
+    border-bottom: 1px solid var(--color-border);
+}
+.guided-unit-main:has(> .guided-introduction) {
+    position: relative;
+    isolation: isolate;
+    width: min(1080px, calc(100% - 48px));
+    flex: none;
+    overflow: hidden;
+    margin: 26px auto 0;
+    padding: clamp(20px, 2.6vw, 34px);
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+    background: radial-gradient(var(--notebook-grain) .65px, transparent .85px) 0 0 / 5px 5px, var(--notebook-paper);
+    box-shadow: inset 0 0 20px #a28b5820, 0 8px 28px #57452f0d;
+}
+.guided-unit-main:has(> .guided-introduction)::before,
+.guided-unit-main:has(> .guided-introduction)::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+    width: 145px;
+    height: 470px;
+    background: url('../images/lesson-botanical.svg') center bottom / contain no-repeat;
+    opacity: .38;
+}
+.guided-unit-main:has(> .guided-introduction)::before { right: -38px; top: 100px; }
+.guided-unit-main:has(> .guided-introduction)::after { left: -56px; bottom: -12px; transform: scaleX(-1); }
+.guided-introduction.guided-introduction {
+    --lesson-accent: var(--color-secondary);
+    --lesson-fill: color-mix(in srgb, var(--color-text) 4%, var(--notebook-paper));
+    --lesson-border: var(--color-border);
+}
+.guided-introduction .lesson-overview { grid-template-columns: minmax(0, 1fr) 132px; gap: 24px; padding: 0 0 24px; }
+.guided-introduction .lesson-overview-meta { font-size: 10px; letter-spacing: .12em; }
+.guided-introduction .lesson-overview-meta > span:first-child { color: var(--color-text-secondary); }
+.guided-introduction .lesson-overview h1 { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(29px, 3.2vw, 42px); font-weight: 700; letter-spacing: -.045em; line-height: 1.16; }
+.guided-introduction .lesson-overview-copy > p { max-width: 64ch; font-size: 14px; line-height: 1.8; }
+.guided-introduction .lesson-guide img { width: 112px; height: 122px; filter: drop-shadow(0 5px 3px #51432e17); }
+.guided-introduction .lesson-guide figcaption { color: var(--color-text-secondary); font-size: 10px; font-weight: 600; }
+.guided-introduction .lesson-study-note { margin: 22px 0 26px; padding: 0 4px; font-size: 13px; }
+.guided-introduction .cometa-lesson-cards { gap: 20px; align-items: start; }
+.guided-introduction .lesson-card-grid.is-packed { grid-auto-rows: 1px; row-gap: 0; align-items: start; }
+.guided-introduction .cometa-lesson-card,
+.guided-introduction .greetings-section {
+    position: relative;
+    padding: clamp(18px, 2vw, 24px);
+    border: 5px solid var(--notebook-wood);
+    border-radius: 5px;
+    background: linear-gradient(115deg, transparent, var(--notebook-grain)), var(--notebook-panel);
+    box-shadow: inset 0 0 0 1px var(--color-border), 0 0 0 1px var(--notebook-edge), 0 4px 7px #4e392529;
+}
+.guided-introduction .cometa-card-heading { align-items: center; gap: 12px; margin-bottom: 16px; }
+.guided-introduction .cometa-card-heading > div { min-width: 0; }
+.guided-introduction .cometa-card-number { color: var(--color-text-secondary); font-family: Georgia, 'Times New Roman', serif; font-size: 22px; font-weight: 400; }
+.guided-introduction .cometa-card-kicker { color: var(--color-text-secondary); font-size: 9px; letter-spacing: .07em; }
+.guided-introduction .cometa-card-heading h2 { color: var(--color-text); font-family: Georgia, 'Times New Roman', serif; font-size: 21px; font-weight: 700; letter-spacing: -.025em; }
+.guided-introduction .cometa-vowel-tiles { gap: 14px; }
+.guided-introduction .cometa-vowel-tiles > button {
+    min-height: 134px;
+    gap: 15px;
+    padding: 18px 6px;
+    border: 4px solid var(--notebook-wood);
+    border-radius: 3px;
+    background: var(--notebook-paper);
+    color: var(--color-text);
+    box-shadow: inset 0 0 0 1px var(--color-border), 0 3px 4px #46321b25;
+}
+.guided-introduction .cometa-vowel-tiles > button:first-child { background: color-mix(in srgb, var(--color-secondary) 15%, var(--notebook-paper)); }
+.guided-introduction .cometa-vowel-tiles > button:hover,
+.guided-introduction .cometa-vowel-tiles > button.is-active { background: var(--color-secondary-soft); border-color: var(--notebook-edge); }
+.guided-introduction .cometa-vowel-tiles > button:focus-visible { outline: 3px solid var(--lesson-accent); outline-offset: 4px; }
+.guided-introduction .cometa-vowel-letter { font-family: Georgia, 'Times New Roman', serif; font-size: 58px; font-weight: 400; }
+.guided-introduction .cometa-vowel-action { font-size: 11px; color: var(--color-text-secondary); }
+.guided-introduction .cometa-word-example { margin-top: 24px; padding-top: 18px; gap: 10px; }
+.guided-introduction .cometa-example-word { font-family: Georgia, 'Times New Roman', serif; font-size: 33px; font-weight: 400; }
+.guided-introduction .cometa-example-word mark { background: transparent; color: var(--color-text); text-decoration-color: var(--color-secondary); }
+.guided-introduction .cometa-consonant-audio { border-radius: 4px; background: var(--notebook-paper); border-color: var(--color-control-border); }
+.guided-introduction .cometa-letter-chips li { border-radius: 3px; background: var(--notebook-paper); }
+.guided-introduction .cometa-letter-chips li.is-group { background: var(--color-secondary-soft); }
+.guided-introduction .cometa-vocabulary-list > div { gap: 10px; padding: 15px 0; }
+.guided-introduction .cometa-vocabulary-list dt { font-family: Georgia, 'Times New Roman', serif; font-size: 20px; }
+.guided-introduction .cometa-word-tiles > span { border-radius: 4px; background: var(--notebook-paper); font-family: Georgia, 'Times New Roman', serif; }
+.guided-introduction .cometa-word-tiles > .is-answer { background: var(--color-secondary-soft); }
+.guided-introduction .cometa-builder-note { border-top: 1px solid var(--lesson-border); border-radius: 0; background: transparent; padding: 14px 0 0; }
+.guided-introduction .greetings-details { gap: 20px; margin-top: 20px; }
+.guided-introduction .greetings-time { border: 1px solid var(--color-control-border); border-top: 3px solid var(--greeting-tone); border-radius: 4px; background: var(--notebook-paper); }
+.guided-introduction .greetings-time h3,
+.guided-introduction .greetings-bubble strong { color: var(--color-text); font-family: Georgia, 'Times New Roman', serif; }
+.guided-introduction .greetings-phrases dt { color: var(--lesson-accent); }
+.guided-introduction .greetings-bubble { border-radius: 4px; background: var(--notebook-paper); }
+.guided-introduction .greetings-reply { background: var(--color-secondary-soft); }
+.guided-introduction .topic-vocabulary > div { grid-template-columns: minmax(0, 1fr) auto; gap: 14px; padding: 7px 0; }
+.guided-introduction .topic-vocabulary dd { max-width: 20ch; }
+.guided-introduction .topic-vocabulary dt { color: var(--lesson-accent); font-weight: 650; }
+.guided-unit-shell:has(.guided-introduction) .guided-unit-footer { width: min(1080px, calc(100% - 48px)); padding: 20px 0 28px; }
+.guided-unit-shell:has(.guided-introduction) .guided-unit-footer > .primary-button { border-radius: 8px; background: var(--color-primary-button); color: var(--color-on-primary); box-shadow: 0 3px 0 #303a26; }
+.guided-unit-shell:has(.guided-introduction) .guided-unit-footer > .primary-button:hover { background: var(--color-primary-hover); }
+
+[data-theme='dark'] .guided-unit-shell:has(.guided-introduction) {
+    --color-bg: #211f19;
+    --color-surface: #302c23;
+    --color-text: #f1e8d5;
+    --color-text-secondary: #c8bda5;
+    --color-secondary: #c4d0a0;
+    --color-secondary-soft: #444b34;
+    --color-primary: #d2ba92;
+    --color-primary-button: #c4d0a0;
+    --color-primary-hover: #d5dfb9;
+    --color-on-primary: #22291a;
+    --color-border: #605642;
+    --color-control-border: #a69578;
+    --notebook-paper: #302c23;
+    --notebook-panel: #363026;
+    --notebook-wood: #806747;
+    --notebook-edge: #a78a61;
+    --notebook-grain: #dac59b09;
+    background: var(--color-bg);
+}
+@media (max-width: 800px) {
+    .guided-introduction .greetings-times { gap: 12px; }
+    .guided-introduction .greetings-time { padding: 16px 12px; }
+}
+@media (max-width: 700px) {
+    .guided-introduction .cometa-lesson-cards,
+    .guided-introduction .greetings-details { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+    .guided-introduction .lesson-overview { grid-template-columns: minmax(0, 1fr) 86px; gap: 14px; }
+    .guided-introduction .lesson-guide img { width: 82px; height: 92px; }
+    .guided-introduction .lesson-overview h1 { font-size: 30px; }
+    .guided-introduction .greetings-dialogue { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .guided-unit-main:has(> .guided-introduction) { width: calc(100% - 28px); margin-top: 16px; padding: 24px 20px; }
+    .guided-unit-shell:has(.guided-introduction) .guided-unit-footer { width: calc(100% - 32px); }
+}
+@media (max-width: 480px) {
+    .guided-unit-main:has(> .guided-introduction) { width: calc(100% - 16px); padding: 22px 14px; }
+    .guided-introduction .lesson-overview { grid-template-columns: minmax(0, 1fr) 70px; gap: 10px; }
+    .guided-introduction .lesson-overview h1 { font-size: 27px; }
+    .guided-introduction .lesson-overview-copy > p { font-size: 12px; line-height: 1.75; }
+    .guided-introduction .lesson-guide { display: grid; gap: 5px; }
+    .guided-introduction .lesson-guide img { width: 70px; height: 82px; }
+    .guided-introduction .lesson-guide figcaption { font-size: 9px; line-height: 1.5; }
+    .guided-introduction .lesson-overview-meta { gap: 6px; font-size: 8px; letter-spacing: .07em; }
+    .guided-introduction .cometa-lesson-card,
+    .guided-introduction .greetings-section { padding: 18px 14px; border-width: 4px; }
+    .guided-introduction .cometa-card-heading h2 { font-size: 20px; }
+    .guided-introduction .cometa-vowel-tiles { gap: 10px; }
+    .guided-introduction .cometa-vowel-tiles > button { min-height: 117px; border-width: 3px; padding: 14px 3px; }
+    .guided-introduction .cometa-vowel-letter { font-size: 49px; }
+    .guided-introduction .cometa-vowel-action { gap: 3px; font-size: 10px; }
+    .guided-introduction .greetings-times { grid-template-columns: minmax(0, 1fr); }
+    .guided-introduction .greetings-time { display: grid; grid-template-columns: 1fr 1.2fr; align-items: center; gap: 2px 12px; padding: 14px; }
+    .guided-introduction .greetings-sky { grid-row: span 2; display: grid; justify-items: start; gap: 8px; margin: 0; }
+    .guided-introduction .greetings-time h3 { font-size: 23px; }
+    .guided-introduction .greetings-time > p { margin: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .guided-introduction button { transition: none; }
+}

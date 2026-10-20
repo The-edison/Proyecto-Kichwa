@@ -8,6 +8,10 @@ const { code } = await transformWithOxc(await readFile(new URL('../src/js/compon
 const { code: hookCode } = await transformWithOxc(await readFile(new URL('../src/js/hooks/useLessonAudio.ts', import.meta.url), 'utf8'), 'useLessonAudio.ts');
 const { code: consonantCode } = await transformWithOxc(await readFile(new URL('../src/js/components/ConsonantAudioButton.tsx', import.meta.url), 'utf8'), 'ConsonantAudioButton.tsx');
 const { code: missingCode } = await transformWithOxc(await readFile(new URL('../src/js/components/MissingVowelExercise.tsx', import.meta.url), 'utf8'), 'MissingVowelExercise.tsx');
+const { code: greetingsCode } = await transformWithOxc(await readFile(new URL('../src/js/components/GreetingsIntroduction.tsx', import.meta.url), 'utf8'), 'GreetingsIntroduction.tsx');
+const { code: audioMatchingCode } = await transformWithOxc(await readFile(new URL('../src/js/components/AudioMatchingExercise.tsx', import.meta.url), 'utf8'), 'AudioMatchingExercise.tsx');
+const { code: sentencesCode } = await transformWithOxc(await readFile(new URL('../src/js/components/ListeningGreetingsExercise.tsx', import.meta.url), 'utf8'), 'ListeningGreetingsExercise.tsx');
+const { code: expressionsCode } = await transformWithOxc(await readFile(new URL('../src/js/components/ConversationMatchingExercise.tsx', import.meta.url), 'utf8'), 'ConversationMatchingExercise.tsx');
 const jsx = (type, props) => ({ type, props });
 function nodes(tree) { if (Array.isArray(tree)) return tree.flatMap(nodes); if (!tree?.props) return []; return [tree, ...nodes(tree.props.children)]; }
 
@@ -15,6 +19,7 @@ async function screen(base = '/') {
     const states = [], audios = [];
     let cursor = 0, cleanup;
     let missingAnswer = {};
+    let sentenceAnswer = {};
     class Audio {
         constructor(src) { this.src = src; this.paused = false; this.promise = new Promise((resolve, reject) => { this.resolve = resolve; this.reject = reject; }); audios.push(this); }
         play() { this.playCalls = (this.playCalls ?? 0) + 1; return this.promise; }
@@ -23,18 +28,26 @@ async function screen(base = '/') {
     const context = vm.createContext({ Audio });
     const link = specifier => {
         if (specifier.endsWith('/useLessonAudio')) return hook;
+        if (specifier.endsWith('/ExerciseCard')) return new vm.SyntheticModule(['mediaUrl'], function(){this.setExport('mediaUrl',path=>'/api/media/'+path)}, {context});
         const dependency = specifier === 'react' ? {
             useState(initial) { const index = cursor++; if (!(index in states)) states[index] = initial; return [states[index], value => { states[index] = value; }]; },
             useRef(initial) { const index = cursor++; return states[index] ??= { current: initial }; },
             useEffect(effect) { const index = cursor++; if (!(index in states)) { states[index] = true; cleanup = effect(); } },
-        } : specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx, Fragment: 'fragment' } : { Volume2: 'Volume2', RotateCcw: 'RotateCcw' };
+        } : specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx, Fragment: 'fragment' }
+            : specifier.endsWith('/LessonOverview') ? { LessonOverview: 'LessonOverview', LessonNote: 'LessonNote' }
+            : specifier.endsWith('/LessonCardGrid') ? { LessonCardGrid: 'LessonCardGrid' }
+            : { Volume2: 'Volume2', RotateCcw: 'RotateCcw', CheckCircle2: 'CheckCircle2', Sun: 'Sun', Sunset: 'Sunset', MoonStar: 'MoonStar' };
         return new vm.SyntheticModule(Object.keys(dependency), function () { for (const [name, value] of Object.entries(dependency)) this.setExport(name, value); }, { context });
     };
     const hook = new vm.SourceTextModule(hookCode, { context, initializeImportMeta(meta) { meta.env = { BASE_URL: base }; } });
     const module = new vm.SourceTextModule(code, { context });
     const consonants = new vm.SourceTextModule(consonantCode, { context });
     const missing = new vm.SourceTextModule(missingCode, { context });
-    for (const item of [hook, module, consonants, missing]) { await item.link(link); await item.evaluate(); }
+    const greetings = new vm.SourceTextModule(greetingsCode, { context });
+    const audioMatching = new vm.SourceTextModule(audioMatchingCode, { context });
+    const sentences = new vm.SourceTextModule(sentencesCode, { context });
+    const expressions = new vm.SourceTextModule(expressionsCode, { context });
+    for (const item of [hook, module, consonants, missing, greetings, audioMatching, sentences, expressions]) { await item.link(link); await item.evaluate(); }
     let playback;
     const view = {
         audios,
@@ -45,11 +58,169 @@ async function screen(base = '/') {
         status() { return nodes(view.render()).find(node => node.props.role === 'status').props.children; },
         missing(disabled = false) { cursor = 0; return missing.namespace.MissingVowelExercise({ exercise: { id: 16, elements: [{ id: 'audio1', texto: 'sh_nku' }, { id: 'audio2', texto: 'p_rina' }, { id: 'audio3', texto: 'll_ma' }] }, answer: missingAnswer, disabled, onChange(value) { missingAnswer = value; } }); },
         missingAnswer() { return missingAnswer; },
+        greetings() { cursor = 0; return greetings.namespace.GreetingsIntroduction(); },
+        sentences(disabled = false) { cursor = 0; return sentences.namespace.ListeningGreetingsExercise({
+            exercise: { id: 25, elements: ['alli-puncha-churi', 'alli-chishi-kusa', 'alli-tuta-tayta'].map((id,index) => ({ id, texto: `Alli _____, ${['churi','kusa','tayta'][index]}.`, opciones: ['puncha','chishi','tuta','kaya'] })) },
+            answer: sentenceAnswer, disabled, onChange(value) { sentenceAnswer = value; },
+        }); },
+        sentenceAnswer() { return sentenceAnswer; },
+        expressions(group, words, disabled=false) { cursor=0;return expressions.namespace.ConversationMatchingExercise({
+            group,exercise:{elements:[...words.map((texto,i)=>({id:`${group}-${i}`,texto,grupo:'origen'})),...words.map((_,i)=>({id:`es-${group}-${i}`,texto:`Meaning ${i}`,grupo:'destino'}))]},
+            answer:{},selectedOrigin:'',disabled,onSelectOrigin(){throw Error('Playback changed a selection')},onPair(){},
+        }); },
+        questionChoices(disabled = false) { cursor = 0; return sentences.namespace.ListeningGreetingsExercise({
+            exercise: { id:26, config:{listening_questions:true}, elements:['imatak','pitak-kan','imamanta'].map(id=>({id,texto:id,imagen:`questions/${id}.webp`,opciones:['¿Qué es?','¿Quién es?','¿Por qué?']})) },
+            answer:sentenceAnswer, disabled, onChange(value){sentenceAnswer=value},
+        }); },
+        audioMatching(props = {}) { cursor = 0; return audioMatching.namespace.AudioMatchingExercise({
+            exercise: { elements: [
+                ...['imatak', 'pitak-kan', 'imamanta'].map(id => ({ id, grupo: 'origen', texto: id })),
+                ...['¿Por qué?', '¿Qué es?', '¿Quién es?'].map((texto, id) => ({ id: String(id), grupo: 'destino', texto })),
+            ] }, answer: {}, selectedOrigin: '', disabled: false, onSelectOrigin() {}, onPair() {}, ...props,
+        }); },
+        clickGreeting(word) { nodes(view.greetings()).find(node => node.props['aria-label'] === `Escuchar ${word}`).props.onClick(); },
         unmount() { cleanup(); },
     };
     view.render();
     return view;
 }
+
+test('farewell and courtesy words play all nine unit recordings without selecting pairs, even after grading', async () => {
+    const view=await screen('/kichwa/');
+    for(const [group,folder,phrases] of [
+        ['d','despedidas',[['Kipakaman','kipakaman'],['Kayakaman','kayakaman'],['Shukti punchakama','shukti-punchakama'],['Ashtak kaman','ashtak-kaman'],['Chisikaman','chisikaman']]],
+        ['c','cortesia',[['Alli shamushka','alli-shamushka'],['Yupaychani','yupaychani'],['Kishpichiway','kishpichiway'],['Tiyaripay','tiyaripay']]],
+    ]) {
+        const words=phrases.map(([word])=>word);
+        const tree=view.expressions(group,words);
+        assert.equal(nodes(tree).filter(node=>node.props['aria-label']?.startsWith('Escuchar ')).length,words.length);
+        for(const [word,file] of phrases){
+            nodes(view.expressions(group,words)).find(node=>node.props['aria-label']===`Escuchar ${word}`).props.onClick();
+            assert.equal(view.audios.at(-1).src,`/kichwa/audios/unidad-2/${folder}/${file}.mp3`);
+            if(view.audios.length>1)assert.equal(view.audios.at(-2).paused,true);
+        }
+        const locked=nodes(view.expressions(group,words,true));
+        assert.ok(locked.filter(node=>node.type==='button'&&!node.props['aria-label']?.startsWith('Escuchar ')).every(node=>node.props.disabled));
+        locked.find(node=>node.props['aria-label']===`Escuchar ${words[0]}`).props.onClick();
+    }
+    view.audios.at(-1).reject(Error('Missing file'));await Promise.resolve();
+    assert.ok(nodes(view.expressions('c',['Alli shamushka','Yupaychani','Kishpichiway','Tiyaripay'])).some(node=>node.props.role==='status'&&String(node.props.children).includes('No se pudo reproducir')));
+    view.unmount();assert.equal(view.audios.at(-1).paused,true);
+});
+
+test('question cards show an image, its audio and three independent Spanish options', async () => {
+    const view = await screen('/kichwa/');
+    const cards = nodes(view.questionChoices()).filter(node=>node.type==='article');
+    assert.equal(cards.length,3);
+    assert.equal(nodes(view.questionChoices()).filter(node=>node.type==='input').length,9);
+    for (const [index,id] of ['imatak','pitak-kan','imamanta'].entries()) {
+        const cardNodes=nodes(cards[index]);
+        const image=cardNodes.find(node=>node.type==='img');
+        assert.equal(image.props.src,`/api/media/questions/${id}.webp`);
+        const audio=cardNodes.find(node=>node.props['aria-label']===`Escuchar la pregunta ${index+1}`);
+        assert.ok(cardNodes.indexOf(image)<cardNodes.indexOf(audio));
+        assert.ok(cardNodes.indexOf(audio)<cardNodes.findIndex(node=>node.type==='input'));
+        audio.props.onClick();
+        assert.equal(view.audios.at(-1).src,`/kichwa/audios/unidad-2/preguntas-respuestas/${id}.mp3`);
+        nodes(view.questionChoices()).find(node=>node.type==='input'&&node.props.name.endsWith(id)&&node.props.value==='¿Qué es?').props.onChange();
+    }
+    assert.equal(Object.keys(view.sentenceAnswer().textos).length,3);
+    assert.ok(Object.values(view.sentenceAnswer().textos).every(value=>value==='¿Qué es?'));
+    assert.ok(nodes(view.questionChoices(true)).filter(node=>node.type==='fieldset').every(node=>node.props.disabled));
+});
+
+test('three listening sentences use separate recordings, preserve all choices and lock checked answers', async () => {
+    const view = await screen('/kichwa/');
+    assert.equal(nodes(view.sentences()).filter(node => node.type === 'article').length, 3);
+    assert.equal(nodes(view.sentences()).filter(node => node.type === 'input').length, 12);
+    assert.equal(view.audios.length, 0);
+    for (const [index,file] of ['alli-puncha-churi','alli-chishi-kusa','alli-tuta-tayta'].entries()) {
+        nodes(view.sentences()).find(node => node.props['aria-label'] === `Escuchar la oración ${index + 1}`).props.onClick();
+        assert.equal(view.audios.at(-1).src, `/kichwa/audios/unidad-2/completar-saludos/${file}.mp3`);
+        const option = nodes(view.sentences()).find(node => node.type === 'input' && node.props.name.endsWith(file) && node.props.value === ['puncha','chishi','tuta'][index]);
+        option.props.onChange();
+    }
+    assert.deepEqual(JSON.parse(JSON.stringify(view.sentenceAnswer())), { textos: { 'alli-puncha-churi': 'puncha', 'alli-chishi-kusa': 'chishi', 'alli-tuta-tayta': 'tuta' } });
+    nodes(view.sentences()).find(node => node.props['aria-label'] === 'Repetir la oración 3').props.onClick();
+    assert.equal(view.audios.at(-2).paused, true);
+    const disabled = view.sentences(true);
+    assert.ok(nodes(disabled).filter(node => node.type === 'fieldset').every(node => node.props.disabled));
+    nodes(disabled).find(node => node.type === 'input' && node.props.value === 'kaya').props.onChange();
+    assert.equal(view.sentenceAnswer().textos['alli-puncha-churi'], 'puncha');
+    view.audios.at(-1).reject(Error('Missing recording')); await Promise.resolve();
+    const message = nodes(view.sentences()).find(node => node.props.role === 'status').props.children;
+    assert.match(message, /No se pudo reproducir la oración 3/);
+    assert.doesNotMatch(message, /tuta|tayta/);
+});
+
+test('question audios use the unit folder, select on playback and repeat without changing pairs', async () => {
+    const view = await screen('/kichwa/');
+    const selections = [];
+    const props = { onSelectOrigin: id => selections.push(id) };
+    assert.equal(view.audios.length, 0);
+    for (const [index, file] of ['imatak', 'pitak-kan', 'imamanta'].entries()) {
+        nodes(view.audioMatching(props)).find(node => node.props['aria-label'] === `Escuchar y seleccionar el audio ${index + 1}`).props.onClick();
+        assert.equal(view.audios.at(-1).src, `/kichwa/audios/unidad-2/preguntas-respuestas/${file}.mp3`);
+        assert.equal(selections.at(-1), file);
+        const count = selections.length;
+        nodes(view.audioMatching(props)).find(node => node.props['aria-label'] === `Repetir el audio ${index + 1}`).props.onClick();
+        assert.equal(selections.length, count);
+        assert.equal(view.audios.at(-2).paused, true);
+    }
+    const count = selections.length;
+    nodes(view.audioMatching({ ...props, disabled: true })).find(node => node.props['aria-label'] === 'Escuchar y seleccionar el audio 1').props.onClick();
+    assert.equal(selections.length, count);
+    assert.ok(nodes(view.audioMatching({ disabled: true })).filter(node => node.props.className?.startsWith('guided-audio-meaning')).every(node => node.props.disabled));
+    view.unmount();
+    assert.equal(view.audios.at(-1).paused, true);
+});
+
+test('a missing question recording reports an error without revealing the answer and can be retried', async () => {
+    const view = await screen();
+    const play = () => nodes(view.audioMatching()).find(node => node.props['aria-label'] === 'Escuchar y seleccionar el audio 2').props.onClick();
+    play(); view.audios[0].reject(Error('Missing file')); await Promise.resolve();
+    const status = nodes(view.audioMatching()).find(node => node.props.role === 'status');
+    assert.match(status.props.children, /No se pudo reproducir el audio 2/);
+    assert.doesNotMatch(status.props.children, /pitak|quién/i);
+    play(); view.audios[1].onplaying();
+    assert.match(nodes(view.audioMatching()).find(node => node.props.role === 'status').props.children, /Reproduciendo audio 2/);
+});
+
+test('all eleven greeting expressions play their own MP3 on click with the corrected farewell spellings', async () => {
+    const view = await screen('/kichwa/');
+    assert.equal(nodes(view.greetings()).filter(node => node.type === 'button').length, 11);
+    assert.equal(view.audios.length, 0);
+    const phrases = [
+        ['Alli puncha', 'alli-puncha'], ['Alli chishi', 'alli-chishi'], ['Alli tuta', 'alli-tuta'],
+        ['Imanalla kanki?', 'imanalla-kanki'], ['Allilla kani.', 'allilla-kani'],
+        ['Maymanta kanki?', 'maymanta-kanki'], ['Maypitak llankanki?', 'maypitak-llankanki'],
+        ['Kayakaman', 'kayakaman'], ['Kipakaman', 'kipakaman'], ['Yupaychani', 'yupaychani'], ['Kishpichiway', 'kishpichiway'],
+    ];
+    for (const [word, file] of phrases) {
+        view.clickGreeting(word);
+        assert.equal(view.audios.at(-1).src, `/kichwa/audios/saludos/${file}.mp3`);
+        assert.equal(view.audios.at(-1).playCalls, 1);
+        if (view.audios.length > 1) assert.equal(view.audios.at(-2).paused, true);
+    }
+    assert.ok(!nodes(view.greetings()).some(node => /Tupananchikkama|Escuchar Kayakama$/.test(node.props['aria-label'] ?? '')));
+    view.unmount();
+    assert.equal(view.audios.at(-1).paused, true);
+});
+
+test('greeting audio failures are shown beside the selected group and can be retried without overlapping playback', async () => {
+    const view = await screen();
+    view.clickGreeting('Kipakaman');
+    view.audios[0].reject(Error('Missing file'));
+    await Promise.resolve();
+    const errors = nodes(view.greetings()).filter(node => node.props.role === 'status' && node.props.className.includes('is-error'));
+    assert.equal(errors.length, 1);
+    assert.match(errors[0].props.children, /No se pudo reproducir el audio de «Kipakaman»/);
+    view.clickGreeting('Kipakaman');
+    view.audios[1].onplaying();
+    assert.ok(nodes(view.greetings()).some(node => node.props.className?.includes('is-active')));
+    view.audios[1].onended();
+    assert.ok(!nodes(view.greetings()).some(node => node.props.className?.includes('is-active')));
+});
 
 test('three accessible native buttons load the correct MP3 only on click and respect the base URL', async () => {
     const view = await screen('/kichwa/');

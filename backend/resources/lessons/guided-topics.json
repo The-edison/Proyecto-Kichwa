@@ -1,0 +1,100 @@
+[
+  {
+    "key": "pronouns",
+    "module": 1,
+    "order": 3,
+    "title": "Pronombres personales",
+    "description": "Un pronombre indica de quién hablamos. Puede representar a una persona o a un grupo.",
+    "note": "Primero identifica a la persona. Luego reconoce la acción.",
+    "sections": [
+      { "title": "Una persona", "kicker": "HABLA DE ALGUIEN", "rows": [["ñuka", "yo"], ["kan", "tú"], ["pay", "él o ella"]], "paragraphs": [] },
+      { "title": "Un grupo", "kicker": "HABLA DE VARIAS PERSONAS", "rows": [["ñukanchik", "nosotros"], ["kankuna", "ustedes"], ["paykuna", "ellos o ellas"]], "paragraphs": [] },
+      { "title": "Quién habla", "kicker": "ELIGE EL PRONOMBRE", "rows": [], "paragraphs": ["Si hablas de ti, usas ñuka.", "Si hablas de ti y de tu grupo, usas ñukanchik."] },
+      { "title": "Ejemplos", "kicker": "RECONOCE LA PERSONA Y LA ACCIÓN", "rows": [["Ñuka mikuni.", "Yo como."], ["Pay puñun.", "Él o ella duerme."]], "paragraphs": ["Primero identifica a la persona. Luego reconoce la acción."] }
+    ]
+  },
+  {
+    "key": "numbers",
+    "module": 1,
+    "order": 4,
+    "title": "Números y cantidades",
+    "description": "Los números se forman combinando palabras de mayor a menor cantidad.",
+    "note": "Primero escribe las decenas y después las unidades: 23 = ishkay chunka kimsa.",
+    "sections": [
+      { "title": "Del cero al diez", "kicker": "LAS CANTIDADES BÁSICAS", "rows": [["illak", "0"], ["shuk", "1"], ["ishkay", "2"], ["kimsa", "3"], ["chusku", "4"], ["pichka", "5"], ["sukta", "6"], ["kanchis", "7"], ["pusak", "8"], ["iskun", "9"], ["chunka", "10"]], "paragraphs": [] },
+      { "title": "Del once al noventa", "kicker": "COMBINA DECENAS Y UNIDADES", "rows": [["chunka shuk", "11"], ["chunka pusak", "18"], ["ishkay chunka", "20"], ["kimsa chunka", "30"], ["ishkay chunka kimsa", "23"]], "paragraphs": ["Primero escribe las decenas y después las unidades."] },
+      { "title": "Cantidades grandes", "kicker": "CIENTOS, MILES Y MILLONES", "rows": [["patsak", "100"], ["waranka", "1.000"], ["hunu", "1.000.000"], ["ishkay patsak", "200"], ["kimsa waranka", "3.000"], ["ishkay chunka waranka", "20.000"], ["patsak waranka", "100.000"]], "paragraphs": [] },
+      { "title": "Una cantidad en una oración", "kicker": "USA LO QUE APRENDISTE", "rows": [["Payka ishkay pankata apamun.", "Él o ella trae dos hojas."]], "paragraphs": ["Ishkay indica la cantidad."] }
+    ]
+  },
+  {
+    "key": "calendar",
+    "module": 1,
+    "order": 5,
+    "title": "Días, meses y calendario",
+    "description": "Un calendario organiza los días de la semana y los meses del año.",
+    "note": "En el calendario, killa significa mes. Kulla killapi… significa «En enero…».",
+    "sections": [
+      { "title": "Días de la semana", "kicker": "ORGANIZA TU SEMANA", "rows": [["awaki", "lunes"], ["awkarik", "martes"], ["chillay", "miércoles"], ["kullka", "jueves"], ["chaska", "viernes"], ["wacha", "sábado"], ["inti", "domingo"]], "paragraphs": [] },
+      { "title": "Meses del año", "kicker": "RECORRE EL CALENDARIO", "rows": [["kulla", "enero"], ["panchi", "febrero"], ["pawkar", "marzo"], ["ayriwa", "abril"], ["aymuray", "mayo"], ["raymi", "junio"], ["sitwa", "julio"], ["karwa", "agosto"], ["kuski", "septiembre"], ["wayru", "octubre"], ["sasi", "noviembre"], ["kapak", "diciembre"]], "paragraphs": [] },
+      { "title": "Palabras de tiempo", "kicker": "UBÍCATE EN EL TIEMPO", "rows": [["puncha", "día"], ["hunkay", "semana"], ["killa", "mes"], ["wata", "año"], ["kayna", "ayer"], ["kunan", "hoy o ahora"], ["kaya", "mañana"]], "paragraphs": [] },
+      { "title": "Cómo leerlos", "kicker": "EL TIEMPO EN CONTEXTO", "rows": [["Kulla killapi…", "En enero…"]], "paragraphs": ["En el calendario, killa significa mes.", "Celebraciones: Inti Raymi, Kulla Raymi, Kapak Raymi y Pawkar Raymi."] }
+    ]
+  },
+  {
+    "key": "animals-colors",
+    "module": 2,
+    "order": 1,
+    "title": "Animales y colores",
+    "description": "Aprende el nombre del animal y distingue el color que observas.",
+    "note": "Reconoce primero al animal. Después identifica la palabra que indica el color.",
+    "sections": [
+      { "title": "Animales domésticos", "kicker": "LOS ANIMALES CERCANOS", "rows": [["allku", "perro"], ["misi", "gato"], ["kuy", "cuy"], ["llama", "oveja"], ["wakra", "ganado"], ["kuchi", "cerdo"], ["atalpa", "gallina"], ["kunu", "conejo"], ["apiw", "caballo"], ["chantasu", "burro"]], "paragraphs": [] },
+      { "title": "Otros animales", "kicker": "DESCUBRE MÁS ANIMALES", "rows": [["taruka", "venado"], ["ukucha", "ratón"], ["urpi", "tórtola"], ["hampatu", "rana"], ["pilpintu", "mariposa"], ["kinti", "colibrí"]], "paragraphs": ["Ejemplo: una foto de venado se relaciona con taruka."] },
+      { "title": "Colores", "kicker": "OBSERVA Y DISTINGUE", "rows": [["yurak", "blanco"], ["yana", "negro"], ["puka", "rojo"], ["killu", "amarillo"], ["ankas", "azul"], ["waylla", "verde"], ["paku", "marrón"], ["maywa", "morado"], ["kishpu", "naranja"], ["waminsi", "rosado"], ["suku", "gris"]], "paragraphs": [] },
+      { "title": "Un ejemplo", "kicker": "EL COLOR EN UNA ORACIÓN", "rows": [["Ñuka muchikuka yurakmi kan.", "Mi sombrero es blanco."]], "paragraphs": ["Yurak es la palabra que indica el color."] }
+    ]
+  },
+  {
+    "key": "body",
+    "module": 2,
+    "order": 2,
+    "title": "Partes del cuerpo",
+    "description": "Cada parte del cuerpo tiene un nombre. Aprende a reconocerla y a señalarla.",
+    "note": "Relaciona cada nombre con una parte del cuerpo. Chaki significa pie.",
+    "sections": [
+      { "title": "Cabeza y rostro", "kicker": "RECONOCE CADA PARTE", "rows": [["uma", "cabeza"], ["ñawi", "cara"], ["rinri", "oreja"], ["shimi", "boca"], ["kiru", "diente"], ["hallu", "lengua"], ["kunka", "cuello"]], "paragraphs": [] },
+      { "title": "Brazos y manos", "kicker": "APRENDE A SEÑALARLAS", "rows": [["rikra", "brazo"], ["maki", "mano"], ["ruka", "dedo"], ["sillu", "uña"]], "paragraphs": [] },
+      { "title": "Tronco y piernas", "kicker": "CONTINÚA EL RECORRIDO", "rows": [["wiksa", "barriga"], ["washa", "espalda"], ["kunkuri", "rodilla"], ["chaki", "pie"], ["chaki washa", "talón"]], "paragraphs": [] },
+      { "title": "Un ejemplo", "kicker": "IDENTIFICA LA PARTE", "rows": [["Chakitami nanan.", "Me duele el pie."]], "paragraphs": ["Para identificar la parte, reconoce chaki.", "En un dibujo del cuerpo, identifica las partes señaladas siguiendo sus números."] }
+    ]
+  },
+  {
+    "key": "nature",
+    "module": 2,
+    "order": 3,
+    "title": "Naturaleza y entorno cercano",
+    "description": "Las palabras de esta unidad nombran elementos del paisaje y de la casa.",
+    "note": "Mira el contexto antes de elegir el significado: killa puede significar luna o mes.",
+    "sections": [
+      { "title": "En el paisaje", "kicker": "OBSERVA LA NATURALEZA", "rows": [["inti", "sol"], ["killa", "luna"], ["yaku", "agua"], ["allpa", "tierra"], ["wayra", "viento"], ["urku", "montaña"], ["tamya", "lluvia"]], "paragraphs": [] },
+      { "title": "Cerca de nosotros", "kicker": "TU ENTORNO COTIDIANO", "rows": [["wasi", "casa"], ["yura", "árbol"], ["punku", "puerta"], ["tuku", "ventana"]], "paragraphs": [] },
+      { "title": "Una palabra, dos contextos", "kicker": "EL CONTEXTO DA LA PISTA", "rows": [], "paragraphs": ["En una imagen del cielo, killa significa luna.", "En un calendario, killa significa mes.", "Mira el contexto antes de elegir el significado."] },
+      { "title": "Cómo relacionar una imagen", "kicker": "CONECTA LA IMAGEN Y LA PALABRA", "rows": [], "paragraphs": ["Si la imagen muestra lluvia, busca tamya.", "Si muestra una montaña, busca urku."] }
+    ]
+  },
+  {
+    "key": "verbs",
+    "module": 2,
+    "order": 4,
+    "title": "Verbos frecuentes y raíz verbal",
+    "description": "Un verbo nombra una acción. En esta unidad reconocerás verbos que terminan en -na.",
+    "note": "Para encontrar la raíz del verbo, separa la terminación -na: purina = puri + na.",
+    "sections": [
+      { "title": "Acciones cotidianas", "kicker": "LAS ACCIONES DE CADA DÍA", "rows": [["mikuna", "comer"], ["upyana", "beber"], ["puñuna", "dormir"], ["purina", "caminar"], ["killkana", "escribir"], ["pichana", "limpiar"]], "paragraphs": [] },
+      { "title": "Más acciones", "kicker": "AMPLÍA TU VOCABULARIO", "rows": [["yachana", "aprender"], ["llamkana", "trabajar"], ["yanuna", "cocinar"], ["tarpuna", "sembrar"], ["rikuna", "ver"], ["uyana", "escuchar"]], "paragraphs": [] },
+      { "title": "La raíz del verbo", "kicker": "SEPARA LA TERMINACIÓN", "rows": [], "paragraphs": ["Para encontrarla, separa la terminación -na.", "purina = puri + na. La raíz es puri.", "killkana = killka + na. La raíz es killka."] },
+      { "title": "Un ejemplo", "kicker": "RECONOCE LA ACCIÓN", "rows": [["Ñuka mikuni.", "Yo como."]], "paragraphs": ["Mikuna nombra la acción de comer.", "Al escuchar una expresión, reconoce la palabra o la acción que se menciona."] }
+    ]
+  }
+]

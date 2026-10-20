@@ -1,5 +1,6 @@
 import { ArrowRight, Flower2, Footprints, Heart, House, PawPrint, TreeDeciduous } from 'lucide-react';
 import { LessonNote, LessonOverview } from './LessonOverview';
+import { LessonCardGrid } from './LessonCardGrid';
 import { VowelAudioButtons } from './VowelAudioButtons';
 import { ConsonantAudioButton } from './ConsonantAudioButton';
 import { useLessonAudio } from '../hooks/useLessonAudio';
@@ -25,7 +26,7 @@ export function GuidedIntroduction() {
         />
         <LessonNote>En la lengua kichwa solo se usan tres vocales: <strong>a, i y u.</strong> Identificarlas es el primer paso para leer una palabra.</LessonNote>
 
-        <div className="cometa-lesson-cards">
+        <LessonCardGrid>
             <section className="cometa-lesson-card cometa-vowels" aria-labelledby="cometa-vowels-title">
                 <div className="cometa-card-heading"><span className="cometa-card-number" aria-hidden="true">01</span><div><span className="cometa-card-kicker">EMPIEZA POR AQUÍ</span><h2 id="cometa-vowels-title">Las vocales</h2></div></div>
                 <VowelAudioButtons playback={playback} />
@@ -55,6 +56,6 @@ export function GuidedIntroduction() {
                 </div>
                 <p className="cometa-builder-note"><span aria-hidden="true">✦</span> Completa con <strong>i</strong> y lee la palabra entera: <strong>sisa.</strong></p>
             </section>
-        </div>
+        </LessonCardGrid>
     </div>;
 }

@@ -12,7 +12,7 @@ async function interaction(exercise, initial = {}, checkPair, initialLockedPairs
     const jsx = (type, props) => ({ type, props });
     const module = new vm.SourceTextModule(code, { context });
     await module.link(specifier => {
-        const dependency = specifier === 'react' ? {
+        const dependency = specifier.endsWith('/useAnswerSound') ? { useAnswerSound: () => () => {} } : specifier === 'react' ? {
             useState: value => { const index = cursor++; if (!(index in states)) states[index] = value; return [states[index], value => { states[index] = typeof value === 'function' ? value(states[index]) : value; }]; },
             useRef: value => ({ current: value }),
         } : specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx, Fragment: 'fragment' }
@@ -59,6 +59,30 @@ test('restored server-confirmed pairs remain locked after resuming', async () =>
     const view = await interaction({type:'relacionar',elements:[{id:'k',texto:'Sisa',grupo:'origen'},{id:'e',texto:'Flor',grupo:'destino'}],zones:[]}, {pares:[{origen:'k',destino:'e'}]}, async()=>true, ['k']);
     assert.equal(nodes(view.render()).find(n=>n.type==='select').props.disabled,true);
     assert.equal(view.complete(),true);
+});
+
+test('matching columns highlight both sides and clicking either side clears only that pair', async () => {
+    const view = await interaction({ type: 'relacionar', elements: [
+        { id: 'flower', texto: 'Sisa', grupo: 'origen' }, { id: 'home', texto: 'Wasi', grupo: 'origen' },
+        { id: 'flor', texto: 'Flor', grupo: 'destino' }, { id: 'casa', texto: 'Casa', grupo: 'destino' },
+    ], zones: [] });
+    const word = text => nodes(view.render()).find(node => node.type === 'button' && nodes(node).some(child => child.props.element?.texto === text));
+    word('Sisa').props.onClick();
+    assert.equal(word('Sisa').props.className, 'primary-button');
+    word('Sisa').props.onClick();
+    assert.equal(word('Sisa').props.className, 'secondary-button');
+    word('Sisa').props.onClick(); word('Flor').props.onClick();
+    for (const text of ['Sisa', 'Flor']) {
+        assert.equal(word(text).props.className, 'primary-button');
+        assert.equal(word(text).props['aria-pressed'], true);
+    }
+    word('Wasi').props.onClick(); word('Casa').props.onClick();
+    word('Sisa').props.onClick();
+    for (const text of ['Sisa', 'Flor']) assert.equal(word(text).props.className, 'secondary-button');
+    assert.deepEqual(view.answer().pares, [{ origen: 'home', destino: 'casa' }]);
+    word('Casa').props.onClick();
+    assert.deepEqual(view.answer().pares, []);
+    for (const text of ['Wasi', 'Casa']) assert.equal(word(text).props['aria-pressed'], false);
 });
 
 test('vowel buttons enforce three selections and allow deselecting', async () => {
