@@ -11,8 +11,8 @@ const greetings = [
     { time: 'Noche', word: 'Alli tuta', meaning: 'Buenas noches', Icon: MoonStar, tone: 'night', clip: 'alli-tuta' },
 ] as const;
 const conversation = [
-    ['Imanalla kanki?', '¿Cómo estás?', 'imanalla-kanki'], ['Allilla kani.', 'Estoy bien.', 'allilla-kani'],
-    ['Maymanta kanki?', '¿De dónde eres?', 'maymanta-kanki'], ['Maypitak llankanki?', '¿Dónde trabajas?', 'maypitak-llankanki'],
+    ['Imanalla kanki', '¿Cómo estás?', 'imanalla-kanki'], ['Allilla kani.', 'Estoy bien.', 'allilla-kani'],
+    ['Maymanta kanki', '¿De dónde eres?', 'maymanta-kanki'], ['Maypitak llankanki', '¿Dónde trabajas?', 'maypitak-llankanki'],
 ] as const;
 const farewells = [['Kayakaman', 'Hasta mañana', 'kayakaman'], ['Kipakaman', 'Hasta luego', 'kipakaman'], ['Yupaychani', 'Gracias', 'yupaychani'], ['Kishpichiway', 'Perdón', 'kishpichiway']] as const;
 
@@ -53,7 +53,7 @@ export function GreetingsIntroduction() {
             </section>
             <section className="cometa-lesson-card greetings-dialogue" aria-labelledby="dialogue-title">
                 <div className="cometa-card-heading"><span className="cometa-card-number" aria-hidden="true">04</span><div><span className="cometa-card-kicker">EJEMPLO EN CONTEXTO</span><h2 id="dialogue-title">Una pequeña conversación</h2></div></div>
-                <div className="greetings-bubble"><span>PERSONA A</span><strong>Imanalla kanki?</strong><p>¿Cómo estás?</p></div>
+                <div className="greetings-bubble"><span>PERSONA A</span><strong>Imanalla kanki</strong><p>¿Cómo estás?</p></div>
                 <div className="greetings-bubble greetings-reply"><span>PERSONA B</span><strong>Allilla kani.</strong><p>Estoy bien.</p></div>
                 <p className="greetings-dialogue-note"><strong>Observa el intercambio.</strong> La primera persona pregunta cómo estás; la segunda responde sobre su estado de ánimo.</p>
             </section>

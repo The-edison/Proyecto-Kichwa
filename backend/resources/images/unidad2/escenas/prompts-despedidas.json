@@ -1,0 +1,25 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "file": "d-0.png",
+      "prompt": "Create one polished educational illustration, landscape 4:3 composition, vivid friendly modern 2D cartoon storybook style matching the existing Kichwa learning series. Consistent recurring ADULT characters: Ecuadorian Andean woman in her twenties, long black braid, white embroidered blouse and blue woven shawl; Ecuadorian Andean man in his twenties, short black hair, cream shirt, blue backpack. Respectful everyday highland Ecuadorian setting, pastel walls and mountains. Clear readable gestures and medium shot, minimal clutter. No written words, no numbers, no speech bubbles, no labels or watermark. Leave calm space upper right for the app Spanish speech bubble. Scene: Hasta luego, see you later. At the sunny town plaza, the two friends part ways, the woman walking away looking back and waving warmly to the man near a fountain. Warm midday light."
+    },
+    {
+      "file": "d-1.png",
+      "prompt": "Create one polished educational illustration, landscape 4:3 composition, vivid friendly modern 2D cartoon storybook style matching the existing Kichwa learning series. Consistent recurring ADULT characters: Ecuadorian Andean woman in her twenties, long black braid, white embroidered blouse and blue woven shawl; Ecuadorian Andean man in his twenties, short black hair, cream shirt, blue backpack. Respectful everyday highland Ecuadorian setting, pastel walls and mountains. Clear readable gestures and medium shot, minimal clutter. No written words, no numbers, no speech bubbles, no labels or watermark. Leave calm space upper right for the app Spanish speech bubble. Scene: Hasta mañana, see you tomorrow. Outside an Andean house at dusk, the man says goodbye waving to the woman standing at her open doorway. Small unlabelled calendar showing the next blank square subtly on the wall, no text or numbers. Peaceful twilight."
+    },
+    {
+      "file": "d-2.png",
+      "prompt": "Create one polished educational illustration, landscape 4:3 composition, vivid friendly modern 2D cartoon storybook style matching the existing Kichwa learning series. Consistent recurring ADULT characters: Ecuadorian Andean woman in her twenties, long black braid, white embroidered blouse and blue woven shawl; Ecuadorian Andean man in his twenties, short black hair, cream shirt, blue backpack. Respectful everyday highland Ecuadorian setting, pastel walls and mountains. Clear readable gestures and medium shot, minimal clutter. No written words, no numbers, no speech bubbles, no labels or watermark. Leave calm space upper right for the app Spanish speech bubble. Scene: Hasta otro día, see you another day. At an intercity bus stop in a sunny mountain town, the woman with her travel bag is about to board a small bus, waving goodbye to her male friend who stays behind. Friendly adults, clear farewell pose, no writing on bus."
+    },
+    {
+      "file": "d-3.png",
+      "prompt": "Create one polished educational illustration, landscape 4:3 composition, vivid friendly modern 2D cartoon storybook style matching the existing Kichwa learning series. Consistent recurring ADULT characters: Ecuadorian Andean woman in her twenties, long black braid, white embroidered blouse and blue woven shawl; Ecuadorian Andean man in his twenties, short black hair, cream shirt, blue backpack. Respectful everyday highland Ecuadorian setting, pastel walls and mountains. Clear readable gestures and medium shot, minimal clutter. No written words, no numbers, no speech bubbles, no labels or watermark. Leave calm space upper right for the app Spanish speech bubble. Scene: Hasta pronto, see you soon. At a garden gate in the sunny Andean town, the two adult friends briefly shake hands and wave with their other hands, woman beginning to step through the gate, promising a soon reunion. Soft warm afternoon."
+    },
+    {
+      "file": "d-4.png",
+      "prompt": "Create one polished educational illustration, landscape 4:3 composition, vivid friendly modern 2D cartoon storybook style matching the existing Kichwa learning series. Consistent recurring ADULT characters: Ecuadorian Andean woman in her twenties, long black braid, white embroidered blouse and blue woven shawl; Ecuadorian Andean man in his twenties, short black hair, cream shirt, blue backpack. Respectful everyday highland Ecuadorian setting, pastel walls and mountains. Clear readable gestures and medium shot, minimal clutter. No written words, no numbers, no speech bubbles, no labels or watermark. Leave calm space upper right for the app Spanish speech bubble. Scene: Hasta tarde, see you later this afternoon. The two friends finish a morning visit at an Andean courtyard, man holding his blue backpack waves goodbye to woman at doorway. Bright early daylight, distant sun above mountains, light morning shadows. Different composition from the plaza and bus scenes."
+    }
+  ]
+}

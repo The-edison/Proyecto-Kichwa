@@ -41,7 +41,7 @@ class UnidadDosGuiadaSeeder extends Seeder
             Tema::where('id_unidad', $unit->id_unidad)->update(['publicado' => false]);
             Tema::create(['id_unidad' => $unit->id_unidad, 'clave_leccion' => self::LESSON_KEY, 'tipo_tema' => 'vocabulario',
                 'titulo_tema' => 'Saludos y conversación',
-                'contenido_tema' => "Elige una expresión según lo que necesitas decir.\n\nPara saludar:\nAlli puncha = buenos días\nAlli chishi = buenas tardes\nAlli tuta = buenas noches\n\nPara conversar:\nImanalla kanki? = ¿Cómo estás?\nAllilla kani. = Estoy bien.\nMaymanta kanki? = ¿De dónde eres?\nMaypitak llankanki? = ¿Dónde trabajas?\n\nPara despedirse o ser amable:\nKayakaman = hasta mañana\nKipakaman = hasta luego\nYupaychani = gracias\nKishpichiway = perdón\n\nUn ejemplo de conversación:\nA: Imanalla kanki?\nB: Allilla kani.\nUna pregunta necesita una respuesta que trate del mismo tema.",
+                'contenido_tema' => "Elige una expresión según lo que necesitas decir.\n\nPara saludar:\nAlli puncha = buenos días\nAlli chishi = buenas tardes\nAlli tuta = buenas noches\n\nPara conversar:\nImanalla kanki = ¿Cómo estás?\nAllilla kani. = Estoy bien.\nMaymanta kanki = ¿De dónde eres?\nMaypitak llankanki = ¿Dónde trabajas?\n\nPara despedirse o ser amable:\nKayakaman = hasta mañana\nKipakaman = hasta luego\nYupaychani = gracias\nKishpichiway = perdón\n\nUn ejemplo de conversación:\nA: Imanalla kanki\nB: Allilla kani.\nUna pregunta necesita una respuesta que trate del mismo tema.",
                 'orden_tema' => 1 + (int) Tema::where('id_unidad', $unit->id_unidad)->max('orden_tema'), 'publicado' => true]);
             $bank = [
                 ['time' => 'manana', 'answer' => 'puncha', 'choices' => ['chishi', 'puncha', 'tuta'], 'meaning' => 'buenos días', 'alt' => 'Amanecer en un pueblo andino: el sol aparece junto al horizonte y las nubes tienen tonos rosados.'],
@@ -76,6 +76,10 @@ class UnidadDosGuiadaSeeder extends Seeder
         $this->seedConversationPairs();
         $this->splitConversationPairs();
         $this->seedFarewellAndCourtesy();
+        $this->seedConversationScenes();
+        $this->refreshKichwaQuestionSpelling();
+        $this->seedCourtesySentenceOrder();
+        $this->refreshCourtesySentenceSpelling();
         PublicacionContenido::invalidate();
     }
 
@@ -137,12 +141,12 @@ class UnidadDosGuiadaSeeder extends Seeder
             }
             $groups = [
                 'q' => [
-                    ['Imanalla kanki?', '¿Cómo estás?'],
-                    ['Maymanta kanki?', '¿De dónde eres?'],
-                    ['Maypitak llankanki?', '¿Dónde trabajas?'],
-                    ['Mashna watakunatatak charinki?', '¿Cuántos años tienes?'],
-                    ['Llakillachu kanki?', '¿Estás triste?'],
-                    ['Imata ruranki?', '¿Qué haces?'],
+                    ['Imanalla kanki', '¿Cómo estás?'],
+                    ['Maymanta kanki', '¿De dónde eres?'],
+                    ['Maypitak llankanki', '¿Dónde trabajas?'],
+                    ['Mashna watakunatatak charinki', '¿Cuántos años tienes?'],
+                    ['Llakillachu kanki', '¿Estás triste?'],
+                    ['Imata ruranki', '¿Qué haces?'],
                 ],
                 'a' => [
                     ['Allilla kani', 'Estoy bien'],
@@ -256,6 +260,207 @@ class UnidadDosGuiadaSeeder extends Seeder
                 $record->orden_actividad = 1 + (int) Actividad::where('id_unidad', $unit->id_unidad)->max('orden_actividad');
                 $record->publicado = true;
                 $record->save();
+            }
+        });
+    }
+
+    private function seedConversationScenes(): void
+    {
+        $images = [];
+        foreach (['q', 'a', 'd', 'c'] as $group) {
+            foreach (range(0, match ($group) {
+                'c' => 3, 'd' => 4, default => 5
+            }) as $index) {
+                $name = $group.'-'.$index;
+                $source = resource_path('images/unidad2/escenas/'.$name.'.png');
+                $path = 'kichwa/imagenes/'.hash('sha256', hash_file('sha256', $source).':scene-webp640-q84').'.webp';
+                if (! Storage::disk('public')->exists($path)) {
+                    $image = imagecreatefrompng($source);
+                    $small = imagescale($image, 640);
+                    ob_start();
+                    imagewebp($small, null, 84);
+                    $bytes = ob_get_clean();
+                    imagedestroy($small);
+                    imagedestroy($image);
+                    Storage::disk('public')->put($path, $bytes);
+                }
+                $images[$name] = $path;
+            }
+        }
+        DB::transaction(function () use ($images): void {
+            DB::select('SELECT pg_advisory_xact_lock(20261011)');
+            $lesson = Tema::where('clave_leccion', self::LESSON_KEY)->firstOrFail();
+            $unit = Unidad::whereKey($lesson->id_unidad)->lockForUpdate()->firstOrFail();
+            $sources = Actividad::where('id_unidad', $unit->id_unidad)->whereIn('origen_reactivo', ['u2-conversation-q-v2', 'u2-conversation-a-v2', 'u2-expressions-d-v1', 'u2-expressions-c-v1'])->orderBy('orden_actividad')->get()
+                ->reject(fn ($source) => Actividad::where('id_unidad', $unit->id_unidad)->where('origen_reactivo', 'u2-scene-'.$source->configuracion['conversation_group'].'-0-v1')->exists());
+            if ($sources->isEmpty()) {
+                return;
+            }
+            $position = $sources->firstOrFail()->orden_actividad;
+            $inserted = $sources->sum(fn ($source) => match ($source->configuracion['conversation_group']) {
+                'c' => 4, 'd' => 5, default => 6
+            });
+            foreach (Actividad::where('id_unidad', $unit->id_unidad)->where('orden_actividad', '>=', $position)->orderByDesc('orden_actividad')->get() as $following) {
+                $following->update(['orden_actividad' => $following->orden_actividad + $inserted]);
+            }
+            foreach ($sources as $source) {
+                $source->refresh()->update(['publicado' => false]);
+                $group = $source->configuracion['conversation_group'];
+                $count = match ($group) {
+                    'c' => 4, 'd' => 5, default => 6
+                };
+                $elements = collect($source->elementos_actividad)->keyBy('id');
+                foreach (range(0, $count - 1) as $index) {
+                    $name = $group.'-'.$index;
+                    $spanish = $elements['es-'.$name]['texto'];
+                    $options = $group === 'c' ? [$index, ($index + 1) % $count, ($index + 2) % $count] : [$index, ($index + 2) % $count, ($index + 4) % $count];
+                    $rotation = $index % 3;
+                    $options = array_merge(array_slice($options, $rotation), array_slice($options, 0, $rotation));
+                    $exercise = ['type' => 'seleccion_multiple', 'prompt' => match ($group) {
+                        'c' => '¿Qué expresión de cortesía usarías en kichwa?', 'd' => '¿Cómo te despedirías en kichwa?', 'q' => '¿Cómo harías esta pregunta en kichwa?', default => '¿Cómo responderías en kichwa?'
+                    },
+                        'resource' => null, 'zones' => [],
+                        'elements' => array_map(fn ($option) => ['id' => $group.'-'.$option, 'texto' => $elements[$group.'-'.$option]['texto']], $options),
+                        'solution' => ['seleccion' => [$name]],
+                        'config' => ['title' => match ($group) {
+                            'c' => '4. CORTESÍA ( ALLI KAWSAYMANTA RIMAYKUNA )', 'd' => '3. DESPEDIDA ( CHIKANYARIKUNA )', 'q' => '2. Elige según la escena', default => 'Responde según la escena'
+                        },
+                            'scene_choice' => true, 'conversation_group' => $group, 'context_text' => $spanish,
+                            'context_meaning' => (match ($group) {
+                                'c' => 'Cortesía ', 'd' => 'Despedida ', 'q' => 'Pregunta ', default => 'Respuesta '
+                            }).($index + 1).' de '.$count,
+                            'prompt_image' => $images[$name], 'prompt_image_alt' => 'Escena de conversación correspondiente a «'.$spanish.'».',
+                            'presentation' => 'buttons', 'max_selections' => 1, 'exact_selections' => true,
+                            'managed' => true, 'reviewed' => true, 'difficulty' => 'inicial',
+                            'correct_feedback' => '¡Muy bien! '.$elements[$name]['texto'].' significa «'.$spanish.'».',
+                            'incorrect_feedback' => 'Observa de nuevo la escena y escucha las opciones para elegir la expresión correcta.']];
+                    EstadoContenido::assertReady($exercise);
+                    $record = new Actividad(KichwaResource::attributes('exercises', $exercise));
+                    $record->id_unidad = $unit->id_unidad;
+                    $record->origen_reactivo = 'u2-scene-'.$name.'-v1';
+                    $record->orden_actividad = $position++;
+                    $record->publicado = true;
+                    $record->save();
+                }
+            }
+        });
+    }
+
+    private function refreshKichwaQuestionSpelling(): void
+    {
+        DB::transaction(function (): void {
+            DB::select('SELECT pg_advisory_xact_lock(20261011)');
+            $lesson = Tema::where('clave_leccion', self::LESSON_KEY)->firstOrFail();
+            $words = ['Imanalla kanki', 'Maymanta kanki', 'Maypitak llankanki', 'Mashna watakunatatak charinki', 'Llakillachu kanki', 'Imata ruranki'];
+            $previous = array_map(fn (string $word): string => $word.'?', $words);
+            $body = str_replace($previous, $words, $lesson->contenido_tema);
+            if ($body !== $lesson->contenido_tema) {
+                $lesson->update(['contenido_tema' => $body]);
+            }
+            foreach (Actividad::where('id_unidad', $lesson->id_unidad)->where('publicado', true)->get() as $activity) {
+                $elements = array_map(function (array $element): array {
+                    if (preg_match('/^q-[0-5]$/', $element['id'])) {
+                        $element['texto'] = str_replace(['¿', '?'], '', $element['texto']);
+                    }
+
+                    return $element;
+                }, $activity->elementos_actividad);
+                $config = $activity->configuracion;
+                if (isset($config['correct_feedback'])) {
+                    $config['correct_feedback'] = str_replace($previous, $words, $config['correct_feedback']);
+                }
+                if ($elements !== $activity->elementos_actividad || $config !== $activity->configuracion) {
+                    if (DB::table('respuestas_actividad')->where('id_actividad', $activity->id_actividad)->exists()) {
+                        $replacement = $activity->replicate();
+                        $position = $activity->orden_actividad;
+                        $activity->update(['publicado' => false, 'orden_actividad' => 1 + (int) Actividad::where('id_unidad', $lesson->id_unidad)->max('orden_actividad')]);
+                        $replacement->elementos_actividad = $elements;
+                        $replacement->configuracion = $config;
+                        $replacement->orden_actividad = $position;
+                        $replacement->save();
+                    } else {
+                        $activity->update(['elementos_actividad' => $elements, 'configuracion' => $config]);
+                    }
+                }
+            }
+        });
+    }
+
+    private function seedCourtesySentenceOrder(): void
+    {
+        $images = [];
+        foreach (range(0, 3) as $index) {
+            $source = resource_path('images/unidad2/escenas/order-'.$index.'.png');
+            $path = 'kichwa/imagenes/'.hash('sha256', hash_file('sha256', $source).':sentence-webp640-q84').'.webp';
+            if (! Storage::disk('public')->exists($path)) {
+                $image = imagecreatefrompng($source);
+                $small = imagescale($image, 640);
+                ob_start();
+                imagewebp($small, null, 84);
+                $bytes = ob_get_clean();
+                imagedestroy($small);
+                imagedestroy($image);
+                Storage::disk('public')->put($path, $bytes);
+            }
+            $images[$index] = $path;
+        }
+        DB::transaction(function () use ($images): void {
+            DB::select('SELECT pg_advisory_xact_lock(20261011)');
+            $lesson = Tema::where('clave_leccion', self::LESSON_KEY)->firstOrFail();
+            $unit = Unidad::whereKey($lesson->id_unidad)->lockForUpdate()->firstOrFail();
+            if (Actividad::where('id_unidad', $unit->id_unidad)->where('origen_reactivo', 'u2-courtesy-order-0-v1')->exists()) {
+                return;
+            }
+            $rows = [
+                ['Kichpichiway yachachik kampak yachana ukuman yaykunkapak', 'Disculpe licenciado para ingresar a sus clases', 'Una estudiante pide permiso a su docente para entrar al aula.'],
+                ['Kishpichiway yachachik ishpana ukuman rinkapak', 'Disculpe licenciado para ir al baño', 'Una estudiante pide permiso a su docente para ir al baño.'],
+                ['Kichpichiway llukshinkapak', 'Disculpe para salir', 'Una estudiante pide permiso para salir del aula.'],
+                ['Kishpichiway pacha mamita', 'Perdón madre tierra', 'Una mujer expresa respeto y pide perdón a la madre tierra junto a una planta.'],
+            ];
+            $position = 1 + (int) Actividad::where('id_unidad', $unit->id_unidad)->max('orden_actividad');
+            foreach ($rows as $index => [$kichwa, $spanish, $alt]) {
+                $words = explode(' ', $kichwa);
+                $elements = array_map(fn ($word, $position) => ['id' => 'word-'.$position, 'texto' => $word], $words, array_keys($words));
+                $exercise = ['type' => 'ordenar', 'prompt' => 'Toca las palabras para formar la oración en kichwa.', 'resource' => null, 'zones' => [],
+                    'elements' => array_reverse($elements), 'solution' => ['orden' => array_column($elements, 'id')],
+                    'config' => ['sentence_order' => true, 'presentation' => 'tiles', 'title' => '5. Ordena las oraciones',
+                        'context_text' => $spanish, 'context_meaning' => 'Oración '.($index + 1).' de 4', 'prompt_image' => $images[$index], 'prompt_image_alt' => $alt,
+                        'managed' => true, 'reviewed' => true, 'difficulty' => 'inicial',
+                        'correct_feedback' => '¡Muy bien! '.$kichwa.' significa «'.$spanish.'».',
+                        'incorrect_feedback' => 'Revisa el orden de las palabras. Puedes tocar una palabra colocada para quitarla o reiniciar la oración.']];
+                EstadoContenido::assertReady($exercise);
+                $record = new Actividad(KichwaResource::attributes('exercises', $exercise));
+                $record->id_unidad = $unit->id_unidad;
+                $record->origen_reactivo = 'u2-courtesy-order-'.$index.'-v1';
+                $record->orden_actividad = $position++;
+                $record->publicado = true;
+                $record->save();
+            }
+        });
+    }
+
+    private function refreshCourtesySentenceSpelling(): void
+    {
+        DB::transaction(function (): void {
+            DB::select('SELECT pg_advisory_xact_lock(20261011)');
+            $lesson = Tema::where('clave_leccion', self::LESSON_KEY)->firstOrFail();
+            $activity = Actividad::where('id_unidad', $lesson->id_unidad)->where('origen_reactivo', 'u2-courtesy-order-2-v1')->where('publicado', true)->orderByDesc('id_actividad')->lockForUpdate()->firstOrFail();
+            $elements = array_map(fn (array $element): array => array_replace($element, ['texto' => str_replace('llukshinkapay', 'llukshinkapak', $element['texto'])]), $activity->elementos_actividad);
+            $config = $activity->configuracion;
+            $config['correct_feedback'] = str_replace('llukshinkapay', 'llukshinkapak', $config['correct_feedback']);
+            if ($elements === $activity->elementos_actividad && $config === $activity->configuracion) {
+                return;
+            }
+            if (DB::table('respuestas_actividad')->where('id_actividad', $activity->id_actividad)->exists()) {
+                $replacement = $activity->replicate();
+                $position = $activity->orden_actividad;
+                $activity->update(['publicado' => false, 'orden_actividad' => 1 + (int) Actividad::where('id_unidad', $lesson->id_unidad)->max('orden_actividad')]);
+                $replacement->elementos_actividad = $elements;
+                $replacement->configuracion = $config;
+                $replacement->orden_actividad = $position;
+                $replacement->save();
+            } else {
+                $activity->update(['elementos_actividad' => $elements, 'configuracion' => $config]);
             }
         });
     }

@@ -12,6 +12,7 @@ const { code: greetingsCode } = await transformWithOxc(await readFile(new URL('.
 const { code: audioMatchingCode } = await transformWithOxc(await readFile(new URL('../src/js/components/AudioMatchingExercise.tsx', import.meta.url), 'utf8'), 'AudioMatchingExercise.tsx');
 const { code: sentencesCode } = await transformWithOxc(await readFile(new URL('../src/js/components/ListeningGreetingsExercise.tsx', import.meta.url), 'utf8'), 'ListeningGreetingsExercise.tsx');
 const { code: expressionsCode } = await transformWithOxc(await readFile(new URL('../src/js/components/ConversationMatchingExercise.tsx', import.meta.url), 'utf8'), 'ConversationMatchingExercise.tsx');
+const { code: scenesCode } = await transformWithOxc(await readFile(new URL('../src/js/components/SceneChoicePanel.tsx', import.meta.url), 'utf8'), 'SceneChoicePanel.tsx');
 const jsx = (type, props) => ({ type, props });
 function nodes(tree) { if (Array.isArray(tree)) return tree.flatMap(nodes); if (!tree?.props) return []; return [tree, ...nodes(tree.props.children)]; }
 
@@ -28,7 +29,7 @@ async function screen(base = '/') {
     const context = vm.createContext({ Audio });
     const link = specifier => {
         if (specifier.endsWith('/useLessonAudio')) return hook;
-        if (specifier.endsWith('/ExerciseCard')) return new vm.SyntheticModule(['mediaUrl'], function(){this.setExport('mediaUrl',path=>'/api/media/'+path)}, {context});
+        if (specifier.endsWith('/ExerciseCard')) return new vm.SyntheticModule(['mediaUrl', 'feedbackMessage'], function(){this.setExport('mediaUrl',path=>'/api/media/'+path);this.setExport('feedbackMessage',value=>value)}, {context});
         const dependency = specifier === 'react' ? {
             useState(initial) { const index = cursor++; if (!(index in states)) states[index] = initial; return [states[index], value => { states[index] = value; }]; },
             useRef(initial) { const index = cursor++; return states[index] ??= { current: initial }; },
@@ -47,10 +48,12 @@ async function screen(base = '/') {
     const audioMatching = new vm.SourceTextModule(audioMatchingCode, { context });
     const sentences = new vm.SourceTextModule(sentencesCode, { context });
     const expressions = new vm.SourceTextModule(expressionsCode, { context });
-    for (const item of [hook, module, consonants, missing, greetings, audioMatching, sentences, expressions]) { await item.link(link); await item.evaluate(); }
+    const scenes = new vm.SourceTextModule(scenesCode, { context });
+    for (const item of [hook, module, consonants, missing, greetings, audioMatching, sentences, expressions, scenes]) { await item.link(link); await item.evaluate(); }
     let playback;
     const view = {
         audios,
+        scenes(props) { cursor = 0; return scenes.namespace.SceneChoicePanel(props); },
         render() { cursor = 0; playback = hook.namespace.useLessonAudio(); return module.namespace.VowelAudioButtons({ playback }); },
         consonantButton() { view.render(); return consonants.namespace.ConsonantAudioButton({ playback }); },
         consonantStatus() { view.render(); return playback.state.clip === 'consonantes' ? playback.state.message : ''; },
@@ -192,8 +195,8 @@ test('all eleven greeting expressions play their own MP3 on click with the corre
     assert.equal(view.audios.length, 0);
     const phrases = [
         ['Alli puncha', 'alli-puncha'], ['Alli chishi', 'alli-chishi'], ['Alli tuta', 'alli-tuta'],
-        ['Imanalla kanki?', 'imanalla-kanki'], ['Allilla kani.', 'allilla-kani'],
-        ['Maymanta kanki?', 'maymanta-kanki'], ['Maypitak llankanki?', 'maypitak-llankanki'],
+        ['Imanalla kanki', 'imanalla-kanki'], ['Allilla kani.', 'allilla-kani'],
+        ['Maymanta kanki', 'maymanta-kanki'], ['Maypitak llankanki', 'maypitak-llankanki'],
         ['Kayakaman', 'kayakaman'], ['Kipakaman', 'kipakaman'], ['Yupaychani', 'yupaychani'], ['Kishpichiway', 'kishpichiway'],
     ];
     for (const [word, file] of phrases) {
@@ -367,4 +370,44 @@ test('listening inputs save one Kichwa vowel per word, normalize uppercase and l
     locked[0].props.onChange({ target: { value: 'a' } });
     assert.equal(view.missingAnswer().textos.audio1, 'u');
     assert.ok(nodes(view.missing(true)).filter(node => node.type === 'button').every(node => !node.props.disabled));
+});
+
+test('scene choices keep audio separate from selection and lock only correct cards', async () => {
+    const view = await screen('/kichwa/');
+    const changes = [];
+    const exercises = [0,1,2].map(i => ({id:101+i,config:{scene_choice:true,conversation_group:'q',context_text:`Spanish ${i}`,prompt_image:`scene-${i}.webp`},elements:[0,1,2].map(n=>({id:`q-${n}`,texto:`Question ${n}`}))}));
+    const props = {exercises,answers:{101:{seleccion:['q-0']}},feedback:{101:{is_correct:true,feedback:'Correct'},102:{is_correct:false,feedback:'Try again'}},busy:false,onChange:(...args)=>changes.push(args)};
+    const all = nodes(view.scenes(props));
+    assert.equal(all.filter(n=>n.type==='article').length,3);
+    assert.deepEqual(all.filter(n=>n.type==='figcaption').map(n=>n.props.children),['Spanish 0','Spanish 1','Spanish 2']);
+    const radios = all.filter(n=>n.type==='input');
+    assert.equal(radios.length,9);
+    assert.ok(radios.slice(0,3).every(n=>n.props.disabled));
+    assert.ok(radios.slice(3).every(n=>!n.props.disabled));
+    const speakers = all.filter(n=>n.type==='button');
+    assert.equal(speakers.length,9);
+    assert.ok(speakers.every(n=>!n.props.disabled));
+    speakers[0].props.onClick();
+    assert.equal(changes.length,0);
+    assert.equal(view.audios.at(-1).src,'/kichwa/audios/unidad-2/escenas/preguntas/imanalla-kanki.mp3');
+    view.audios.at(-1).resolve();
+    radios[3].props.onChange();
+    assert.equal(changes[0][0].id,102);
+    assert.deepEqual(JSON.parse(JSON.stringify(changes[0][1])),{seleccion:['q-0']});
+    view.unmount();
+    assert.ok(view.audios.at(-1).paused);
+});
+
+test('farewell scene cards retain the existing audio folder and support two-card panels', async () => {
+    const view=await screen('/kichwa/');
+    const props={exercises:[3,4].map(i=>({id:201+i,config:{conversation_group:'d',context_text:'Farewell '+i,prompt_image:'farewell-'+i+'.webp'},elements:[{id:'d-'+i,texto:'Farewell '+i}]})),answers:{},feedback:{},busy:false,onChange(){throw Error('Audio changed an answer')}};
+    const tree=view.scenes(props);
+    assert.ok(tree.props.className.includes('is-pair'));
+    assert.equal(nodes(tree).filter(n=>n.type==='article').length,2);
+    for(const [i,path]of['ashtak-kaman','chisikaman'].entries()){
+        nodes(view.scenes(props)).filter(n=>n.type==='button')[i].props.onClick();
+        assert.equal(view.audios.at(-1).src,`/kichwa/audios/unidad-2/despedidas/${path}.mp3`);
+        view.audios.at(-1).resolve();
+    }
+    view.unmount();
 });

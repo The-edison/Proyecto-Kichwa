@@ -1,0 +1,21 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "file": "order-0.png",
+      "prompt": "One polished educational illustration landscape 4:3, vivid friendly modern 2D cartoon storybook style matching a Kichwa language learning app's Andean conversation series. All characters are ADULT Ecuadorians, in their twenties or adult teachers. Recurring student: Ecuadorian Andean woman with long black braid, embroidered white blouse and blue woven shawl. Warm respectful everyday scene, clear medium shot gestures, pastel Andean architecture and mountains, minimal clutter. No text, speech bubbles, numbers, signs, labels, watermark or written letters anywhere. Safe margins, calm upper-right corner for app text overlay. An ADULT female university student politely asks her ADULT male teacher for permission to enter his classroom. She stands just outside the open classroom door holding a notebook, palm raised politely; teacher inside welcomes her with open palm. Desks and blank blackboard behind, no writing."
+    },
+    {
+      "file": "order-1.png",
+      "prompt": "One polished educational illustration landscape 4:3, vivid friendly modern 2D cartoon storybook style matching a Kichwa language learning app's Andean conversation series. All characters are ADULT Ecuadorians, in their twenties or adult teachers. Recurring student: Ecuadorian Andean woman with long black braid, embroidered white blouse and blue woven shawl. Warm respectful everyday scene, clear medium shot gestures, pastel Andean architecture and mountains, minimal clutter. No text, speech bubbles, numbers, signs, labels, watermark or written letters anywhere. Safe margins, calm upper-right corner for app text overlay. An ADULT female university student politely asks her ADULT male teacher permission to go to the bathroom. In a bright college corridor, she holds a notebook and respectfully gestures toward a distant closed bathroom door with a simple toilet pictogram and no text. The teacher listens and nods. Focus on permission conversation, fully clothed everyday scene."
+    },
+    {
+      "file": "order-2.png",
+      "prompt": "One polished educational illustration landscape 4:3, vivid friendly modern 2D cartoon storybook style matching a Kichwa language learning app's Andean conversation series. All characters are ADULT Ecuadorians, in their twenties or adult teachers. Recurring student: Ecuadorian Andean woman with long black braid, embroidered white blouse and blue woven shawl. Warm respectful everyday scene, clear medium shot gestures, pastel Andean architecture and mountains, minimal clutter. No text, speech bubbles, numbers, signs, labels, watermark or written letters anywhere. Safe margins, calm upper-right corner for app text overlay. An ADULT female student politely asks permission to leave a classroom, standing by the open door with notebook and blue woven shawl, looking back toward her ADULT female teacher who gestures kindly toward the exit. Andean college classroom with desks, sunny courtyard outside. Different composition from classroom entrance scene."
+    },
+    {
+      "file": "order-3.png",
+      "prompt": "One polished educational illustration landscape 4:3, vivid friendly modern 2D cartoon storybook style matching a Kichwa language learning app's Andean conversation series. All characters are ADULT Ecuadorians, in their twenties or adult teachers. Recurring student: Ecuadorian Andean woman with long black braid, embroidered white blouse and blue woven shawl. Warm respectful everyday scene, clear medium shot gestures, pastel Andean architecture and mountains, minimal clutter. No text, speech bubbles, numbers, signs, labels, watermark or written letters anywhere. Safe margins, calm upper-right corner for app text overlay. Pardon Mother Earth: the ADULT Andean woman respectfully kneels beside a young plant and gently touches the soil with one hand and her chest with the other, reflective peaceful expression, showing respect and an apology to Mother Earth. Andean mountains, flowers, natural garden, soft warm daylight. No supernatural character or words."
+    }
+  ]
+}

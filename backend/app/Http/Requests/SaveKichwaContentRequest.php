@@ -40,8 +40,8 @@ class SaveKichwaContentRequest extends FormRequest
             $rules['config.guided_lesson'] = ['sometimes', 'in:writing,greetings,pronouns,numbers,calendar,animals-colors,body,nature,verbs'];
         }
         if (in_array($resource, ['exercises', 'questions', 'evaluations'], true)) {
-            $rules['config'] = ['sometimes', 'array:conversation_group,conversation_pairs,listening_greetings,listening_questions,managed,reviewed,requires_audio,requires_images,max_selections,exact_selections,ignore_accents,explanation,correct_feedback,incorrect_feedback,title,difficulty,question_count,pass_percentage,final,presentation,word_target,missing_index,context_text,context_meaning,prompt_image,prompt_image_alt,reveal_highlight,sequence_mode,fixed_order,required_correct,prerequisite_activities'];
-            foreach (['conversation_pairs', 'listening_greetings', 'listening_questions', 'managed', 'reviewed', 'requires_audio', 'requires_images', 'exact_selections', 'ignore_accents', 'final', 'sequence_mode', 'fixed_order'] as $flag) {
+            $rules['config'] = ['sometimes', 'array:sentence_order,scene_choice,conversation_group,conversation_pairs,listening_greetings,listening_questions,managed,reviewed,requires_audio,requires_images,max_selections,exact_selections,ignore_accents,explanation,correct_feedback,incorrect_feedback,title,difficulty,question_count,pass_percentage,final,presentation,word_target,missing_index,context_text,context_meaning,prompt_image,prompt_image_alt,reveal_highlight,sequence_mode,fixed_order,required_correct,prerequisite_activities'];
+            foreach (['sentence_order', 'scene_choice', 'conversation_pairs', 'listening_greetings', 'listening_questions', 'managed', 'reviewed', 'requires_audio', 'requires_images', 'exact_selections', 'ignore_accents', 'final', 'sequence_mode', 'fixed_order'] as $flag) {
                 $rules['config.'.$flag] = ['sometimes', 'boolean'];
             }
             foreach (['title', 'explanation', 'correct_feedback', 'incorrect_feedback', 'word_target', 'context_text', 'context_meaning', 'prompt_image', 'prompt_image_alt', 'reveal_highlight'] as $text) {

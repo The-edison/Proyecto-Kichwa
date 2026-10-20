@@ -147,14 +147,15 @@ class KichwaCatalogController extends Controller
     {
         $record = self::publishedUnit($unit);
         abort_unless(($record->configuracion['learning_mode'] ?? '') === 'guided', 404);
-        $exercises = PublicacionContenido::exercises($unit)->orderBy('orden_actividad')->get();
+        $exercises = collect(PublicacionContenido::remember('guided:'.$unit, fn () => PublicacionContenido::exercises($unit)->orderBy('orden_actividad')->get()
+            ->map(fn (Actividad $exercise): array => ['origin' => SecuenciaUnidad::origin($exercise), 'exercise' => KichwaResource::present('exercises', $exercise)])->all()));
         $completed = DB::table('respuestas_actividad as r')->join('actividades as a', 'a.id_actividad', '=', 'r.id_actividad')
             ->where('r.id_usuario', $request->user()->id_usuario)->where('a.id_unidad', $unit)->where('r.acierto_actividad', true)
-            ->whereIn(DB::raw('COALESCE(a.origen_reactivo,a.id_actividad::text)'), $exercises->map(fn (Actividad $exercise) => SecuenciaUnidad::origin($exercise)))
+            ->whereIn(DB::raw('COALESCE(a.origen_reactivo,a.id_actividad::text)'), $exercises->pluck('origin'))
             ->selectRaw('DISTINCT COALESCE(a.origen_reactivo,a.id_actividad::text) as origin')->get()->pluck('origin');
 
         return response()->json([
-            'exercises' => $exercises->map(fn (Actividad $exercise): array => KichwaResource::present('exercises', $exercise) + ['completed' => $completed->contains(SecuenciaUnidad::origin($exercise))])->values(),
+            'exercises' => $exercises->map(fn (array $entry): array => $entry['exercise'] + ['completed' => $completed->contains($entry['origin'])])->values(),
             'completed_count' => $completed->count(),
             'total' => $exercises->count(),
         ]);

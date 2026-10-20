@@ -80,6 +80,8 @@ class ContratoEjercicio
             'config.listening_greetings' => ['sometimes', 'boolean'],
             'config.conversation_pairs' => ['sometimes', 'boolean'],
             'config.conversation_group' => ['sometimes', 'in:q,a,d,c'],
+            'config.scene_choice' => ['sometimes', 'boolean'],
+            'config.sentence_order' => ['sometimes', 'boolean'],
             'config.requires_images' => ['sometimes', 'boolean'],
             'config.reviewed' => ['sometimes', 'boolean'],
             'config.presentation' => ['sometimes', 'in:buttons,visual,letter,tiles,writing'],
@@ -95,6 +97,22 @@ class ContratoEjercicio
         ], ['required' => 'El campo :attribute es obligatorio.', 'distinct' => 'No repitas identificadores.',
             'array' => 'La estructura de :attribute no es válida.', 'between' => 'Las coordenadas deben estar entre 0 y 1.'])->validate();
         $presentation = $data['config']['presentation'] ?? '';
+        if (($data['config']['sentence_order'] ?? false) && ($data['type'] !== 'ordenar'
+            || empty($data['config']['prompt_image']) || empty($data['config']['context_text'])
+            || count($data['elements']) < 2 || collect($data['elements'])->contains(fn ($element) => preg_match('/\s/u', trim($element['texto']))))) {
+            self::fail('Cada oración necesita una imagen, su significado y fichas de palabras separadas.', 'config');
+        }
+        if ($data['config']['scene_choice'] ?? false) {
+            $group = $data['config']['conversation_group'] ?? '';
+            $lastOption = match ($group) {
+                'c' => 3, 'd' => 4, default => 5
+            };
+            if ($data['type'] !== 'seleccion_multiple' || ! in_array($group, ['q', 'a', 'd', 'c'], true) || count($data['elements']) !== 3
+                || empty($data['config']['prompt_image']) || empty($data['config']['context_text'])
+                || collect($data['elements'])->contains(fn ($element) => ! preg_match('/^'.preg_quote($group, '/').'-[0-'.$lastOption.']$/', $element['id']))) {
+                self::fail('Cada escena necesita su imagen, contexto y tres opciones del mismo grupo en kichwa.', 'config');
+            }
+        }
         if ($data['config']['conversation_pairs'] ?? false) {
             $origins = array_merge(array_map(fn ($index) => 'q-'.$index, range(0, 5)), array_map(fn ($index) => 'a-'.$index, range(0, 5)));
             if (isset($data['config']['conversation_group'])) {
@@ -301,7 +319,7 @@ class ContratoEjercicio
             self::keys($answer, ['orden']);
             self::selection($answer['orden'] ?? null, array_column($exercise['elements'], 'id'));
             if (count($answer['orden']) !== count($exercise['elements'])) {
-                self::fail('Ordena todas las letras.', 'answer');
+                self::fail(($exercise['config']['sentence_order'] ?? false) ? 'Ordena todas las palabras.' : 'Ordena todas las letras.', 'answer');
             }
             $letters = array_column($exercise['elements'], 'texto', 'id');
 

@@ -13,6 +13,29 @@ export class ApiError extends Error {
 
 export const apiBaseUrl = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000').replace(/\/$/, '');
 
+let progressBatches = 0;
+let progressPending = false;
+const guidedUnitDetail = (query: { queryKey: readonly unknown[]; state?: { data?: unknown } }) => {
+    const data = query.state?.data as { config?: { learning_mode?: string } } | undefined;
+    return query.queryKey[0] === 'api' && typeof query.queryKey[1] === 'string'
+        && /^\/units\/\d+$/.test(query.queryKey[1]) && data?.config?.learning_mode === 'guided';
+};
+function refreshProgress() {
+    void queryClient.invalidateQueries({ refetchType: 'active', predicate: query => {
+        const key = query.queryKey[1];
+        return query.queryKey[0] === 'api' && typeof key === 'string' && !guidedUnitDetail(query)
+            && (key === '/mastery' || /^\/admin\/learning-results\//.test(key) || /^\/evaluations\/\d+(\?|$)/.test(key) || /^\/progress(\/|\?|$)/.test(key) || /^\/levels\/\d+\/modules/.test(key) || /^\/modules\/\d+\/(units|contents)/.test(key) || /^\/units\/\d+(\/sequence|\/contents|\?|$)/.test(key));
+    } });
+}
+export async function withProgressBatch<T>(work: () => Promise<T>): Promise<T> {
+    progressBatches++;
+    try { return await work(); }
+    finally {
+        progressBatches--;
+        if (!progressBatches && progressPending) { progressPending = false; refreshProgress(); }
+    }
+}
+
 function csrfToken(): string | null {
     const cookie = document.cookie.split('; ').find((part) => part.startsWith('XSRF-TOKEN='));
     return cookie ? decodeURIComponent(cookie.substring('XSRF-TOKEN='.length)) : null;
@@ -66,14 +89,12 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
         const testimonialsChanged = path === '/testimonials';
         const hierarchyChanged = /^\/admin\/(levels|modules|units|contents|exercises|evaluations|questions)(\/|$)/.test(path);
         const progressChanged = /^\/(exercises\/\d+\/answer|evaluations\/\d+\/submit)$/.test(path);
-        const guidedUnitDetail = (query: { queryKey: readonly unknown[]; state?: { data?: unknown } }) => {
-            const data = query.state?.data as { config?: { learning_mode?: string } } | undefined;
-            return query.queryKey[0] === 'api' && typeof query.queryKey[1] === 'string'
-                && /^\/units\/\d+$/.test(query.queryKey[1]) && data?.config?.learning_mode === 'guided';
-        };
         if (progressChanged) {
             void queryClient.invalidateQueries({ refetchType: 'none', predicate: query =>
                 guidedUnitDetail(query) || query.queryKey[0] === 'api' && typeof query.queryKey[1] === 'string' && /^\/units\/\d+\/guided$/.test(query.queryKey[1]) });
+            if (progressBatches) progressPending = true;
+            else refreshProgress();
+            return payload as T;
         }
         void queryClient.invalidateQueries({ refetchType: 'active', predicate: query => {
             const key = query.queryKey[1];
@@ -81,8 +102,7 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
             if (dictionaryChanged) return /^\/(?:diccionario|admin\/diccionario|admin\/overview)(?:\/|\?|$)/.test(key);
             if (testimonialsChanged) return /^\/testimonials(?:\/eligibility)?(?:\?|$)/.test(key);
             if (hierarchyChanged) return /^\/(admin\/overview|levels|modules|units|evaluations|progress|learning-navigation)(\/|\?|$)/.test(key);
-            if (progressChanged && guidedUnitDetail(query)) return false;
-            return progressChanged && (key === '/mastery' || /^\/admin\/learning-results\//.test(key) || /^\/evaluations\/\d+(\?|$)/.test(key) || /^\/progress(\/|\?|$)/.test(key) || /^\/levels\/\d+\/modules/.test(key) || /^\/modules\/\d+\/(units|contents)/.test(key) || /^\/units\/\d+(\/sequence|\/contents|\?|$)/.test(key));
+            return false;
         } });
         if (hierarchyChanged) {
             try { localStorage.setItem('yachay:catalog-changed', crypto.randomUUID()); } catch { /* La actualización local ya se realizó. */ }

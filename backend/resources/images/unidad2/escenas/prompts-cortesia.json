@@ -1,0 +1,21 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "file": "c-0.png",
+      "prompt": "One polished educational illustration, landscape 4:3, vivid friendly modern 2D cartoon storybook style identical in spirit to the Kichwa learning Andean conversation series. Recurring ADULT Ecuadorian Andean characters in their twenties: woman with long black braid, embroidered white blouse and blue woven shawl; man with short black hair, cream shirt and blue backpack when outdoors. Pastel highland town, mountains, warm inviting light. Clear readable medium-shot gestures, minimal clutter, safe margins. No words, letters, numbers, speech bubbles, labels or watermark. Calm space in upper right for app speech bubble. Bienvenido (welcome): woman opens a decorated Andean home door, warmly welcoming her adult male friend with an inviting open palm. Flowers, cozy home."
+    },
+    {
+      "file": "c-1.png",
+      "prompt": "One polished educational illustration, landscape 4:3, vivid friendly modern 2D cartoon storybook style identical in spirit to the Kichwa learning Andean conversation series. Recurring ADULT Ecuadorian Andean characters in their twenties: woman with long black braid, embroidered white blouse and blue woven shawl; man with short black hair, cream shirt and blue backpack when outdoors. Pastel highland town, mountains, warm inviting light. Clear readable medium-shot gestures, minimal clutter, safe margins. No words, letters, numbers, speech bubbles, labels or watermark. Calm space in upper right for app speech bubble. Gracias (thank you): man kindly gives woman a small basket of bread in a sunny Andean courtyard; she places free hand on chest in heartfelt gratitude, both smiling."
+    },
+    {
+      "file": "c-2.png",
+      "prompt": "One polished educational illustration, landscape 4:3, vivid friendly modern 2D cartoon storybook style identical in spirit to the Kichwa learning Andean conversation series. Recurring ADULT Ecuadorian Andean characters in their twenties: woman with long black braid, embroidered white blouse and blue woven shawl; man with short black hair, cream shirt and blue backpack when outdoors. Pastel highland town, mountains, warm inviting light. Clear readable medium-shot gestures, minimal clutter, safe margins. No words, letters, numbers, speech bubbles, labels or watermark. Calm space in upper right for app speech bubble. Perdón (sorry): man accidentally knocks over an empty clay cup on a courtyard table, no broken shards; he places one hand on his chest with a gentle apologetic expression, woman kindly acknowledges. Respectful everyday minor mistake."
+    },
+    {
+      "file": "c-3.png",
+      "prompt": "One polished educational illustration, landscape 4:3, vivid friendly modern 2D cartoon storybook style identical in spirit to the Kichwa learning Andean conversation series. Recurring ADULT Ecuadorian Andean characters in their twenties: woman with long black braid, embroidered white blouse and blue woven shawl; man with short black hair, cream shirt and blue backpack when outdoors. Pastel highland town, mountains, warm inviting light. Clear readable medium-shot gestures, minimal clutter, safe margins. No words, letters, numbers, speech bubbles, labels or watermark. Calm space in upper right for app speech bubble. Siéntese (please sit down): woman respectfully offers a wooden chair to her adult male guest beside a table in a sunny Andean courtyard, open palm clearly pointing toward the empty seat. Welcoming smiles."
+    }
+  ]
+}

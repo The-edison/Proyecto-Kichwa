@@ -25,6 +25,22 @@ async function client(status = 200) {
     return { api: api.namespace, requests, invalidations, events, notifications };
 }
 
+test('grouped checks refresh active progress once after all submissions, including partial failure', async () => {
+    const browser=await client();
+    await browser.api.withProgressBatch(async()=>{
+        await Promise.all([browser.api.apiPost('/exercises/1/answer',{}),browser.api.withProgressBatch(()=>browser.api.apiPost('/exercises/2/answer',{}))]);
+        assert.equal(browser.invalidations.filter(([i])=>i.refetchType==='active').length,0);
+    });
+    assert.equal(browser.invalidations.filter(([i])=>i.refetchType==='active').length,1);
+    await assert.rejects(browser.api.withProgressBatch(async()=>{await browser.api.apiPost('/exercises/3/answer',{});throw Error('Interrupted')}));
+    assert.equal(browser.invalidations.filter(([i])=>i.refetchType==='active').length,2);
+    await browser.api.apiPost('/exercises/4/answer',{});
+    assert.equal(browser.invalidations.filter(([i])=>i.refetchType==='active').length,3);
+    const failed=await client(500);
+    await assert.rejects(failed.api.withProgressBatch(()=>failed.api.apiPost('/exercises/1/answer',{})));
+    assert.equal(failed.invalidations.length,0);
+});
+
 test('private requests send the tab credential and bypass browser caches', async () => {
     const browser = await client();
     await browser.api.apiGet('/auth/me');

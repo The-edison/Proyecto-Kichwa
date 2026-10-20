@@ -22,6 +22,7 @@ async function screen({ completed = false, post, exercises = [choice, matching],
     const dependencies = {
         useAnswerSound: { useAnswerSound: () => correct => sounds.push(correct) },
         react: {
+            useMemo: create => create(),
             useState: initial => { const index = cursor++; if (!(index in states)) states[index] = initial; return [states[index], value => { states[index] = typeof value === 'function' ? value(states[index]) : value; }]; },
             useRef: initial => { const index = cursor++; return states[index] ??= { current: initial }; },
             useSyncExternalStore: (_subscribe, getSnapshot) => getSnapshot(),
@@ -32,7 +33,7 @@ async function screen({ completed = false, post, exercises = [choice, matching],
         'guided-unit.css': {},
         navigation: { Head: 'Head', Link: 'Link' },
         useApi: { useApi: () => ({ data: { exercises: exercises.map(item => ({ ...item, completed })), total: exercises.length, completed_count: completed ? exercises.length : 0 }, loading: false, error: '', refresh: async () => { refreshes++; } }) },
-        api: { ApiError, apiBaseUrl: '', apiPost: async (path, payload) => { requests.push({ path, payload }); return post ? post({ path, payload, ApiError }) : path.endsWith('/guided/result') ? perfectScore : { response_id: requests.length + 100, is_correct: true, feedback: 'Respuesta correcta.' }; } },
+        api: { withProgressBatch: work => work(), ApiError, apiBaseUrl: '', apiPost: async (path, payload) => { requests.push({ path, payload }); return post ? post({ path, payload, ApiError }) : path.endsWith('/guided/result') ? perfectScore : { response_id: requests.length + 100, is_correct: true, feedback: 'Respuesta correcta.' }; } },
         LearningCompanion: { LearningCompanion: 'LearningCompanion' },
         GuidedIntroduction: { GuidedIntroduction: 'GuidedIntroduction' },
         GreetingsIntroduction: { GreetingsIntroduction: 'GreetingsIntroduction' },
@@ -41,6 +42,8 @@ async function screen({ completed = false, post, exercises = [choice, matching],
         AudioMatchingExercise: { AudioMatchingExercise: 'AudioMatchingExercise' },
         ListeningGreetingsExercise: { ListeningGreetingsExercise: 'ListeningGreetingsExercise' },
         ConversationMatchingExercise: { ConversationMatchingExercise: 'ConversationMatchingExercise' },
+        SceneChoicePanel: { SceneChoicePanel: 'SceneChoicePanel' },
+        SentenceOrderPanel: { SentenceOrderPanel: 'SentenceOrderPanel' },
         States: { ErrorState: 'ErrorState', LoadingState: 'LoadingState' },
         AuthContext: { useAuth: () => ({ user: { id: userId } }) },
     };
@@ -80,6 +83,24 @@ async function complete(view) {
     for (const [spanish, kichwa] of [['Flor', 'sisa'], ['Oveja', 'llama'], ['Corazón', 'shunku'], ['Caminar', 'purina']]) pair(view, spanish, kichwa);
     await check(view); await finish(view);
 }
+
+test('choosing an answer persists the complete draft in one storage write', async () => {
+    const storage=new Map();let writes=0;
+    storage.set=function(key,value){writes++;return Map.prototype.set.call(this,key,value)};
+    const view=await screen({storage});click(view,'Continuar');
+    const before=writes;choose(view,'wasi');assert.equal(writes-before,1);
+    const draft=JSON.parse([...storage.values()][0]);
+    assert.deepEqual(draft.answers['11'],{seleccion:['wasi']});
+    assert.equal(draft.feedback['11'],undefined);assert.equal(draft.submissions['11'],undefined);
+});
+
+test('greetings preload six unique images including images inside listening exercises', async () => {
+    const listening={...matching,id:90,elements:[0,1,2,3,4].map(i=>({id:String(i),texto:'Image '+i,imagen:'inside-'+i+'.webp'}))};
+    const view=await screen({config:{guided_lesson:'greetings'},exercises:[choice,listening,{...choice,id:91}]});
+    view.render();assert.equal(view.preloads.length,6);
+    assert.ok(view.preloads.some(i=>i.src.endsWith('inside-4.webp')));
+    view.render();assert.equal(view.preloads.length,6);
+});
 
 test('six pronoun pairs are followed by exactly two panels of two images with working back navigation', async () => {
     const words = ['nuka', 'kan', 'pay', 'nukanchik', 'kankuna', 'paykuna'];
@@ -464,6 +485,88 @@ test('checking a grouped panel plays exactly one tone, reports any mistake and s
     failed=false; await check(view);
     assert.deepEqual(view.sounds,[false,true]);
     assert.equal(view.requests.length,5);
+});
+
+test('six questions and six responses form four panels of three with independent feedback and retries', async () => {
+    const scenes=['q','a'].flatMap((group,g)=>Array.from({length:6},(_,i)=>({...choice,id:31+g*6+i,elements:[i,(i+2)%6,(i+4)%6].map(n=>({id:group+'-'+n,texto:'K '+group+' '+n})),config:{...choice.config,scene_choice:true,conversation_group:group,context_text:'Scene '+group+' '+i}})));
+    let wrong=true,responseId=100;
+    const view=await screen({config:{guided_lesson:'greetings'},exercises:[...[21,22,23].map(id=>({...choice,id})),...scenes],post:({path})=>path.endsWith('/guided/result')?{...perfectScore,score:15,max_score:15,correct_count:15,total_items:15}:{response_id:++responseId,is_correct:!(wrong&&path.includes('/31/')),xp_earned:0}});
+    click(view,'Continuar');[21,22,23].forEach(id=>choose(view,'wasi',id));await check(view);click(view,'Continuar');
+    const panel=()=>nodes(view.render()).find(n=>n.type==='SceneChoicePanel');
+    for(let p=0;p<4;p++){
+        assert.equal(panel().props.exercises.length,3);
+        assert.deepEqual(Array.from(panel().props.exercises,e=>e.id),scenes.slice(p*3,p*3+3).map(e=>e.id));
+        assert.ok(panel().props.exercises.every(e=>e.config.conversation_group===(p<2?'q':'a')));
+        for(const exercise of panel().props.exercises){
+            assert.equal(button(view,'Comprobar').props.disabled,true);
+            panel().props.onChange(exercise,{seleccion:[exercise.elements[0].id]});
+        }
+        await check(view);
+        if(p===0){
+            assert.equal(panel().props.feedback[31].is_correct,false);
+            assert.equal(panel().props.feedback[32].is_correct,true);
+            const before=view.requests.length;wrong=false;await check(view);
+            assert.equal(view.requests.length,before+1);
+            assert.equal(view.requests.at(-1).path,'/exercises/31/answer');
+        }
+        if(p===1){click(view,'Volver');assert.equal(panel().props.exercises[0].id,31);click(view,'Continuar');assert.equal(panel().props.exercises[0].id,34);}
+        if(p<3)click(view,'Continuar');
+    }
+    await finish(view);
+    assert.ok(nodes(view.render()).some(n=>n.props['aria-label']==='15 de 15 ejercicios correctos'));
+});
+
+test('five farewells form a panel of three and a panel of two without including courtesy', async () => {
+    const scenes=Array.from({length:5},(_,i)=>({...choice,id:51+i,elements:[0,1,2].map(n=>({id:'d-'+n,texto:'Farewell '+n})),config:{...choice.config,scene_choice:true,conversation_group:'d'}}));
+    const courtesy={...matching,id:70,config:{conversation_pairs:true,conversation_group:'c'}};
+    const view=await screen({config:{guided_lesson:'greetings'},exercises:[...[21,22,23].map(id=>({...choice,id})),...scenes,courtesy]});
+    click(view,'Continuar');[21,22,23].forEach(id=>choose(view,'wasi',id));await check(view);click(view,'Continuar');
+    const panel=()=>nodes(view.render()).find(n=>n.type==='SceneChoicePanel');
+    assert.deepEqual(Array.from(panel().props.exercises,e=>e.id),[51,52,53]);
+    for(const e of panel().props.exercises)panel().props.onChange(e,{seleccion:['d-0']});
+    await check(view);click(view,'Continuar');
+    assert.deepEqual(Array.from(panel().props.exercises,e=>e.id),[54,55]);
+    click(view,'Volver');assert.equal(panel().props.exercises[0].id,51);click(view,'Continuar');
+    for(const e of panel().props.exercises)panel().props.onChange(e,{seleccion:['d-0']});
+    await check(view);click(view,'Continuar');
+    assert.ok(nodes(view.render()).some(n=>n.type==='ConversationMatchingExercise'&&n.props.group==='c'));
+});
+
+test('four courtesy scenes form two panels of two and retain separate results', async () => {
+    const scenes=Array.from({length:4},(_,i)=>({...choice,id:81+i,elements:[0,1,2].map(n=>({id:'c-'+n,texto:'Courtesy '+n})),config:{...choice.config,scene_choice:true,conversation_group:'c'}}));
+    let responseId=200;
+    const view=await screen({config:{guided_lesson:'greetings'},exercises:scenes,post:({path})=>path.endsWith('/guided/result')?{...perfectScore,score:4,max_score:4,correct_count:4,total_items:4}:{response_id:++responseId,is_correct:true}});
+    click(view,'Continuar');
+    const panel=()=>nodes(view.render()).find(n=>n.type==='SceneChoicePanel');
+    assert.deepEqual(Array.from(panel().props.exercises,e=>e.id),[81,82]);
+    for(const e of panel().props.exercises)panel().props.onChange(e,{seleccion:['c-0']});
+    await check(view);click(view,'Continuar');
+    assert.deepEqual(Array.from(panel().props.exercises,e=>e.id),[83,84]);
+    click(view,'Volver');assert.ok(panel().props.feedback[81].is_correct);click(view,'Continuar');
+    for(const e of panel().props.exercises)panel().props.onChange(e,{seleccion:['c-0']});
+    await check(view);await finish(view);
+    assert.ok(nodes(view.render()).some(n=>n.props['aria-label']==='4 de 4 ejercicios correctos'));
+});
+
+test('four ordered sentences form two panels, save drafts and retry only the incorrect sentence', async () => {
+    const exercises=Array.from({length:4},(_,i)=>({...choice,id:91+i,type:'ordenar',elements:[{id:'b',texto:'mamita'},{id:'a',texto:'pacha'}],config:{sentence_order:true,prompt_image:'order.webp'}}));
+    let wrong=true,responseId=400;
+    const view=await screen({config:{guided_lesson:'greetings'},exercises,post:({path})=>path.endsWith('/guided/result')?{...perfectScore,score:4,max_score:4,correct_count:4,total_items:4}:{response_id:++responseId,is_correct:!(wrong&&path.includes('/92/')),xp_earned:0}});
+    click(view,'Continuar');
+    const panel=()=>nodes(view.render()).find(n=>n.type==='SentenceOrderPanel');
+    assert.deepEqual(Array.from(panel().props.exercises,e=>e.id),[91,92]);
+    panel().props.onChange(exercises[0],{orden:['a']});
+    assert.ok(button(view,'Comprobar').props.disabled);
+    click(view,'Volver');click(view,'Continuar');
+    assert.deepEqual(Array.from(panel().props.answers[91].orden),['a']);
+    for(const e of panel().props.exercises)panel().props.onChange(e,{orden:['a','b']});
+    await check(view);assert.ok(panel().props.feedback[91].is_correct);
+    const before=view.requests.length;wrong=false;await check(view);assert.equal(view.requests.length,before+1);
+    assert.equal(view.requests.at(-1).path,'/exercises/92/answer');click(view,'Continuar');
+    assert.deepEqual(Array.from(panel().props.exercises,e=>e.id),[93,94]);
+    for(const e of panel().props.exercises)panel().props.onChange(e,{orden:['a','b']});
+    await check(view);await finish(view);
+    assert.ok(nodes(view.render()).some(n=>n.props['aria-label']==='4 de 4 ejercicios correctos'));
 });
 
 test('questions and responses are graded independently and only a failed exercise is retried', async () => {

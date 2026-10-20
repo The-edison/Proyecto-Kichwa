@@ -2,13 +2,19 @@ import { useEffect, useRef, useState } from 'react';
 
 const greetingAudios = {
     'alli-puncha': 'Alli puncha', 'alli-chishi': 'Alli chishi', 'alli-tuta': 'Alli tuta',
-    'imanalla-kanki': 'Imanalla kanki?', 'allilla-kani': 'Allilla kani.',
-    'maymanta-kanki': 'Maymanta kanki?', 'maypitak-llankanki': 'Maypitak llankanki?',
+    'imanalla-kanki': 'Imanalla kanki', 'allilla-kani': 'Allilla kani.',
+    'maymanta-kanki': 'Maymanta kanki', 'maypitak-llankanki': 'Maypitak llankanki',
     kayakaman: 'Kayakaman', kipakaman: 'Kipakaman', yupaychani: 'Yupaychani', kishpichiway: 'Kishpichiway',
 };
 const questionAudios = { imatak: 'Audio 1', 'pitak-kan': 'Audio 2', imamanta: 'Audio 3' };
 const sentenceAudios = { 'alli-puncha-churi': 'la oración 1', 'alli-chishi-kusa': 'la oración 2', 'alli-tuta-tayta': 'la oración 3' };
 const expressionAudios = {
+    'q-0': { word:'Imanalla kanki', path:'escenas/preguntas/imanalla-kanki' }, 'q-1': { word:'Maymanta kanki', path:'escenas/preguntas/maymanta-kanki' },
+    'q-2': { word:'Maypitak llankanki', path:'escenas/preguntas/maypitak-llankanki' }, 'q-3': { word:'Mashna watakunatatak charinki', path:'escenas/preguntas/mashna-watakunatatak-charinki' },
+    'q-4': { word:'Llakillachu kanki', path:'escenas/preguntas/llakillachu-kanki' }, 'q-5': { word:'Imata ruranki', path:'escenas/preguntas/imata-ruranki' },
+    'a-0': { word:'Allilla kani', path:'escenas/respuestas/allilla-kani' }, 'a-1': { word:'Ambatomanta kani', path:'escenas/respuestas/ambatomanta-kani' },
+    'a-2': { word:'Quitupi llankani', path:'escenas/respuestas/quitupi-llankani' }, 'a-3': { word:'Ishkay chunka watakuntami charini', path:'escenas/respuestas/ishkay-chunka-watakuntami-charini' },
+    'a-4': { word:'Ari', path:'escenas/respuestas/ari' }, 'a-5': { word:'Nimata', path:'escenas/respuestas/nimata' },
     'd-0': { word:'Kipakaman', path:'despedidas/kipakaman' }, 'd-1': { word:'Kayakaman', path:'despedidas/kayakaman' },
     'd-2': { word:'Shukti punchakama', path:'despedidas/shukti-punchakama' }, 'd-3': { word:'Ashtak kaman', path:'despedidas/ashtak-kaman' },
     'd-4': { word:'Chisikaman', path:'despedidas/chisikaman' },
