@@ -18,13 +18,157 @@
     "module": 1,
     "order": 4,
     "title": "Números y cantidades",
-    "description": "Los números se forman combinando palabras de mayor a menor cantidad.",
-    "note": "Primero escribe las decenas y después las unidades: 23 = ishkay chunka kimsa.",
+    "description": "Aprende a contar en kichwa del cero al veinte y a usar los números para hablar de edades y cantidades.",
+    "note": "Del once al diecinueve, combina chunka con la unidad: 11 = chunka shuk. Veinte es ishkay chunka.",
     "sections": [
-      { "title": "Del cero al diez", "kicker": "LAS CANTIDADES BÁSICAS", "rows": [["illak", "0"], ["shuk", "1"], ["ishkay", "2"], ["kimsa", "3"], ["chusku", "4"], ["pichka", "5"], ["sukta", "6"], ["kanchis", "7"], ["pusak", "8"], ["iskun", "9"], ["chunka", "10"]], "paragraphs": [] },
-      { "title": "Del once al noventa", "kicker": "COMBINA DECENAS Y UNIDADES", "rows": [["chunka shuk", "11"], ["chunka pusak", "18"], ["ishkay chunka", "20"], ["kimsa chunka", "30"], ["ishkay chunka kimsa", "23"]], "paragraphs": ["Primero escribe las decenas y después las unidades."] },
-      { "title": "Cantidades grandes", "kicker": "CIENTOS, MILES Y MILLONES", "rows": [["patsak", "100"], ["waranka", "1.000"], ["hunu", "1.000.000"], ["ishkay patsak", "200"], ["kimsa waranka", "3.000"], ["ishkay chunka waranka", "20.000"], ["patsak waranka", "100.000"]], "paragraphs": [] },
-      { "title": "Una cantidad en una oración", "kicker": "USA LO QUE APRENDISTE", "rows": [["Payka ishkay pankata apamun.", "Él o ella trae dos hojas."]], "paragraphs": ["Ishkay indica la cantidad."] }
+      {
+        "title": "Del cero al diez",
+        "kicker": "LAS CANTIDADES BÁSICAS",
+        "rows": [
+          [
+            "illak",
+            "0"
+          ],
+          [
+            "shuk",
+            "1"
+          ],
+          [
+            "ishkay",
+            "2"
+          ],
+          [
+            "kimsa",
+            "3"
+          ],
+          [
+            "chusku",
+            "4"
+          ],
+          [
+            "pichka",
+            "5"
+          ],
+          [
+            "sukta",
+            "6"
+          ],
+          [
+            "kanchis",
+            "7"
+          ],
+          [
+            "pusak",
+            "8"
+          ],
+          [
+            "iskun",
+            "9"
+          ],
+          [
+            "chunka",
+            "10"
+          ]
+        ],
+        "paragraphs": []
+      },
+      {
+        "title": "Del once al veinte",
+        "kicker": "FORMA NUEVOS NÚMEROS",
+        "rows": [
+          [
+            "chunka shuk",
+            "11"
+          ],
+          [
+            "chunka ishkay",
+            "12"
+          ],
+          [
+            "chunka kimsa",
+            "13"
+          ],
+          [
+            "chunka chusku",
+            "14"
+          ],
+          [
+            "chunka pichka",
+            "15"
+          ],
+          [
+            "chunka sukta",
+            "16"
+          ],
+          [
+            "chunka kanchis",
+            "17"
+          ],
+          [
+            "chunka pusak",
+            "18"
+          ],
+          [
+            "chunka iskun",
+            "19"
+          ],
+          [
+            "ishkay chunka",
+            "20"
+          ]
+        ],
+        "paragraphs": [
+          "Desde el once, di primero chunka y después la unidad. Para veinte, di ishkay chunka."
+        ]
+      },
+      {
+        "title": "Cantidades grandes",
+        "kicker": "CIENTOS, MILES Y MILLONES",
+        "rows": [
+          [
+            "patsak",
+            "100"
+          ],
+          [
+            "waranka",
+            "1.000"
+          ],
+          [
+            "chunka waranka",
+            "10.000"
+          ],
+          [
+            "patsak waranka",
+            "100.000"
+          ],
+          [
+            "hunu",
+            "1.000.000"
+          ]
+        ],
+        "paragraphs": []
+      },
+      {
+        "title": "Números en la vida diaria",
+        "kicker": "EDAD, OBJETOS Y PERSONAS",
+        "rows": [
+          [
+            "Ñuka shuk watatami charini.",
+            "Tengo un año."
+          ],
+          [
+            "Pichka yura.",
+            "Cinco árboles."
+          ],
+          [
+            "Kimsa runakuna.",
+            "Tres personas."
+          ]
+        ],
+        "paragraphs": [
+          "Cuenta objetos que tengas cerca: libros, lápices o frutas."
+        ]
+      }
     ]
   },
   {

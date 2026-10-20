@@ -1,0 +1,24 @@
+.is-numbers.is-activity .guided-unit-main { overflow-y: auto; scrollbar-gutter: stable; }
+.is-numbers .guided-matching-panel { padding: 20px; border: 1px solid var(--color-border); border-radius: 18px; background: var(--color-surface); }
+.is-numbers .guided-matching-column button { font-variant-numeric: tabular-nums; }
+.numbers-practice { min-width: 0; padding: 0; border: 0; }
+.numbers-count-grid, .numbers-sentence-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.numbers-count-card, .numbers-sentence-card { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 18px; border: 1px solid var(--color-control-border); border-radius: 16px; background: var(--color-surface); box-shadow: var(--shadow-card); }
+.numbers-card-index { color: var(--color-primary); font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.numbers-objects { display: flex; flex-wrap: wrap; align-content: center; gap: 4px 8px; min-height: 70px; font-size: clamp(24px,3vw,34px); line-height: 1.2; }
+.numbers-input-label { color: var(--color-text-secondary); font-size: 12px; font-weight: 700; }
+.numbers-count-card .field { width: 100%; }
+.numbers-bank-instruction { margin: 0 0 12px; color: var(--color-text-secondary); font-size: 14px; }
+.numbers-word-bank { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.numbers-word-bank button { min-height: 40px; padding: 7px 13px; border: 1px solid var(--color-primary); border-radius: 999px; background: var(--color-soft); color: var(--color-primary); font-weight: 700; }
+.numbers-word-bank button:hover, .numbers-word-bank button:focus-visible { background: var(--color-primary-button); color: var(--color-on-primary); }
+.numbers-sentence-card.is-active { border-color: var(--color-primary); }
+.numbers-sentence-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; color: var(--color-text); font-size: clamp(16px,1.8vw,20px); font-weight: 700; line-height: 1.8; }
+.numbers-sentence-line .field { width: auto; min-width: 132px; max-width: 100%; font-size: 15px; }
+.numbers-sentence-meaning { color: var(--color-text-secondary); font-size: 14px; line-height: 1.5; }
+@media (max-width: 700px) {
+    .numbers-count-grid, .numbers-sentence-grid { grid-template-columns: minmax(0,1fr); }
+    .numbers-count-card, .numbers-sentence-card { padding: 14px; }
+    .numbers-objects { min-height: 48px; }
+    .is-numbers .guided-matching-panel { padding: 12px; }
+}

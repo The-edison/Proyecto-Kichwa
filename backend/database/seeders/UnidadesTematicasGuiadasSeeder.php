@@ -94,5 +94,6 @@ class UnidadesTematicasGuiadasSeeder extends Seeder
         });
         PublicacionContenido::invalidate();
         $this->call(UnidadTresPronombresSeeder::class);
+        $this->call(UnidadCuatroNumerosSeeder::class);
     }
 }

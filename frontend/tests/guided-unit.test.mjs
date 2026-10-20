@@ -44,6 +44,7 @@ async function screen({ completed = false, post, exercises = [choice, matching],
         ConversationMatchingExercise: { ConversationMatchingExercise: 'ConversationMatchingExercise' },
         SceneChoicePanel: { SceneChoicePanel: 'SceneChoicePanel' },
         SentenceOrderPanel: { SentenceOrderPanel: 'SentenceOrderPanel' },
+        NumbersPractice: { NumbersPractice: 'NumbersPractice' },
         States: { ErrorState: 'ErrorState', LoadingState: 'LoadingState' },
         AuthContext: { useAuth: () => ({ user: { id: userId } }) },
     };
