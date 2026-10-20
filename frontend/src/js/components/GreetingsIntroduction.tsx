@@ -27,9 +27,9 @@ export function GreetingsIntroduction() {
         <LessonOverview
             unit="UNIDAD 2"
             title="Saludos y conversación"
-            description="Aprende a iniciar una conversación en kichwa: un saludo para cada momento y expresiones para acercarte a los demás."
+            description="Aprende a decir «buenos días», «buenas tardes» y «buenas noches» en kichwa. Después practica preguntas y respuestas sencillas."
         />
-        <LessonNote>El saludo cambia según el momento del día. <strong>Observa la mañana, la tarde y la noche</strong> para elegir la expresión adecuada.</LessonNote>
+        <LessonNote>Usa un saludo distinto <strong>por la mañana, por la tarde y por la noche.</strong> Lee su significado en español.</LessonNote>
         <p className="greetings-audio-instruction"><Volume2 size={16} aria-hidden="true" />Pulsa un saludo o una expresión para escuchar su pronunciación.</p>
         <section className="greetings-section" aria-labelledby="greetings-title">
             <div className="cometa-card-heading"><span className="cometa-card-number" aria-hidden="true">01</span><div><span className="cometa-card-kicker">UN SALUDO PARA CADA MOMENTO</span><h2 id="greetings-title">Para saludar</h2></div></div>
@@ -55,7 +55,7 @@ export function GreetingsIntroduction() {
                 <div className="cometa-card-heading"><span className="cometa-card-number" aria-hidden="true">04</span><div><span className="cometa-card-kicker">EJEMPLO EN CONTEXTO</span><h2 id="dialogue-title">Una pequeña conversación</h2></div></div>
                 <div className="greetings-bubble"><span>PERSONA A</span><strong>Imanalla kanki</strong><p>¿Cómo estás?</p></div>
                 <div className="greetings-bubble greetings-reply"><span>PERSONA B</span><strong>Allilla kani.</strong><p>Estoy bien.</p></div>
-                <p className="greetings-dialogue-note"><strong>Observa el intercambio.</strong> La primera persona pregunta cómo estás; la segunda responde sobre su estado de ánimo.</p>
+                <p className="greetings-dialogue-note"><strong>Una persona pregunta y otra responde.</strong> Lee cada frase junto a su significado en español.</p>
             </section>
         </LessonCardGrid>
     </div>;

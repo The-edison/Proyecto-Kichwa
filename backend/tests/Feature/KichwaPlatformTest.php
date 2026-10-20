@@ -124,7 +124,8 @@ class KichwaPlatformTest extends TestCase
         $this->deleteJson('/api/admin/modules/'.$module)->assertNoContent();
         $word = $this->postJson('/api/admin/diccionario', ['kichwa' => '[DEMO] prueba', 'español' => '[DEMO] equivalencia'])->assertCreated()->json('id');
         $this->getJson('/api/diccionario?q=equivalencia')->assertOk()->assertJsonPath('total', 1);
-        $this->deleteJson('/api/admin/diccionario/'.$word)->assertNoContent();
+        $this->deleteJson('/api/admin/diccionario/'.$word)->assertMethodNotAllowed();
+        $this->assertDatabaseHas('diccionario', ['id' => $word]);
     }
 
     public function test_safe_uploads_accept_raster_and_wav_but_reject_scripts_and_wrong_extension(): void

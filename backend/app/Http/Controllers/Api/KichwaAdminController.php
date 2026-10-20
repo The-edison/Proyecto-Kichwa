@@ -326,10 +326,14 @@ class KichwaAdminController extends Controller
             }
         }
         if ($resource === 'evaluations') {
-            abort_unless(($merged['type'] === 'unidad') === ! empty($merged['unit_id']), 422, 'La evaluación de unidad requiere una unidad; la diagnóstica es general.');
+            abort_unless(match ($merged['type']) {
+                'unidad' => ! empty($merged['unit_id']) && empty($merged['module_id']),
+                'modulo' => ! empty($merged['module_id']) && empty($merged['unit_id']) && empty($merged['topic_id']),
+                default => empty($merged['unit_id']) && empty($merged['module_id']),
+            }, 422, 'Selecciona el módulo o la unidad que corresponde al tipo de evaluación.');
         }
         if ($resource === 'evaluations' && ($merged['config']['managed'] ?? false)) {
-            if (($merged['config']['final'] ?? false) && ! ($merged['config']['sequence_mode'] ?? false)) {
+            if (($merged['config']['final'] ?? false) && ! ($merged['config']['sequence_mode'] ?? false) && $merged['type'] !== 'modulo') {
                 abort_unless(! empty($merged['unit_id']) && ! empty($merged['topic_id']), 422, 'El desafío final requiere su unidad y lección asociadas.');
                 abort_unless(($merged['config']['question_count'] ?? 10) === 10 && ($merged['config']['pass_percentage'] ?? 80) === 80, 422, 'El desafío final requiere diez preguntas y 80 %.');
             }
@@ -410,7 +414,7 @@ class KichwaAdminController extends Controller
     {
         $relations = match ($resource) {
             'levels' => ['módulos' => ['modulos', 'id_nivel'], 'matrículas' => ['usuarios_niveles', 'id_nivel']],
-            'modules' => ['unidades' => ['unidades', 'id_modulo']],
+            'modules' => ['unidades' => ['unidades', 'id_modulo'], 'evaluaciones finales' => ['evaluaciones', 'id_modulo']],
             'units' => ['temas' => ['temas', 'id_unidad'], 'actividades' => ['actividades', 'id_unidad'], 'evaluaciones' => ['evaluaciones', 'id_unidad'], 'progresos de estudiantes' => ['progreso', 'id_unidad']],
             'contents' => ['actividades' => ['actividades', 'id_tema'], 'evaluaciones' => ['evaluaciones', 'id_tema']],
             'exercises' => ['respuestas de estudiantes' => ['respuestas_actividad', 'id_actividad']],

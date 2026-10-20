@@ -78,6 +78,7 @@ class ContratoEjercicio
             'config.listening_vowels' => ['sometimes', 'boolean'],
             'config.listening_questions' => ['sometimes', 'boolean'],
             'config.listening_greetings' => ['sometimes', 'boolean'],
+            'config.pronouns_activity' => ['sometimes', 'in:persons,groups,listening,complete,order,listening-pronouns'],
             'config.conversation_pairs' => ['sometimes', 'boolean'],
             'config.conversation_group' => ['sometimes', 'in:q,a,d,c'],
             'config.scene_choice' => ['sometimes', 'boolean'],
@@ -133,6 +134,19 @@ class ContratoEjercicio
             || array_column($data['elements'], 'id') !== ['alli-puncha-churi', 'alli-chishi-kusa', 'alli-tuta-tayta']
             || collect($data['elements'])->contains(fn ($element) => substr_count($element['texto'], '_____') !== 1 || empty($element['opciones'])))) {
             self::fail('El panel de saludos necesita las tres oraciones con sus opciones y una palabra que falta.', 'config');
+        }
+        if (isset($data['config']['pronouns_activity'])) {
+            $activity = $data['config']['pronouns_activity'];
+            if ($data['type'] !== 'completar' || count($data['elements']) !== 3
+                || collect($data['elements'])->contains(fn (array $element): bool => empty($element['opciones']))) {
+                self::fail('Cada ejercicio de pronombres necesita tres filas con sus opciones.', 'config');
+            }
+            if (str_starts_with($activity, 'listening') && array_column($data['elements'], 'id') !== ['audio1', 'audio2', 'audio3']) {
+                self::fail('El ejercicio debe incluir los tres audios de pronombres en orden.', 'config');
+            }
+            if ($activity === 'order' && collect($data['elements'])->contains(fn (array $element): bool => collect($element['opciones'])->contains(fn (string $word): bool => preg_match('/\s/u', $word) === 1))) {
+                self::fail('Cada ficha debe contener una sola palabra.', 'elements');
+            }
         }
         if (($data['config']['listening_questions'] ?? false) && ($data['type'] === 'completar'
             ? array_column($data['elements'], 'id') !== ['imatak', 'pitak-kan', 'imamanta'] || collect($data['elements'])->contains(fn ($element) => empty($element['imagen']) || empty($element['opciones']))
@@ -216,7 +230,15 @@ class ContratoEjercicio
                     if (! is_string($variant) || trim($variant) === '' || mb_strlen($variant) > 500) {
                         self::fail();
                     }
-                    if (! empty($element['opciones']) && ! in_array($variant, $element['opciones'], true)) {
+                    if (($data['config']['pronouns_activity'] ?? null) === 'order') {
+                        $words = explode(' ', $variant);
+                        $options = $element['opciones'] ?? [];
+                        sort($words);
+                        sort($options);
+                        if ($words !== $options) {
+                            self::fail('La oración debe usar todas las palabras del banco exactamente una vez.');
+                        }
+                    } elseif (! empty($element['opciones']) && ! in_array($variant, $element['opciones'], true)) {
                         self::fail();
                     }
                 }

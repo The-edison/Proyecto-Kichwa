@@ -42,6 +42,13 @@ export function TopicSectionIcon({ lesson, section }: { lesson: string; section:
 }
 
 export function TopicWordVisual({ lesson, section, word, index }: { lesson: string; section: number; word: string; index: number }) {
+    if (lesson === 'numbers' && section === 3) {
+        return <Calculator className="topic-word-icon" size={21} strokeWidth={1.65} aria-hidden="true" />;
+    }
+    if (lesson === 'calendar' && section !== 1) {
+        const Icon = section === 2 ? Clock3 : CalendarDays;
+        return <Icon className="topic-word-icon" size={21} strokeWidth={1.65} aria-hidden="true" />;
+    }
     if (lesson === 'animals-colors' && (word === 'pilpintu' || word === 'hampatu')) {
         return <svg className="topic-word-icon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             {word === 'pilpintu' ? <>

@@ -11,7 +11,11 @@ export function feedbackMessage(message?: string | null): string {
 export function answerComplete(exercise: Exercise, answer: ExerciseAnswer): boolean {
     if (exercise.type === 'ordenar') return answer.orden?.length === exercise.elements.length;
     if (exercise.type === 'seleccion_multiple') return exercise.config?.exact_selections ? answer.seleccion?.length === exercise.config.max_selections : Boolean(answer.seleccion?.length);
-    if (exercise.type === 'completar') return exercise.elements.every(e => Boolean(answer.textos?.[e.id]?.trim()));
+    if (exercise.type === 'completar') return exercise.elements.every(e => {
+        const text = answer.textos?.[e.id]?.trim();
+        if (!text) return false;
+        return exercise.config?.pronouns_activity !== 'order' || text.split(/\s+/).sort().join(' ') === [...(e.opciones ?? [])].sort().join(' ');
+    });
     const origins = exercise.elements.filter(e => exercise.type === 'arrastrar' || e.grupo === 'origen');
     return origins.length > 0 && origins.every(e => answer.pares?.some(p => p.origen === e.id && p.destino));
 }

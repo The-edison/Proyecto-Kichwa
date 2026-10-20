@@ -62,7 +62,7 @@ class EstadoContenido
             ->filter(fn ($question) => self::errors(KichwaResource::present('questions', $question, true)) === [])
             ->sortByDesc('id_pregunta')->unique(fn ($question) => $question->origen_reactivo ?? (string) $question->id_pregunta)->sortBy('orden_pregunta')->values();
         $record = EvaluacionKichwa::findOrFail($evaluation);
-        if (($record->configuracion['sequence_mode'] ?? false) || ! ($record->configuracion['final'] ?? false)) {
+        if ($record->tipo_evaluacion === 'modulo' || ($record->configuracion['sequence_mode'] ?? false) || ! ($record->configuracion['final'] ?? false)) {
             return $questions;
         }
         $sources = self::sources($record);

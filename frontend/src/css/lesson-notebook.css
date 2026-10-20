@@ -62,8 +62,7 @@
 .guided-introduction .lesson-guide img { width: 112px; height: 122px; filter: drop-shadow(0 5px 3px #51432e17); }
 .guided-introduction .lesson-guide figcaption { color: var(--color-text-secondary); font-size: 10px; font-weight: 600; }
 .guided-introduction .lesson-study-note { margin: 22px 0 26px; padding: 0 4px; font-size: 13px; }
-.guided-introduction .cometa-lesson-cards { gap: 20px; align-items: start; }
-.guided-introduction .lesson-card-grid.is-packed { grid-auto-rows: 1px; row-gap: 0; align-items: start; }
+.guided-introduction .cometa-lesson-cards { gap: 20px; align-items: stretch; }
 .guided-introduction .cometa-lesson-card,
 .guided-introduction .greetings-section {
     position: relative;
@@ -179,3 +178,120 @@
 @media (prefers-reduced-motion: reduce) {
     .guided-introduction button { transition: none; }
 }
+
+/* Readable lesson text for first-time learners, including small screens. */
+.guided-introduction .lesson-overview-copy > p { font-size: 18px; line-height: 1.75; }
+.guided-introduction .lesson-study-note,
+.guided-introduction .topic-explanation,
+.guided-introduction .cometa-letter-note,
+.guided-introduction .cometa-extra-letter,
+.guided-introduction .cometa-builder-prompt,
+.guided-introduction .cometa-builder-note,
+.guided-introduction .greetings-dialogue-note { font-size: 18px; line-height: 1.7; }
+.guided-introduction .topic-vocabulary > div,
+.guided-introduction .greetings-phrases dt { font-size: 18px; line-height: 1.6; }
+.guided-introduction .cometa-card-heading h2 { font-size: 24px; }
+.guided-introduction .cometa-card-kicker { font-size: 11px; }
+.guided-introduction .lesson-overview-meta { font-size: 12px; }
+.guided-introduction .topic-pronoun-copy > strong { font-size: 21px; }
+.guided-introduction .topic-pronoun-copy > span,
+.guided-introduction .greetings-phrases dd,
+.guided-introduction .greetings-time > p,
+.guided-introduction .greetings-bubble p,
+.guided-introduction .cometa-vocabulary-list dd,
+.guided-introduction .cometa-word-meaning,
+.guided-introduction .greetings-audio-instruction { font-size: 16px; line-height: 1.6; }
+.guided-introduction .cometa-vowel-instruction,
+.guided-introduction .cometa-vowel-action,
+.guided-introduction .cometa-consonant-audio,
+.guided-introduction .greetings-tile-audio,
+.guided-introduction .cometa-example-label,
+.guided-introduction .greetings-sky,
+.guided-introduction .greetings-bubble > span { font-size: 13px; }
+.guided-introduction .lesson-guide figcaption { font-size: 12px; }
+@media (max-width: 480px) {
+    .guided-introduction .lesson-overview { grid-template-columns: minmax(0,1fr); gap: 12px; }
+    .guided-introduction .lesson-guide { display: flex; justify-content: flex-start; align-items: center; gap: 8px; }
+    .guided-introduction .lesson-guide img { width: 44px; height: 50px; }
+    .guided-introduction .lesson-overview-copy > p,
+    .guided-introduction .lesson-study-note,
+    .guided-introduction .topic-explanation,
+    .guided-introduction .cometa-letter-note,
+    .guided-introduction .cometa-extra-letter,
+    .guided-introduction .cometa-builder-prompt,
+    .guided-introduction .cometa-builder-note,
+    .guided-introduction .greetings-dialogue-note { font-size: 17px; }
+    .guided-introduction .cometa-card-heading h2 { font-size: 22px; }
+    .guided-introduction .topic-vocabulary > div { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+    .guided-introduction .topic-vocabulary dd { max-width: none; }
+    .guided-introduction .cometa-vowel-tiles { gap: 6px; }
+    .guided-introduction .cometa-vowel-action { flex-wrap: wrap; font-size: 12px; }
+}
+
+/* Module one: visible audio controls and distinct vocabulary groups. */
+.greetings-introduction .greetings-tile-audio,
+.greetings-introduction .greetings-phrase-audio {
+    min-height: 44px;
+    padding: 9px 12px;
+    border: 1px solid var(--lesson-accent);
+    border-radius: 8px;
+    background: var(--notebook-paper,var(--color-surface));
+    color: var(--lesson-accent);
+    box-shadow: 0 3px 0 var(--lesson-border);
+    font-size: 17px;
+    line-height: 1.5;
+}
+.greetings-introduction .greetings-tile-audio { background: var(--color-secondary-soft); font-size: 15px; }
+.greetings-introduction .greetings-phrase-audio > svg { box-sizing: content-box; width: 20px; height: 20px; padding: 6px; border-radius: 50%; background: var(--color-secondary-soft); opacity: 1; }
+.greetings-introduction .greetings-phrase-audio:hover,
+.greetings-introduction .greetings-phrase-audio.is-active,
+.greetings-introduction .greetings-time.is-active .greetings-tile-audio { border-color: var(--lesson-accent); background: var(--color-secondary-soft); box-shadow: inset 0 0 0 1px var(--lesson-accent); }
+.greetings-introduction .greetings-phrases > div { grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); gap: 14px; }
+.greetings-introduction .greetings-phrases dd { font-size: 17px; }
+.greetings-introduction .greetings-phrase-audio:focus-visible { outline: 3px solid var(--lesson-accent); outline-offset: 3px; }
+.guided-introduction.topic-numbers .topic-section-0 .topic-vocabulary,
+.guided-introduction.topic-numbers .topic-section-1 .topic-vocabulary { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+.guided-introduction.topic-numbers .topic-section-0 .topic-vocabulary > div,
+.guided-introduction.topic-numbers .topic-section-1 .topic-vocabulary > div,
+.guided-introduction.topic-numbers .topic-section-2 .topic-vocabulary > div { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 8px; padding: 10px; border: 1px solid var(--lesson-border); border-radius: 8px; background: var(--lesson-fill); }
+.guided-introduction.topic-numbers .topic-section-2 .topic-vocabulary { display: grid; gap: 9px; }
+.guided-introduction.topic-numbers .topic-quantity { min-width: 40px; padding: 2px 5px; background: var(--notebook-paper,var(--color-surface)); border: 1px solid var(--lesson-border); font-size: 24px; font-weight: 650; line-height: 1.4; }
+.guided-introduction.topic-calendar .topic-vocabulary > div { align-items: center; padding-block: 10px; }
+.guided-introduction.topic-calendar .topic-vocabulary dt { align-items: center; }
+.guided-introduction.topic-calendar .topic-month-number { width: 32px; height: 32px; font-size: 15px; font-weight: 650; background: var(--lesson-fill); }
+.guided-introduction.topic-calendar .topic-section-0 .topic-vocabulary > div,
+.guided-introduction.topic-calendar .topic-section-2 .topic-vocabulary > div { margin-bottom: 6px; padding: 10px; border: 1px solid var(--lesson-border); border-radius: 8px; background: var(--lesson-fill); }
+.guided-introduction.topic-calendar .topic-section-1 .topic-vocabulary > div:nth-child(even) { background: var(--lesson-fill); border-radius: 6px; }
+.guided-introduction.topic-calendar .topic-section-1 .topic-vocabulary > div { padding-inline: 8px; }
+@media (max-width: 1100px) {
+    .guided-introduction.topic-numbers .topic-section-0 .topic-vocabulary,
+    .guided-introduction.topic-numbers .topic-section-1 .topic-vocabulary { grid-template-columns: minmax(0,1fr); }
+}
+@media (max-width: 480px) {
+    .greetings-introduction .greetings-phrases > div { grid-template-columns: minmax(0,1fr); gap: 5px; }
+    .greetings-introduction .greetings-phrases dd { padding-left: 12px; }
+    .topic-pronoun-audio { display: grid; grid-template-columns: 38px minmax(0,1fr); }
+    .topic-pronoun-speaker { grid-column: 2; justify-self: start; margin-left: 0; }
+    .topic-pronoun-symbol { grid-row: span 2; }
+}
+
+@font-face { font-family: 'Nunito Lesson'; font-style: normal; font-weight: 400; font-display: swap; src: url('../fonts/nunito/nunito-400.ttf') format('truetype'); }
+@font-face { font-family: 'Nunito Lesson'; font-style: normal; font-weight: 600; font-display: swap; src: url('../fonts/nunito/nunito-600.ttf') format('truetype'); }
+@font-face { font-family: 'Nunito Lesson'; font-style: normal; font-weight: 700; font-display: swap; src: url('../fonts/nunito/nunito-700.ttf') format('truetype'); }
+@font-face { font-family: 'Nunito Lesson'; font-style: normal; font-weight: 800; font-display: swap; src: url('../fonts/nunito/nunito-800.ttf') format('truetype'); }
+.guided-introduction { font-family: 'Nunito Lesson', 'Trebuchet MS', sans-serif; }
+.guided-introduction .lesson-overview h1,
+.guided-introduction .cometa-card-heading h2,
+.guided-introduction .cometa-card-number,
+.guided-introduction .cometa-vowel-letter,
+.guided-introduction .cometa-example-word,
+.guided-introduction .cometa-vocabulary-list dt,
+.guided-introduction .cometa-word-tiles > span,
+.guided-introduction .greetings-time h3,
+.guided-introduction .greetings-bubble strong { font-family: 'Nunito Lesson', 'Trebuchet MS', sans-serif; }
+.guided-introduction .lesson-overview h1 { font-weight: 800; letter-spacing: -.025em; line-height: 1.2; }
+.guided-introduction .cometa-card-heading h2 { font-weight: 800; letter-spacing: -.015em; line-height: 1.3; }
+.guided-introduction .lesson-key-text { color: var(--color-text); font-weight: 800; }
+.guided-introduction .lesson-card-grid { align-items: stretch; grid-auto-rows: auto; }
+.guided-introduction .cometa-card-heading { min-height: 60px; }
+@media (max-width: 700px) { .guided-introduction .cometa-card-heading { min-height: 0; } }

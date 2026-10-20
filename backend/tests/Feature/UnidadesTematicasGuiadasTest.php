@@ -28,7 +28,7 @@ class UnidadesTematicasGuiadasTest extends TestCase
             $this->getJson('/api/units/'.$unit->id_unidad)->assertOk()->assertJsonPath('sort_order', $index + 3)
                 ->assertJsonPath('config.guided_lesson', ['pronouns', 'numbers', 'calendar'][$index]);
             $this->getJson('/api/units/'.$unit->id_unidad.'/contents')->assertOk()->assertJsonPath('data.0.title', ['Pronombres personales', 'Números y cantidades', 'Días, meses y calendario'][$index]);
-            $exercises = $this->getJson('/api/units/'.$unit->id_unidad.'/guided')->assertOk()->assertJsonPath('total', [5, 4, 7][$index])->json('exercises');
+            $exercises = $this->getJson('/api/units/'.$unit->id_unidad.'/guided')->assertOk()->assertJsonPath('total', [6, 4, 7][$index])->json('exercises');
             if ($index === 1) {
                 $this->assertSame(['relacionar', 'completar', 'relacionar', 'completar'], array_column($exercises, 'type'));
                 $this->assertSame(['small', 'count', 'large', 'sentences'], array_map(fn (array $exercise): string => $exercise['config']['numbers_activity'], $exercises));
@@ -50,7 +50,7 @@ class UnidadesTematicasGuiadasTest extends TestCase
                 ])->assertOk()->assertJsonPath('is_correct', true)->json('response_id');
             }
             $this->postJson('/api/units/'.$unit->id_unidad.'/guided/result', ['response_ids' => $responseIds[$unit->id_unidad], 'practice_attempt_id' => $session])
-                ->assertOk()->assertJsonPath('score', [5, 4, 7][$index])->assertJsonPath('passed', true)
+                ->assertOk()->assertJsonPath('score', [6, 4, 7][$index])->assertJsonPath('passed', true)
                 ->assertJsonPath('next_unit_id', $units->get($index + 1)?->id_unidad);
         }
 

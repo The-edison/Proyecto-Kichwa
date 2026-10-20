@@ -4,13 +4,13 @@
     "module": 1,
     "order": 3,
     "title": "Pronombres personales",
-    "description": "Un pronombre indica de quién hablamos. Puede representar a una persona o a un grupo.",
-    "note": "Primero identifica a la persona. Luego reconoce la acción.",
+    "description": "Aprende las palabras en kichwa para decir «yo», «tú», «él o ella», «nosotros», «ustedes» y «ellos o ellas».",
+    "note": "Lee cada palabra junto a su significado en español. Pulsa el botón para escucharla.",
     "sections": [
       { "title": "Una persona", "kicker": "HABLA DE ALGUIEN", "rows": [["ñuka", "yo"], ["kan", "tú"], ["pay", "él o ella"]], "paragraphs": [] },
       { "title": "Un grupo", "kicker": "HABLA DE VARIAS PERSONAS", "rows": [["ñukanchik", "nosotros"], ["kankuna", "ustedes"], ["paykuna", "ellos o ellas"]], "paragraphs": [] },
-      { "title": "Quién habla", "kicker": "ELIGE EL PRONOMBRE", "rows": [], "paragraphs": ["Si hablas de ti, usas ñuka.", "Si hablas de ti y de tu grupo, usas ñukanchik."] },
-      { "title": "Ejemplos", "kicker": "RECONOCE LA PERSONA Y LA ACCIÓN", "rows": [["Ñuka mikuni.", "Yo como."], ["Pay puñun.", "Él o ella duerme."]], "paragraphs": ["Primero identifica a la persona. Luego reconoce la acción."] }
+      { "title": "Habla de ti y de tu grupo", "kicker": "ELIGE EL PRONOMBRE", "rows": [], "paragraphs": ["Ñuka significa «yo». Úsalo para hablar de ti.", "Ñukanchik significa «nosotros». Úsalo cuando hables de ti y de otras personas juntas."] },
+      { "title": "Pronombres en una frase", "kicker": "RECONOCE LA PERSONA Y LA ACCIÓN", "rows": [["Ñuka mikuni.", "Yo como."], ["Pay puñun.", "Él o ella duerme."]], "paragraphs": ["Ñuka significa «yo» y pay significa «él o ella». Lee la traducción de cada oración."] }
     ]
   },
   {
@@ -18,8 +18,8 @@
     "module": 1,
     "order": 4,
     "title": "Números y cantidades",
-    "description": "Aprende a contar en kichwa del cero al veinte y a usar los números para hablar de edades y cantidades.",
-    "note": "Del once al diecinueve, combina chunka con la unidad: 11 = chunka shuk. Veinte es ishkay chunka.",
+    "description": "Aprende los números del cero al veinte y algunas cantidades mayores en kichwa.",
+    "note": "Shuk significa «uno» y chunka significa «diez». Busca cada número junto a su nombre en kichwa.",
     "sections": [
       {
         "title": "Del cero al diez",
@@ -118,7 +118,7 @@
           ]
         ],
         "paragraphs": [
-          "Desde el once, di primero chunka y después la unidad. Para veinte, di ishkay chunka."
+          "Para decir once, une chunka (diez) y shuk (uno): chunka shuk. Sigue los ejemplos hasta llegar a veinte."
         ]
       },
       {
@@ -166,7 +166,7 @@
           ]
         ],
         "paragraphs": [
-          "Cuenta objetos que tengas cerca: libros, lápices o frutas."
+          "Cuenta algunos libros o frutas. Busca cómo se dice esa cantidad en kichwa."
         ]
       }
     ]
@@ -176,13 +176,13 @@
     "module": 1,
     "order": 5,
     "title": "Días, meses y calendario",
-    "description": "Un calendario organiza los días de la semana y los meses del año.",
-    "note": "En el calendario, killa significa mes. Kulla killapi… significa «En enero…».",
+    "description": "Aprende cómo se dicen los días de la semana y los meses del año en kichwa.",
+    "note": "Lee el nombre en kichwa y su significado en español. Empieza por los días y después sigue con los meses.",
     "sections": [
       { "title": "Días de la semana", "kicker": "ORGANIZA TU SEMANA", "rows": [["awaki", "lunes"], ["awkarik", "martes"], ["chillay", "miércoles"], ["kullka", "jueves"], ["chaska", "viernes"], ["wacha", "sábado"], ["inti", "domingo"]], "paragraphs": [] },
       { "title": "Meses del año", "kicker": "RECORRE EL CALENDARIO", "rows": [["kulla", "enero"], ["panchi", "febrero"], ["pawkar", "marzo"], ["ayriwa", "abril"], ["aymuray", "mayo"], ["raymi", "junio"], ["sitwa", "julio"], ["karwa", "agosto"], ["kuski", "septiembre"], ["wayru", "octubre"], ["sasi", "noviembre"], ["kapak", "diciembre"]], "paragraphs": [] },
       { "title": "Palabras de tiempo", "kicker": "UBÍCATE EN EL TIEMPO", "rows": [["puncha", "día"], ["hunkay", "semana"], ["killa", "mes"], ["wata", "año"], ["kayna", "ayer"], ["kunan", "hoy o ahora"], ["kaya", "mañana"]], "paragraphs": [] },
-      { "title": "Cómo leerlos", "kicker": "EL TIEMPO EN CONTEXTO", "rows": [["Kulla killapi…", "En enero…"]], "paragraphs": ["En el calendario, killa significa mes.", "Celebraciones: Inti Raymi, Kulla Raymi, Kapak Raymi y Pawkar Raymi."] }
+      { "title": "Los meses en una frase", "kicker": "EL TIEMPO EN CONTEXTO", "rows": [["Kulla killapi…", "En enero…"]], "paragraphs": ["Killa significa «mes» cuando hablamos del calendario.", "Inti Raymi, Kulla Raymi, Kapak Raymi y Pawkar Raymi son nombres de celebraciones."] }
     ]
   },
   {
@@ -190,13 +190,13 @@
     "module": 2,
     "order": 1,
     "title": "Animales y colores",
-    "description": "Aprende el nombre del animal y distingue el color que observas.",
-    "note": "Reconoce primero al animal. Después identifica la palabra que indica el color.",
+    "description": "Aprende los nombres de algunos animales y colores en kichwa.",
+    "note": "Allku significa «perro» y puka significa «rojo». Aquí encontrarás más animales y colores.",
     "sections": [
       { "title": "Animales domésticos", "kicker": "LOS ANIMALES CERCANOS", "rows": [["allku", "perro"], ["misi", "gato"], ["kuy", "cuy"], ["llama", "oveja"], ["wakra", "ganado"], ["kuchi", "cerdo"], ["atalpa", "gallina"], ["kunu", "conejo"], ["apiw", "caballo"], ["chantasu", "burro"]], "paragraphs": [] },
-      { "title": "Otros animales", "kicker": "DESCUBRE MÁS ANIMALES", "rows": [["taruka", "venado"], ["ukucha", "ratón"], ["urpi", "tórtola"], ["hampatu", "rana"], ["pilpintu", "mariposa"], ["kinti", "colibrí"]], "paragraphs": ["Ejemplo: una foto de venado se relaciona con taruka."] },
+      { "title": "Otros animales", "kicker": "DESCUBRE MÁS ANIMALES", "rows": [["taruka", "venado"], ["ukucha", "ratón"], ["urpi", "tórtola"], ["hampatu", "rana"], ["pilpintu", "mariposa"], ["kinti", "colibrí"]], "paragraphs": ["Taruka significa «venado»."] },
       { "title": "Colores", "kicker": "OBSERVA Y DISTINGUE", "rows": [["yurak", "blanco"], ["yana", "negro"], ["puka", "rojo"], ["killu", "amarillo"], ["ankas", "azul"], ["waylla", "verde"], ["paku", "marrón"], ["maywa", "morado"], ["kishpu", "naranja"], ["waminsi", "rosado"], ["suku", "gris"]], "paragraphs": [] },
-      { "title": "Un ejemplo", "kicker": "EL COLOR EN UNA ORACIÓN", "rows": [["Ñuka muchikuka yurakmi kan.", "Mi sombrero es blanco."]], "paragraphs": ["Yurak es la palabra que indica el color."] }
+      { "title": "Una frase con un color", "kicker": "EL COLOR EN UNA ORACIÓN", "rows": [["Ñuka muchikuka yurakmi kan.", "Mi sombrero es blanco."]], "paragraphs": ["Yurak significa «blanco». En la oración se habla de un sombrero blanco."] }
     ]
   },
   {
@@ -204,13 +204,13 @@
     "module": 2,
     "order": 2,
     "title": "Partes del cuerpo",
-    "description": "Cada parte del cuerpo tiene un nombre. Aprende a reconocerla y a señalarla.",
-    "note": "Relaciona cada nombre con una parte del cuerpo. Chaki significa pie.",
+    "description": "Aprende cómo se dicen las partes del cuerpo en kichwa.",
+    "note": "Chaki significa «pie». Lee cada nombre y señala esa parte de tu cuerpo.",
     "sections": [
       { "title": "Cabeza y rostro", "kicker": "RECONOCE CADA PARTE", "rows": [["uma", "cabeza"], ["ñawi", "cara"], ["rinri", "oreja"], ["shimi", "boca"], ["kiru", "diente"], ["hallu", "lengua"], ["kunka", "cuello"]], "paragraphs": [] },
       { "title": "Brazos y manos", "kicker": "APRENDE A SEÑALARLAS", "rows": [["rikra", "brazo"], ["maki", "mano"], ["ruka", "dedo"], ["sillu", "uña"]], "paragraphs": [] },
       { "title": "Tronco y piernas", "kicker": "CONTINÚA EL RECORRIDO", "rows": [["wiksa", "barriga"], ["washa", "espalda"], ["kunkuri", "rodilla"], ["chaki", "pie"], ["chaki washa", "talón"]], "paragraphs": [] },
-      { "title": "Un ejemplo", "kicker": "IDENTIFICA LA PARTE", "rows": [["Chakitami nanan.", "Me duele el pie."]], "paragraphs": ["Para identificar la parte, reconoce chaki.", "En un dibujo del cuerpo, identifica las partes señaladas siguiendo sus números."] }
+      { "title": "Una frase sobre el cuerpo", "kicker": "IDENTIFICA LA PARTE", "rows": [["Chakitami nanan.", "Me duele el pie."]], "paragraphs": ["Chaki significa «pie». La oración dice que te duele el pie.", "Usa la lista para encontrar las otras partes del cuerpo."] }
     ]
   },
   {
@@ -218,13 +218,13 @@
     "module": 2,
     "order": 3,
     "title": "Naturaleza y entorno cercano",
-    "description": "Las palabras de esta unidad nombran elementos del paisaje y de la casa.",
-    "note": "Mira el contexto antes de elegir el significado: killa puede significar luna o mes.",
+    "description": "Aprende palabras en kichwa para nombrar la naturaleza y algunas cosas de la casa.",
+    "note": "Inti significa «sol» y wasi significa «casa». Lee las demás palabras junto a su significado.",
     "sections": [
       { "title": "En el paisaje", "kicker": "OBSERVA LA NATURALEZA", "rows": [["inti", "sol"], ["killa", "luna"], ["yaku", "agua"], ["allpa", "tierra"], ["wayra", "viento"], ["urku", "montaña"], ["tamya", "lluvia"]], "paragraphs": [] },
       { "title": "Cerca de nosotros", "kicker": "TU ENTORNO COTIDIANO", "rows": [["wasi", "casa"], ["yura", "árbol"], ["punku", "puerta"], ["tuku", "ventana"]], "paragraphs": [] },
-      { "title": "Una palabra, dos contextos", "kicker": "EL CONTEXTO DA LA PISTA", "rows": [], "paragraphs": ["En una imagen del cielo, killa significa luna.", "En un calendario, killa significa mes.", "Mira el contexto antes de elegir el significado."] },
-      { "title": "Cómo relacionar una imagen", "kicker": "CONECTA LA IMAGEN Y LA PALABRA", "rows": [], "paragraphs": ["Si la imagen muestra lluvia, busca tamya.", "Si muestra una montaña, busca urku."] }
+      { "title": "Dos significados de killa", "kicker": "OBSERVA DE QUÉ SE HABLA", "rows": [], "paragraphs": ["Cuando hablamos del cielo, killa significa «luna».", "Cuando hablamos del calendario, killa significa «mes».", "Para saber qué significa, fíjate en el tema del que se habla."] },
+      { "title": "La imagen y su nombre", "kicker": "CONECTA LA IMAGEN Y LA PALABRA", "rows": [], "paragraphs": ["Tamya significa «lluvia». Usa esa palabra para reconocer una imagen de lluvia.", "Urku significa «montaña». Usa esa palabra para reconocer una imagen de montaña."] }
     ]
   },
   {
@@ -232,13 +232,13 @@
     "module": 2,
     "order": 4,
     "title": "Verbos frecuentes y raíz verbal",
-    "description": "Un verbo nombra una acción. En esta unidad reconocerás verbos que terminan en -na.",
-    "note": "Para encontrar la raíz del verbo, separa la terminación -na: purina = puri + na.",
+    "description": "Un verbo es una palabra que nombra una acción, como comer o caminar. Aprende algunos verbos en kichwa.",
+    "note": "Purina significa «caminar». Primero lee los verbos y sus significados. Después veremos cómo separar su terminación.",
     "sections": [
       { "title": "Acciones cotidianas", "kicker": "LAS ACCIONES DE CADA DÍA", "rows": [["mikuna", "comer"], ["upyana", "beber"], ["puñuna", "dormir"], ["purina", "caminar"], ["killkana", "escribir"], ["pichana", "limpiar"]], "paragraphs": [] },
       { "title": "Más acciones", "kicker": "AMPLÍA TU VOCABULARIO", "rows": [["yachana", "aprender"], ["llamkana", "trabajar"], ["yanuna", "cocinar"], ["tarpuna", "sembrar"], ["rikuna", "ver"], ["uyana", "escuchar"]], "paragraphs": [] },
-      { "title": "La raíz del verbo", "kicker": "SEPARA LA TERMINACIÓN", "rows": [], "paragraphs": ["Para encontrarla, separa la terminación -na.", "purina = puri + na. La raíz es puri.", "killkana = killka + na. La raíz es killka."] },
-      { "title": "Un ejemplo", "kicker": "RECONOCE LA ACCIÓN", "rows": [["Ñuka mikuni.", "Yo como."]], "paragraphs": ["Mikuna nombra la acción de comer.", "Al escuchar una expresión, reconoce la palabra o la acción que se menciona."] }
+      { "title": "La raíz del verbo", "kicker": "SEPARA LA TERMINACIÓN", "rows": [], "paragraphs": ["La raíz es la parte del verbo que queda al quitar -na.", "Purina (caminar): quita -na y queda puri.", "Killkana (escribir): quita -na y queda killka."] },
+      { "title": "Una frase con una acción", "kicker": "RECONOCE LA ACCIÓN", "rows": [["Ñuka mikuni.", "Yo como."]], "paragraphs": ["Mikuna significa «comer». Ñuka mikuni significa «yo como».", "Lee la traducción para saber qué acción se realiza."] }
     ]
   }
 ]

@@ -1,4 +1,12 @@
 .student-progress-page { display: grid; gap: 24px; }
+.student-progress-test-list { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,340px),1fr)); gap: 18px; }
+.student-progress-test { padding: 24px; }
+.student-progress-test header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.student-progress-test h3 { font-size: 20px; font-weight: 750; }
+.student-progress-test dl { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 22px; }
+.student-progress-test dt { color: var(--color-text-secondary); font-size: 14px; }
+.student-progress-test dd { margin-top: 6px; font-size: 22px; font-weight: 750; }
+.student-progress-explanation { margin-bottom: 20px; color: var(--color-text-secondary); font-size: 15px; line-height: 1.8; }
 .student-progress-page > .dashboard-intro { margin-bottom: -4px; }
 .student-progress-page > .stats-grid { grid-template-columns: repeat(4,minmax(0,1fr)); margin-bottom: 0; }
 .student-progress-columns { display: grid; grid-template-columns: minmax(0,1.65fr) minmax(280px,1fr); gap: 24px; align-items: start; }

@@ -24,7 +24,7 @@ function refreshProgress() {
     void queryClient.invalidateQueries({ refetchType: 'active', predicate: query => {
         const key = query.queryKey[1];
         return query.queryKey[0] === 'api' && typeof key === 'string' && !guidedUnitDetail(query)
-            && (key === '/mastery' || /^\/admin\/learning-results\//.test(key) || /^\/evaluations\/\d+(\?|$)/.test(key) || /^\/progress(\/|\?|$)/.test(key) || /^\/levels\/\d+\/modules/.test(key) || /^\/modules\/\d+\/(units|contents)/.test(key) || /^\/units\/\d+(\/sequence|\/contents|\?|$)/.test(key));
+            && (key === '/mastery' || /^\/admin\/learning-results\//.test(key) || /^\/evaluations\/\d+(\?|$)/.test(key) || /^\/progress(\/|\?|$)/.test(key) || /^\/levels\/\d+\/modules/.test(key) || /^\/modules\/\d+(\/(units|contents)|\?|$)/.test(key) || /^\/units\/\d+(\/sequence|\/contents|\?|$)/.test(key));
     } });
 }
 export async function withProgressBatch<T>(work: () => Promise<T>): Promise<T> {

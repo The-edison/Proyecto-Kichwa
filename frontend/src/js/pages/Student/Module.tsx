@@ -4,6 +4,7 @@ import { Head, Link } from '../../navigation';
 import { AppLayout } from '../../layouts/AppLayout';
 import { EmptyState, ErrorState, LoadingState } from '../../components/States';
 import { Pagination } from '../../components/Pagination';
+import { ModuleFinalCard } from '../../components/ModuleFinalCard';
 import { LearningProgress, progressValue } from '../../components/LearningProgress';
 import { useApi } from '../../hooks/useApi';
 import type { LearningModule, Paginated, Unit } from '../../types';
@@ -62,6 +63,7 @@ export default function Module({ moduleId }: { moduleId: number }) {
                     </ol>}
                 <Pagination page={page} lastPage={units.data?.last_page ?? 1} onChange={setPage} />
             </section>
+            {module.data?.final_evaluation && <ModuleFinalCard status={module.data.final_evaluation} />}
         </>}
         </div>
     </AppLayout>;

@@ -53,6 +53,11 @@ class DominioLecciones
 
     public static function assertUnlocked(EvaluacionKichwa $evaluation, int $user): void
     {
+        if ($evaluation->tipo_evaluacion === 'modulo') {
+            EvaluacionModulo::assertUnlocked($evaluation, $user);
+
+            return;
+        }
         if ($evaluation->configuracion['sequence_mode'] ?? false) {
             SecuenciaUnidad::assertUnlocked($evaluation, $user);
 
@@ -128,6 +133,9 @@ class DominioLecciones
                 $grant('intento:'.$attempt->id_intento.':pregunta:'.$result['question_id'], 10);
             }
         }
+        if ($evaluation->tipo_evaluacion === 'modulo' && $score >= ($evaluation->configuracion['pass_percentage'] ?? 80)) {
+            $grant('modulo:'.$evaluation->id_modulo, 50, 'Primeros contactos con el kichwa');
+        }
         if ($evaluation->id_tema !== null && ($evaluation->configuracion['managed'] ?? false)) {
             if (($evaluation->configuracion['sequence_mode'] ?? false) ? count(array_filter($results, fn ($result) => $result['is_correct'])) >= ($evaluation->configuracion['required_correct'] ?? 5) : $score >= ($evaluation->configuracion['pass_percentage'] ?? 80)) {
                 if ($evaluation->configuracion['final'] ?? false) {
@@ -169,8 +177,11 @@ class DominioLecciones
         $visibleTopics = Tema::where('publicado', true)->pluck('id_tema');
         $lessons = $lessons->filter(fn ($lesson) => $visibleTopics->contains($lesson['topic_id']))->values();
 
-        return ['lessons' => $lessons, 'xp' => $xp, 'medals' => $rewards->whereNotNull('medalla')->pluck('medalla')->values(),
+        $completedUnits = $rewards->filter(fn ($r) => str_starts_with($r->clave, 'final:') && ! $guidedUnits->contains((int) substr($r->clave, 6)) && (! $sequenceUnits->contains((int) substr($r->clave, 6)) || $passedUnits->contains((int) substr($r->clave, 6))))->map(fn ($r) => (int) substr($r->clave, 6))->merge($completedGuidedUnits->map(fn ($id) => (int) $id))->unique()->values();
+        $report = ProgresoAprendizaje::forUser($user, $completedUnits->all());
+
+        return ['learning_report' => $report, 'lessons' => $lessons, 'xp' => $xp, 'medals' => $rewards->whereNotNull('medalla')->pluck('medalla')->unique()->values(),
             'mastered_topics' => $rewards->filter(fn ($r) => str_starts_with($r->clave, 'dominio:') && $visibleTopics->contains((int) substr($r->clave, 8)))->map(fn ($r) => (int) substr($r->clave, 8))->values(),
-            'completed_units' => $rewards->filter(fn ($r) => str_starts_with($r->clave, 'final:') && ! $guidedUnits->contains((int) substr($r->clave, 6)) && (! $sequenceUnits->contains((int) substr($r->clave, 6)) || $passedUnits->contains((int) substr($r->clave, 6))))->map(fn ($r) => (int) substr($r->clave, 6))->merge($completedGuidedUnits->map(fn ($id) => (int) $id))->unique()->values()];
+            'completed_units' => collect($report['levels'])->flatMap(fn ($level) => $level['modules'])->flatMap(fn ($module) => $module['units'])->where('completed', true)->pluck('id')->values()];
     }
 }

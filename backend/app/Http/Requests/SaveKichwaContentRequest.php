@@ -27,7 +27,7 @@ class SaveKichwaContentRequest extends FormRequest
             'contents' => ['unit_id' => ['required', 'integer', $unitParent], 'kind' => ['required', Rule::in(['vocabulary', 'grammar', 'culture'])], 'title' => ['required', 'string', 'max:180'], 'body' => ['required', 'string', 'max:50000']],
             'exercises', 'questions' => [$resource === 'exercises' ? 'unit_id' : 'evaluation_id' => ['required', 'integer', $resource === 'exercises' ? $unitParent : 'exists:evaluaciones,id_evaluacion'],
                 'type' => ['required', Rule::in(['seleccion_multiple', 'completar', 'relacionar', 'arrastrar', 'ordenar'])], 'prompt' => ['required', 'string', 'max:10000'], 'elements' => ['required', 'array', 'max:50'], 'zones' => ['present', 'array', 'max:50'], 'solution' => ['required', 'array'], 'resource' => ['nullable', 'string', 'max:500']],
-            'evaluations' => ['unit_id' => ['nullable', 'integer', $unitParent], 'type' => ['required', Rule::in(['unidad', 'diagnostica'])], 'title' => ['required', 'string', 'max:180']],
+            'evaluations' => ['unit_id' => ['nullable', 'integer', $unitParent], 'module_id' => ['nullable', 'integer', 'exists:modulos,id_modulo'], 'type' => ['required', Rule::in(['unidad', 'diagnostica', 'modulo'])], 'title' => ['required', 'string', 'max:180']],
             'diccionario' => ['kichwa' => ['required', 'string', 'max:200'], 'español' => ['required', 'string', 'max:250']],
             default => [],
         };
@@ -40,7 +40,7 @@ class SaveKichwaContentRequest extends FormRequest
             $rules['config.guided_lesson'] = ['sometimes', 'in:writing,greetings,pronouns,numbers,calendar,animals-colors,body,nature,verbs'];
         }
         if (in_array($resource, ['exercises', 'questions', 'evaluations'], true)) {
-            $rules['config'] = ['sometimes', 'array:sentence_order,scene_choice,conversation_group,conversation_pairs,listening_greetings,listening_questions,managed,reviewed,requires_audio,requires_images,max_selections,exact_selections,ignore_accents,explanation,correct_feedback,incorrect_feedback,title,difficulty,question_count,pass_percentage,final,presentation,word_target,missing_index,context_text,context_meaning,prompt_image,prompt_image_alt,reveal_highlight,sequence_mode,fixed_order,required_correct,prerequisite_activities'];
+            $rules['config'] = ['sometimes', 'array:pronouns_activity,sentence_order,scene_choice,conversation_group,conversation_pairs,listening_greetings,listening_questions,managed,reviewed,requires_audio,requires_images,max_selections,exact_selections,ignore_accents,explanation,correct_feedback,incorrect_feedback,title,difficulty,question_count,pass_percentage,final,presentation,word_target,missing_index,context_text,context_meaning,prompt_image,prompt_image_alt,reveal_highlight,sequence_mode,fixed_order,required_correct,prerequisite_activities'];
             foreach (['sentence_order', 'scene_choice', 'conversation_pairs', 'listening_greetings', 'listening_questions', 'managed', 'reviewed', 'requires_audio', 'requires_images', 'exact_selections', 'ignore_accents', 'final', 'sequence_mode', 'fixed_order'] as $flag) {
                 $rules['config.'.$flag] = ['sometimes', 'boolean'];
             }
@@ -51,6 +51,13 @@ class SaveKichwaContentRequest extends FormRequest
             $rules['config.question_count'] = ['sometimes', 'integer', 'between:1,100'];
             $rules['config.pass_percentage'] = ['sometimes', 'integer', 'between:1,100'];
             $rules['config.conversation_group'] = ['sometimes', 'in:q,a,d,c'];
+            $rules['config.pronouns_activity'] = ['sometimes', 'in:persons,groups,listening,complete,order,listening-pronouns'];
+            if ($resource === 'evaluations') {
+                $rules['config'][1] .= ',prerequisite_units,bank_key';
+                $rules['config.prerequisite_units'] = ['sometimes', 'array', 'min:1', 'max:100'];
+                $rules['config.prerequisite_units.*'] = ['integer', 'distinct', 'exists:unidades,id_unidad'];
+                $rules['config.bank_key'] = ['sometimes', 'string', 'max:100'];
+            }
             $rules['config.presentation'] = ['sometimes', 'in:buttons,visual,letter,tiles,writing'];
             $rules['config.missing_index'] = ['sometimes', 'integer', 'between:0,49'];
             $rules['config.required_correct'] = ['sometimes', 'integer', 'between:1,100'];

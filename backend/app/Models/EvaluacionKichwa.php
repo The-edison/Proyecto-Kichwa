@@ -12,7 +12,7 @@ class EvaluacionKichwa extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['publicado', 'configuracion', 'id_tema', 'id_unidad', 'titulo_evaluacion', 'tipo_evaluacion'];
+    protected $fillable = ['publicado', 'configuracion', 'id_tema', 'id_unidad', 'id_modulo', 'titulo_evaluacion', 'tipo_evaluacion'];
 
     protected function casts(): array
     {

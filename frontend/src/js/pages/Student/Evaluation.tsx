@@ -1,4 +1,5 @@
 import { Head, Link } from '../../navigation';
+import ModuleFinalEvaluation from './ModuleFinalEvaluation';
 import { useEffect, useRef, useState } from 'react';
 import { useAnswerSound } from '../../hooks/useAnswerSound';
 import { AppLayout } from '../../layouts/AppLayout';
@@ -46,6 +47,7 @@ export default function Evaluation({ evaluationId }: { evaluationId: number }) {
         try { await apiDelete(`/attempts/${attempt}`); setAttempt(null); setAnswers({}); }
         catch (reason) { setSubmitError(reason instanceof ApiError ? reason.message : 'No se pudo abandonar.'); }
     }
+    if (data?.type === 'modulo') return <ModuleFinalEvaluation key={evaluationId} evaluation={data} />;
     return <AppLayout title={data?.title ?? 'Evaluación'} subtitle="La calificación se calcula al finalizar el intento."><Head title="Evaluación" />{loading ? <LoadingState /> : error ? <ErrorState message={error} /> : data && <div className="space-y-5">
         <Link href={`/aprender/nivel/${data.level_id}`} className="font-bold text-forest">← Volver al nivel</Link>
         {data.config?.sequence_mode && <p className="glass-panel p-5">Seis preguntas · Un punto por pregunta · Apruebas con cinco aciertos · Duración sugerida: 3–5 minutos.</p>}{!data.config?.managed && !data.questions.length ? <EmptyState title="Sin preguntas" description="Esta evaluación todavía no está lista." /> : !attempt ? <button className="primary-button" disabled={busy} onClick={start}>{result ? 'Nuevo intento' : 'Iniciar o retomar intento'}</button> : <>{questions.map((q, i) => <article key={q.id} className="glass-panel p-6"><span className="eyebrow">PREGUNTA {i + 1} DE {questions.length}</span><h3 className="my-5 text-lg font-bold">{q.config?.title && <span className="block text-sm text-forest">{q.config.title}</span>}{q.prompt}</h3><fieldset disabled={busy}><ExerciseInteraction name={`question-${q.id}`} initialLockedPairs={confirmedPairs[q.id]} onCheckPair={data.config?.managed && !data.config.final ? async (origin,destination) => (await apiPost<{is_correct: boolean}>(`/attempts/${attempt}/pair`, {question_id:q.id,origin,destination})).is_correct : undefined} exercise={q} answer={answers[q.id] ?? {}} onChange={value => setAnswers(old => ({ ...old, [q.id]: value }))} /></fieldset></article>)}

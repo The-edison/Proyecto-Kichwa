@@ -45,6 +45,7 @@ async function screen({ completed = false, post, exercises = [choice, matching],
         SceneChoicePanel: { SceneChoicePanel: 'SceneChoicePanel' },
         SentenceOrderPanel: { SentenceOrderPanel: 'SentenceOrderPanel' },
         NumbersPractice: { NumbersPractice: 'NumbersPractice' },
+        PronounsPracticePanel: { PronounsPracticePanel: 'PronounsPracticePanel' },
         States: { ErrorState: 'ErrorState', LoadingState: 'LoadingState' },
         AuthContext: { useAuth: () => ({ user: { id: userId } }) },
     };
@@ -101,6 +102,43 @@ test('greetings preload six unique images including images inside listening exer
     view.render();assert.equal(view.preloads.length,6);
     assert.ok(view.preloads.some(i=>i.src.endsWith('inside-4.webp')));
     view.render();assert.equal(view.preloads.length,6);
+});
+
+test('six pronoun exercises form three panels with one check button, retry mistakes, restore drafts and finish', async () => {
+    const exercises = ['persons', 'groups', 'listening', 'complete', 'order', 'listening-pronouns'].map((activity, index) => ({
+        id: 30 + index, type: 'completar', prompt: 'Tres respuestas', zones: [],
+        elements: ['one', 'two', 'three'].map(id => ({ id, texto: id, opciones: ['Ñuka', 'mikuni'] })),
+        config: { title: activity, pronouns_activity: activity },
+    }));
+    const view = await screen({ config: { guided_lesson: 'pronouns' }, exercises,
+        post: ({ path, payload }) => path.endsWith('/guided/result') ? { ...perfectScore, score: 6, max_score: 6, correct_count: 6, total_items: 6, xp_earned: 60 }
+            : { response_id: Number(path.split('/')[2]) + 100, is_correct: !Object.values(payload.answer.textos).includes('wrong'), xp_earned: 10 } });
+    const panel = () => nodes(view.render()).find(node => node.type === 'PronounsPracticePanel');
+    const answer = item => ({ textos: { one: item.config.pronouns_activity === 'order' ? 'Ñuka mikuni' : 'Ñuka', two: item.config.pronouns_activity === 'order' ? 'Ñuka mikuni' : 'Kan', three: item.config.pronouns_activity === 'order' ? 'Ñuka mikuni' : 'Pay' } });
+    click(view, 'Continuar');
+    assert.deepEqual(panel().props.exercises.map(item => item.id), [30, 31]);
+    panel().props.onChange(exercises[0], answer(exercises[0]));
+    assert.equal(button(view, 'Comprobar').props.disabled, true);
+    assert.equal(panel().props.onCheck, undefined);
+    assert.equal(view.requests.length, 0); assert.ok(!button(view, 'Continuar'));
+    panel().props.onChange(exercises[1], { textos: { one: 'wrong', two: 'Kan', three: 'Pay' } });
+    await check(view); assert.ok(!button(view, 'Continuar'));
+    assert.equal(view.requests.length, 2);
+    assert.equal(panel().props.feedback[30].is_correct, true);
+    assert.equal(panel().props.feedback[31].is_correct, false);
+    panel().props.onChange(exercises[1], answer(exercises[1])); await check(view);
+    assert.equal(view.requests.filter(request => request.path === '/exercises/30/answer').length, 1);
+    click(view, 'Continuar'); assert.deepEqual(panel().props.exercises.map(item => item.id), [32, 33]);
+    panel().props.onChange(exercises[2], { textos: { one: 'Ñuka' } });
+    view.remount(); assert.equal(panel().props.answers[32].textos.one, 'Ñuka');
+    click(view, 'Volver'); assert.equal(panel().props.start, 1); click(view, 'Continuar');
+    for (const item of exercises.slice(2, 4)) panel().props.onChange(item, answer(item));
+    await check(view); click(view, 'Continuar');
+    assert.equal(panel().props.start, 5); assert.deepEqual(panel().props.exercises.map(item => item.id), [34, 35]);
+    for (const item of exercises.slice(4)) panel().props.onChange(item, answer(item));
+    await check(view); await finish(view);
+    assert.equal(view.requests.at(-1).payload.response_ids.length, 6);
+    assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === '6 de 6 ejercicios correctos'));
 });
 
 test('six pronoun pairs are followed by exactly two panels of two images with working back navigation', async () => {

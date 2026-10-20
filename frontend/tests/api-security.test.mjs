@@ -63,6 +63,7 @@ test('checking guided answers marks their catalog stale without refetching it wh
     assert.equal(active.predicate(classic), true);
     assert.equal(active.predicate({ queryKey: ['api', '/progress'] }), true);
     assert.equal(active.predicate({ queryKey: ['api', '/modules/8/units?page=1'] }), true);
+    assert.equal(active.predicate({ queryKey: ['api', '/modules/8'] }), true);
 });
 
 test('adding dictionary words refreshes public searches, admin listings and the dashboard count', async () => {

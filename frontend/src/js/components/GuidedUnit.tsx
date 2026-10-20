@@ -17,6 +17,7 @@ import { ConversationMatchingExercise } from './ConversationMatchingExercise';
 import { SceneChoicePanel } from './SceneChoicePanel';
 import { SentenceOrderPanel } from './SentenceOrderPanel';
 import { NumbersPractice } from './NumbersPractice';
+import { PronounsPracticePanel } from './PronounsPracticePanel';
 import { useAuth } from '../context/AuthContext';
 import { useAnswerSound } from '../hooks/useAnswerSound';
 import { emptyGuidedAttempt, readGuidedAttempt, writeGuidedAttempt, subscribeGuidedAttempt, type GuidedAttempt, type GuidedResult } from '../services/guidedAttempt';
@@ -55,6 +56,7 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
         if (triple.length === 3 && triple[0].config?.conversation_group !== 'c' && triple.every(exercise => exercise.type === 'seleccion_multiple' && exercise.config?.scene_choice
             && exercise.config.conversation_group === triple[0].config?.conversation_group)) return 3;
         const pair = exercises.slice(start - 1, start + 1);
+        if (pair.length === 2 && pair.every(exercise => exercise.config?.pronouns_activity)) return 2;
         if (pair.length === 2 && pair.every(exercise => exercise.type === 'ordenar' && exercise.config?.sentence_order)) return 2;
         if (pair.length === 2 && pair.every(exercise => exercise.type === 'seleccion_multiple' && exercise.config?.scene_choice
             && exercise.config.conversation_group === pair[0].config?.conversation_group)) return 2;
@@ -74,6 +76,7 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
     const length = step > 0 ? panelLength(groupStart) : 1;
     const groupedChoices = length > 1 ? exercises.slice(groupStart - 1, groupStart - 1 + length) : [];
     const isGrouped = groupedChoices.length > 1;
+    const pronounsPanel = isGrouped && groupedChoices.every(exercise => exercise.config?.pronouns_activity);
     const scenePanel = isGrouped && groupedChoices.every(exercise => exercise.config?.scene_choice);
     const orderPanel = isGrouped && groupedChoices.every(exercise => exercise.type === 'ordenar' && exercise.config?.sentence_order);
     const lastPanelStep = isGrouped ? groupStart + groupedChoices.length - 1 : step;
@@ -243,9 +246,9 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
                     <Link className="guided-result-exit" href={moduleHref}><ArrowLeft size={17} aria-hidden="true" />Salir a unidades</Link>
                 </div>
             </section> : <>
-                {step > 0 && <div className="exercise-companion-header"><div><h1 className="guided-exercise-heading" ref={heading} tabIndex={-1}>{current?.config?.title}</h1>
-                <p className="guided-unit-description">{orderPanel ? 'Toca las palabras para formar cada oración en kichwa. Puedes quitar una palabra o reiniciar para cambiar el orden.' : scenePanel ? `Observa las ${groupedChoices.length === 2 ? 'dos' : 'tres'} escenas. Escucha las opciones y elige la expresión en kichwa que corresponde a cada una.` : isGrouped ? greetingsPanel ? 'Observa las tres imágenes. Elige el saludo en kichwa que corresponde a cada momento del día.' : unit.config?.guided_lesson === 'pronouns' ? 'Observa las dos escenas. Selecciona el pronombre correcto en kichwa para cada una.' : 'Observa las dos imágenes. Selecciona el nombre en kichwa de cada una.' : current?.prompt}</p></div><LearningCompanion key={displayResult ? `response-${displayResult.response_id}` : `ready-${current?.id}`} correct={displayResult?.is_correct} xpEarned={displayResult?.xp_earned} xpTotal={isGrouped ? undefined : result?.xp_total} /></div>}
-                {step === 0 ? (unit.config?.guided_lesson === 'greetings' ? <GreetingsIntroduction /> : unit.config?.guided_lesson && ['pronouns', 'numbers', 'calendar', 'animals-colors', 'body', 'nature', 'verbs'].includes(unit.config.guided_lesson) ? <TopicIntroduction lesson={unit.config.guided_lesson} /> : <GuidedIntroduction />) : orderPanel ? <SentenceOrderPanel exercises={groupedChoices} answers={answers} feedback={feedback} busy={busy} onChange={updateExercise} /> : scenePanel ? <SceneChoicePanel key={groupStart} exercises={groupedChoices} answers={answers} feedback={feedback} busy={busy} onChange={updateExercise} /> : isGrouped ? <section className="guided-choice-panel" aria-label={greetingsPanel ? "Reconoce los tres saludos" : "Reconoce las dos imágenes"}>
+                {step > 0 && <div className="exercise-companion-header"><div><h1 className="guided-exercise-heading" ref={heading} tabIndex={-1}>{pronounsPanel ? `Pronombres · Panel ${Math.ceil(groupStart / 2)} de 3` : current?.config?.title}</h1>
+                <p className="guided-unit-description">{pronounsPanel ? 'Shutirantikuna · Completa los dos ejercicios para continuar.' : orderPanel ? 'Toca las palabras para formar cada oración en kichwa. Puedes quitar una palabra o reiniciar para cambiar el orden.' : scenePanel ? `Observa las ${groupedChoices.length === 2 ? 'dos' : 'tres'} escenas. Escucha las opciones y elige la expresión en kichwa que corresponde a cada una.` : isGrouped ? greetingsPanel ? 'Observa las tres imágenes. Elige el saludo en kichwa que corresponde a cada momento del día.' : unit.config?.guided_lesson === 'pronouns' ? 'Observa las dos escenas. Selecciona el pronombre correcto en kichwa para cada una.' : 'Observa las dos imágenes. Selecciona el nombre en kichwa de cada una.' : current?.prompt}</p></div><LearningCompanion key={displayResult ? `response-${displayResult.response_id}` : `ready-${current?.id}`} correct={displayResult?.is_correct} xpEarned={displayResult?.xp_earned} xpTotal={isGrouped ? undefined : result?.xp_total} /></div>}
+                {step === 0 ? (unit.config?.guided_lesson === 'greetings' ? <GreetingsIntroduction /> : unit.config?.guided_lesson && ['pronouns', 'numbers', 'calendar', 'animals-colors', 'body', 'nature', 'verbs'].includes(unit.config.guided_lesson) ? <TopicIntroduction lesson={unit.config.guided_lesson} /> : <GuidedIntroduction />) : pronounsPanel ? <PronounsPracticePanel key={groupStart} exercises={groupedChoices} answers={answers} feedback={feedback} busy={busy} start={groupStart} onChange={updateExercise} /> : orderPanel ? <SentenceOrderPanel exercises={groupedChoices} answers={answers} feedback={feedback} busy={busy} onChange={updateExercise} /> : scenePanel ? <SceneChoicePanel key={groupStart} exercises={groupedChoices} answers={answers} feedback={feedback} busy={busy} onChange={updateExercise} /> : isGrouped ? <section className="guided-choice-panel" aria-label={greetingsPanel ? "Reconoce los tres saludos" : "Reconoce las dos imágenes"}>
                     {groupedChoices.map((exercise, index) => {
                         const selection = answers[exercise.id] ?? {};
                         const graded = feedback[exercise.id];

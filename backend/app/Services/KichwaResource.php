@@ -25,7 +25,7 @@ class KichwaResource
         'contents' => ['id' => 'id_tema', 'unit_id' => 'id_unidad', 'kind' => 'tipo_tema', 'title' => 'titulo_tema', 'body' => 'contenido_tema', 'sort_order' => 'orden_tema'],
         'exercises' => ['id' => 'id_actividad', 'unit_id' => 'id_unidad', 'type' => 'tipo_actividad', 'prompt' => 'enunciado_actividad',
             'elements' => 'elementos_actividad', 'zones' => 'zonas_actividad', 'resource' => 'recurso_actividad', 'solution' => 'solucion_actividad', 'sort_order' => 'orden_actividad'],
-        'evaluations' => ['id' => 'id_evaluacion', 'unit_id' => 'id_unidad', 'title' => 'titulo_evaluacion', 'type' => 'tipo_evaluacion'],
+        'evaluations' => ['id' => 'id_evaluacion', 'unit_id' => 'id_unidad', 'module_id' => 'id_modulo', 'title' => 'titulo_evaluacion', 'type' => 'tipo_evaluacion'],
         'questions' => ['id' => 'id_pregunta', 'evaluation_id' => 'id_evaluacion', 'type' => 'tipo_pregunta', 'prompt' => 'enunciado_pregunta',
             'elements' => 'elementos_pregunta', 'zones' => 'zonas_pregunta', 'resource' => 'recurso_pregunta', 'solution' => 'solucion_pregunta', 'score' => 'puntaje_pregunta', 'sort_order' => 'orden_pregunta'],
         'diccionario' => ['id' => 'id', 'kichwa' => 'kichwa', 'español' => 'español'],

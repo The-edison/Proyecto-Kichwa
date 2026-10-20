@@ -22,9 +22,9 @@ export function GuidedIntroduction() {
         <LessonOverview
             unit="UNIDAD 1"
             title="La escritura del kichwa"
-            description="Conoce las letras, descubre cómo se combinan y empieza a leer tus primeras palabras en kichwa."
+            description="Conoce las tres vocales y las 15 consonantes del kichwa. Escucha sus sonidos y aprende a formar palabras sencillas."
         />
-        <LessonNote>En la lengua kichwa solo se usan tres vocales: <strong>a, i y u.</strong> Identificarlas es el primer paso para leer una palabra.</LessonNote>
+        <LessonNote>El kichwa tiene <strong>tres vocales (a, i y u)</strong> y <strong>15 consonantes.</strong> Pulsa los botones para escuchar sus sonidos.</LessonNote>
 
         <LessonCardGrid>
             <section className="cometa-lesson-card cometa-vowels" aria-labelledby="cometa-vowels-title">
@@ -34,11 +34,10 @@ export function GuidedIntroduction() {
             </section>
 
             <section className="cometa-lesson-card cometa-letters" aria-labelledby="cometa-letters-title">
-                <div className="cometa-card-heading cometa-letters-heading"><span className="cometa-card-number" aria-hidden="true">02</span><div><span className="cometa-card-kicker">DA FORMA A LAS PALABRAS</span><h2 id="cometa-letters-title">Letras y grupos de letras</h2></div><ConsonantAudioButton playback={playback} /></div>
+                <div className="cometa-card-heading cometa-letters-heading"><span className="cometa-card-number" aria-hidden="true">02</span><div><span className="cometa-card-kicker">RECONOCE SUS SONIDOS</span><h2 id="cometa-letters-title">Las consonantes</h2></div><ConsonantAudioButton playback={playback} /></div>
                 <p className="cometa-vowel-status" role="status" aria-live="polite">{playback.state.clip === 'consonantes' ? playback.state.message : ''}</p>
-                <ul className="cometa-letter-chips" aria-label="Letras y grupos de letras de la unidad">{letters.map(letter => <li key={letter} className={letter.length > 1 ? 'is-group' : undefined}>{letter}</li>)}</ul>
-                <p className="cometa-letter-note"><strong>ch, ll y sh</strong> se escriben con dos letras.</p>
-                <p className="cometa-extra-letter">También verás <strong>ts</strong> en <em>tsalik</em> y <em>tsuntsu.</em></p>
+                <ul className="cometa-letter-chips" aria-label="Las 15 consonantes">{letters.map(letter => <li key={letter} className={letter.length > 1 ? 'is-group' : undefined}>{letter}</li>)}</ul>
+                <p className="cometa-letter-note">Las consonantes <strong>ch, ll y sh</strong> se escriben con dos letras. Cada una cuenta como una consonante en esta lista.</p>
             </section>
 
             <section className="cometa-lesson-card cometa-vocabulary" aria-labelledby="cometa-vocabulary-title">
@@ -48,7 +47,7 @@ export function GuidedIntroduction() {
 
             <section className="cometa-lesson-card cometa-word-builder" aria-labelledby="cometa-builder-title">
                 <div className="cometa-card-heading"><span className="cometa-card-number" aria-hidden="true">04</span><div><span className="cometa-card-kicker">ASÍ LO VAS A HACER</span><h2 id="cometa-builder-title">Cómo completar una palabra</h2></div></div>
-                <p className="cometa-builder-prompt">Si escuchas <strong>«sisa»</strong>, busca la letra que falta:</p>
+                <p className="cometa-builder-prompt"><strong>Sisa</strong> significa «flor». Mira qué vocal falta para completar la palabra.</p>
                 <div className="cometa-word-transformation" role="img" aria-label="s, espacio vacío, s, a. Completa con i para formar sisa.">
                     <span className="cometa-word-tiles" aria-hidden="true"><span>s</span><span className="is-empty">_</span><span>s</span><span>a</span></span>
                     <ArrowRight size={20} aria-hidden="true" />
