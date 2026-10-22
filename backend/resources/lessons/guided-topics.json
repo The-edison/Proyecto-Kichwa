@@ -150,23 +150,23 @@
       },
       {
         "title": "Números en la vida diaria",
-        "kicker": "EDAD, OBJETOS Y PERSONAS",
+        "kicker": "PERSONAS, OBJETOS Y ANIMALES",
         "rows": [
           [
-            "Ñuka shuk watatami charini.",
-            "Tengo un año."
+            "Ñuka shuk mishkita mikuni.",
+            "Yo como un dulce."
           ],
           [
-            "Pichka yura.",
-            "Cinco árboles."
+            "Pichka wawakuna pukllankuna.",
+            "Cinco niños juegan."
           ],
           [
-            "Kimsa runakuna.",
-            "Tres personas."
+            "Kanchis yurakuna wiñankuna.",
+            "Crecen siete plantas."
           ]
         ],
         "paragraphs": [
-          "Cuenta algunos libros o frutas. Busca cómo se dice esa cantidad en kichwa."
+          "Cuenta hojas, niños y plantas; luego busca sus números en kichwa."
         ]
       }
     ]
@@ -176,13 +176,14 @@
     "module": 1,
     "order": 5,
     "title": "Días, meses y calendario",
-    "description": "Aprende cómo se dicen los días de la semana y los meses del año en kichwa.",
-    "note": "Lee el nombre en kichwa y su significado en español. Empieza por los días y después sigue con los meses.",
+    "description": "Aprende los días de la semana, los meses y las estaciones del año en kichwa.",
+    "note": "Lee los nombres y las expresiones. Empieza por los días, sigue con los meses y termina con las estaciones.",
     "sections": [
       { "title": "Días de la semana", "kicker": "ORGANIZA TU SEMANA", "rows": [["awaki", "lunes"], ["awkarik", "martes"], ["chillay", "miércoles"], ["kullka", "jueves"], ["chaska", "viernes"], ["wacha", "sábado"], ["inti", "domingo"]], "paragraphs": [] },
       { "title": "Meses del año", "kicker": "RECORRE EL CALENDARIO", "rows": [["kulla", "enero"], ["panchi", "febrero"], ["pawkar", "marzo"], ["ayriwa", "abril"], ["aymuray", "mayo"], ["raymi", "junio"], ["sitwa", "julio"], ["karwa", "agosto"], ["kuski", "septiembre"], ["wayru", "octubre"], ["sasi", "noviembre"], ["kapak", "diciembre"]], "paragraphs": [] },
-      { "title": "Palabras de tiempo", "kicker": "UBÍCATE EN EL TIEMPO", "rows": [["puncha", "día"], ["hunkay", "semana"], ["killa", "mes"], ["wata", "año"], ["kayna", "ayer"], ["kunan", "hoy o ahora"], ["kaya", "mañana"]], "paragraphs": [] },
-      { "title": "Los meses en una frase", "kicker": "EL TIEMPO EN CONTEXTO", "rows": [["Kulla killapi…", "En enero…"]], "paragraphs": ["Killa significa «mes» cuando hablamos del calendario.", "Inti Raymi, Kulla Raymi, Kapak Raymi y Pawkar Raymi son nombres de celebraciones."] }
+      { "title": "Días en contexto", "kicker": "DÍAS EN FRASES", "rows": [["Chillay punchapi pukllanaman risha", "El miércoles iré a jugar"], ["Kullka punchapi Quituman risha", "El jueves me iré a Quito"], ["Inti punchami sawarikrin", "El domingo se va a casar"]], "paragraphs": [] },
+      { "title": "Meses en contexto", "kicker": "MESES EN FRASES", "rows": [["Kulla killapi wasiman risha", "En enero me iré a casa"], ["Raymi killapi raymita ruranchik", "En junio hacemos una celebración"], ["Kapak killapi aylluwan raymita rurasha", "En diciembre celebro con mi familia"]], "paragraphs": [] },
+      { "title": "Estaciones del año", "kicker": "WATAPAK PACHAKUNA", "rows": [["Inti Raymi", "Época de siembra y cosecha"], ["Kulla Raymi", "Época del florecimiento"], ["Kapak Raymi", "Época del sol"], ["Pawkar Raymi", "Época relacionada con el calor y la luz del sol"]], "paragraphs": [] }
     ]
   },
   {

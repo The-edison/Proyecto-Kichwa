@@ -27,7 +27,17 @@ const expressionAudios = {
     'c-0': { word:'Alli shamushka', path:'cortesia/alli-shamushka' }, 'c-1': { word:'Yupaychani', path:'cortesia/yupaychani' },
     'c-2': { word:'Kishpichiway', path:'cortesia/kishpichiway' }, 'c-3': { word:'Tiyaripay', path:'cortesia/tiyaripay' },
 };
-export type LessonAudioClip = 'a' | 'i' | 'u' | 'consonantes' | 'audio1' | 'audio2' | 'audio3' | keyof typeof greetingAudios | keyof typeof questionAudios | keyof typeof sentenceAudios | keyof typeof expressionAudios | keyof typeof pronounAudios | keyof typeof pronounWordAudios;
+const numberAudios = {
+    'numbers-zero-ten': { description: 'los números del cero al diez', file: 'cero-al-diez' },
+    'numbers-eleven-twenty': { description: 'los números del once al veinte', file: 'once-al-veinte' },
+    'numbers-large': { description: 'las cantidades grandes', file: 'cantidades-grandes' },
+};
+const calendarAudios = {
+    'calendar-weekdays': { description: 'los días de la semana', file: 'dias-de-la-semana' },
+    'calendar-months': { description: 'los meses del año', file: 'meses-del-ano' },
+    'calendar-seasons': { description: 'las estaciones del año', file: 'estaciones-del-ano' },
+};
+export type LessonAudioClip = 'a' | 'i' | 'u' | 'consonantes' | 'audio1' | 'audio2' | 'audio3' | keyof typeof numberAudios | keyof typeof calendarAudios | keyof typeof greetingAudios | keyof typeof questionAudios | keyof typeof sentenceAudios | keyof typeof expressionAudios | keyof typeof pronounAudios | keyof typeof pronounWordAudios;
 type Clip = LessonAudioClip;
 const wordAudios = { audio1: 'shunku', audio2: 'purina', audio3: 'llama' };
 type PlaybackState = { clip: Clip | null; phase: 'idle' | 'loading' | 'playing' | 'error'; message: string };
@@ -56,16 +66,18 @@ export function useLessonAudio() {
         const expression = clip in expressionAudios ? expressionAudios[clip as keyof typeof expressionAudios] : null;
         const pronoun = clip in pronounAudios ? pronounAudios[clip as keyof typeof pronounAudios] : null;
         const pronounWord = clip in pronounWordAudios ? pronounWordAudios[clip as keyof typeof pronounWordAudios] : null;
-        const description = pronounWord ? `«${pronounWord.word}»` : pronoun ? `la oración ${clip.slice(-1)}` : expression ? `«${expression.word}»` : sentence ?? (question ? question.toLowerCase() : greeting ? `«${greeting}»` : isWordAudio ? `el audio ${clip.slice(-1)}` : clip === 'consonantes' ? 'las consonantes' : `la vocal ${clip}`);
+        const numberAudio = clip in numberAudios ? numberAudios[clip as keyof typeof numberAudios] : null;
+        const calendarAudio = clip in calendarAudios ? calendarAudios[clip as keyof typeof calendarAudios] : null;
+        const description = pronounWord ? `«${pronounWord.word}»` : pronoun ? `la oración ${clip.slice(-1)}` : expression ? `«${expression.word}»` : sentence ?? (question ? question.toLowerCase() : greeting ? `«${greeting}»` : isWordAudio ? `el audio ${clip.slice(-1)}` : numberAudio ? numberAudio.description : calendarAudio ? calendarAudio.description : clip === 'consonantes' ? 'las consonantes' : `la vocal ${clip}`);
         setState({ clip, phase: 'loading', message: `Cargando ${description}.` });
-        const path = expression ? `unidad-2/${expression.path}.mp3` : sentence ? `unidad-2/completar-saludos/${clip}.mp3` : question ? `unidad-2/preguntas-respuestas/${clip}.mp3` : greeting ? `saludos/${clip}.mp3` : isWordAudio ? `vocal-que-falta/${wordAudios[clip]}.mp3` : clip === 'consonantes' ? 'consonantes/consonantes.mp3' : `vocales/${clip}.mp3`;
+        const path = expression ? `unidad-2/${expression.path}.mp3` : sentence ? `unidad-2/completar-saludos/${clip}.mp3` : question ? `unidad-2/preguntas-respuestas/${clip}.mp3` : greeting ? `saludos/${clip}.mp3` : isWordAudio ? `vocal-que-falta/${wordAudios[clip]}.mp3` : numberAudio ? `unidad-4/numeros/${numberAudio.file}.mp3` : calendarAudio ? `unidad-5/calendario/${calendarAudio.file}.mp3` : clip === 'consonantes' ? 'consonantes/consonantes.mp3' : `vocales/${clip}.mp3`;
         const audio = new Audio(`${import.meta.env.BASE_URL}audios/${pronounWord ? `unidad-3/pronombres/${pronounWord.file}.mp3` : pronoun ? `unidad-3/pronombres/${pronoun}.mp3` : path}`);
         audioRef.current = audio;
 
         const fail = () => {
             if (audioRef.current !== audio) return;
             stop();
-            const subject = pronounWord ? `«${pronounWord.word}»` : expression ? `«${expression.word}»` : greeting ? `«${greeting}»` : clip === 'consonantes' ? 'las consonantes' : `«${clip}»`;
+            const subject = pronounWord ? `«${pronounWord.word}»` : expression ? `«${expression.word}»` : greeting ? `«${greeting}»` : numberAudio ? numberAudio.description : calendarAudio ? calendarAudio.description : clip === 'consonantes' ? 'las consonantes' : `«${clip}»`;
             setState({ clip, phase: 'error', message: pronoun ? `No se pudo reproducir ${description}. Inténtalo de nuevo.` : sentence ? `No se pudo reproducir ${sentence}. Inténtalo de nuevo.` : question ? `No se pudo reproducir el ${description}. Inténtalo de nuevo.` : isWordAudio ? `No se pudo reproducir el audio ${clip.slice(-1)}. Inténtalo de nuevo.` : `No se pudo reproducir el audio de ${subject}. Inténtalo de nuevo.` });
         };
         audio.onplaying = () => {

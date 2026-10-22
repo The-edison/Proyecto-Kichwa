@@ -35,6 +35,7 @@ async function screen({ completed = false, post, exercises = [choice, matching],
         useApi: { useApi: () => ({ data: { exercises: exercises.map(item => ({ ...item, completed })), total: exercises.length, completed_count: completed ? exercises.length : 0 }, loading: false, error: '', refresh: async () => { refreshes++; } }) },
         api: { withProgressBatch: work => work(), ApiError, apiBaseUrl: '', apiPost: async (path, payload) => { requests.push({ path, payload }); return post ? post({ path, payload, ApiError }) : path.endsWith('/guided/result') ? perfectScore : { response_id: requests.length + 100, is_correct: true, feedback: 'Respuesta correcta.' }; } },
         LearningCompanion: { LearningCompanion: 'LearningCompanion' },
+        SuccessConfetti: { SuccessConfetti: 'SuccessConfetti' },
         GuidedIntroduction: { GuidedIntroduction: 'GuidedIntroduction' },
         GreetingsIntroduction: { GreetingsIntroduction: 'GreetingsIntroduction' },
         TopicIntroduction: { TopicIntroduction: 'TopicIntroduction' },
@@ -45,6 +46,8 @@ async function screen({ completed = false, post, exercises = [choice, matching],
         SceneChoicePanel: { SceneChoicePanel: 'SceneChoicePanel' },
         SentenceOrderPanel: { SentenceOrderPanel: 'SentenceOrderPanel' },
         NumbersPractice: { NumbersPractice: 'NumbersPractice' },
+        NumbersMatchingExercise: { NumbersMatchingExercise: 'NumbersMatchingExercise' },
+        InteractiveSentencePractice: { InteractiveSentencePractice: 'InteractiveSentencePractice' },
         PronounsPracticePanel: { PronounsPracticePanel: 'PronounsPracticePanel' },
         States: { ErrorState: 'ErrorState', LoadingState: 'LoadingState' },
         AuthContext: { useAuth: () => ({ user: { id: userId } }) },
@@ -185,6 +188,47 @@ for (const lesson of ['pronouns', 'numbers', 'calendar', 'animals-colors', 'body
         assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === '2 de 2 ejercicios correctos'));
     });
 }
+
+for (const lesson of ['numbers', 'calendar']) {
+    test(`${lesson} sends tile, choice and written answers through the guided flow`, async () => {
+        const exercises = [
+            { id: 70, type: 'ordenar', prompt: 'Ordena', elements: [{ id: 'a', texto: 'a' }, { id: 'b', texto: 'b' }], zones: [], config: { title: 'Fichas', interactive_activity: 'tiles' } },
+            { id: 71, type: 'completar', prompt: 'Elige', elements: [{ id: 'word', texto: '_____ · Pista', opciones: ['a', 'b'] }], zones: [], config: { title: 'Opciones', interactive_activity: 'choice' } },
+            { id: 72, type: 'completar', prompt: 'Escribe', elements: [{ id: 'word', texto: '_____ · Pista' }], zones: [], config: { title: 'Escritura', interactive_activity: 'writing' } },
+        ];
+        const view = await screen({ config: { guided_lesson: lesson }, exercises });
+        const panel = () => nodes(view.render()).find(node => node.type === 'InteractiveSentencePractice');
+        click(view, 'Continuar');
+        assert.equal(panel().props.lesson, lesson);
+        assert.equal(button(view, 'Comprobar').props.disabled, true);
+        panel().props.onChange({ orden: ['a', 'b'] });
+        await check(view);
+        assert.deepEqual(Array.from(view.requests[0].payload.answer.orden), ['a', 'b']);
+        click(view, 'Continuar');
+        panel().props.onChange({ textos: { word: 'a' } });
+        await check(view);
+        assert.equal(view.requests[1].payload.answer.textos.word, 'a');
+        click(view, 'Continuar');
+        panel().props.onChange({ textos: { word: 'b' } });
+        await check(view);
+        assert.equal(view.requests[2].payload.answer.textos.word, 'b');
+    });
+}
+
+test('book-style matching is limited to the one-to-ten exercise', async () => {
+    const elements = [
+        { id: 'n-1', texto: '1', grupo: 'origen' },
+        { id: 'w-1', texto: 'shuk', grupo: 'destino' },
+    ];
+    for (const activity of ['small', 'large']) {
+        const view = await screen({ config: { guided_lesson: 'numbers' }, exercises: [
+            { id: 90, type: 'relacionar', prompt: 'Une', elements, zones: [], config: { title: 'Números', numbers_activity: activity } },
+        ] });
+        click(view, 'Continuar');
+        assert.equal(nodes(view.render()).some(node => node.type === 'NumbersMatchingExercise'), activity === 'small');
+        assert.equal(nodes(view.render()).some(node => node.props.className === 'guided-matching-panel'), activity === 'large');
+    }
+});
 
 test('three dedicated screens grade both exercises and show the server score with three working actions', async () => {
     const view = await screen();
@@ -331,6 +375,23 @@ test('guided companion shows checked XP, clears stale feedback and sums only ear
     click(view, 'Reintentar');
     await complete(view);
     assert.equal(companion().xpEarned, 0);
+});
+
+test('confetti appears only after a fresh correct check and clears on navigation or reload', async () => {
+    let correct = false;
+    const view = await screen({ post: () => ({ response_id: correct ? 2 : 1, is_correct: correct, feedback: 'Revisado.' }) });
+    const celebrates = () => nodes(view.render()).some(node => node.type === 'SuccessConfetti');
+    click(view, 'Continuar');
+    assert.equal(celebrates(), false);
+    choose(view, 'sisa'); await check(view);
+    assert.equal(celebrates(), false);
+    correct = true;
+    choose(view, 'wasi'); await check(view);
+    assert.equal(celebrates(), true);
+    view.remount();
+    assert.equal(celebrates(), false);
+    click(view, 'Continuar');
+    assert.equal(celebrates(), false);
 });
 
 test('guided correct selections and matching answers stay locked when navigating backwards', async () => {

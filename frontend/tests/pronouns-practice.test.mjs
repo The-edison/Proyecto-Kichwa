@@ -30,6 +30,7 @@ async function screen(exercises) {
         'lucide-react': Object.fromEntries(['CheckCircle2', 'RotateCcw', 'Volume2', 'Bed', 'Fingerprint', 'Hand', 'UserRound', 'UserRoundCheck', 'Users', 'UsersRound', 'Utensils'].map(name => [name, name])),
         api: { apiBaseUrl: '', apiPost() {}, ApiError: class extends Error {} },
         LearningCompanion: { LearningCompanion: 'LearningCompanion' },
+        SuccessConfetti: { SuccessConfetti: 'SuccessConfetti' },
         useAnswerSound: { useAnswerSound: () => () => {} },
         'pronouns-practice.css': {},
         'guided-introduction.css': {}, 'guided-topics.css': {},

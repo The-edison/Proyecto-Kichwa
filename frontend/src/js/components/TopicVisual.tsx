@@ -10,7 +10,7 @@ import {
 const sectionIcons: Record<string, readonly LucideIcon[]> = {
     pronouns: [UserRound, UsersRound, MessageCircle, Quote],
     numbers: [Hash, Calculator, Layers, Leaf],
-    calendar: [CalendarDays, CalendarRange, Clock3, Sun],
+    calendar: [CalendarDays, CalendarRange, Clock3, CalendarDays, Sun],
     'animals-colors': [PawPrint, Bird, Palette, Shirt],
     body: [Smile, Hand, PersonStanding, Footprints],
     nature: [Mountain, House, Moon, CloudRain],
@@ -46,7 +46,7 @@ export function TopicWordVisual({ lesson, section, word, index }: { lesson: stri
         return <Calculator className="topic-word-icon" size={21} strokeWidth={1.65} aria-hidden="true" />;
     }
     if (lesson === 'calendar' && section !== 1) {
-        const Icon = section === 2 ? Clock3 : CalendarDays;
+        const Icon = section === 4 ? Sun : section === 2 ? Clock3 : CalendarDays;
         return <Icon className="topic-word-icon" size={21} strokeWidth={1.65} aria-hidden="true" />;
     }
     if (lesson === 'animals-colors' && (word === 'pilpintu' || word === 'hampatu')) {

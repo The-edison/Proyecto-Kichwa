@@ -1,6 +1,16 @@
 .app-sidebar > nav { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--color-border) transparent; }
 .app-sidebar .sidebar-top, .app-sidebar .sidebar-bottom { flex-shrink: 0; }
 .student-learning-nav { margin-top: 16px; --color-text-secondary: var(--color-sidebar-muted); --color-soft: var(--color-sidebar-hover); --color-border: var(--color-sidebar-border); }
+.student-overview-nav { --color-text-secondary: var(--color-sidebar-muted); --color-soft: var(--color-sidebar-hover); --color-border: var(--color-sidebar-border); }
+.student-overview-row { padding: 0; overflow: hidden; }
+.student-overview-row.is-current { color: var(--color-sidebar-text); background: var(--color-sidebar-hover); }
+.student-overview-home { display: flex; flex: 1; align-items: center; gap: 12px; min-width: 0; padding: 12px; }
+.student-overview-home svg { flex: none; }
+.student-overview-toggle { display: grid; flex: none; place-items: center; width: 38px; align-self: stretch; border: 0; background: transparent; color: inherit; cursor: pointer; }
+.student-overview-toggle:hover { background: var(--color-sidebar-hover); }
+.student-overview-children { margin: 0 0 12px 18px; }
+.student-overview-link { display: flex; align-items: center; gap: 9px; font-size: 13px; }
+.student-overview-link svg { flex: none; }
 .learning-nav-toggle { display: flex; align-items: center; gap: 9px; width: 100%; padding: 10px; border: 0; border-radius: 9px; color: var(--color-text-secondary); background: transparent; text-align: left; cursor: pointer; }
 .learning-nav-toggle:hover, .learning-nav-link:hover { background: var(--color-soft); color: var(--color-sidebar-text); }
 .learning-nav-toggle:focus-visible, .learning-nav-link:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
@@ -27,6 +37,8 @@
 .app-shell.is-learning .guided-unit-header { padding-inline: 24px; }
 @media (min-width: 901px) {
     .app-shell.is-collapsed .learning-nav-label, .app-shell.is-collapsed .learning-nav-chevron, .app-shell.is-collapsed .learning-nav-children, .app-shell.is-collapsed .learning-nav-message { display: none; }
+    .app-shell.is-collapsed .student-overview-toggle { display: none; }
+    .app-shell.is-collapsed .student-overview-home { justify-content: center; width: 100%; padding: 12px 0; }
     .app-shell.is-collapsed .learning-nav-level-toggle { justify-content: center; }
 }
 @media (max-width: 900px) {

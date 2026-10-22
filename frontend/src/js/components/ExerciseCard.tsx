@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { LearningCompanion } from './LearningCompanion';
+import { SuccessConfetti } from './SuccessConfetti';
 import { useAnswerSound } from '../hooks/useAnswerSound';
 import { apiPost, ApiError, apiBaseUrl } from '../services/api';
 import type { Exercise, ExerciseAnswer, ExerciseFeedback } from '../types';
@@ -92,21 +93,22 @@ export function ExerciseCard({ exercise, index, onFeedback }: { exercise: Exerci
     const [feedback, setFeedback] = useState<ExerciseFeedback | null>(null);
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
+    const [celebration, setCelebration] = useState(0);
     const sending = useRef(false);
     const practiceAttempt = useRef<string | null>(null);
     const submission = useRef<string | null>(null);
     function restart() {
         if (sending.current) return;
         practiceAttempt.current = null; submission.current = null;
-        setAnswer({}); setFeedback(null); setError('');
+        setAnswer({}); setFeedback(null); setError(''); setCelebration(0);
     }
     async function submit() {
         if (sending.current || feedback?.is_correct || !answerComplete(exercise, answer)) return;
         sending.current = true;
         setBusy(true); setError('');
-        try { const response=await apiPost<ExerciseFeedback>(`/exercises/${exercise.id}/answer`, {answer, practice_attempt_id: practiceAttempt.current ??= crypto.randomUUID(), submission_id: submission.current ??= crypto.randomUUID()});setFeedback(response);playAnswerSound(response.is_correct);onFeedback?.(response); }
+        try { const response=await apiPost<ExerciseFeedback>(`/exercises/${exercise.id}/answer`, {answer, practice_attempt_id: practiceAttempt.current ??= crypto.randomUUID(), submission_id: submission.current ??= crypto.randomUUID()});setFeedback(response);playAnswerSound(response.is_correct);if (response.is_correct) setCelebration(previous => previous + 1);onFeedback?.(response); }
         catch (reason) { setError(reason instanceof ApiError ? Object.values(reason.errors).flat().join(' ') || reason.message : 'No se pudo enviar la respuesta.'); }
         finally { sending.current = false; setBusy(false); }
     }
-    return <article className="glass-panel p-6"><div className="exercise-companion-header"><div><span className="eyebrow">EJERCICIO {index + 1} · {exercise.type.replaceAll('_', ' ').toUpperCase()}</span><h3 className="my-5 text-xl font-bold">{exercise.config?.title ?? exercise.prompt}</h3>{exercise.config?.title && <p className="mb-5 text-lg">{exercise.prompt}</p>}</div><LearningCompanion key={feedback ? `response-${feedback.response_id ?? feedback.is_correct}` : "ready"} correct={feedback?.is_correct} xpEarned={feedback?.xp_earned} xpTotal={feedback?.xp_total} /></div><fieldset disabled={busy || feedback?.is_correct === true}><ExerciseInteraction key={practiceAttempt.current ?? "new"} corrected={feedback ?? undefined} exercise={exercise} answer={answer} onChange={value => { if (busy || feedback?.is_correct) return; setAnswer(value); setFeedback(null); submission.current = null; }} name={`exercise-${exercise.id}`} /></fieldset><button className="primary-button mt-5" type="button" disabled={!answerComplete(exercise, answer) || busy || feedback?.is_correct === true} onClick={submit}>{exercise.config?.presentation || exercise.config?.title ? 'Comprobar' : 'Comprobar respuesta'}</button>{feedback && <button type="button" className="secondary-button mt-5 ml-3" disabled={busy} onClick={restart}>Nuevo intento</button>}{error && <p className="form-error" role="alert">{error}</p>}{feedback && feedbackMessage(feedback.feedback) && <p role="status" className={`mt-5 rounded-xl p-4 ${feedback.is_correct ? 'bg-positive-soft' : 'bg-negative-soft text-negative'}`}>{feedbackMessage(feedback.feedback)}</p>}</article>;
+    return <article className="glass-panel p-6">{celebration > 0 && <SuccessConfetti key={celebration} onDone={() => setCelebration(current => current === celebration ? 0 : current)} />}<div className="exercise-companion-header"><div><span className="eyebrow">EJERCICIO {index + 1} · {exercise.type.replaceAll('_', ' ').toUpperCase()}</span><h3 className="my-5 text-xl font-bold">{exercise.config?.title ?? exercise.prompt}</h3>{exercise.config?.title && <p className="mb-5 text-lg">{exercise.prompt}</p>}</div><LearningCompanion key={feedback ? `response-${feedback.response_id ?? feedback.is_correct}` : "ready"} correct={feedback?.is_correct} xpEarned={feedback?.xp_earned} xpTotal={feedback?.xp_total} /></div><fieldset disabled={busy || feedback?.is_correct === true}><ExerciseInteraction key={practiceAttempt.current ?? "new"} corrected={feedback ?? undefined} exercise={exercise} answer={answer} onChange={value => { if (busy || feedback?.is_correct) return; setAnswer(value); setFeedback(null); submission.current = null; }} name={`exercise-${exercise.id}`} /></fieldset><button className="primary-button mt-5" type="button" disabled={!answerComplete(exercise, answer) || busy || feedback?.is_correct === true} onClick={submit}>{exercise.config?.presentation || exercise.config?.title ? 'Comprobar' : 'Comprobar respuesta'}</button>{feedback && <button type="button" className="secondary-button mt-5 ml-3" disabled={busy} onClick={restart}>Nuevo intento</button>}{error && <p className="form-error" role="alert">{error}</p>}{feedback && feedbackMessage(feedback.feedback) && <p role="status" className={`mt-5 rounded-xl p-4 ${feedback.is_correct ? 'bg-positive-soft' : 'bg-negative-soft text-negative'}`}>{feedbackMessage(feedback.feedback)}</p>}</article>;
 }

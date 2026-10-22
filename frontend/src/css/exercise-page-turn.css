@@ -1,0 +1,52 @@
+.exercise-page-turn {
+    position: relative;
+    min-width: 0;
+    transform-origin: left center;
+    backface-visibility: hidden;
+    animation: exercise-page-forward 480ms cubic-bezier(.2,.7,.2,1) both;
+}
+
+.exercise-page-turn.is-turning-back {
+    transform-origin: right center;
+    animation-name: exercise-page-backward;
+}
+
+.exercise-page-turn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    background: linear-gradient(90deg, rgb(0 0 0 / 15%), transparent 42%);
+    pointer-events: none;
+    animation: exercise-page-shadow 480ms ease-out both;
+}
+
+.exercise-page-turn.is-turning-back::after {
+    background: linear-gradient(270deg, rgb(0 0 0 / 15%), transparent 42%);
+}
+
+.guided-page-turn { width: 100%; }
+
+@keyframes exercise-page-forward {
+    from { opacity: .35; transform: perspective(1200px) rotateY(-24deg) translateX(16px); }
+    to { opacity: 1; transform: perspective(1200px) rotateY(0) translateX(0); }
+}
+
+@keyframes exercise-page-backward {
+    from { opacity: .35; transform: perspective(1200px) rotateY(24deg) translateX(-16px); }
+    to { opacity: 1; transform: perspective(1200px) rotateY(0) translateX(0); }
+}
+
+@keyframes exercise-page-shadow {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .exercise-page-turn, .exercise-page-turn::after {
+        animation: none;
+        transform: none;
+    }
+    .exercise-page-turn::after { display: none; }
+}

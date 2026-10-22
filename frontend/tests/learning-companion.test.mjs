@@ -31,27 +31,24 @@ test('companion reveals no reward or score before checking', () => {
     assert.equal(nodes(view).some(n => n.props.className === 'learning-companion-score'), false);
 });
 
-test('correct and incorrect responses use different portraits and server-confirmed XP', () => {
+test('graded exercise responses hide the companion badge and XP', () => {
     const success = LearningCompanion({ correct: true, xpEarned: 10, xpTotal: 70 });
     const retry = LearningCompanion({ correct: false, xpEarned: 0, xpTotal: 70 });
     assert.notEqual(nodes(success).find(n => n.type === 'img').props.src, nodes(retry).find(n => n.type === 'img').props.src);
-    assert.match(content(success), /\+10 XP/);
-    assert.match(content(retry), /\+0 XP/);
-    assert.match(content(success), /Alli rurashka/);
-    assert.match(content(retry), /Kutin rurapay/);
-    assert.equal(nodes(success).find(n => n.props.className === 'learning-companion-translation').props.children, 'Bien hecho');
-    assert.equal(nodes(retry).find(n => n.props.className === 'learning-companion-translation').props.children, 'Reinténtalo');
+    assert.doesNotMatch(content(success), /\+10 XP|Alli rurashka|Bien hecho/);
+    assert.doesNotMatch(content(retry), /\+0 XP|Kutin rurapay|Cada intento/);
+    assert.equal(nodes(success).some(n => n.props.className === 'learning-companion-message'), false);
+    assert.equal(nodes(retry).some(n => n.props.className === 'learning-companion-message'), false);
     for (const view of [success, retry]) {
         assert.doesNotMatch(content(view), /ganados en esta actividad|Total acumulado|70 XP/);
     }
     assert.match(retry.props.className, /is-encourage/);
-    assert.equal(nodes(retry).find(n => n.props.role === 'status').props['aria-live'], 'polite');
+    assert.equal(nodes(retry).some(n => n.props.role === 'status'), false);
 });
 
 test('zero XP stays zero on an already rewarded or unrewarded correct activity', () => {
     const view = LearningCompanion({ correct: true, xpEarned: 0 });
-    assert.match(content(view), /\+0 XP/);
-    assert.match(content(view), /ya cuentan en este intento/);
+    assert.doesNotMatch(content(view), /\+0 XP|ya cuentan en este intento/);
     assert.equal(content(view).includes('undefined'), false);
 });
 
@@ -78,7 +75,7 @@ async function card(post) {
     const module = await load(cardCode, specifier => specifier.endsWith('/useAnswerSound') ? { useAnswerSound: () => () => {} } : specifier === 'react' ? {
         useState(initial) { const index = cursor++; if (!(index in states)) states[index] = initial; return [states[index], value => { states[index] = typeof value === 'function' ? value(states[index]) : value; }]; },
         useRef(initial) { const index = cursor++; return states[index] ??= { current: initial }; },
-    } : specifier.endsWith('/LearningCompanion') ? { LearningCompanion: 'LearningCompanion' } : {
+    } : specifier.endsWith('/LearningCompanion') ? { LearningCompanion: 'LearningCompanion' } : specifier.endsWith('/SuccessConfetti') ? { SuccessConfetti: 'SuccessConfetti' } : {
         apiBaseUrl: '', ApiError: class extends Error {}, apiPost: async (path, payload) => { requests.push({ path, payload }); return post(payload); },
     });
     return {
@@ -116,6 +113,19 @@ test('a correct activity locks its answer and keeps its graded feedback', async 
     assert.equal(companion(view).xpEarned, 10);
     assert.equal(companion(view).correct, true);
     assert.equal(nodes(view.render()).find(n => n.type === 'fieldset').props.disabled, true);
+});
+
+test('standalone exercises celebrate a correct submission and clear confetti for a new attempt', async () => {
+    let correct = false;
+    const view = await card(() => ({ response_id: correct ? 2 : 1, is_correct: correct, feedback: 'Revisado.' }));
+    const celebrates = () => nodes(view.render()).some(node => node.type === 'SuccessConfetti');
+    select(view); await check(view);
+    assert.equal(celebrates(), false);
+    correct = true;
+    await check(view);
+    assert.equal(celebrates(), true);
+    nodes(view.render()).find(node => node.type === 'button' && node.props.children === 'Nuevo intento').props.onClick();
+    assert.equal(celebrates(), false);
 });
 
 test('an incorrect activity stays editable until it is corrected', async () => {

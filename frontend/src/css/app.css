@@ -444,6 +444,12 @@ h1, h2, h3 { line-height: 1.25; letter-spacing: -.035em; }
 .course-art.has-image::after { content: ''; position: absolute; inset: 50% 0 0; background: linear-gradient(transparent, var(--color-scrim)); pointer-events: none; }
 .course-art.has-image span { z-index: 1; color: var(--color-on-primary); }
 .course-body { padding: 24px; }
+.course-body, .learning-module-body {
+    background-image:
+        radial-gradient(circle, color-mix(in srgb, var(--color-secondary) 13%, transparent) 1px, transparent 1.5px),
+        linear-gradient(110deg, var(--color-surface) 18%, var(--color-secondary-soft) 100%);
+    background-size: 16px 16px, auto;
+}
 .course-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
 .course-body h3 { font-size: 22px; font-weight: 700; }
 .course-body p { margin-top: 10px; font-size: 13px; line-height: 1.7; color: var(--color-text-secondary); }

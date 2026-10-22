@@ -44,13 +44,8 @@ class UnidadesTematicasGuiadasSeeder extends Seeder
                 Actividad::where('id_unidad', $unit->id_unidad)->update(['publicado' => false]);
                 EvaluacionKichwa::where('id_unidad', $unit->id_unidad)->update(['publicado' => false]);
                 Tema::where('id_unidad', $unit->id_unidad)->update(['publicado' => false]);
-                $body = [$topic['description'], $topic['note']];
-                foreach ($topic['sections'] as $section) {
-                    $body[] = $section['title']."\n".implode("\n", array_map(fn (array $row): string => $row[0].' = '.$row[1], $section['rows']));
-                    $body = array_merge($body, $section['paragraphs']);
-                }
                 Tema::create(['id_unidad' => $unit->id_unidad, 'clave_leccion' => $key, 'tipo_tema' => 'vocabulario',
-                    'titulo_tema' => $topic['title'], 'contenido_tema' => implode("\n\n", $body),
+                    'titulo_tema' => $topic['title'], 'contenido_tema' => self::topicBody($topic),
                     'orden_tema' => 1 + (int) Tema::where('id_unidad', $unit->id_unidad)->max('orden_tema'), 'publicado' => true]);
                 $order = (int) Actividad::where('id_unidad', $unit->id_unidad)->max('orden_actividad');
                 foreach ($topic['sections'] as $sectionIndex => $section) {
@@ -95,5 +90,17 @@ class UnidadesTematicasGuiadasSeeder extends Seeder
         PublicacionContenido::invalidate();
         $this->call(UnidadTresPronombresSeeder::class);
         $this->call(UnidadCuatroNumerosSeeder::class);
+        $this->call(UnidadCincoCalendarioSeeder::class);
+    }
+
+    public static function topicBody(array $topic): string
+    {
+        $body = [$topic['description'], $topic['note']];
+        foreach ($topic['sections'] as $section) {
+            $body[] = $section['title']."\n".implode("\n", array_map(fn (array $row): string => $row[0].' = '.$row[1], $section['rows']));
+            $body = array_merge($body, $section['paragraphs']);
+        }
+
+        return implode("\n\n", $body);
     }
 }

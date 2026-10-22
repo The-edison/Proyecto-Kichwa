@@ -1,0 +1,37 @@
+.success-confetti {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    overflow: hidden;
+    pointer-events: none;
+    animation: success-confetti-lifetime 2.6s linear forwards;
+}
+
+.success-confetti-piece {
+    position: absolute;
+    top: -24px;
+    width: 10px;
+    height: 17px;
+    border-radius: 2px;
+    opacity: 0;
+    animation: success-confetti-fall ease-out both;
+}
+
+.success-confetti-piece:nth-child(3n) { width: 9px; height: 9px; border-radius: 50%; }
+.success-confetti-piece:nth-child(4n) { width: 5px; height: 19px; }
+.success-confetti-piece:nth-child(2n) { --confetti-drift: 70px; }
+.success-confetti-piece:nth-child(2n + 1) { --confetti-drift: -70px; }
+
+@keyframes success-confetti-fall {
+    0% { transform: translate3d(0, -10px, 0) rotate(0deg); opacity: 1; }
+    100% { transform: translate3d(var(--confetti-drift), 105vh, 0) rotate(780deg); opacity: 0; }
+}
+
+@keyframes success-confetti-lifetime {
+    to { visibility: hidden; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .success-confetti { animation-duration: 100ms; }
+    .success-confetti-piece { animation: none; }
+}

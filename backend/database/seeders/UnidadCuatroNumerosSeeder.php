@@ -21,7 +21,7 @@ class UnidadCuatroNumerosSeeder extends Seeder
             DB::select('SELECT pg_advisory_xact_lock(20261020)');
             $topic = Tema::where('clave_leccion', self::LESSON_KEY)->firstOrFail();
             $unit = Unidad::whereKey($topic->id_unidad)->lockForUpdate()->firstOrFail();
-            if (Actividad::where('id_unidad', $unit->id_unidad)->where('origen_reactivo', 'u4-numbers-match-small-v1')->exists()) {
+            if (Actividad::where('id_unidad', $unit->id_unidad)->where('origen_reactivo', 'u4-numbers-match-small-v3')->exists()) {
                 return;
             }
 
@@ -40,7 +40,9 @@ class UnidadCuatroNumerosSeeder extends Seeder
                 $record->save();
             }
 
-            $topic->update(['contenido_tema' => "Aprende a contar en kichwa del cero al veinte y a usar los números para hablar de edades y cantidades.\n\nDel cero al diez: illak = 0; shuk = 1; ishkay = 2; kimsa = 3; chusku = 4; pichka = 5; sukta = 6; kanchis = 7; pusak = 8; iskun = 9; chunka = 10.\n\nDel once al veinte se combina chunka con las unidades: chunka shuk = 11; chunka ishkay = 12; chunka kimsa = 13; chunka chusku = 14; chunka pichka = 15; chunka sukta = 16; chunka kanchis = 17; chunka pusak = 18; chunka iskun = 19; ishkay chunka = 20.\n\nCantidades grandes: patsak = 100; waranka = 1.000; chunka waranka = 10.000; patsak waranka = 100.000; hunu = 1.000.000.\n\nEjemplos: Ñuka shuk watatami charini. = Tengo un año. Pichka yura. = Cinco árboles. Kimsa runakuna. = Tres personas."]);
+            $topics = json_decode(file_get_contents(resource_path('lessons/guided-topics.json')), true, 512, JSON_THROW_ON_ERROR);
+            $lesson = collect($topics)->firstWhere('key', 'numbers');
+            $topic->update(['contenido_tema' => UnidadesTematicasGuiadasSeeder::topicBody($lesson)]);
             $unit->update(['titulo_unidad' => 'Números y cantidades',
                 'objetivo_unidad' => 'Contar del cero al veinte y usar números para expresar cantidades en kichwa.',
                 'publicado' => true]);
@@ -56,29 +58,29 @@ class UnidadCuatroNumerosSeeder extends Seeder
             100000 => 'patsak waranka', 1000000 => 'hunu'];
 
         $counts = [
-            ['id' => 'apples', 'label' => 'Manzanas', 'number' => 3, 'word' => 'kimsa'],
-            ['id' => 'flowers', 'label' => 'Flores', 'number' => 5, 'word' => 'pichka'],
-            ['id' => 'llamas', 'label' => 'Llamas', 'number' => 4, 'word' => 'chusku'],
-            ['id' => 'trees', 'label' => 'Árboles', 'number' => 6, 'word' => 'sukta'],
-            ['id' => 'books', 'label' => 'Libros', 'number' => 10, 'word' => 'chunka'],
-            ['id' => 'pencils', 'label' => 'Lápices', 'number' => 7, 'word' => 'kanchis'],
+            ['id' => 'leaves', 'label' => 'Hojas', 'word' => 'ishkay'],
+            ['id' => 'women', 'label' => 'Mujeres', 'word' => 'kimsa'],
+            ['id' => 'bulls', 'label' => 'Toros', 'word' => 'chusku'],
+            ['id' => 'children', 'label' => 'Niños', 'word' => 'pichka'],
+            ['id' => 'plants', 'label' => 'Plantas', 'word' => 'kanchis'],
+            ['id' => 'cows', 'label' => 'Vacas', 'word' => 'chunka'],
         ];
         $sentences = [
-            ['id' => 'trees', 'text' => 'Ñuka charini _____ yura. · Tengo cinco árboles.', 'word' => 'pichka'],
-            ['id' => 'llamas', 'text' => 'Wasipi _____ llamakuna kashkan. · En mi casa hay tres llamas.', 'word' => 'kimsa'],
-            ['id' => 'days', 'text' => 'Kay punchapi _____ punchakuna charini. · Hoy tengo diez días.', 'word' => 'chunka'],
-            ['id' => 'apples', 'text' => 'Mamay charin _____ mishki murukuna. · Mi mamá tiene dos frutas.', 'word' => 'ishkay'],
+            ['id' => 'sweet', 'text' => 'Ñuka _____ mishkita mikuni · Yo como un dulce', 'word' => 'shuk'],
+            ['id' => 'leaves', 'text' => 'Payka _____ pankata apamun · Él trae dos hojas', 'word' => 'ishkay'],
+            ['id' => 'women', 'text' => '_____ warmikuna tushunkuna · Tres mujeres bailan', 'word' => 'kimsa'],
+            ['id' => 'children', 'text' => '_____ wawakuna pukllankuna · Cinco niños juegan', 'word' => 'pichka'],
         ];
 
         return [
-            ['origin' => 'u4-numbers-match-small-v1', 'type' => 'relacionar',
+            ['origin' => 'u4-numbers-match-small-v3', 'type' => 'relacionar',
                 'prompt' => 'Selecciona cada cifra y después su nombre en kichwa. Completa las diez parejas.',
                 'elements' => $this->matchingElements($small), 'zones' => [], 'resource' => null,
                 'solution' => ['pares' => $this->matchingPairs($small)],
                 'config' => ['title' => '1. Une los números', 'numbers_activity' => 'small',
                     'correct_feedback' => '¡Muy bien! Reconociste los números del uno al diez.',
                     'incorrect_feedback' => 'Revisa las parejas y vuelve a intentarlo. Puedes cambiar cualquier unión.']],
-            ['origin' => 'u4-numbers-count-v1', 'type' => 'completar',
+            ['origin' => 'u4-numbers-count-v3', 'type' => 'completar',
                 'prompt' => 'Cuenta los objetos de cada tarjeta y escribe el número en kichwa.',
                 'elements' => array_map(fn (array $item): array => ['id' => $item['id'], 'texto' => $item['label']], $counts),
                 'zones' => [], 'resource' => null,
@@ -86,14 +88,14 @@ class UnidadCuatroNumerosSeeder extends Seeder
                 'config' => ['title' => '2. Cuenta lo que ves', 'numbers_activity' => 'count',
                     'correct_feedback' => '¡Excelente! Contaste todos los grupos en kichwa.',
                     'incorrect_feedback' => 'Cuenta cada grupo despacio. Después revisa cómo se escribe el número.']],
-            ['origin' => 'u4-numbers-match-large-v1', 'type' => 'relacionar',
+            ['origin' => 'u4-numbers-match-large-v3', 'type' => 'relacionar',
                 'prompt' => 'Relaciona cada cifra grande con su nombre en kichwa.',
                 'elements' => $this->matchingElements($large), 'zones' => [], 'resource' => null,
                 'solution' => ['pares' => $this->matchingPairs($large)],
                 'config' => ['title' => '3. Cantidades grandes', 'numbers_activity' => 'large',
                     'correct_feedback' => '¡Muy bien! Reconociste centenas, miles y un millón.',
                     'incorrect_feedback' => 'Fíjate en el valor de cada cifra y revisa las palabras de la lección.']],
-            ['origin' => 'u4-numbers-sentences-v1', 'type' => 'completar',
+            ['origin' => 'u4-numbers-sentences-v3', 'type' => 'completar',
                 'prompt' => 'Elige del banco de palabras el número que completa cada frase.',
                 'elements' => array_map(fn (array $item): array => ['id' => $item['id'], 'texto' => $item['text'],
                     'opciones' => array_values($small)], $sentences),
@@ -102,6 +104,30 @@ class UnidadCuatroNumerosSeeder extends Seeder
                 'config' => ['title' => '4. Números en contexto', 'numbers_activity' => 'sentences',
                     'correct_feedback' => '¡Muy bien! Usaste los números para completar las frases.',
                     'incorrect_feedback' => 'Lee la traducción de cada frase y cambia las palabras que no correspondan.']],
+            ['origin' => 'u4-numbers-tiles-v3', 'type' => 'ordenar',
+                'prompt' => 'Forma en kichwa el número diecisiete tocando las fichas en orden.',
+                'elements' => [['id' => 'kanchis', 'texto' => 'kanchis'], ['id' => 'chunka', 'texto' => 'chunka']],
+                'zones' => [], 'resource' => null, 'solution' => ['orden' => ['chunka', 'kanchis']],
+                'config' => ['title' => '5. Forma el número', 'interactive_activity' => 'tiles',
+                    'context_meaning' => 'Diecisiete · 17', 'presentation' => 'tiles',
+                    'correct_feedback' => '¡Correcto! Chunka kanchis significa diecisiete.',
+                    'incorrect_feedback' => 'Para formar diecisiete, empieza por chunka (diez).']],
+            ['origin' => 'u4-numbers-choice-v3', 'type' => 'completar',
+                'prompt' => 'Elige la palabra que completa la cantidad.',
+                'elements' => [['id' => 'quantity', 'texto' => '_____ wawakuna pukllankuna · Cinco niños juegan',
+                    'opciones' => ['kimsa', 'pichka', 'sukta', 'kanchis']]],
+                'zones' => [], 'resource' => null, 'solution' => ['textos' => ['quantity' => ['pichka']]],
+                'config' => ['title' => '6. Elige la cantidad', 'interactive_activity' => 'choice',
+                    'correct_feedback' => '¡Así es! Pichka wawakuna pukllankuna significa cinco niños juegan.',
+                    'incorrect_feedback' => 'Cuenta hasta cinco y busca su nombre en kichwa.']],
+            ['origin' => 'u4-numbers-writing-v3', 'type' => 'completar',
+                'prompt' => 'Escribe la palabra que falta en kichwa.',
+                'elements' => [['id' => 'number', 'texto' => 'Chunka _____ · 12']],
+                'zones' => [], 'resource' => null, 'solution' => ['textos' => ['number' => ['ishkay']]],
+                'config' => ['title' => '7. Escribe el número', 'interactive_activity' => 'writing',
+                    'presentation' => 'writing',
+                    'correct_feedback' => '¡Bien! Chunka ishkay significa doce.',
+                    'incorrect_feedback' => 'Doce se forma con chunka (diez) y el nombre del número dos.']],
         ];
     }
 

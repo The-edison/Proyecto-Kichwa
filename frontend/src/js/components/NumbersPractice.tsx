@@ -2,13 +2,13 @@ import { useState } from 'react';
 import type { Exercise, ExerciseAnswer } from '../types';
 import '../../css/numbers-practice.css';
 
-const groups: Record<string, { icon: string; count: number; name: string }> = {
-    apples: { icon: '🍎', count: 3, name: 'manzanas' },
-    flowers: { icon: '🌼', count: 5, name: 'flores' },
-    llamas: { icon: '🦙', count: 4, name: 'llamas' },
-    trees: { icon: '🌳', count: 6, name: 'árboles' },
-    books: { icon: '📚', count: 10, name: 'libros' },
-    pencils: { icon: '✏️', count: 7, name: 'lápices' },
+const groups: Record<string, { image: string; count: number; name: string }> = {
+    leaves: { image: 'leaf.webp', count: 2, name: 'hojas' },
+    women: { image: 'woman.webp', count: 3, name: 'mujeres' },
+    bulls: { image: 'bull.webp', count: 4, name: 'toros' },
+    children: { image: 'child.webp', count: 5, name: 'niños' },
+    plants: { image: 'plant.webp', count: 7, name: 'plantas' },
+    cows: { image: 'cow.webp', count: 10, name: 'vacas' },
 };
 
 export function NumbersPractice({ exercise, answer, disabled, onChange }: {
@@ -24,16 +24,18 @@ export function NumbersPractice({ exercise, answer, disabled, onChange }: {
     if (exercise.config?.numbers_activity === 'count') {
         return <fieldset className="numbers-practice" disabled={disabled}>
             <legend className="sr-only">Cuenta los objetos y escribe cada número en kichwa</legend>
-            <div className="numbers-count-grid">{exercise.elements.map((element, index) => {
+            <div className="numbers-count-sheet">
+                <div className="numbers-count-sheet-heading"><strong>Observa, cuenta y escribe</strong><span>Escribe en kichwa cuántas figuras hay en cada fila.</span></div>
+                <div className="numbers-count-grid">{exercise.elements.map((element, index) => {
                 const group = groups[element.id];
                 if (!group) return null;
-                return <label className="numbers-count-card" key={element.id}>
-                    <span className="numbers-card-index">{String(index + 1).padStart(2, '0')} · {element.texto}</span>
-                    <span className="numbers-objects" role="img" aria-label={`${group.count} ${group.name}`}>{Array.from({ length: group.count }, (_, item) => <span key={item} aria-hidden="true">{group.icon}</span>)}</span>
-                    <span className="numbers-input-label">Número en kichwa</span>
-                    <input className="field" type="text" autoComplete="off" spellCheck={false} value={texts[element.id] ?? ''} placeholder="Escribe el número" onChange={event => fill(element.id, event.target.value)} />
+                return <label className="numbers-count-row" key={element.id}>
+                    <span className="numbers-count-row-label"><small>{String(index + 1).padStart(2, '0')}</small><strong>{element.texto}</strong></span>
+                    <span className={`numbers-objects numbers-objects-${element.id}`} role="img" aria-label={`${group.count} ${group.name}`}>{Array.from({ length: group.count }, (_, item) => <img key={item} src={`${import.meta.env.BASE_URL}images/numbers-count/${group.image}`} alt="" aria-hidden="true" width={64} height={64} draggable={false} />)}</span>
+                    <span className="numbers-count-answer"><span className="sr-only">Número de {group.name} en kichwa</span><input className="field" type="text" autoComplete="off" spellCheck={false} value={texts[element.id] ?? ''} placeholder="?" onChange={event => fill(element.id, event.target.value)} /></span>
                 </label>;
-            })}</div>
+                })}</div>
+            </div>
         </fieldset>;
     }
 

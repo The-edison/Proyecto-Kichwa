@@ -15,6 +15,18 @@ const pronounIcons: Record<string, LucideIcon> = {
     'ñuka': Fingerprint, kan: Hand, pay: UserRound,
     'ñukanchik': UserRoundCheck, kankuna: UsersRound, paykuna: Users,
 };
+const numberSectionAudio = [
+    { clip: 'numbers-zero-ten', label: 'del cero al diez' },
+    { clip: 'numbers-eleven-twenty', label: 'del once al veinte' },
+    { clip: 'numbers-large', label: 'cantidades grandes' },
+] as const;
+const calendarSectionAudio = [
+    { clip: 'calendar-weekdays', label: 'los días de la semana' },
+    { clip: 'calendar-months', label: 'los meses del año' },
+    undefined,
+    undefined,
+    { clip: 'calendar-seasons', label: 'las estaciones del año' },
+] as const;
 
 export function TopicIntroduction({ lesson }: { lesson: string }) {
     const { state, play } = useLessonAudio();
@@ -25,12 +37,21 @@ export function TopicIntroduction({ lesson }: { lesson: string }) {
         <LessonOverview unit={`${topic.module > 1 ? `MÓDULO ${topic.module} · ` : ''}UNIDAD ${topic.order}`} title={topic.title} description={topic.description} />
         <LessonNote>{topic.note}</LessonNote>
         <LessonCardGrid>
-            {topic.sections.map((section, index) => <section className={`cometa-lesson-card topic-section-${index}`} key={section.title} aria-labelledby={`${topic.key}-section-${index}`}>
+            {topic.sections.map((section, index) => {
+                const sectionAudio = topic.key === 'numbers' ? numberSectionAudio[index] : topic.key === 'calendar' ? calendarSectionAudio[index] : undefined;
+                return <section className={`cometa-lesson-card topic-section-${index}`} key={section.title} aria-labelledby={`${topic.key}-section-${index}`}>
                 <div className="cometa-card-heading">
                     <span className="cometa-card-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
                     <div><span className="cometa-card-kicker">{section.kicker}</span><h2 id={`${topic.key}-section-${index}`}>{section.title}</h2></div>
                     <TopicSectionIcon lesson={topic.key} section={index} />
                 </div>
+                {sectionAudio && <div className="topic-section-audio">
+                    <button type="button" className="topic-section-audio-button" onClick={() => play(sectionAudio.clip)} aria-label={`Escuchar ${sectionAudio.label}`}>
+                        <Volume2 size={18} aria-hidden="true" />
+                        <span>{state.clip === sectionAudio.clip && state.phase === 'playing' ? 'Sonando…' : state.clip === sectionAudio.clip && state.phase === 'loading' ? 'Cargando…' : `Escuchar ${sectionAudio.label}`}</span>
+                    </button>
+                    {state.clip === sectionAudio.clip && state.message && <p className={`topic-section-audio-status${state.phase === 'error' ? ' is-error' : ''}`} role="status">{state.message}</p>}
+                </div>}
                 {topic.key === 'pronouns' && index < 2 ? <div className="topic-pronoun-tiles">
                     {section.rows.map(([word, meaning]) => {
                         const Icon = pronounIcons[word] ?? UserRound;
@@ -46,7 +67,8 @@ export function TopicIntroduction({ lesson }: { lesson: string }) {
                 {section.paragraphs.map((paragraph, paragraphIndex) => topic.key === 'pronouns' && index === 2 ? <div className="topic-pronoun-note" key={paragraph}>
                     <span className="topic-pronoun-note-icon" aria-hidden="true">{paragraphIndex === 0 ? <UserRound size={20} strokeWidth={1.6} /> : <UsersRound size={20} strokeWidth={1.6} />}</span><p className="topic-explanation"><LessonText text={paragraph} /></p>
                 </div> : <p className="topic-explanation" key={paragraph}><LessonText text={paragraph} /></p>)}
-            </section>)}
+            </section>;
+            })}
         </LessonCardGrid>
     </div>;
 }

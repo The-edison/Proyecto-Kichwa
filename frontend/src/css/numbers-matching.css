@@ -1,0 +1,27 @@
+.numbers-matching { width: min(100%, 920px); margin-inline: auto; }
+.numbers-matching-progress { display: flex; align-items: baseline; justify-content: flex-end; gap: 8px; margin-bottom: 10px; color: var(--color-text-secondary); font-size: 12px; }
+.numbers-matching-progress strong { color: var(--color-primary); font-size: 19px; font-variant-numeric: tabular-nums; }
+.numbers-matching-book { padding: 18px; border: 1px solid var(--color-border); border-radius: 18px; background: var(--color-surface); box-shadow: var(--shadow-card); }
+.numbers-matching-headings { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: clamp(28px,7vw,100px); margin-bottom: 10px; }
+.numbers-matching-headings h2 { margin: 0; color: var(--color-text-secondary); font-size: 11px; font-weight: 750; letter-spacing: .08em; }
+.numbers-matching-headings h2:last-child { text-align: right; }
+.numbers-matching-board { position: relative; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: clamp(28px,7vw,100px); }
+.numbers-matching-board::before { position: absolute; top: -10px; bottom: -10px; left: 50%; width: 2px; border-radius: 2px; background: var(--color-border); content: ''; transform: translateX(-50%); }
+.numbers-matching-page { display: grid; grid-template-rows: repeat(10,minmax(46px,1fr)); gap: 8px; min-width: 0; }
+.numbers-matching-page button { position: relative; z-index: 1; min-width: 0; padding: 10px 14px; border: 1px solid var(--color-control-border); border-radius: 10px; background: var(--color-bg); color: var(--color-text); font: inherit; font-size: clamp(14px,2vw,19px); font-weight: 650; overflow-wrap: anywhere; cursor: pointer; }
+.numbers-matching-page-left button { text-align: right; }
+.numbers-matching-page-right button { text-align: left; }
+.numbers-matching-page button:not(:disabled):hover, .numbers-matching-page button.is-selected { border-color: var(--color-primary); background: var(--color-soft); }
+.numbers-matching-page button.is-paired { border-color: var(--color-primary); color: var(--color-primary); }
+.numbers-matching-page button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.numbers-matching-page button:disabled { cursor: default; }
+.numbers-matching-lines { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
+.numbers-matching-lines line { stroke: var(--color-primary); stroke-width: 3; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.numbers-matching-hint { min-height: 22px; margin: 12px 0 0; color: var(--color-text-secondary); font-size: 13px; }
+@media (max-width: 600px) {
+    .numbers-matching-book { padding: 12px 8px; }
+    .numbers-matching-headings, .numbers-matching-board { gap: 24px; }
+    .numbers-matching-page { grid-template-rows: repeat(10,minmax(42px,1fr)); gap: 6px; }
+    .numbers-matching-page button { padding: 6px; font-size: 13px; }
+    .numbers-matching-hint { font-size: 12px; }
+}

@@ -3,15 +3,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Link } from '../navigation';
 import {
     BookOpen,
-    ChartNoAxesCombined,
     ChevronLeft,
     ChevronRight,
-    House,
     Languages,
     LayoutDashboard,
     LogOut,
     Menu,
-    UserRound,
     Users,
     X,
     Search,
@@ -23,6 +20,7 @@ import { ThemeToggle } from '../components/ThemeToggle';
 import { ProfileMenu } from '../components/ProfileMenu';
 import { StudentOpinionMenu } from '../components/StudentOpinionMenu';
 import { StudentLearningNav } from '../components/StudentLearningNav';
+import { StudentOverviewNav } from '../components/StudentOverviewNav';
 import { useAuth } from '../context/AuthContext';
 
 const storageKey = 'yachay-sidebar-collapsed';
@@ -91,19 +89,15 @@ function Shell({ title, subtitle, children, immersive = false }: { title: string
             ['/admin/contenidos', 'Contenidos y actividades', BookOpen],
             ['/admin/diccionario', 'Diccionario', Languages],
             ['/admin/estudiantes', 'Estudiantes', Users],
-            ['/cuenta', 'Mi cuenta', UserRound],
         ]
         : [
-            ['/aprender', 'Mi aprendizaje', House],
-            ['/aprender/progreso', 'Mi progreso', ChartNoAxesCombined],
             ['/aprender/diccionario', 'Diccionario', Languages],
-            ['/cuenta', 'Mi cuenta', UserRound],
         ];
     const isActive = (href: string) => location.pathname === href
         || (!['/admin', '/aprender'].includes(href) && location.pathname.startsWith(href + '/'));
     const navigationGroups = admin
-        ? [{ label: 'GESTIÓN DEL CAMPUS', links: links.filter(([href]) => href !== '/cuenta') }, { label: 'MI CUENTA', links: links.filter(([href]) => href === '/cuenta') }]
-        : [{ label: 'APRENDIZAJE', links: links.filter(([href]) => href === '/aprender' || href === '/aprender/progreso') }, { label: 'RECURSOS', links: links.filter(([href]) => href === '/aprender/diccionario') }, { label: 'MI CUENTA', links: links.filter(([href]) => href === '/cuenta') }];
+        ? [{ label: 'GESTIÓN DEL CAMPUS', links }]
+        : [{ label: 'APRENDIZAJE', links: [] }, { label: 'RECURSOS', links }];
 
     useEffect(() => {
         try {
@@ -148,7 +142,7 @@ function Shell({ title, subtitle, children, immersive = false }: { title: string
                             <Icon size={19} aria-hidden="true" />
                             <span className="sidebar-link-label">{label}</span>
                         </Link>
-                    ))}{!admin && group.label === 'APRENDIZAJE' && <StudentLearningNav onExpand={() => setCollapsed(false)} onNavigate={() => setMobileOpen(false)} />}</section>)}
+                    ))}{!admin && group.label === 'APRENDIZAJE' && <><StudentOverviewNav onExpand={() => setCollapsed(false)} onNavigate={() => setMobileOpen(false)} /><StudentLearningNav onExpand={() => setCollapsed(false)} onNavigate={() => setMobileOpen(false)} /></>}</section>)}
                 </nav>
                 <div className="sidebar-bottom">
                     <UserAvatar name={user?.name} avatar={user?.avatar} />

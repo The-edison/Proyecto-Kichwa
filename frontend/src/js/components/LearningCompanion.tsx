@@ -19,7 +19,7 @@ export function LearningCompanion({ correct, xpEarned, score, final = false, por
             <img src={correct === false ? encouragingMascot : mascot} width={160} height={180} alt={correct === false ? 'Cometa, el cuy con poncho rojo, te anima a seguir practicando' : 'Cometa, el cuy con poncho andino rojo, celebra tu aprendizaje'} decoding="async" />
             <span className="learning-companion-symbol" aria-hidden="true">{final ? correct ? '★' : '♡' : correct === undefined ? '✦' : correct ? '✓' : '♡'}</span>
         </div>
-        {!portraitOnly && <div className="learning-companion-message" role="status" aria-live="polite" aria-atomic="true">
+        {!portraitOnly && (final || correct === undefined) && <div className="learning-companion-message" role="status" aria-live="polite" aria-atomic="true">
             <strong>{correct === undefined ? '¡Vamos paso a paso!' : correct ? 'Alli rurashka' : 'Kutin rurapay'}</strong>
             {correct !== undefined && <span className="learning-companion-translation">{correct ? 'Bien hecho' : 'Reinténtalo'}</span>}
             {score !== undefined && <span className="learning-companion-score"><small>Puntuación final</small>{score}</span>}
