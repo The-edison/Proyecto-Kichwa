@@ -21,6 +21,7 @@ async function screen(exercises) {
     }
     const context = vm.createContext({ Audio });
     const dependencies = {
+        MatchingLines: { MatchingLines: 'MatchingLines' },
         react: {
             useState(initial) { const i = cursor++; if (!(i in states)) states[i] = initial; return [states[i], value => { states[i] = value; }]; },
             useRef(initial) { const i = cursor++; return states[i] ??= { current: initial }; },
@@ -38,6 +39,7 @@ async function screen(exercises) {
         LessonOverview: { LessonOverview: 'LessonOverview', LessonNote: 'LessonNote', LessonText: 'LessonText' },
         LessonCardGrid: { LessonCardGrid: 'LessonCardGrid' },
         TopicVisual: { TopicSectionIcon: 'TopicSectionIcon', TopicWordVisual: 'TopicWordVisual' },
+        BodyPartVisual: { BodyPartVisual: 'BodyPartVisual' },
     };
     const modules = sources.map(code => new vm.SourceTextModule(code, { context, initializeImportMeta(meta) { meta.env = { BASE_URL: '/yachay/' }; } }));
     const cache = new Map();
@@ -139,5 +141,63 @@ test('the six pronoun words play their own recordings, stop the preceding audio 
     nodes(view.topic()).find(node => node.props['aria-label'] === 'Escuchar paykuna').props.onClick();
     assert.equal(view.audios.length, 7);
     view.unmount(); assert.equal(view.audios.at(-1).paused, true);
-    assert.equal(nodes(view.topic('numbers')).some(node => node.type === 'button'), false);
+    assert.equal(nodes(view.topic('numbers')).filter(node => node.type === 'button').length, 3);
+});
+
+test('ten domestic and ten wild animals plus colors and the black cat example play all 32 recordings', async () => {
+    const view = await screen([]);
+    const topic = JSON.parse(await readFile(new URL('../../backend/resources/lessons/guided-topics.json', import.meta.url), 'utf8')).find(item => item.key === 'animals-colors');
+    assert.equal(topic.sections[0].rows.length, 10);
+    assert.equal(topic.sections[1].title, 'Animales salvajes');
+    assert.equal(topic.sections[1].rows.length, 10);
+    assert.equal(nodes(view.topic('animals-colors')).filter(node => node.type === 'button').length, 32);
+    assert.equal(view.audios.length, 0);
+    for (const [sectionIndex, section] of topic.sections.entries()) for (const [word, meaning] of section.rows) {
+        const button = nodes(view.topic('animals-colors')).find(node => node.props['aria-label'] === `Escuchar ${word}`);
+        assert.ok(button, word); assert.ok(text(button).includes(meaning), meaning);
+        button.props.onClick();
+        const file = sectionIndex === 3 ? 'ejemplos/mi-gato-es-negro' : `${sectionIndex === 2 ? 'colores' : 'animales'}/${word === 'añas' ? 'anas' : word}`;
+        assert.equal(view.audios.at(-1).src, `/yachay/audios/modulo-2/unidad-1/${file}.mp3`);
+        if (view.audios.length > 1) assert.equal(view.audios.at(-2).paused, true);
+        view.audios.at(-1).onplaying();
+        assert.equal(nodes(view.topic('animals-colors')).find(node => node.props['aria-label'] === `Escuchar ${word}`).props['aria-pressed'], true);
+    }
+    view.audios.at(-1).reject(Error('file missing')); await new Promise(resolve => setImmediate(resolve));
+    assert.ok(text(view.topic('animals-colors')).includes('No se pudo reproducir el audio de «Ñuka misika yanami kan.»'));
+    assert.equal(text(view.topic('animals-colors')).includes('Mi sombrero es blanco'), false);
+    assert.ok(text(view.topic('animals-colors')).includes('Mi gato es negro.'));
+    nodes(view.topic('animals-colors')).find(node => node.props['aria-label'] === 'Escuchar Ñuka misika yanami kan.').props.onClick();
+    assert.equal(view.audios.length, 33);
+    view.unmount(); assert.equal(view.audios.at(-1).paused, true);
+});
+
+test('body lesson plays sixteen parts and its example with safe filenames, completion and retry states', async () => {
+    const view = await screen([]);
+    const topic = JSON.parse(await readFile(new URL('../../backend/resources/lessons/guided-topics.json', import.meta.url), 'utf8')).find(item => item.key === 'body');
+    const words = topic.sections.flatMap(section => section.rows);
+    assert.equal(words.length, 17);
+    assert.deepEqual(topic.sections.slice(0, 3).flatMap(section => section.rows.map(([word]) => word)).sort(),
+        ['uma', 'kunka', 'maki', 'rikra', 'chaki', 'chaki washa', 'shimi', 'rinri', 'ñawi', 'wiksa', 'washa', 'kiru', 'hallu', 'sillu', 'kunkuri', 'ruka'].sort());
+    assert.equal(nodes(view.topic('body')).filter(node => node.type === 'button').length, 17);
+    assert.equal(view.audios.length, 0);
+    for (const [word, meaning] of words) {
+        const button = nodes(view.topic('body')).find(node => node.props['aria-label'] === `Escuchar ${word}`);
+        assert.ok(button, word); assert.ok(text(button).includes(meaning), meaning);
+        button.props.onClick();
+        const file = word === 'Chakitami nanan.' ? 'ejemplos/me-duele-el-pie' : `partes/${word === 'ñawi' ? 'nawi' : word.replaceAll(' ', '-')}`;
+        assert.equal(view.audios.at(-1).src, `/yachay/audios/modulo-2/unidad-2/${file}.mp3`);
+        if (view.audios.length > 1) assert.equal(view.audios.at(-2).paused, true);
+        view.audios.at(-1).onplaying();
+        assert.equal(nodes(view.topic('body')).find(node => node.props['aria-label'] === `Escuchar ${word}`).props['aria-pressed'], true);
+    }
+    view.audios.at(-1).onended();
+    assert.equal(nodes(view.topic('body')).some(node => node.props['aria-pressed'] === true), false);
+    nodes(view.topic('body')).find(node => node.props['aria-label'] === 'Escuchar ñawi').props.onClick();
+    view.audios.at(-1).reject(Error('file missing')); await new Promise(resolve => setImmediate(resolve));
+    assert.ok(text(view.topic('body')).includes('No se pudo reproducir el audio de «ñawi»'));
+    nodes(view.topic('body')).find(node => node.props['aria-label'] === 'Escuchar ñawi').props.onClick();
+    assert.equal(view.audios.at(-1).src, '/yachay/audios/modulo-2/unidad-2/partes/nawi.mp3');
+    nodes(view.topic('animals-colors')).find(node => node.props['aria-label'] === 'Escuchar allku').props.onClick();
+    assert.equal(view.audios.at(-2).paused, true);
+    view.unmount(); assert.equal(view.audios.at(-1).paused, true);
 });

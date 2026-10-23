@@ -26,7 +26,7 @@ async function screen({ fail = false } = {}) {
             : specifier === 'react-router-dom' ? { useSearchParams: () => [new URLSearchParams()] }
             : specifier === 'lucide-react' ? { ArrowRight: 'ArrowRight', Check: 'Check', LoaderCircle: 'LoaderCircle' }
             : specifier.endsWith('/AuthContext') ? { useAuth: () => ({ register: async payload => { requests.push(payload); if (fail) throw new Error('Sin conexión'); } }) }
-            : { Link: 'Link', GoogleAuthButton: 'GoogleAuthButton', PasswordInput: 'PasswordInput', ApiError: class ApiError extends Error {} };
+            : { PrivacyNotice: 'PrivacyNotice', Link: 'Link', GoogleAuthButton: 'GoogleAuthButton', PasswordInput: 'PasswordInput', ApiError: class ApiError extends Error {} };
         return new vm.SyntheticModule(Object.keys(dependency), function () { for (const [key, value] of Object.entries(dependency)) this.setExport(key, value); }, { context });
     });
     await form.evaluate();

@@ -1,0 +1,125 @@
+{
+  "key": "short-dialogues",
+  "module": 2,
+  "order": 4,
+  "title": "Conversaciones cortas y textos breves",
+  "description": "Aprende a saludar, preguntar y responder en conversaciones cortas. Después, reúne tus ideas en un texto de dos oraciones.",
+  "note": "Lee un turno a la vez: primero la frase en kichwa y luego su significado. Observa cómo cada respuesta continúa la idea de la pregunta.",
+  "sections": [
+    {
+      "key": "meeting",
+      "label": "Un encuentro",
+      "title": "Alex y Evelin se encuentran",
+      "kicker": "LEE UNA CONVERSACIÓN COMPLETA",
+      "position": "Saluda, conversa y despídete",
+      "explanation": "Un diálogo se construye por turnos: una persona habla y la otra responde. Alex y Evelin se saludan, cuentan adónde van y se despiden.",
+      "instruction": "Sigue los nombres para reconocer quién habla. La pregunta pide una información y la respuesta aporta esa información.",
+      "forms": [
+        { "base": "Imanalla?", "baseMeaning": "¿Cómo estás?", "word": "Allillami kani.", "meaning": "Estoy bien.", "label": "Saludar", "detail": "La respuesta cuenta cómo se siente la persona." },
+        { "base": "Mayman rinki?", "baseMeaning": "¿Adónde vas?", "word": "Ñuka yachanawasiman rini.", "meaning": "Voy a la escuela.", "label": "Conversar", "detail": "La respuesta indica el destino: la escuela." },
+        { "base": "Shuk punchakama.", "baseMeaning": "Hasta otro día.", "word": "Ashtakama.", "meaning": "Hasta luego.", "label": "Despedirse", "detail": "Ambas personas cierran la conversación con una despedida." }
+      ],
+      "dialogues": [
+        {
+          "title": "Camino a estudiar y trabajar",
+          "context": "Evelin va a la escuela. Alex va a Quito, donde trabaja.",
+          "turns": [
+            { "speaker": "Alex", "text": "Imanalla, mashi Evelin?", "meaning": "¿Cómo estás, amiga Evelin?" },
+            { "speaker": "Evelin", "text": "Allillami kani, mashi Alex.", "meaning": "Estoy bien, amigo Alex." },
+            { "speaker": "Alex", "text": "Mayman rinki?", "meaning": "¿Adónde vas?" },
+            { "speaker": "Evelin", "text": "Ñuka yachanawasiman rini. Kanka, mayman rinki?", "meaning": "Voy a la escuela. Y tú, ¿adónde vas?" },
+            { "speaker": "Alex", "text": "Ñuka Kitoman rini. Kitopi llankani.", "meaning": "Voy a Quito. Trabajo en Quito." },
+            { "speaker": "Evelin", "text": "Alli, mashi Alex.", "meaning": "Bien, amigo Alex." },
+            { "speaker": "Alex", "text": "Shuk punchakama, mashi Evelin.", "meaning": "Hasta otro día, amiga Evelin." },
+            { "speaker": "Evelin", "text": "Ashtakama, mashi Alex.", "meaning": "Hasta luego, amigo Alex." }
+          ]
+        }
+      ],
+      "example": { "before": "", "focus": "Kanka?", "after": "", "meaning": "¿Y tú? Sirve para devolver la pregunta y continuar conversando." },
+      "reminder": "No necesitas decir mucho: un saludo, una pregunta con su respuesta y una despedida ya forman una conversación."
+    },
+    {
+      "key": "destination",
+      "label": "¿Adónde vas?",
+      "title": "Cambia el destino y cuenta tu plan",
+      "kicker": "DE LA PREGUNTA A LA RESPUESTA",
+      "position": "La respuesta debe hablar del destino",
+      "explanation": "Mayman rinki? pregunta adónde vas. Responde con un lugar y rini, «voy». Si cuentas un plan para mañana, usa kaya y risha, «iré».",
+      "instruction": "Elige un destino y observa cómo cambia la respuesta. Después compara lo que haces ahora con lo que harás mañana.",
+      "forms": [
+        { "base": "wasi + man", "baseMeaning": "casa + hacia", "word": "wasiman", "meaning": "a la casa", "label": "El destino", "detail": "-man indica hacia dónde se dirige alguien." },
+        { "base": "ri + ni", "baseMeaning": "ir + yo, presente", "word": "rini", "meaning": "voy", "label": "Lo que hago ahora", "detail": "-ni señala a la persona que habla en este presente." },
+        { "base": "ri + sha", "baseMeaning": "ir + futuro de yo", "word": "risha", "meaning": "iré", "label": "Mi plan", "detail": "-sha expresa el futuro de primera persona singular: yo." }
+      ],
+      "dialogues": [],
+      "example": { "before": "Kaya ñuka", "focus": "wasiman risha.", "after": "", "meaning": "Mañana yo iré a la casa." },
+      "reminder": "-man señala el destino; -pi señala dónde ocurre algo. Kitoman rini: voy a Quito. Kitopi llankani: trabajo en Quito."
+    },
+    {
+      "key": "everyday",
+      "label": "Otros temas",
+      "title": "Conversa sobre lo que te rodea",
+      "kicker": "FAMILIA Y NATURALEZA",
+      "position": "Escucha la pregunta antes de responder",
+      "explanation": "La pregunta te orienta: maypi pide un lugar; imata pide qué acción se realiza o qué se observa. Mantén la conversación en el mismo tema.",
+      "instruction": "Elige un tema. Lee cada pareja de pregunta y respuesta y reconoce qué información comparten.",
+      "forms": [
+        { "base": "Maypi?", "baseMeaning": "¿Dónde?", "word": "Wasipi.", "meaning": "En la casa.", "label": "Un lugar", "detail": "La respuesta ubica a alguien. Aquí -pi significa «en»." },
+        { "base": "Imata ruran?", "baseMeaning": "¿Qué hace él o ella?", "word": "Pay mikukun.", "meaning": "Él o ella está comiendo.", "label": "Una actividad", "detail": "Miku + ku + n: comer + acción en curso + él o ella." },
+        { "base": "Imata rikunki?", "baseMeaning": "¿Qué ves?", "word": "Ñuka shuk urkuta rikuni.", "meaning": "Veo una montaña.", "label": "Lo que observas", "detail": "Rikuni significa «veo». Rini significa «voy»: son verbos diferentes." }
+      ],
+      "dialogues": [
+        {
+          "title": "En familia",
+          "context": "Alex pregunta por el papá de Evelin y por lo que está haciendo.",
+          "turns": [
+            { "speaker": "Alex", "text": "Maypi kan kanpak yaya?", "meaning": "¿Dónde está tu papá?" },
+            { "speaker": "Evelin", "text": "Ñuka yayaka wasipi kan.", "meaning": "Mi papá está en la casa." },
+            { "speaker": "Alex", "text": "Imata ruran?", "meaning": "¿Qué hace?" },
+            { "speaker": "Evelin", "text": "Pay mikukun.", "meaning": "Él está comiendo." }
+          ]
+        },
+        {
+          "title": "Un paseo por la naturaleza",
+          "context": "Alex y Evelin hablan del paisaje que ven durante un paseo.",
+          "turns": [
+            { "speaker": "Alex", "text": "Imata rikunki?", "meaning": "¿Qué ves?" },
+            { "speaker": "Evelin", "text": "Ñuka shuk urkuta rikuni.", "meaning": "Veo una montaña." },
+            { "speaker": "Alex", "text": "Imashina kan urkuka?", "meaning": "¿Cómo es la montaña?" },
+            { "speaker": "Evelin", "text": "Urkuka hatunmi kan.", "meaning": "La montaña es grande." }
+          ]
+        }
+      ],
+      "example": { "before": "Pay", "focus": "mikukun.", "after": "", "meaning": "Él o ella está comiendo. -ku muestra que la acción está en desarrollo." },
+      "reminder": "Para continuar, pregunta sobre la misma persona, actividad o paisaje. Así las respuestas se conectan entre sí."
+    },
+    {
+      "key": "brief-text",
+      "label": "Un texto breve",
+      "title": "Une dos ideas sobre un mismo plan",
+      "kicker": "DEL DIÁLOGO AL PÁRRAFO",
+      "position": "Una idea por oración, un tema en común",
+      "explanation": "Puedes convertir lo que conversaste en un párrafo de dos oraciones: primero cuentas adónde irás y después qué harás allí. En estos modelos, ambas acciones ocurrirán mañana y las realizará ñuka, «yo».",
+      "instruction": "Elige un destino y lee el texto completo. Reconoce la persona, el lugar y la acción; observa cómo la segunda oración continúa la primera.",
+      "forms": [
+        { "base": "Kaya", "baseMeaning": "mañana", "word": "Kaya ñuka wasiman risha.", "meaning": "Mañana yo iré a la casa.", "label": "Primera oración", "detail": "Presenta el momento, la persona y el destino." },
+        { "base": "wasi + pi", "baseMeaning": "casa + en", "word": "Wasipi samarisha.", "meaning": "En la casa descansaré.", "label": "Segunda oración", "detail": "Continúa el mismo plan e indica qué haré en ese lugar." },
+        { "base": "ri + sha · samari + sha", "baseMeaning": "iré · descansaré", "word": "risha · samarisha", "meaning": "dos acciones futuras de yo", "label": "La conexión", "detail": "El lugar es el mismo y -sha mantiene la primera persona del futuro." }
+      ],
+      "dialogues": [],
+      "example": { "before": "Kaya ñuka", "focus": "wasiman risha.", "after": " Wasipi samarisha.", "meaning": "Mañana yo iré a la casa. En la casa descansaré." },
+      "reminder": "Al releer, comprueba tres cosas: quién habla, cuándo ocurre cada acción y si las dos oraciones tratan del mismo tema."
+    }
+  ],
+  "destinations": [
+    {
+      "key": "home", "label": "La casa", "icon": "home", "place": "wasi", "placeMeaning": "casa", "toward": "wasiman", "at": "Wasipi", "present": "Ñuka wasiman rini.", "presentMeaning": "Voy a la casa.", "future": "Kaya ñuka wasiman risha.", "futureMeaning": "Mañana yo iré a la casa.", "followUp": "Wasipi samarisha.", "followUpMeaning": "En la casa descansaré.", "action": "samari", "actionMeaning": "descansar", "futureAction": "samarisha", "futureActionMeaning": "descansaré"
+    },
+    {
+      "key": "school", "label": "La escuela", "icon": "school", "place": "yachanawasi", "placeMeaning": "escuela", "toward": "yachanawasiman", "at": "Yachanawasipi", "present": "Ñuka yachanawasiman rini.", "presentMeaning": "Voy a la escuela.", "future": "Kaya ñuka yachanawasiman risha.", "futureMeaning": "Mañana yo iré a la escuela.", "followUp": "Yachanawasipi yachasha.", "followUpMeaning": "En la escuela aprenderé.", "action": "yacha", "actionMeaning": "aprender", "futureAction": "yachasha", "futureActionMeaning": "aprenderé"
+    },
+    {
+      "key": "quito", "label": "Quito", "icon": "work", "place": "Kito", "placeMeaning": "Quito", "toward": "Kitoman", "at": "Kitopi", "present": "Ñuka Kitoman rini.", "presentMeaning": "Voy a Quito.", "future": "Kaya ñuka Kitoman risha.", "futureMeaning": "Mañana yo iré a Quito.", "followUp": "Kitopi llankasha.", "followUpMeaning": "En Quito trabajaré.", "action": "llanka", "actionMeaning": "trabajar", "futureAction": "llankasha", "futureActionMeaning": "trabajaré"
+    }
+  ]
+}

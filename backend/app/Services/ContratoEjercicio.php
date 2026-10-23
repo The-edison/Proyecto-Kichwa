@@ -79,6 +79,12 @@ class ContratoEjercicio
             'config.listening_questions' => ['sometimes', 'boolean'],
             'config.listening_greetings' => ['sometimes', 'boolean'],
             'config.pronouns_activity' => ['sometimes', 'in:persons,groups,listening,complete,order,listening-pronouns'],
+            'config.animal_group' => ['sometimes', 'in:domestic,wild'],
+            'config.color_activity' => ['sometimes', 'in:apply,listen,understand,interpret,meaning,complete,order'],
+            'config.color_panel' => ['sometimes', 'integer', 'between:1,5'],
+            'config.body_activity' => ['sometimes', 'in:locate,details,recognize,listen,understand,order'],
+            'config.body_panel' => ['sometimes', 'integer', 'between:1,4'],
+            'config.animal_activity' => ['sometimes', 'in:identify,listen,understand,complete,understand-complete,order,labels,write'],
             'config.conversation_pairs' => ['sometimes', 'boolean'],
             'config.conversation_group' => ['sometimes', 'in:q,a,d,c'],
             'config.scene_choice' => ['sometimes', 'boolean'],
@@ -134,6 +140,69 @@ class ContratoEjercicio
             || array_column($data['elements'], 'id') !== ['alli-puncha-churi', 'alli-chishi-kusa', 'alli-tuta-tayta']
             || collect($data['elements'])->contains(fn ($element) => substr_count($element['texto'], '_____') !== 1 || empty($element['opciones'])))) {
             self::fail('El panel de saludos necesita las tres oraciones con sus opciones y una palabra que falta.', 'config');
+        }
+        if (isset($data['config']['animal_activity'])) {
+            $group = $data['config']['animal_group'] ?? '';
+            $activity = $data['config']['animal_activity'];
+            $counts = ['domestic' => ['identify' => 6, 'listen' => 4, 'understand' => 3, 'complete' => 3, 'understand-complete' => 6, 'order' => 3],
+                'wild' => ['identify' => 6, 'listen' => 3, 'labels' => 3, 'write' => 3, 'order' => 3]];
+            if ($data['type'] !== 'completar' || ! isset($counts[$group][$activity]) || count($data['elements']) !== $counts[$group][$activity]
+                || collect($data['elements'])->contains(fn (array $element): bool => empty($element['imagen'])
+                    || ($activity === 'write' ? ! empty($element['opciones']) : empty($element['opciones'])))) {
+                self::fail('El panel de animales necesita su grupo, imágenes y todas sus filas con las opciones correspondientes.', 'config');
+            }
+            if ($activity === 'order' && collect($data['elements'])->contains(fn (array $element): bool => collect($element['opciones'])->contains(fn (string $word): bool => preg_match('/\s/u', $word) === 1))) {
+                self::fail('Cada ficha de la oración debe contener una sola palabra.', 'elements');
+            }
+            if ($activity === 'complete' && collect($data['elements'])->contains(fn (array $element): bool => substr_count($element['texto'], '_____') !== 1)) {
+                self::fail('Cada oración necesita exactamente un espacio para completar.', 'elements');
+            }
+            if ($activity === 'understand-complete') {
+                if (array_column($data['elements'], 'id') !== ['d-sentence-1', 'd-mama', 'd-sentence-2', 'd-boy', 'd-sentence-3', 'd-jose']) {
+                    self::fail('Mantén juntas las tres oraciones, cada una seguida de su palabra que falta.', 'elements');
+                }
+                foreach (array_chunk($data['elements'], 2) as [$meaning, $completion]) {
+                    if (substr_count($meaning['texto'], '_____') !== 0 || substr_count($completion['texto'], '_____') !== 1) {
+                        self::fail('Cada oración necesita su significado y un espacio para completar, en ese orden.', 'elements');
+                    }
+                }
+            }
+        }
+        if (isset($data['config']['color_activity'])) {
+            $activity = $data['config']['color_activity'];
+            $shapes = ['apply' => [1, ['c-cup', 'c-notebook', 'c-bag']], 'listen' => [1, ['c-audio-1', 'c-audio-2', 'c-audio-3']],
+                'understand' => [2, ['c-understand-pants', 'c-understand-hat', 'c-understand-cat']],
+                'interpret' => [3, ['c-hat', 'c-cat', 'c-pants', 'c-shawl', 'c-necklace', 'c-shoes']],
+                'meaning' => [4, ['c-shawl', 'c-necklace', 'c-shoes']], 'complete' => [4, ['c-hat', 'c-pants', 'c-shawl']],
+                'order' => [5, ['c-cat', 'c-necklace', 'c-shoes']]];
+            [$panel, $ids] = $shapes[$activity];
+            if ($data['type'] !== 'completar' || ($data['config']['color_panel'] ?? null) !== $panel || array_column($data['elements'], 'id') !== $ids
+                || collect($data['elements'])->contains(fn (array $element): bool => $activity === 'complete' ? ! empty($element['opciones']) || substr_count($element['texto'], '_____') !== 1 : empty($element['opciones']))) {
+                self::fail('El ejercicio de colores necesita todas sus filas, opciones y el panel correspondiente.', 'config');
+            }
+            if (in_array($activity, ['apply', 'listen', 'interpret'], true)
+                && collect($data['elements'])->contains(fn (array $element): bool => array_diff($element['opciones'], ['yurak', 'yana', 'puka', 'killu', 'ankas', 'waylla', 'paku', 'maywa', 'kishpu', 'waminsi', 'suku']) !== [])) {
+                self::fail('Selecciona solamente los colores de la lección.', 'elements');
+            }
+            if ($activity === 'order' && collect($data['elements'])->contains(fn (array $element): bool => collect($element['opciones'])->contains(fn (string $word): bool => preg_match('/\s/u', $word) === 1))) {
+                self::fail('Cada ficha de la oración debe contener una sola palabra.', 'elements');
+            }
+        }
+        if (isset($data['config']['body_activity'])) {
+            $activity = $data['config']['body_activity'];
+            $shapes = ['locate' => [1, ['b-uma', 'b-kunka', 'b-rikra', 'b-maki', 'b-wiksa', 'b-kunkuri', 'b-chaki', 'b-washa', 'b-ruka', 'b-sillu']],
+                'details' => [2, ['b-nawi', 'b-rinri', 'b-shimi', 'b-kiru', 'b-hallu', 'b-chaki-washa']],
+                'recognize' => [2, ['b-kunkuri', 'b-wiksa', 'b-washa']], 'listen' => [3, ['b-audio-1', 'b-audio-2', 'b-audio-3']],
+                'understand' => [3, ['b-sentence-head', 'b-sentence-belly', 'b-sentence-foot', 'b-sentence-throat']],
+                'order' => [4, ['b-sentence-head', 'b-sentence-belly', 'b-sentence-foot', 'b-sentence-throat']]];
+            [$panel, $ids] = $shapes[$activity];
+            if ($data['type'] !== 'completar' || ($data['config']['body_panel'] ?? null) !== $panel || array_column($data['elements'], 'id') !== $ids
+                || collect($data['elements'])->contains(fn (array $element): bool => empty($element['imagen']) || ($activity === 'listen' ? ! empty($element['opciones']) : empty($element['opciones'])))) {
+                self::fail('El ejercicio del cuerpo necesita todas sus imágenes, filas y el panel correspondiente.', 'config');
+            }
+            if ($activity === 'order' && collect($data['elements'])->contains(fn (array $element): bool => collect($element['opciones'])->contains(fn (string $word): bool => preg_match('/\s/u', $word) === 1))) {
+                self::fail('Cada ficha de la oración debe contener una sola palabra.', 'elements');
+            }
         }
         if (isset($data['config']['pronouns_activity'])) {
             $activity = $data['config']['pronouns_activity'];
@@ -230,7 +299,7 @@ class ContratoEjercicio
                     if (! is_string($variant) || trim($variant) === '' || mb_strlen($variant) > 500) {
                         self::fail();
                     }
-                    if (($data['config']['pronouns_activity'] ?? null) === 'order') {
+                    if (($data['config']['pronouns_activity'] ?? null) === 'order' || ($data['config']['animal_activity'] ?? null) === 'order' || ($data['config']['color_activity'] ?? null) === 'order' || ($data['config']['body_activity'] ?? null) === 'order') {
                         $words = explode(' ', $variant);
                         $options = $element['opciones'] ?? [];
                         sort($words);
@@ -364,6 +433,13 @@ class ContratoEjercicio
             if (! is_array($answer['textos'] ?? null) || ! self::sameKeys(array_keys($answer['textos']), array_keys($exercise['solution']['textos']))) {
                 self::fail('Responde todos los espacios.', 'answer');
             }
+            if (in_array($exercise['config']['color_activity'] ?? '', ['apply', 'listen', 'interpret'], true)) {
+                foreach ($exercise['elements'] as $element) {
+                    if (! in_array($answer['textos'][$element['id']], $element['opciones'], true)) {
+                        self::fail('Selecciona una muestra de color disponible.', 'answer');
+                    }
+                }
+            }
             $correct = true;
             foreach ($exercise['solution']['textos'] as $id => $variants) {
                 $text = $answer['textos'][$id];
@@ -381,6 +457,34 @@ class ContratoEjercicio
         $pairs = fn ($list) => array_map(fn ($p) => $p['origen'].':'.$p['destino'], $list);
 
         return self::sameKeys($pairs($answer['pares']), $pairs($exercise['solution']['pares']));
+    }
+
+    public static function itemResults(array $exercise, array $answer): array
+    {
+        $results = [];
+        if ($exercise['type'] === 'completar') {
+            foreach ($exercise['solution']['textos'] as $id => $variants) {
+                $normalize = fn (string $value): string => self::normalize($value, $exercise['config']['ignore_accents'] ?? false);
+                $results[$id] = in_array($normalize($answer['textos'][$id]), array_map($normalize, $variants), true);
+            }
+        } elseif ($exercise['type'] === 'seleccion_multiple') {
+            foreach ($answer['seleccion'] as $id) {
+                $results[$id] = in_array($id, $exercise['solution']['seleccion'], true);
+            }
+        } elseif ($exercise['type'] === 'ordenar') {
+            $words = array_column($exercise['elements'], 'texto', 'id');
+            foreach ($answer['orden'] as $position => $id) {
+                $expected = $exercise['solution']['orden'][$position] ?? null;
+                $results[$id] = $expected !== null && $words[$expected] === $words[$id];
+            }
+        } else {
+            $expected = array_column($exercise['solution']['pares'], 'destino', 'origen');
+            foreach ($answer['pares'] as $pair) {
+                $results[$pair['origen']] = ($expected[$pair['origen']] ?? null) === $pair['destino'];
+            }
+        }
+
+        return ['item_results' => $results];
     }
 
     private static function normalize(string $text, bool $ignoreAccents = false): string

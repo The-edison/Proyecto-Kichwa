@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\DiccionarioController;
 use App\Http\Controllers\Api\KichwaAdminController;
 use App\Http\Controllers\Api\KichwaCatalogController;
 use App\Http\Controllers\Api\KichwaSubmissionController;
+use App\Http\Controllers\Api\PrivacyController;
 use App\Http\Controllers\Api\TestimonialController;
 use App\Http\Controllers\Web\GoogleAuthController;
 use App\Services\DominioLecciones;
@@ -25,12 +26,13 @@ Route::post('/auth/google/prepare', [GoogleAuthController::class, 'prepare'])->m
 Route::get('/diccionario', [KichwaCatalogController::class, 'diccionario']);
 Route::get('/diccionario/buscar', [DiccionarioController::class, 'search'])->middleware('throttle:120,1');
 Route::get('/testimonials', [TestimonialController::class, 'index']);
+Route::get('/privacy', [PrivacyController::class, 'show']);
 Route::get('/media/{path}', [ArchivoController::class, 'show'])->where('path', '.*');
 Route::get('/avatars/{filename}', [AvatarController::class, 'show'])->where('filename', '[a-f0-9]{40}\.webp');
 Route::get('/config', fn () => response()->json(['google' => ['enabled' => (bool) (config('services.google.client_id') && config('services.google.client_secret'))]]));
 Route::middleware(['auth:sanctum', 'active'])->group(function (): void {
     Route::get('/auth/me', [AuthController::class, 'me']);
-    Route::post('/auth/avatar', [AvatarController::class, 'store'])->middleware('throttle:20,1');
+    Route::post('/auth/avatar', [AvatarController::class, 'store'])->middleware(['role:student', 'throttle:20,1']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::post('/auth/google/link-prepare', [GoogleAuthController::class, 'prepare'])->defaults('intent', 'link')->middleware('throttle:10,1');
     Route::post('/auth/change-password', [AuthController::class, 'changePassword'])->middleware('throttle:5,1');

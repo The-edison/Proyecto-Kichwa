@@ -1,6 +1,6 @@
 import { RotateCcw, Volume2 } from 'lucide-react';
 import { useLessonAudio, type LessonAudioClip } from '../hooks/useLessonAudio';
-import type { Exercise, ExerciseAnswer } from '../types';
+import type { Exercise, ExerciseAnswer, ExerciseFeedback } from '../types';
 import { mediaUrl } from './ExerciseCard';
 
 const clips: Record<string, LessonAudioClip> = {
@@ -13,20 +13,21 @@ const scenes: Record<string, string> = {
     imamanta: 'Dos personas observan una planta con hojas caídas y tierra seca.',
 };
 
-export function ListeningGreetingsExercise({ exercise, answer, disabled, onChange }: {
+export function ListeningGreetingsExercise({ exercise, answer, feedback, disabled, onChange }: {
     exercise: Exercise;
     answer: ExerciseAnswer;
+    feedback?: ExerciseFeedback;
     disabled: boolean;
     onChange: (answer: ExerciseAnswer) => void;
 }) {
     const { state, play } = useLessonAudio();
     const questions = exercise.config?.listening_questions === true;
-    return <section className={`guided-sentence-panel${questions ? ' is-question-choices' : ''}`} aria-label={questions ? 'Escucha y elige el significado de las tres preguntas' : 'Completa las tres oraciones según el audio'}>
+    return <section className={`guided-sentence-panel${questions ? ' is-question-choices' : ''}`} data-exercise-correct={feedback?.is_correct} aria-label={questions ? 'Escucha y elige el significado de las tres preguntas' : 'Completa las tres oraciones según el audio'}>
         {exercise.elements.map((element, index) => {
             const clip = clips[element.id];
             const active = state.clip === clip && ['playing', 'loading'].includes(state.phase);
             const [before, after] = element.texto.split(/_+/);
-            return <article className="guided-sentence-item" key={element.id}>
+            return <article className="guided-sentence-item" data-answer-correct={feedback?.item_results?.[element.id] ?? feedback?.is_correct} key={element.id}>
                 <h2>{questions ? 'Imagen' : 'Oración'} {index + 1}</h2>
                 {questions && <img className="guided-question-image" src={mediaUrl(element.imagen)} alt={scenes[element.id] ?? 'Escena de una pregunta'} width={280} height={210} decoding="async" fetchPriority="high" />}
                 <div className={`guided-listening-audio${active ? ' is-active' : ''}`}>

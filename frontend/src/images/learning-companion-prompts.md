@@ -1,4 +1,4 @@
-# Cometa · Personaje de aprendizaje
+# Inti · Personaje de aprendizaje
 
 Adaptaciones de la referencia proporcionada por el usuario, creadas con la herramienta integrada de generación de imágenes. Los PNG conservan transparencia real.
 
@@ -8,7 +8,7 @@ Adaptaciones de la referencia proporcionada por el usuario, creadas con la herra
 
 ## Prompt de enseñanza
 
-Use case: identity-preserve. Edit target: the attached local image of Cometa, the adorable orange-and-white guinea pig mascot in a red Andean poncho. Create a full-body teaching / presenting pose for the introduction of a Kichwa lesson. Cometa stands on the RIGHT of a page and looks slightly toward the LEFT. Extend the paw on the LEFT side of the image toward the LEFT with the palm open, gently presenting the lesson content next to him; the other paw holds a small closed plain cream-colored book against his body. A calm friendly smile with mouth slightly open as if explaining, kind shiny dark eyes. Preserve the same recognizable guinea pig face, orange and white patches, spiky tuft, tiny pink paws, proportions, elaborate red poncho with green/yellow/white woven Andean geometric patterns and fringes, clean dark outlines, warm polished cartoon shading. Center the single character with all paws and ears fully visible, tightly framed with small safe margin. True transparent background, no floor, no scene, no text, no lettering on book, no numbers, no extra characters. Must read clearly as a supportive teacher at 220px tall.
+Use case: identity-preserve. Edit target: the attached local image of Inti, the adorable orange-and-white guinea pig mascot in a red Andean poncho. Create a full-body teaching / presenting pose for the introduction of a Kichwa lesson. Inti stands on the RIGHT of a page and looks slightly toward the LEFT. Extend the paw on the LEFT side of the image toward the LEFT with the palm open, gently presenting the lesson content next to him; the other paw holds a small closed plain cream-colored book against his body. A calm friendly smile with mouth slightly open as if explaining, kind shiny dark eyes. Preserve the same recognizable guinea pig face, orange and white patches, spiky tuft, tiny pink paws, proportions, elaborate red poncho with green/yellow/white woven Andean geometric patterns and fringes, clean dark outlines, warm polished cartoon shading. Center the single character with all paws and ears fully visible, tightly framed with small safe margin. True transparent background, no floor, no scene, no text, no lettering on book, no numbers, no extra characters. Must read clearly as a supportive teacher at 220px tall.
 
 ## Prompt de celebración
 
@@ -52,7 +52,7 @@ Edit this Andean landscape into unmistakable NIGHT. Preserve the same house moun
 
 ## Ajuste de contraste visual y carga: Unidad 2
 
-Mañana: cielo azul y neblina; tarde: cielo naranja y sol bajo. Hora de referencia mostrada en HTML: 08:00 / 17:30 / 21:00. Variantes generadas con la herramienta integrada a partir de manana.png, sin fondo transparente. Publicación en WebP a 480 px, calidad 78. Cometa usa derivados WebP de 420 px y calidad 84 (44–48 KB), con transparencia conservada.
+Mañana: cielo azul y neblina; tarde: cielo naranja y sol bajo. Hora de referencia mostrada en HTML: 08:00 / 17:30 / 21:00. Variantes generadas con la herramienta integrada a partir de manana.png, sin fondo transparente. Publicación en WebP a 480 px, calidad 78. Inti usa derivados WebP de 420 px y calidad 84 (44–48 KB), con transparencia conservada.
 
 Archivo: `backend/resources/images/unidad2/manana-v2.png`.
 

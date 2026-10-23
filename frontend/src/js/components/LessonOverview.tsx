@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Lightbulb } from 'lucide-react';
-import cometaTeaching from '../../images/cometa-teaching.webp';
+import intiTeaching from '../../images/cometa-teaching.webp';
 import '../../css/lesson-notebook.css';
 
 type LessonOverviewProps = {
@@ -23,8 +23,8 @@ export function LessonOverview({ unit, title, description }: LessonOverviewProps
                 <p><LessonText text={description} /></p>
             </div>
             <figure className="lesson-guide">
-                <img src={cometaTeaching} width={100} height={108} alt="Cometa, tu guía de aprendizaje" decoding="async" />
-                <figcaption>Aprende con Cometa</figcaption>
+                <img src={intiTeaching} width={100} height={108} alt="Inti, tu guía de aprendizaje" decoding="async" />
+                <figcaption>Aprende con Inti</figcaption>
             </figure>
         </header>;
 }

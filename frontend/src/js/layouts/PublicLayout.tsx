@@ -1,12 +1,13 @@
 import { useLocation } from 'react-router-dom';
 import { Link } from '../navigation';
-import { CircleHelp, Globe2, Menu, X } from 'lucide-react';
+import { Globe2, Menu, X } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { Brand } from '../components/Brand';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { useAuth } from '../context/AuthContext';
 import type { HomeLanguage } from '../homeLanguage';
 import '../../css/auth-compact.css';
+import '../../css/privacy.css';
 
 type PublicLayoutProps = { children: ReactNode; language?: HomeLanguage; onLanguageChange?: () => void };
 
@@ -31,9 +32,8 @@ function Shell({ children, language = 'es', onLanguageChange }: PublicLayoutProp
     const footerLinks = [
         { href: '/informacion/terminos', label: kichwaHome ? 'Kamachikuna' : 'Términos de uso' },
         { href: '/informacion/privacidad', label: kichwaHome ? 'Pakalla willay' : 'Aviso de privacidad' },
-        { href: '/informacion/accesibilidad', label: kichwaHome ? 'Tukuykunapak yaykuy' : 'Accesibilidad' },
-        { href: '/informacion/enfoque', label: kichwaHome ? 'Ñukanchik yuyay' : 'Nuestro enfoque' },
-        { href: '/informacion/preguntas', label: kichwaHome ? 'Tapuykuna' : 'Preguntas frecuentes' },
+        { href: '/informacion/privacidad#cookies', label: 'Cookies' },
+        { href: '/informacion/ayuda', label: kichwaHome ? 'Yanapay' : 'Ayuda y contacto' },
     ];
 
     return (
@@ -66,8 +66,7 @@ function Shell({ children, language = 'es', onLanguageChange }: PublicLayoutProp
                     {footerLinks.map(link => <Link key={link.href} href={link.href}>{link.label}</Link>)}
                 </nav>
                 <div className="public-footer-meta">
-                    <span>Yachay · Universidad Estatal de Bolívar</span>
-                    <Link href="/informacion/ayuda" className="public-footer-help"><CircleHelp size={17} aria-hidden="true" />{kichwaHome ? 'Yanapay' : 'Ayuda'}</Link>
+                    <span>Yachay · Plataforma educativa para aprender kichwa</span>
                 </div>
             </footer>
         </div>

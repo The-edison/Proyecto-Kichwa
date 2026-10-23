@@ -1,25 +1,18 @@
-import { Flower2, MoonStar, Sun, type LucideIcon } from 'lucide-react';
-import cometa from '../../images/cuy-companion.webp';
-import guide from '../../images/cometa-teaching.webp';
-import encouragingCometa from '../../images/cuy-companion-encourage.webp';
-import { apiBaseUrl } from '../services/api';
+import presets from '../../../../backend/resources/avatar-presets.json';
+import { AvatarIllustration } from './AvatarIllustration';
 import '../../css/avatar-picker.css';
 
-export const avatarOptions: Array<{ id: string; label: string; image?: string; Icon?: LucideIcon }> = [
-    { id: 'cometa', label: 'Cometa', image: cometa },
-    { id: 'cometa-guia', label: 'Cometa guía', image: guide },
-    { id: 'cometa-animo', label: 'Cometa te anima', image: encouragingCometa },
-    { id: 'sol', label: 'Sol andino', Icon: Sun },
-    { id: 'luna', label: 'Luna', Icon: MoonStar },
-    { id: 'flor', label: 'Sisa · Flor', Icon: Flower2 },
-];
+export const avatarOptions = presets;
+const previousAvatars: Record<string, string> = { cometa: 'llama', 'cometa-guia': 'condor', 'cometa-animo': 'colibri', sol: 'jaguar', luna: 'oso', flor: 'mariposa' };
+
+export function resolveAvatarId(avatar?: string | null): string | undefined {
+    const id = avatar ? previousAvatars[avatar] ?? avatar : undefined;
+    return avatarOptions.find(option => option.id === id)?.id;
+}
 
 export function UserAvatar({ name = '', avatar, className = 'user-avatar' }: { name?: string; avatar?: string | null; className?: string }) {
-    const preset = avatarOptions.find(option => option.id === avatar);
-    const uploaded = /^avatars\/[a-f0-9]{40}\.webp$/.test(avatar ?? '');
-    const src = preset?.image ?? (uploaded ? `${apiBaseUrl}/api/${avatar}` : undefined);
-    const Icon = preset?.Icon;
-    return <span className={`${className} system-avatar${preset || uploaded ? ' has-avatar' : ''}${uploaded ? ' is-uploaded' : ''}`} aria-hidden="true">
-        {src ? <img src={src} alt="" width={128} height={128} decoding="async" /> : Icon ? <Icon strokeWidth={1.6} /> : name.slice(0, 1).toUpperCase()}
+    const preset = avatarOptions.find(option => option.id === resolveAvatarId(avatar));
+    return <span className={`${className} system-avatar${preset ? ' has-avatar' : ''}`} aria-hidden="true">
+        {preset ? <AvatarIllustration id={preset.id} background={preset.background} /> : name.slice(0, 1).toUpperCase()}
     </span>;
 }

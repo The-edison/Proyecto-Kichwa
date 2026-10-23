@@ -1,0 +1,79 @@
+{
+  "key": "advanced-morphemes",
+  "module": 2,
+  "order": 1,
+  "title": "Ocupaciones, orden y parentesco",
+  "description": "Aprende a reconocer qué cambia en una palabra cuando añadimos -kamak, -niki o la-. Mira sus partes y descubre su significado.",
+  "note": "Un morfema es una parte de una palabra que aporta significado. En esta lección veremos qué se añade, dónde se coloca y qué significa la palabra completa.",
+  "sections": [
+    {
+      "key": "occupation",
+      "label": "Ocupaciones",
+      "title": "-kamak: quien se encarga de algo",
+      "kicker": "PASO 1 · UNA RESPONSABILIDAD",
+      "morpheme": "-kamak",
+      "position": "Se añade al final",
+      "explanation": "Wasi significa «casa». Al añadir -kamak, ya no nombramos la casa: nombramos a la persona que la cuida.",
+      "instruction": "Lee primero la palabra de la izquierda. Después observa cómo cambia al añadir -kamak.",
+      "forms": [
+        { "base": "wasi", "baseMeaning": "casa", "word": "wasikamak", "meaning": "cuidador o cuidadora de la casa", "icon": "house" },
+        { "base": "punku", "baseMeaning": "puerta", "word": "punkukamak", "meaning": "portero o portera", "icon": "door" },
+        { "base": "llama", "baseMeaning": "oveja", "word": "llamakamak", "meaning": "ovejero u ovejera", "icon": "sheep" },
+        { "base": "wakra", "baseMeaning": "ganado", "word": "wakrakamak", "meaning": "vaquero o vaquera", "icon": "cattle" }
+      ],
+      "example": { "before": "Marilin", "focus": "llamakamak", "after": "kan.", "meaning": "Marilin es ovejera." },
+      "reminder": "Busca -kamak al final. Te ayuda a reconocer a una persona y su responsabilidad."
+    },
+    {
+      "key": "order",
+      "label": "Orden",
+      "title": "-niki: el lugar que ocupa alguien",
+      "kicker": "PASO 2 · DE CANTIDAD A POSICIÓN",
+      "morpheme": "-niki",
+      "position": "Se añade al final de un número",
+      "explanation": "Shuk significa «uno». Shukniki significa «primero». El número dice cuántos hay; con -niki indica un lugar en el orden.",
+      "instruction": "Sigue la fila de posiciones. El primer lugar es 1.º, el tercero es 3.º y el noveno es 9.º.",
+      "forms": [
+        { "base": "shuk", "baseMeaning": "uno · 1", "word": "shukniki", "meaning": "primero · 1.º", "icon": "1" },
+        { "base": "kimsa", "baseMeaning": "tres · 3", "word": "kimsaniki", "meaning": "tercero · 3.º", "icon": "3" },
+        { "base": "iskun", "baseMeaning": "nueve · 9", "word": "iskunniki", "meaning": "noveno · 9.º", "icon": "9" }
+      ],
+      "example": { "before": "", "focus": "Shukniki", "after": "", "meaning": "Primero: ocupa el lugar 1 en una fila o una llegada." },
+      "reminder": "En iskunniki se conservan las dos n: iskun termina en n y niki empieza con n."
+    },
+    {
+      "key": "family",
+      "label": "Parentesco",
+      "title": "la-: al inicio de estas palabras de familia",
+      "kicker": "PASO 3 · PALABRAS DE FAMILIA",
+      "morpheme": "la-",
+      "position": "Se coloca al inicio",
+      "explanation": "Aquí la- aparece antes de una palabra de parentesco. Por eso no lo llamamos sufijo: un sufijo se coloca al final.",
+      "instruction": "Observa la palabra completa junto a su significado.",
+      "forms": [
+        { "base": "yaya", "baseMeaning": "papá", "word": "layaya", "meaning": "padrastro", "icon": "parent" },
+        { "base": "mama", "baseMeaning": "mamá", "word": "lamama", "meaning": "madrastra", "icon": "parent" },
+        { "base": "churi", "baseMeaning": "hijo", "word": "lachuri", "meaning": "entenado (hijastro)", "icon": "child" },
+        { "base": "ushushi", "baseMeaning": "hija", "word": "laushushi", "meaning": "entenada (hijastra)", "icon": "child" }
+      ],
+      "example": { "before": "la + yaya →", "focus": "layaya", "after": "", "meaning": "Padrastro." },
+      "reminder": ""
+    },
+    {
+      "key": "review",
+      "label": "Repaso",
+      "title": "Una letra puede cambiar el significado",
+      "kicker": "PASO 4 · COMPARA Y RECUERDA",
+      "morpheme": "-kamak / -kama",
+      "position": "Mira si termina en k",
+      "explanation": "-kamak indica quién se encarga de algo. -kama indica «hasta». Se parecen al escribirlos, pero expresan ideas diferentes.",
+      "instruction": "Compara las dos palabras con wasi. La k final cambia lo que expresan.",
+      "forms": [
+        { "base": "wasi", "baseMeaning": "casa", "word": "wasikamak", "meaning": "cuidador o cuidadora de la casa", "icon": "house" },
+        { "base": "wasi", "baseMeaning": "casa", "word": "wasikama", "meaning": "hasta la casa", "icon": "destination" }
+      ],
+      "example": { "before": "", "focus": "Mira → separa → comprende", "after": "", "meaning": "Reconoce la palabra que ya conoces, busca la parte añadida y lee el significado completo." },
+      "reminder": ""
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "key": "time-morphemes",
+  "module": 2,
+  "order": 2,
+  "title": "Pasado y futuro: -rka y -sha",
+  "description": "Aprende a decir lo que ya pasó y lo que harás después. Separa las partes del verbo y observa quién realiza la acción.",
+  "note": "La raíz expresa la acción. Para encontrarla, quitamos -na del verbo: chayana (llegar) → chaya. Después añadimos la terminación que necesitamos.",
+  "sections": [
+    {
+      "key": "past",
+      "label": "Pasado",
+      "title": "-rka: una acción que ya ocurrió",
+      "kicker": "PASO 1 · ANTES DE AHORA",
+      "position": "Raíz + rka",
+      "explanation": "-rka señala el pasado. En estos cinco ejemplos hablamos de «él o ella»: pay. Así, pay chayarka significa «él o ella llegó».",
+      "instruction": "Mira la raíz y la parte resaltada. Cada palabra expresa una acción que ya pasó.",
+      "forms": [
+        { "base": "samari", "baseMeaning": "descansar", "infinitive": "samarina", "word": "samarirka", "meaning": "descansó", "icon": "rest", "label": "Él o ella", "parts": ["samari", "rka"] },
+        { "base": "waka", "baseMeaning": "llorar", "infinitive": "wakana", "word": "wakarka", "meaning": "lloró", "icon": "cry", "label": "Él o ella", "parts": ["waka", "rka"] },
+        { "base": "chaya", "baseMeaning": "llegar", "infinitive": "chayana", "word": "chayarka", "meaning": "llegó", "icon": "arrive", "label": "Él o ella", "parts": ["chaya", "rka"] },
+        { "base": "chinkari", "baseMeaning": "perderse", "infinitive": "chinkarina", "word": "chinkarirka", "meaning": "se perdió", "icon": "lost", "label": "Él o ella", "parts": ["chinkari", "rka"] },
+        { "base": "urma", "baseMeaning": "caer", "infinitive": "urmana", "word": "urmarka", "meaning": "cayó", "icon": "fall", "label": "Él o ella", "parts": ["urma", "rka"] }
+      ],
+      "example": { "before": "Pay", "focus": "chayarka.", "after": "", "meaning": "Él o ella llegó." },
+      "reminder": "Para decir «yo llegué», añadimos -ni: chaya + rka + ni → ñuka chayarkani. -rka indica pasado y -ni indica «yo»."
+    },
+    {
+      "key": "future",
+      "label": "Futuro con yo",
+      "title": "-sha: lo que yo haré",
+      "kicker": "PASO 2 · DESPUÉS DE AHORA",
+      "position": "Raíz + sha",
+      "explanation": "Ñuka significa «yo». Con -sha expresamos una acción futura de quien habla: ñuka purisha significa «yo caminaré».",
+      "instruction": "Todas estas formas expresan «yo». Lee la acción y luego su forma en futuro.",
+      "forms": [
+        { "base": "llanka", "baseMeaning": "trabajar", "infinitive": "llankana", "word": "llankasha", "meaning": "trabajaré", "icon": "work", "label": "Yo", "parts": ["llanka", "sha"] },
+        { "base": "yachachi", "baseMeaning": "enseñar", "infinitive": "yachachina", "word": "yachachisha", "meaning": "enseñaré", "icon": "teach", "label": "Yo", "parts": ["yachachi", "sha"] },
+        { "base": "puri", "baseMeaning": "caminar", "infinitive": "purina", "word": "purisha", "meaning": "caminaré", "icon": "walk", "label": "Yo", "parts": ["puri", "sha"] },
+        { "base": "kuya", "baseMeaning": "amar", "infinitive": "kuyana", "word": "kuyasha", "meaning": "amaré", "icon": "love", "label": "Yo", "parts": ["kuya", "sha"] },
+        { "base": "sira", "baseMeaning": "coser", "infinitive": "sirana", "word": "sirasha", "meaning": "coseré", "icon": "sew", "label": "Yo", "parts": ["sira", "sha"] }
+      ],
+      "example": { "before": "Ñuka", "focus": "purisha.", "after": "", "meaning": "Yo caminaré." },
+      "reminder": "-sha ya expresa el futuro con «yo». Aprende esta terminación con ñuka; los demás pronombres tienen sus propias formas."
+    },
+    {
+      "key": "compare",
+      "label": "Compara",
+      "title": "La misma acción en tres momentos",
+      "kicker": "PASO 3 · ANTES, AHORA Y DESPUÉS",
+      "position": "La raíz puri se mantiene",
+      "explanation": "En las tres frases hablamos de «yo» y de la acción de caminar. Cambian las terminaciones para indicar cuándo ocurre.",
+      "instruction": "Sigue la línea del tiempo y compara las partes. En pasado aparecen -rka y -ni; en futuro, -sha expresa «yo caminaré».",
+      "forms": [
+        { "base": "puri", "baseMeaning": "caminar", "infinitive": "purina", "word": "purirkani", "meaning": "yo caminé", "icon": "past", "label": "Pasado", "parts": ["puri", "rka", "ni"] },
+        { "base": "puri", "baseMeaning": "caminar", "infinitive": "purina", "word": "purini", "meaning": "yo camino", "icon": "present", "label": "Presente", "parts": ["puri", "ni"] },
+        { "base": "puri", "baseMeaning": "caminar", "infinitive": "purina", "word": "purisha", "meaning": "yo caminaré", "icon": "future", "label": "Futuro", "parts": ["puri", "sha"] }
+      ],
+      "example": { "before": "Ñuka", "focus": "purirkani → purini → purisha", "after": "", "meaning": "Yo caminé → yo camino → yo caminaré." },
+      "reminder": "Antes de escribir, piensa en dos cosas: quién realiza la acción y en qué momento ocurre."
+    },
+    {
+      "key": "sentences",
+      "label": "En oraciones",
+      "title": "Kayna y kaya: ayer y mañana",
+      "kicker": "PASO 4 · UNE LA PERSONA Y EL TIEMPO",
+      "position": "Kayna = ayer · Kaya = mañana",
+      "explanation": "Kayna nos sitúa en el pasado. Kaya nos sitúa en el futuro. Además de elegir el momento, mira si hablas de «yo» o de «él o ella».",
+      "instruction": "Compara el futuro de la misma acción: con ñuka usamos -sha; con pay usamos -nka.",
+      "forms": [
+        { "base": "puri", "baseMeaning": "caminar", "infinitive": "purina", "word": "purisha", "meaning": "yo caminaré", "icon": "speaker", "label": "Ñuka · yo", "parts": ["puri", "sha"] },
+        { "base": "puri", "baseMeaning": "caminar", "infinitive": "purina", "word": "purinka", "meaning": "él o ella caminará", "icon": "person", "label": "Pay · él o ella", "parts": ["puri", "nka"] }
+      ],
+      "example": { "before": "Kayna pay", "focus": "chayarka.", "after": "", "meaning": "Ayer él o ella llegó." },
+      "reminder": "Para el pasado, reconoce -rka. Para el futuro, elige según la persona: ñuka → -sha; pay → -nka."
+    }
+  ]
+}

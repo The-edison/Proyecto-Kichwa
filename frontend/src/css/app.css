@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './exercise-feedback.css';
 @source '../js/**/*.tsx';
 
 .exercise-matching-columns { column-gap: clamp(48px,8vw,120px); }
@@ -28,6 +29,10 @@
     --color-on-primary: #F5F3FF;
     --color-success: #0F766E;
     --color-success-bg: #E7F7F3;
+    --exercise-correct: #166534;
+    --exercise-correct-bg: #ecfdf3;
+    --exercise-incorrect: #b4233a;
+    --exercise-incorrect-bg: #fff0f2;
     --color-error: #B4233A;
     --color-error-bg: #FFF0F2;
     --color-warning: #78430B;
@@ -66,6 +71,10 @@
     --color-on-primary: #F5F3FF;
     --color-success: #2DD4BF;
     --color-success-bg: #163734;
+    --exercise-correct: #86efac;
+    --exercise-correct-bg: #163723;
+    --exercise-incorrect: #fda4af;
+    --exercise-incorrect-bg: #401f32;
     --color-error: #FDA4AF;
     --color-error-bg: #401F32;
     --color-warning: #FBBF24;
@@ -201,7 +210,8 @@ h1, h2, h3 { line-height: 1.25; letter-spacing: -.035em; }
 .public-info-contact a { color: var(--color-primary); font-weight: 650; text-decoration: underline; text-underline-offset: 4px; overflow-wrap: anywhere; }
 .public-info-actions { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 28px; }
 .public-info-actions a { color: var(--color-primary); font-weight: 650; text-decoration: underline; text-underline-offset: 4px; }
-.home-shell .public-header { position: absolute; inset: 0 0 auto; z-index: 10; width: 100%; max-width: none; padding: 24px 5%; background: #0F0B1E66; border-bottom-color: #FFFFFF33; backdrop-filter: blur(12px); }
+.home-shell .public-header { position: fixed; inset: 0 0 auto; z-index: 10; width: 100%; max-width: none; padding: 24px 5%; background: #0F0B1E66; border-bottom-color: #FFFFFF33; backdrop-filter: blur(12px); }
+.home-shell #historias { scroll-margin-top: 96px; }
 .home-shell .public-nav, .home-shell .public-header .menu-button { margin-left: auto; }
 .home-shell .public-nav .nav-start { color: #FFFFFF; background: #0F0B1E66; border-color: #FFFFFF99; }
 .home-shell .public-nav .nav-start:hover, .home-shell .public-nav .nav-start:focus-visible { color: var(--color-on-primary); background: var(--color-primary-button); border-color: var(--color-primary-button); }

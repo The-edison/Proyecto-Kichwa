@@ -9,7 +9,7 @@ const jsx=(type,props)=>({type,props});
 const context=vm.createContext({});
 const module=new vm.SourceTextModule(code,{context});
 await module.link(specifier=>{
-const exports=specifier.endsWith('/useLessonAudio')?{useLessonAudio:()=>({state:{phase:'idle'},play(){}})}:specifier==='lucide-react'?{Volume2:'Volume2'}:{jsx,jsxs:jsx};
+const exports=specifier.endsWith('/MatchingLines')?{MatchingLines:'MatchingLines'}:specifier.endsWith('/useLessonAudio')?{useLessonAudio:()=>({state:{phase:'idle'},play(){}})}:specifier==='lucide-react'?{Volume2:'Volume2'}:{jsx,jsxs:jsx};
 return new vm.SyntheticModule(Object.keys(exports),function(){for(const [key,value] of Object.entries(exports))this.setExport(key,value)},{context});
 });
 await module.evaluate();

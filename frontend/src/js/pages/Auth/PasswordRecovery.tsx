@@ -5,6 +5,7 @@ import { PublicLayout } from '../../layouts/PublicLayout';
 import { apiPost, ApiError } from '../../services/api';
 import { Head, Link } from '../../navigation';
 import { PasswordInput } from '../../components/PasswordInput';
+import { PrivacyNotice } from '../../components/PrivacyNotice';
 import { passwordChecks, passwordError } from '../../services/registration';
 
 export default function PasswordRecovery() {
@@ -61,6 +62,7 @@ export default function PasswordRecovery() {
                 <span className="recovery-symbol" aria-hidden="true">{resetting ? <KeyRound size={27} /> : <Mail size={27} />}</span>
                 <span className="eyebrow">VUELVE A TU APRENDIZAJE</span>
                 <h1>{resetting ? 'Crea una nueva contraseña' : 'Recupera tu contraseña'}</h1>
+                <PrivacyNotice />
                 <p className="recovery-intro">{resetting ? 'Elige una contraseña segura para volver a entrar a tu cuenta.' : 'Escribe el correo de tu cuenta y te enviaremos un enlace para cambiar la contraseña.'}</p>
                 {message ? <div className="recovery-confirmation" role="status"><CheckCircle2 size={26} aria-hidden="true" /><h2>Revisa tu correo</h2><p>{message}</p><p>Revisa también la carpeta de spam. El enlace vence en 60 minutos.</p><button type="button" className="secondary-button" onClick={() => setMessage('')}>Usar otro correo o volver a intentar</button></div> :
                     <form onSubmit={submit} noValidate aria-busy={busy} aria-label={resetting ? 'Crear una nueva contraseña' : 'Solicitar enlace de recuperación'}>

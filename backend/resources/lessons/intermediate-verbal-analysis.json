@@ -1,0 +1,85 @@
+{
+  "key": "verbal-analysis",
+  "module": 2,
+  "order": 3,
+  "title": "Morfemas verbales: comprende cada parte",
+  "description": "Descubre cómo una parte pequeña cambia lo que expresas. Aprende a hablar de acciones en curso, hacer que alguien actúe, deseos y peticiones amables.",
+  "note": "Lee la palabra completa, sepárala en bloques y mira qué aporta cada uno. La raíz expresa la idea principal; las partes añadidas completan su significado.",
+  "sections": [
+    {
+      "key": "ongoing", "label": "En curso", "title": "-ku: una acción que está ocurriendo", "kicker": "PASO 1 · LA PALABRA TE DA EL CONTEXTO",
+      "position": "Miku + ku + ni", "focus": "mikukuni", "listTitle": "Con nombres, -ku expresa cariño", "extraTitle": "", "extraIntro": "",
+      "explanation": "Miku expresa la acción de comer. Al añadir -ku indicamos que la acción está en desarrollo. -ni indica «yo»: mikukuni significa «estoy comiendo».",
+      "instruction": "En estas palabras nombramos personas o cosas con cariño. Observa la diferencia con el verbo mikukuni.",
+      "forms": [
+        { "base": "miku", "baseMeaning": "comer", "word": "mikukuni", "meaning": "estoy comiendo", "icon": "eat", "group": "focus", "kind": "Verbo: acción en curso", "parts": [{"text":"miku","role":"root","label":"Raíz","meaning":"comer"},{"text":"ku","role":"morpheme","label":"Acción en curso","meaning":"está ocurriendo"},{"text":"ni","role":"ending","label":"Persona","meaning":"yo"}] },
+        { "base": "wawa", "baseMeaning": "bebé", "word": "wawaku", "meaning": "bebecito", "icon": "baby", "group": "list", "kind": "Nombre: cariño", "parts": [{"text":"wawa","role":"root","label":"Nombre","meaning":"bebé"},{"text":"ku","role":"morpheme","label":"Cariño","meaning":"expresa afecto"}] },
+        { "base": "warmi", "baseMeaning": "mujer", "word": "warmiku", "meaning": "mujercita, dicho con cariño", "icon": "person", "group": "list", "kind": "Nombre: cariño", "parts": [{"text":"warmi","role":"root","label":"Nombre","meaning":"mujer"},{"text":"ku","role":"morpheme","label":"Cariño","meaning":"expresa afecto"}] },
+        { "base": "wasi", "baseMeaning": "casa", "word": "wasiku", "meaning": "casita", "icon": "house", "group": "list", "kind": "Nombre: cariño", "parts": [{"text":"wasi","role":"root","label":"Nombre","meaning":"casa"},{"text":"ku","role":"morpheme","label":"Cariño","meaning":"expresa afecto"}] },
+        { "base": "mashi", "baseMeaning": "amigo o amiga", "word": "mashiku", "meaning": "amiguito o amiguita", "icon": "friends", "group": "list", "kind": "Nombre: cariño", "parts": [{"text":"mashi","role":"root","label":"Nombre","meaning":"amigo o amiga"},{"text":"ku","role":"morpheme","label":"Cariño","meaning":"expresa afecto"}] }
+      ],
+      "example": { "before": "Ñuka", "focus": "mikukuni.", "after": "", "meaning": "Yo estoy comiendo." },
+      "reminder": "Mira qué palabra acompaña a -ku: en mikukuni hay una acción en curso; en wasiku se expresa cariño hacia una casa."
+    },
+    {
+      "key": "cause", "label": "Hacer que", "title": "-chi: hacer que alguien realice una acción", "kicker": "PASO 2 · UNA PERSONA HACE ACTUAR A OTRA",
+      "position": "Miku + chi + na", "focus": "mikuchina", "listTitle": "De una acción a hacer que otro la haga", "extraTitle": "Peticiones dirigidas a un grupo", "extraIntro": "Estas expresiones completas sirven para pedir algo a varias personas. Apréndelas con su significado.",
+      "explanation": "Mikuna significa «comer». Mikuchina significa «hacer comer» o «alimentar». -chi aporta la idea de hacer que otra persona realice la acción.",
+      "instruction": "Compara la acción de la raíz con el significado de la palabra completa.",
+      "forms": [
+        { "base": "miku", "baseMeaning": "comer", "word": "mikuchina", "meaning": "hacer comer o alimentar", "icon": "eat", "group": "list", "kind": "Causativo", "parts": [{"text":"miku","role":"root","label":"Raíz","meaning":"comer"},{"text":"chi","role":"morpheme","label":"Causativo","meaning":"hacer que otra persona actúe"},{"text":"na","role":"ending","label":"Infinitivo","meaning":"forma del verbo sin conjugar"}] },
+        { "base": "arma", "baseMeaning": "bañarse", "word": "armachina", "meaning": "hacer bañar a alguien", "icon": "water", "group": "list", "kind": "Causativo", "parts": [{"text":"arma","role":"root","label":"Raíz","meaning":"bañarse"},{"text":"chi","role":"morpheme","label":"Causativo","meaning":"hacer que otra persona actúe"},{"text":"na","role":"ending","label":"Infinitivo","meaning":"forma del verbo sin conjugar"}] },
+        { "base": "yacha", "baseMeaning": "aprender", "word": "yachachina", "meaning": "enseñar: hacer que alguien aprenda", "icon": "learn", "group": "list", "kind": "Causativo", "parts": [{"text":"yacha","role":"root","label":"Raíz","meaning":"aprender"},{"text":"chi","role":"morpheme","label":"Causativo","meaning":"hacer que otra persona aprenda"},{"text":"na","role":"ending","label":"Infinitivo","meaning":"forma del verbo sin conjugar"}] },
+        { "base": "shamuy", "baseMeaning": "venir", "word": "shamuychi", "meaning": "vengan", "icon": "friends", "group": "extra", "kind": "Petición a varias personas", "parts": [{"text":"shamuychi","role":"expression","label":"Expresión completa","meaning":"vengan"}] },
+        { "base": "apamuy", "baseMeaning": "traer", "word": "apamuychi", "meaning": "traigan", "icon": "gift", "group": "extra", "kind": "Petición a varias personas", "parts": [{"text":"apamuychi","role":"expression","label":"Expresión completa","meaning":"traigan"}] },
+        { "base": "hapi", "baseMeaning": "coger", "word": "hapichi", "meaning": "cojan", "icon": "hand", "group": "extra", "kind": "Petición a varias personas", "parts": [{"text":"hapichi","role":"expression","label":"Expresión completa","meaning":"cojan"}] }
+      ],
+      "example": { "before": "", "focus": "Mikuna → mikuchina", "after": "", "meaning": "Comer → hacer comer o alimentar." },
+      "reminder": "En mikuchina, -chi cambia la acción: una persona hace que otra coma. En shamuychi, aprende la petición completa: «vengan»."
+    },
+    {
+      "key": "desire", "label": "Deseo", "title": "-naya: tener ganas de hacer algo", "kicker": "PASO 3 · EXPRESA LO QUE DESEAS",
+      "position": "Miku + naya + ni", "focus": "mikunayani", "listTitle": "Así expreso lo que quiero hacer", "extraTitle": "Expresiones de ganas y sensaciones", "extraIntro": "Lee estas frases completas y su significado. Fíjate en cómo expresan lo que siente una persona.",
+      "explanation": "-naya aporta la idea de deseo o ganas. Miku + naya + ni forma mikunayani: «yo quiero comer». La terminación -ni indica «yo».",
+      "instruction": "Reconoce la acción, encuentra -naya y termina con -ni para hablar de «yo».",
+      "forms": [
+        { "base": "miku", "baseMeaning": "comer", "word": "mikunayani", "meaning": "quiero comer", "icon": "eat", "group": "list", "kind": "Deseo: yo", "parts": [{"text":"miku","role":"root","label":"Raíz","meaning":"comer"},{"text":"naya","role":"morpheme","label":"Deseo","meaning":"tener ganas de hacer algo"},{"text":"ni","role":"ending","label":"Persona","meaning":"yo"}] },
+        { "base": "killka", "baseMeaning": "escribir", "word": "killkanayani", "meaning": "quiero escribir", "icon": "write", "group": "list", "kind": "Deseo: yo", "parts": [{"text":"killka","role":"root","label":"Raíz","meaning":"escribir"},{"text":"naya","role":"morpheme","label":"Deseo","meaning":"tener ganas de hacer algo"},{"text":"ni","role":"ending","label":"Persona","meaning":"yo"}] },
+        { "base": "yacha", "baseMeaning": "aprender", "word": "yachanayani", "meaning": "quiero aprender", "icon": "learn", "group": "list", "kind": "Deseo: yo", "parts": [{"text":"yacha","role":"root","label":"Raíz","meaning":"aprender"},{"text":"naya","role":"morpheme","label":"Deseo","meaning":"tener ganas de hacer algo"},{"text":"ni","role":"ending","label":"Persona","meaning":"yo"}] },
+        { "base": "miku", "baseMeaning": "comer", "word": "mikunayan", "meaning": "Ñukata mikunayan: me dan ganas de comer", "icon": "eat", "group": "extra", "kind": "Sensación", "parts": [{"text":"miku","role":"root","label":"Raíz","meaning":"comer"},{"text":"naya","role":"morpheme","label":"Ganas","meaning":"sensación de querer comer"},{"text":"n","role":"ending","label":"Terminación","meaning":"completa esta expresión"}] },
+        { "base": "milla", "baseMeaning": "sentir asco", "word": "millanayan", "meaning": "Ñukata millanayan: siento asco", "icon": "person", "group": "extra", "kind": "Sensación", "parts": [{"text":"milla","role":"root","label":"Raíz","meaning":"asco"},{"text":"naya","role":"morpheme","label":"Sensación","meaning":"expresa la sensación de asco"},{"text":"n","role":"ending","label":"Terminación","meaning":"completa esta expresión"}] }
+      ],
+      "example": { "before": "Ñuka", "focus": "mikunayani.", "after": "", "meaning": "Yo quiero comer." },
+      "reminder": "Mikukuni expresa una acción en curso: «estoy comiendo». Mikunayani expresa un deseo: «quiero comer»."
+    },
+    {
+      "key": "courtesy", "label": "Cortesía", "title": "-pay: pide algo con amabilidad", "kicker": "PASO 4 · UNA EXPRESIÓN PARA CONVERSAR",
+      "position": "Aprende la expresión completa", "focus": "shamupay", "listTitle": "Peticiones amables", "extraTitle": "", "extraIntro": "",
+      "explanation": "Shamupay significa «ven, por favor». En esta expresión, -pay aporta cortesía. Aprende cada petición completa para usarla en una conversación.",
+      "instruction": "Relaciona cada expresión con la acción que pides amablemente.",
+      "forms": [
+        { "base": "shamu", "baseMeaning": "venir hacia aquí", "word": "shamupay", "meaning": "ven, por favor", "icon": "hand", "group": "list", "kind": "Cortesía", "parts": [{"text":"shamu","role":"root","label":"Raíz","meaning":"venir hacia aquí"},{"text":"pay","role":"morpheme","label":"Cortesía","meaning":"una petición amable"}] },
+        { "base": "tiyari", "baseMeaning": "sentarse", "word": "tiyaripay", "meaning": "siéntate, por favor", "icon": "person", "group": "list", "kind": "Cortesía", "parts": [{"text":"tiyari","role":"root","label":"Raíz","meaning":"sentarse"},{"text":"pay","role":"morpheme","label":"Cortesía","meaning":"una petición amable"}] },
+        { "base": "uya", "baseMeaning": "escuchar", "word": "uyapay", "meaning": "escucha, por favor", "icon": "listen", "group": "list", "kind": "Cortesía", "parts": [{"text":"uya","role":"root","label":"Raíz","meaning":"escuchar"},{"text":"pay","role":"morpheme","label":"Cortesía","meaning":"una petición amable"}] }
+      ],
+      "example": { "before": "Al recibir a una persona:", "focus": "Shamupay.", "after": "", "meaning": "Ven, por favor." },
+      "reminder": "Usa las peticiones completas que has aprendido. Memorizar su significado te ayuda a hablar con amabilidad."
+    },
+    {
+      "key": "analysis", "label": "Analiza", "title": "Separa los bloques y comprende la palabra", "kicker": "PASO 5 · CADA PARTE CUMPLE UNA FUNCIÓN",
+      "position": "Raíz o base + partes añadidas", "focus": "mikukuni", "listTitle": "Reconoce qué tipo de idea expresa", "extraTitle": "", "extraIntro": "",
+      "explanation": "Un nombre señala una persona o cosa. Un verbo expresa una acción. Otras partes indican lugar, beneficiario, finalidad o cómo afirmamos lo que decimos.",
+      "instruction": "Pulsa una palabra. Observa sus bloques y lee lo que aporta cada uno.",
+      "forms": [
+        { "base": "miku", "baseMeaning": "comer", "word": "mikukuni", "meaning": "estoy comiendo", "icon": "eat", "group": "list", "kind": "Verbo", "parts": [{"text":"miku","role":"root","label":"Raíz","meaning":"comer"},{"text":"ku","role":"morpheme","label":"Acción en curso","meaning":"la acción se está realizando"},{"text":"ni","role":"ending","label":"Persona","meaning":"yo"}] },
+        { "base": "wasi", "baseMeaning": "casa", "word": "wasipi", "meaning": "en la casa", "icon": "house", "group": "list", "kind": "Nombre + lugar", "parts": [{"text":"wasi","role":"root","label":"Nombre","meaning":"casa"},{"text":"pi","role":"morpheme","label":"Lugar","meaning":"en"}] },
+        { "base": "wawa", "baseMeaning": "bebé", "word": "wawaku", "meaning": "bebecito", "icon": "baby", "group": "list", "kind": "Nombre + cariño", "parts": [{"text":"wawa","role":"root","label":"Nombre","meaning":"bebé"},{"text":"ku","role":"morpheme","label":"Cariño","meaning":"expresa afecto"}] },
+        { "base": "wawa", "baseMeaning": "bebé", "word": "wawapak", "meaning": "para el bebé", "icon": "gift", "group": "list", "kind": "Nombre + beneficiario", "parts": [{"text":"wawa","role":"root","label":"Nombre","meaning":"bebé"},{"text":"pak","role":"morpheme","label":"Beneficiario","meaning":"para quien recibe algo"}] },
+        { "base": "miku", "baseMeaning": "comer", "word": "mikunkapak", "meaning": "para comer", "icon": "eat", "group": "list", "kind": "Verbo + finalidad", "parts": [{"text":"miku","role":"root","label":"Raíz","meaning":"comer"},{"text":"nkapak","role":"morpheme","label":"Finalidad","meaning":"para realizar la acción"}] },
+        { "base": "alli", "baseMeaning": "bien", "word": "allimi", "meaning": "está bien", "icon": "affirm", "group": "list", "kind": "Afirmación del mensaje", "parts": [{"text":"alli","role":"root","label":"Base","meaning":"bien"},{"text":"mi","role":"morpheme","label":"Afirmación","meaning":"afirma lo que se dice"}] }
+      ],
+      "example": { "before": "", "focus": "Miku + ku + ni → mikukuni", "after": "", "meaning": "Comer + acción en curso + yo → estoy comiendo." },
+      "reminder": "Primero reconoce la raíz o base. Después observa qué aporta cada segmento y lee el significado de la palabra completa."
+    }
+  ]
+}

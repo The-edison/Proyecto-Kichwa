@@ -31,7 +31,7 @@ async function screen(component = 'PasswordRecovery', { query = '', post, google
             : specifier === 'lucide-react' ? Object.fromEntries(['ArrowLeft', 'ArrowRight', 'Check', 'CheckCircle2', 'KeyRound', 'LoaderCircle', 'Mail'].map(name => [name, name]))
             : specifier.endsWith('/AuthContext') ? { useAuth: () => ({ googleEnabled, googleLoading: false, login: async () => {} }) }
             : specifier.endsWith('/api') ? { ApiError, apiPost: async (path, payload) => { requests.push({ path, payload }); return post ? post(ApiError) : path === '/auth/google/prepare' ? { url: 'http://127.0.0.1:8000/auth/google' } : { message: 'Revisa tu correo.' }; } }
-            : Object.fromEntries(['Link', 'Head', 'PublicLayout', 'PasswordInput', 'GoogleAuthButton'].map(name => [name, name]));
+            : Object.fromEntries(['Link', 'Head', 'PublicLayout', 'PasswordInput', 'GoogleAuthButton', 'PrivacyNotice'].map(name => [name, name]));
         return new vm.SyntheticModule(Object.keys(dependency), function () { for (const [key, value] of Object.entries(dependency)) this.setExport(key, value); }, { context });
     });
     await module.evaluate();

@@ -1,21 +1,22 @@
 import { RotateCcw, Volume2 } from 'lucide-react';
 import { useLessonAudio } from '../hooks/useLessonAudio';
-import type { Exercise, ExerciseAnswer } from '../types';
+import type { Exercise, ExerciseAnswer, ExerciseFeedback } from '../types';
 
-export function MissingVowelExercise({ exercise, answer, disabled, onChange }: {
+export function MissingVowelExercise({ exercise, answer, feedback, disabled, onChange }: {
     exercise: Exercise;
     answer: ExerciseAnswer;
+    feedback?: ExerciseFeedback;
     disabled: boolean;
     onChange: (answer: ExerciseAnswer) => void;
 }) {
     const { state, play } = useLessonAudio();
-    return <section className="guided-listening-panel" aria-label="Completa las tres palabras">
+    return <section className="guided-listening-panel" data-exercise-correct={feedback?.is_correct} aria-label="Completa las tres palabras">
         {exercise.elements.map((element, index) => {
             const clip = (['audio1', 'audio2', 'audio3'] as const)[index];
             if (!clip) return null;
             const [before, after] = element.texto.split('_');
             const active = state.clip === clip && (state.phase === 'playing' || state.phase === 'loading');
-            return <div className="guided-listening-row" key={element.id}>
+            return <div className="guided-listening-row" data-answer-correct={feedback?.item_results?.[element.id] ?? feedback?.is_correct} key={element.id}>
                 <div className={`guided-listening-audio${active ? ' is-active' : ''}`}>
                     <button type="button" onClick={() => play(clip)} aria-label={`Escuchar el audio ${index + 1}`}><Volume2 size={21} aria-hidden="true" /><span>{active ? (state.phase === 'playing' ? 'Sonando' : 'Cargando…') : `Audio ${index + 1}`}</span></button>
                     <button type="button" className="guided-listening-repeat" aria-label={`Repetir el audio ${index + 1}`} title="Repetir audio" onClick={() => play(clip)}><RotateCcw size={18} aria-hidden="true" /></button>

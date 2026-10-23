@@ -7,6 +7,7 @@ import { transformWithOxc } from 'vite';
 const compile = async path => (await transformWithOxc(await readFile(new URL('../src/js/' + path, import.meta.url), 'utf8'), path)).code;
 const pickerCode = await compile('components/AvatarPicker.tsx');
 const avatarCode = await compile('components/UserAvatar.tsx');
+const presets = JSON.parse(await readFile(new URL('../../backend/resources/avatar-presets.json', import.meta.url), 'utf8'));
 const accountCode = await compile('pages/Account/Index.tsx');
 const jsx = (type, props) => ({ type, props });
 function nodes(tree) { if (Array.isArray(tree)) return tree.flatMap(nodes); return tree?.props ? [tree, ...nodes(tree.props.children)] : []; }
@@ -17,13 +18,14 @@ async function screen({ post, role = 'student', avatar = null } = {}) {
     const states = [], requests = [];
     const user = { id: 1, name: 'Ana', avatar, role, email: 'ana@example.test', email_verified: true };
     class ApiError extends Error { constructor(message, errors = {}) { super(message); this.errors = errors; } }
-    const context = vm.createContext({ FormData, window: { location: { search: '' } }, URLSearchParams });
+    const context = vm.createContext({ window: { location: { search: '' } }, URLSearchParams });
     const dependencies = {
         react: { useState: initial => { const index = cursor++; if (!(index in states)) states[index] = initial; return [states[index], value => { states[index] = value; }]; }, useRef: initial => { const index = cursor++; return states[index] ??= { current: initial }; }, useEffect() {} },
         'react/jsx-runtime': { jsx, jsxs: jsx, Fragment: 'fragment' },
-        'lucide-react': Object.fromEntries(['Camera', 'LoaderCircle', 'Upload', 'X', 'Flower2', 'MoonStar', 'Sun', 'CheckCircle2', 'KeyRound', 'Mail', 'ShieldCheck', 'UserRound'].map(name => [name, name])),
+        'lucide-react': Object.fromEntries(['Palette', 'LoaderCircle', 'X', 'CheckCircle2', 'KeyRound', 'Mail', 'ShieldCheck', 'UserRound'].map(name => [name, name])),
         AuthContext: { useAuth: () => ({ user, refreshUser: async () => { refreshes++; user.avatar = saved; } }) },
-        api: { apiBaseUrl: 'https://campus.test', ApiError, apiPost: async (path, payload) => { requests.push({ path, payload }); if (post) await post({ payload, ApiError }); saved = payload instanceof FormData ? 'avatars/' + 'a'.repeat(40) + '.webp' : payload.preset === 'initial' ? null : payload.preset; return { avatar: saved }; } },
+        api: { apiBaseUrl: 'https://campus.test', ApiError, apiPost: async (path, payload) => { requests.push({ path, payload }); if (post) await post({ payload, ApiError }); saved = payload.preset === 'initial' ? null : payload.preset; return { avatar: saved }; } },
+        AvatarIllustration: { AvatarIllustration: 'AvatarIllustration' },
         navigation: { Head: 'Head' }, AppLayout: { AppLayout: 'AppLayout' }, PasswordChange: { PasswordChange: 'PasswordChange' },
     };
     const cache = new Map();
@@ -33,7 +35,7 @@ async function screen({ post, role = 'student', avatar = null } = {}) {
         if (specifier.endsWith('/UserAvatar')) return avatarModule;
         if (specifier.endsWith('/AvatarPicker')) return pickerModule;
         if (!cache.has(specifier)) {
-            const exports = specifier.endsWith('.webp') ? { default: specifier } : specifier.endsWith('.css') ? {} : dependencies[specifier] ?? dependencies[specifier.split('/').at(-1)];
+            const exports = specifier.endsWith('.json') ? { default: presets } : specifier.endsWith('.css') ? {} : dependencies[specifier] ?? dependencies[specifier.split('/').at(-1)];
             assert.ok(exports, specifier);
             cache.set(specifier, new vm.SyntheticModule(Object.keys(exports), function () { for (const [key, value] of Object.entries(exports)) this.setExport(key, value); }, { context }));
         }
@@ -43,12 +45,11 @@ async function screen({ post, role = 'student', avatar = null } = {}) {
     await pickerModule.link(link); await pickerModule.evaluate();
     const accountModule = new vm.SourceTextModule(accountCode, { context });
     await accountModule.link(link); await accountModule.evaluate();
-    return { requests, user, refreshes: () => refreshes, render: () => { cursor = 0; return pickerModule.namespace.AvatarPicker(); }, account: () => { cursor = 0; return accountModule.namespace.default(); }, avatar: props => avatarModule.namespace.UserAvatar(props) };
+    return { requests, user, refreshes: () => refreshes, render: () => { cursor = 0; return pickerModule.namespace.AvatarPicker(); }, account: () => { cursor = 0; return accountModule.namespace.default(); }, avatar: props => { cursor = 0; return avatarModule.namespace.UserAvatar(props); } };
 }
 const button = (view, label) => nodes(view.render()).find(node => node.type === 'button' && node.props['aria-label'] === label);
 const settle = () => new Promise(resolve => setImmediate(resolve));
 const open = view => button(view, 'Cambiar avatar').props.onClick();
-function upload(view, file) { const target = { files: file ? [file] : [], value: 'selected' }; nodes(view.render()).find(node => node.type === 'input').props.onChange({ target }); return target; }
 
 test('student account omits the three shortcut buttons and retains its account sections and avatar picker', async () => {
     const view = await screen();
@@ -60,63 +61,75 @@ test('student account omits the three shortcut buttons and retains its account s
     assert.ok(nodes(tree).some(node => typeof node.type === 'function' && node.type.name === 'AvatarPicker'));
     const admin = await screen({ role: 'admin' });
     assert.ok(nodes(admin.account()).some(node => node.type === 'nav'));
+    assert.equal(nodes(admin.account()).some(node => typeof node.type === 'function' && node.type.name === 'AvatarPicker'), false);
+    assert.ok(nodes(admin.account()).some(node => typeof node.type === 'function' && node.type.name === 'UserAvatar'));
+    assert.equal(admin.render(), null);
+    assert.equal(admin.requests.length, 0);
 });
 
-test('clicking the profile avatar opens six choices and choosing Cometa saves and refreshes the global user', async () => {
-    const view = await screen();
-    assert.equal(button(view, 'Cambiar avatar').props['aria-expanded'], false);
-    open(view);
-    assert.equal(button(view, 'Cambiar avatar').props['aria-expanded'], true);
-    assert.equal(nodes(view.render()).filter(node => node.type === 'button' && 'aria-pressed' in node.props).length, 6);
-    button(view, 'Cometa').props.onClick(); await settle();
-    assert.equal(view.requests[0].path, '/auth/avatar');
-    assert.equal(view.requests[0].payload.preset, 'cometa');
-    assert.equal(view.user.avatar, 'cometa');
-    assert.equal(view.refreshes(), 1);
-    assert.equal(button(view, 'Cambiar avatar').props['aria-expanded'], false);
-    assert.match(content(view.render()), /Avatar actualizado/);
-});
 
-test('upload submits a multipart image and resets the input so the same file can be chosen again', async () => {
+test('the selector offers twelve illustrations ending with a woman and a man, without file uploads', async () => {
     const view = await screen(); open(view);
-    const file = new File(['image bytes'], 'foto.png', { type: 'image/png' });
-    const target = upload(view, file); await settle();
-    assert.equal(target.value, '');
-    assert.ok(view.requests[0].payload instanceof FormData);
-    assert.equal(view.requests[0].payload.get('image').name, 'foto.png');
-    assert.match(view.user.avatar, /^avatars\//);
+    const choices = nodes(view.render()).filter(node => node.type === 'button' && 'aria-pressed' in node.props);
+    assert.equal(choices.length, 12);
+    assert.deepEqual(choices.slice(-2).map(node => node.props['aria-label']), ['Mujer', 'Hombre']);
+    assert.deepEqual(choices.map(node => node.props['aria-label']), presets.map(item => item.label));
+    assert.equal(nodes(view.render()).some(node => node.type === 'input'), false);
+    assert.doesNotMatch(content(view.render()), /computadora|JPG|PNG|WebP|Subir/);
+    for (const preset of presets) {
+        const avatar = nodes(view.avatar({ avatar: preset.id })).find(node => node.type === 'AvatarIllustration');
+        assert.equal(avatar.props.id, preset.id);
+        assert.equal(avatar.props.background, preset.background);
+    }
 });
 
-test('invalid uploads are explained without sending a request and canceling does nothing', async () => {
-    const view = await screen(); open(view);
-    upload(view, new File(['<svg/>'], 'foto.svg', { type: 'image/svg+xml' }));
-    assert.ok(nodes(view.render()).some(node => node.props.role === 'alert'));
-    upload(view, new File([new Uint8Array(2 * 1024 * 1024 + 1)], 'foto.png', { type: 'image/png' }));
-    assert.match(content(view.render()), /2 MB/);
-    upload(view, null);
-    assert.equal(view.requests.length, 0);
+test('all twelve avatars save their own preset and refresh the shared profile', async () => {
+    for (const preset of presets) {
+        const view = await screen(); open(view);
+        button(view, preset.label).props.onClick(); await settle();
+        assert.equal(view.requests[0].path, '/auth/avatar');
+        assert.equal(view.requests[0].payload.preset, preset.id);
+        assert.equal(view.user.avatar, preset.id);
+        assert.equal(view.refreshes(), 1);
+        assert.equal(button(view, 'Cambiar avatar').props['aria-expanded'], false);
+        assert.match(content(view.render()), /Avatar actualizado/);
+        open(view);
+        assert.equal(nodes(view.render()).filter(node => node.type === 'button' && node.props['aria-pressed']).length, 1);
+        assert.equal(button(view, preset.label).props['aria-pressed'], true);
+    }
 });
 
-test('failed save stays open and duplicate clicks cannot send another upload while saving', async () => {
+test('using the initial clears an animal and refreshes the account', async () => {
+    const view = await screen({ avatar: 'condor' }); open(view);
+    nodes(view.render()).find(node => node.type === 'button' && content(node) === 'Usar mi inicial').props.onClick(); await settle();
+    assert.equal(view.requests[0].payload.preset, 'initial');
+    assert.equal(view.user.avatar, null);
+    assert.equal(content(view.avatar({ avatar: view.user.avatar, name: 'Ana' })), 'A');
+});
+
+test('failed saves stay open and duplicate clicks cannot send another selection while saving', async () => {
     let reject;
     const view = await screen({ post: ({ ApiError }) => new Promise((_, fail) => { reject = () => fail(new ApiError('No disponible')); }) });
-    open(view); button(view, 'Cometa').props.onClick(); button(view, 'Luna').props.onClick();
+    open(view); button(view, presets[0].label).props.onClick(); button(view, presets[1].label).props.onClick();
     assert.equal(view.requests.length, 1);
-    assert.equal(button(view, 'Luna').props.disabled, true);
+    assert.equal(button(view, presets[1].label).props.disabled, true);
     reject(); await settle();
     assert.equal(view.refreshes(), 0);
     assert.equal(button(view, 'Cambiar avatar').props['aria-expanded'], true);
     assert.match(content(view.render()), /No disponible/);
-    assert.equal(button(view, 'Luna').props.disabled, false);
+    assert.equal(button(view, presets[1].label).props.disabled, false);
 });
 
-test('shared avatar renderer supports preset pictures, icons, uploads and safe initial fallback', async () => {
-    const view = await screen();
-    assert.ok(nodes(view.avatar({ avatar: 'cometa' })).some(node => node.type === 'img' && node.props.src.endsWith('.webp')));
-    assert.ok(nodes(view.avatar({ avatar: 'sol' })).some(node => node.type === 'Sun'));
-    const path = 'avatars/' + 'b'.repeat(40) + '.webp';
-    assert.equal(nodes(view.avatar({ avatar: path })).find(node => node.type === 'img').props.src, 'https://campus.test/api/' + path);
-    const fallback = view.avatar({ avatar: 'https://untrusted.test/image.svg', name: 'Ana' });
-    assert.equal(nodes(fallback).some(node => node.type === 'img'), false);
-    assert.equal(content(fallback), 'A');
+test('previous presets use new illustrations and old uploads or unknown paths fall back to initials', async () => {
+    const view = await screen({ avatar: 'cometa-guia' }); open(view);
+    assert.equal(button(view, presets[0].label).props['aria-pressed'], true);
+    const aliases = { cometa: 'llama', 'cometa-guia': 'condor', 'cometa-animo': 'colibri', sol: 'jaguar', luna: 'oso', flor: 'mariposa' };
+    for (const [avatar, id] of Object.entries(aliases)) {
+        assert.equal(nodes(view.avatar({ avatar })).find(node => node.type === 'AvatarIllustration').props.id, id);
+    }
+    for (const avatar of [null, 'avatars/' + 'a'.repeat(40) + '.webp', 'https://untrusted.test/image.svg', 'unknown']) {
+        const tree = view.avatar({ avatar, name: 'Ana' });
+        assert.equal(content(tree), 'A');
+        assert.equal(nodes(tree).some(node => node.type === 'img'), false);
+    }
 });

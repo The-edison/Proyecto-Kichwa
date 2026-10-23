@@ -30,7 +30,7 @@ async function screen(base = '/') {
     const link = specifier => {
         if (specifier.endsWith('/useLessonAudio')) return hook;
         if (specifier.endsWith('/ExerciseCard')) return new vm.SyntheticModule(['mediaUrl', 'feedbackMessage'], function(){this.setExport('mediaUrl',path=>'/api/media/'+path);this.setExport('feedbackMessage',value=>value)}, {context});
-        const dependency = specifier === 'react' ? {
+        const dependency = specifier.endsWith('/MatchingLines') ? { MatchingLines: 'MatchingLines' } : specifier === 'react' ? {
             useState(initial) { const index = cursor++; if (!(index in states)) states[index] = initial; return [states[index], value => { states[index] = value; }]; },
             useRef(initial) { const index = cursor++; return states[index] ??= { current: initial }; },
             useEffect(effect) { const index = cursor++; if (!(index in states)) { states[index] = true; cleanup = effect(); } },

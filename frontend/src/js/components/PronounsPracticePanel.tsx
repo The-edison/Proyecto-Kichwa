@@ -42,7 +42,7 @@ export function PronounsPracticePanel({ exercises, answers, feedback, busy, star
             const fill = (id: string, value: string) => {
                 if (!disabled) onChange(exercise, { textos: { ...answer.textos, [id]: value } });
             };
-            return <article className={`pronouns-card${result ? result.is_correct ? ' is-correct' : ' is-incorrect' : ''}`} key={exercise.id}>
+            return <article data-exercise-correct={result?.is_correct} className={`pronouns-card${result ? result.is_correct ? ' is-correct' : ' is-incorrect' : ''}`} key={exercise.id}>
                 <header className="pronouns-card-heading">
                     <div><h2><span>{start + index}.</span> {exercise.config?.title}</h2><p>{exercise.prompt}</p></div>
                     <span className="pronouns-counter" aria-label={`${filled} de 3 respuestas completas`}>{result?.is_correct ? <CheckCircle2 size={15} aria-hidden="true" /> : null}{filled} de 3</span>
@@ -57,7 +57,7 @@ export function PronounsPracticePanel({ exercises, answers, feedback, busy, star
                     const selected = value.trim() ? value.trim().split(/\s+/) : [];
                     const used = new Map<string, number>();
                     selected.forEach(word => used.set(word, (used.get(word) ?? 0) + 1));
-                    return <div className={`pronouns-row${listening ? ' is-listening' : ''}${ordering ? ' is-ordering' : ''}${activity === 'complete' ? ' is-completing' : ''}`} key={element.id}>
+                    return <div data-answer-correct={result?.item_results?.[element.id] ?? result?.is_correct} className={`pronouns-row${listening ? ' is-listening' : ''}${ordering ? ' is-ordering' : ''}${activity === 'complete' ? ' is-completing' : ''}`} key={element.id}>
                         <span className="pronouns-row-number" aria-hidden="true">{row + 1}</span>
                         {!listening && element.imagen && scene && <div className="pronouns-illustration" role="img" aria-label={scene.description} style={{ backgroundImage: `url("${mediaUrl(element.imagen)}")`, backgroundPosition: `${(scene.cell % 3) * 50}% ${Math.floor(scene.cell / 3) * 50}%` }} />}
                         <div className="pronouns-row-content">
@@ -67,7 +67,7 @@ export function PronounsPracticePanel({ exercises, answers, feedback, busy, star
                             {ordering ? <fieldset className="pronouns-order" disabled={disabled}>
                                 <legend className="sr-only">Construye la oración {row + 1}: {meaning}</legend>
                                 <div className="pronouns-order-answer" aria-label={`Oración ${row + 1} construida`}>
-                                    {Array.from({ length: element.opciones?.length ?? 0 }, (_, position) => <button type="button" key={position} disabled={!selected[position] || disabled} className={selected[position] ? 'is-filled' : ''} aria-label={selected[position] ? `Quitar ${selected[position]} de la posición ${position + 1}` : `Posición ${position + 1} vacía`} onClick={() => fill(element.id, selected.filter((_, i) => i !== position).join(' '))}>{selected[position] || <span aria-hidden="true">···</span>}</button>)}
+                                    {Array.from({ length: element.opciones?.length ?? 0 }, (_, position) => <button data-answer-control={Boolean(selected[position])} type="button" key={position} disabled={!selected[position] || disabled} className={selected[position] ? 'is-filled' : ''} aria-label={selected[position] ? `Quitar ${selected[position]} de la posición ${position + 1}` : `Posición ${position + 1} vacía`} onClick={() => fill(element.id, selected.filter((_, i) => i !== position).join(' '))}>{selected[position] || <span aria-hidden="true">···</span>}</button>)}
                                     <button type="button" className="pronouns-reset" disabled={disabled || !selected.length} aria-label={`Reiniciar oración ${row + 1}`} onClick={() => fill(element.id, '')}><RotateCcw size={16} aria-hidden="true" /></button>
                                 </div>
                                 <div className="pronouns-order-bank" aria-label={`Palabras para la oración ${row + 1}`}>

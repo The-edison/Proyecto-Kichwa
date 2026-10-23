@@ -19,14 +19,14 @@ export function SentenceOrderPanel({ exercises, answers, feedback, busy, onChang
                 const disabled = busy || result?.is_correct === true;
                 const words = new Map(exercise.elements.map(word => [word.id, word.texto]));
                 const change = (next: string[]) => { if (!disabled) onChange(exercise, { orden: next }); };
-                return <article className="scene-choice-card sentence-order-card" key={exercise.id}>
+                return <article data-exercise-correct={result?.is_correct} className="scene-choice-card sentence-order-card" key={exercise.id}>
                     <header><h2>Ordena la oración</h2><span>{exercise.config?.context_meaning}</span></header>
                     <figure className="scene-choice-figure"><img src={mediaUrl(exercise.config?.prompt_image)} alt={exercise.config?.prompt_image_alt ?? 'Situación para formar una oración en kichwa'} width={320} height={240} decoding="async" fetchPriority="high" /></figure>
                     <fieldset disabled={disabled}>
                         <legend>{exercise.config?.context_text}</legend>
                         <div className="sentence-order-toolbar"><span>{order.length} de {exercise.elements.length} palabras colocadas</span><button type="button" onClick={() => change([])} disabled={disabled || !order.length} aria-label={`Reiniciar ${exercise.config?.context_meaning}`} title="Reiniciar oración"><RotateCcw size={18} aria-hidden="true" /></button></div>
                         <div className="sentence-order-slots" aria-label="Oración formada">
-                            {exercise.elements.map((_, index) => order[index] ? <button type="button" key={index} onClick={() => change(order.filter((_, position) => position !== index))} aria-label={`Quitar ${words.get(order[index])}, posición ${index + 1}`}>{words.get(order[index])}</button> : <span className="sentence-order-empty" key={index} aria-label={`Espacio ${index + 1}`} />)}
+                            {exercise.elements.map((_, index) => order[index] ? <button data-answer-correct={result?.item_results?.[order[index]] ?? result?.is_correct} type="button" key={index} onClick={() => change(order.filter((_, position) => position !== index))} aria-label={`Quitar ${words.get(order[index])}, posición ${index + 1}`}>{words.get(order[index])}</button> : <span className="sentence-order-empty" key={index} aria-label={`Espacio ${index + 1}`} />)}
                         </div>
                         <div className="sentence-order-words" aria-label="Palabras disponibles">
                             {exercise.elements.map(word => <button type="button" key={word.id} disabled={disabled || order.includes(word.id)} onClick={() => change([...order, word.id])}>{word.texto}</button>)}

@@ -72,7 +72,7 @@ test('portrait-only results leave the grade and XP to the result panel', () => {
 async function card(post) {
     let cursor = 0;
     const states = [], requests = [];
-    const module = await load(cardCode, specifier => specifier.endsWith('/useAnswerSound') ? { useAnswerSound: () => () => {} } : specifier === 'react' ? {
+    const module = await load(cardCode, specifier => specifier.endsWith('/MatchingLines') ? { MatchingLines: 'MatchingLines' } : specifier.endsWith('/useAnswerSound') ? { useAnswerSound: () => () => {} } : specifier === 'react' ? {
         useState(initial) { const index = cursor++; if (!(index in states)) states[index] = initial; return [states[index], value => { states[index] = typeof value === 'function' ? value(states[index]) : value; }]; },
         useRef(initial) { const index = cursor++; return states[index] ??= { current: initial }; },
     } : specifier.endsWith('/LearningCompanion') ? { LearningCompanion: 'LearningCompanion' } : specifier.endsWith('/SuccessConfetti') ? { SuccessConfetti: 'SuccessConfetti' } : {
@@ -87,7 +87,7 @@ const companion = view => nodes(view.render()).find(n => n.type === 'LearningCom
 const select = view => nodes(view.render()).find(n => typeof n.type === 'function').props.onChange({ seleccion: ['wasi'] });
 const check = view => nodes(view.render()).find(n => n.type === 'button').props.onClick();
 
-test('exercise feedback leaves Cometa greetings out and preserves the explanation', async () => {
+test('exercise feedback leaves Inti greetings out and preserves the explanation', async () => {
     for (const [message, expected] of [
         ['Alli rurashka. Sisa significa flor.', 'Sisa significa flor.'],
         ['Kutin rurapay. Observa la flor y vuelve a intentarlo.', 'Observa la flor y vuelve a intentarlo.'],

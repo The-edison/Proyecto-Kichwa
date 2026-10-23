@@ -5,14 +5,14 @@ import vm from 'node:vm';
 import { transformWithOxc } from 'vite';
 
 const { code } = await transformWithOxc(await readFile(new URL('../src/js/components/ExerciseCard.tsx', import.meta.url), 'utf8'), 'ExerciseCard.tsx');
-async function interaction(exercise, initial = {}, checkPair, initialLockedPairs = []) {
+async function interaction(exercise, initial = {}, checkPair, initialLockedPairs = [], corrected) {
     let cursor = 0, answer = initial;
     const states = [];
     const context = vm.createContext({});
     const jsx = (type, props) => ({ type, props });
     const module = new vm.SourceTextModule(code, { context });
     await module.link(specifier => {
-        const dependency = specifier.endsWith('/useAnswerSound') ? { useAnswerSound: () => () => {} } : specifier === 'react' ? {
+        const dependency = specifier.endsWith('/MatchingLines') ? { MatchingLines: 'MatchingLines' } : specifier.endsWith('/useAnswerSound') ? { useAnswerSound: () => () => {} } : specifier === 'react' ? {
             useState: value => { const index = cursor++; if (!(index in states)) states[index] = value; return [states[index], value => { states[index] = typeof value === 'function' ? value(states[index]) : value; }]; },
             useRef: value => ({ current: value }),
         } : specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx, Fragment: 'fragment' }
@@ -20,10 +20,39 @@ async function interaction(exercise, initial = {}, checkPair, initialLockedPairs
         return new vm.SyntheticModule(Object.keys(dependency), function () { for (const [key, value] of Object.entries(dependency)) this.setExport(key, value); }, { context });
     });
     await module.evaluate();
-    return { render: () => { cursor = 0; return module.namespace.ExerciseInteraction({ exercise, answer, onChange: value => { answer = value; }, name: 'test', onCheckPair: checkPair, initialLockedPairs }); }, answer: () => JSON.parse(JSON.stringify(answer)), complete: () => module.namespace.answerComplete(exercise, answer) };
+    return { render: () => { cursor = 0; return module.namespace.ExerciseInteraction({ exercise, answer, onChange: value => { answer = value; }, name: 'test', corrected, onCheckPair: checkPair, initialLockedPairs }); }, answer: () => JSON.parse(JSON.stringify(answer)), complete: () => module.namespace.answerComplete(exercise, answer) };
 }
 function nodes(tree) { if (Array.isArray(tree)) return tree.flatMap(nodes); if (!tree?.props) return []; return [tree, ...nodes(tree.props.children)]; }
 const button = (view, text) => nodes(view.render()).find(node => node.type === 'button' && node.props.children === text);
+
+test('checked choices and text answers use individual grades while the entire exercise reflects any error', async () => {
+    const exercise = { type: 'seleccion_multiple', elements: ['a', 'b', 'c'].map(id => ({ id, texto: id })), zones: [], config: { presentation: 'buttons', max_selections: 2 } };
+    const feedback = { is_correct: false, item_results: { a: true, b: false } };
+    const view = await interaction(exercise, { seleccion: ['a', 'b'] }, undefined, [], feedback);
+    assert.equal(view.render().props['data-exercise-correct'], false);
+    assert.equal(button(view, 'a').props['data-answer-correct'], true);
+    assert.equal(button(view, 'b').props['data-answer-correct'], false);
+    assert.equal(button(view, 'c').props['data-answer-correct'], undefined);
+    const writing = await interaction({ type: 'completar', elements: [{ id: 'one', texto: 'Uno' }, { id: 'two', texto: 'Dos' }], zones: [] }, {}, undefined, [], { is_correct: false, item_results: { one: true, two: false } });
+    assert.deepEqual(nodes(writing.render()).filter(node => node.type === 'label').map(node => node.props['data-answer-correct']), [true, false]);
+});
+
+test('matching keeps saved lines and colors both endpoints with the grade for their pair', async () => {
+    const exercise = { type: 'relacionar', elements: [
+        { id: 'a', texto: 'A', grupo: 'origen' }, { id: 'b', texto: 'B', grupo: 'origen' },
+        { id: 'x', texto: 'X', grupo: 'destino' }, { id: 'y', texto: 'Y', grupo: 'destino' },
+    ], zones: [] };
+    const pairs = [{ origen: 'a', destino: 'y' }, { origen: 'b', destino: 'x' }];
+    const feedback = { is_correct: false, item_results: { a: true, b: false } };
+    const view = await interaction(exercise, { pares: pairs }, undefined, [], feedback);
+    const tree = nodes(view.render());
+    for (const [attribute, ids] of [['data-matching-origin', ['a', 'b']], ['data-matching-destination', ['y', 'x']]]) {
+        assert.deepEqual(ids.map(id => tree.find(node => node.props[attribute] === id).props['data-answer-correct']), [true, false]);
+    }
+    const lines = tree.find(node => node.type === 'MatchingLines');
+    assert.deepEqual(lines.props.pairs, pairs);
+    assert.equal(lines.props.feedback, feedback);
+});
 
 test('ordering supports repeated letters, removing a selected letter and resetting', async () => {
     const view = await interaction({ type: 'ordenar', elements: [{ id: 's1', texto: 's' }, { id: 'i', texto: 'i' }, { id: 's2', texto: 's' }, { id: 'a', texto: 'a' }], zones: [] });

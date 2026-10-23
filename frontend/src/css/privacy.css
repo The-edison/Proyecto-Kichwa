@@ -1,0 +1,20 @@
+.privacy-storage-list { display: grid; gap: 15px; margin-top: 18px; }
+.privacy-storage-list > div { padding: 14px 0; border-bottom: 1px solid var(--color-border); }
+.privacy-storage-list dt { font-size: 14px; font-weight: 800; overflow-wrap: anywhere; }
+.privacy-storage-list dd { margin-top: 8px; font-size: 14px; line-height: 1.75; color: var(--color-text-secondary); }
+.privacy-storage-details { margin: 20px 0; }
+.privacy-storage-details summary { padding-block: 10px; cursor: pointer; font-weight: 750; }
+.public-info-sections h3 { margin: 20px 0 9px; font-size: 17px; font-weight: 750; }
+.public-info-sections p + p { margin-top: 12px; }
+.auth-shell .public-footer { flex-wrap: wrap; }
+.account-privacy-notice a { color: var(--color-primary); text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.account-privacy-notice { margin: 0 0 18px; padding: 12px 14px; border-left: 3px solid var(--color-secondary); border-radius: 4px; background: var(--color-soft); color: var(--color-text-secondary); font-size: 12px; line-height: 1.7; }
+.google-privacy-notice { color: var(--color-text-secondary); font-size: 12px; line-height: 1.7; }
+.google-privacy-notice a { color: var(--color-primary); text-decoration: underline; }
+.privacy-data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.privacy-table-scroll { overflow-x: auto; margin: 16px 0; }
+.privacy-data-table th, .privacy-data-table td { padding: 12px; border-bottom: 1px solid var(--color-border); vertical-align: top; text-align: left; line-height: 1.6; }
+.privacy-data-table th { font-weight: 800; }
+.privacy-data-table td:first-child { overflow-wrap: anywhere; }
+.public-info-sections section[id] { scroll-margin-top: 24px; }
+.public-info-sections a { color: var(--color-primary); text-decoration: underline; text-underline-offset: 4px; }

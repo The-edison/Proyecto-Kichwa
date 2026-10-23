@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Exercise, ExerciseAnswer } from '../types';
+import type { Exercise, ExerciseAnswer, ExerciseFeedback } from '../types';
 import '../../css/numbers-practice.css';
 
 const groups: Record<string, { image: string; count: number; name: string }> = {
@@ -11,9 +11,10 @@ const groups: Record<string, { image: string; count: number; name: string }> = {
     cows: { image: 'cow.webp', count: 10, name: 'vacas' },
 };
 
-export function NumbersPractice({ exercise, answer, disabled, onChange }: {
+export function NumbersPractice({ exercise, answer, feedback, disabled, onChange }: {
     exercise: Exercise;
     answer: ExerciseAnswer;
+    feedback?: ExerciseFeedback;
     disabled: boolean;
     onChange: (answer: ExerciseAnswer) => void;
 }) {
@@ -22,14 +23,14 @@ export function NumbersPractice({ exercise, answer, disabled, onChange }: {
     const fill = (id: string, word: string) => onChange({ textos: { ...texts, [id]: word } });
 
     if (exercise.config?.numbers_activity === 'count') {
-        return <fieldset className="numbers-practice" disabled={disabled}>
+        return <fieldset className="numbers-practice" data-exercise-correct={feedback?.is_correct} disabled={disabled}>
             <legend className="sr-only">Cuenta los objetos y escribe cada número en kichwa</legend>
             <div className="numbers-count-sheet">
                 <div className="numbers-count-sheet-heading"><strong>Observa, cuenta y escribe</strong><span>Escribe en kichwa cuántas figuras hay en cada fila.</span></div>
                 <div className="numbers-count-grid">{exercise.elements.map((element, index) => {
                 const group = groups[element.id];
                 if (!group) return null;
-                return <label className="numbers-count-row" key={element.id}>
+                return <label className="numbers-count-row" data-answer-correct={feedback?.item_results?.[element.id] ?? feedback?.is_correct} key={element.id}>
                     <span className="numbers-count-row-label"><small>{String(index + 1).padStart(2, '0')}</small><strong>{element.texto}</strong></span>
                     <span className={`numbers-objects numbers-objects-${element.id}`} role="img" aria-label={`${group.count} ${group.name}`}>{Array.from({ length: group.count }, (_, item) => <img key={item} src={`${import.meta.env.BASE_URL}images/numbers-count/${group.image}`} alt="" aria-hidden="true" width={64} height={64} draggable={false} />)}</span>
                     <span className="numbers-count-answer"><span className="sr-only">Número de {group.name} en kichwa</span><input className="field" type="text" autoComplete="off" spellCheck={false} value={texts[element.id] ?? ''} placeholder="?" onChange={event => fill(element.id, event.target.value)} /></span>
@@ -40,7 +41,7 @@ export function NumbersPractice({ exercise, answer, disabled, onChange }: {
     }
 
     const words = [...new Set(exercise.elements.flatMap(element => element.opciones ?? []))];
-    return <fieldset className="numbers-practice" disabled={disabled}>
+    return <fieldset className="numbers-practice" data-exercise-correct={feedback?.is_correct} disabled={disabled}>
         <legend className="sr-only">Completa las frases con números en kichwa</legend>
         <p className="numbers-bank-instruction">Selecciona una frase y toca una palabra. También puedes usar el menú de cada frase.</p>
         <div className="numbers-word-bank" aria-label="Banco de números">{words.map(word => <button type="button" key={word} draggable={!disabled} onDragStart={event => event.dataTransfer.setData('text/plain', word)} onClick={() => {
@@ -50,7 +51,7 @@ export function NumbersPractice({ exercise, answer, disabled, onChange }: {
         <div className="numbers-sentence-grid">{exercise.elements.map((element, index) => {
             const [sentence, meaning = ''] = element.texto.split(' · ');
             const [before, after] = sentence.split('_____');
-            return <label className={`numbers-sentence-card${active === element.id ? ' is-active' : ''}`} key={element.id} onDragOver={event => event.preventDefault()} onDrop={event => {
+            return <label className={`numbers-sentence-card${active === element.id ? ' is-active' : ''}`} data-answer-correct={feedback?.item_results?.[element.id] ?? feedback?.is_correct} key={element.id} onDragOver={event => event.preventDefault()} onDrop={event => {
                 event.preventDefault();
                 const word = event.dataTransfer.getData('text/plain');
                 if (words.includes(word)) fill(element.id, word);

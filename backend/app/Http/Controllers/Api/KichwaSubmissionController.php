@@ -74,7 +74,8 @@ class KichwaSubmissionController extends Controller
                         'highlight' => $record->configuracion['reveal_highlight'] ?? null,
                         'xp_earned' => (int) DB::table('recompensas')->where('id_respuesta_actividad', $existing->id_respuesta_actividad)->sum('xp'),
                         'xp_total' => (int) DB::table('recompensas')->where('id_usuario', $existing->id_usuario)->sum('xp'),
-                        'xp_attempt' => DominioLecciones::practiceXp($existing->id_usuario, $record->id_unidad, $existing->id_sesion_practica)];
+                        'xp_attempt' => DominioLecciones::practiceXp($existing->id_usuario, $record->id_unidad, $existing->id_sesion_practica)]
+                        + ContratoEjercicio::itemResults(KichwaResource::present('exercises', $record, true), $existing->respuesta_actividad);
                 }
             }
             if (! empty($data['practice_attempt_id'])) {
@@ -91,7 +92,8 @@ class KichwaSubmissionController extends Controller
                 'respuesta_actividad' => $data['answer'], 'acierto_actividad' => $correct,
                 'retroalimentacion_actividad' => $feedback, 'id_sesion_practica' => $data['practice_attempt_id'] ?? null, 'clave_envio' => $data['submission_id'] ?? null]);
 
-            return ['response_id' => $answer->id_respuesta_actividad, 'is_correct' => $correct, 'feedback' => $feedback, 'highlight' => $record->configuracion['reveal_highlight'] ?? null] + DominioLecciones::rewardActivity($record, $answer);
+            return ['response_id' => $answer->id_respuesta_actividad, 'is_correct' => $correct, 'feedback' => $feedback, 'highlight' => $record->configuracion['reveal_highlight'] ?? null]
+                + DominioLecciones::rewardActivity($record, $answer) + ContratoEjercicio::itemResults($content, $data['answer']);
         });
 
         return response()->json($result);

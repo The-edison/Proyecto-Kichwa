@@ -49,13 +49,12 @@ export default function Home() {
     }, []);
     useEffect(() => {
         document.documentElement.lang = language === 'qu' ? 'qu-EC' : 'es';
-        try { localStorage.setItem(homeLanguageKey, language); } catch { /* The selection still works without storage. */ }
         return () => { document.documentElement.lang = 'es'; };
     }, [language]);
     const t = copy[language];
 
     return (
-        <PublicLayout language={language} onLanguageChange={() => setLanguage(current => current === 'es' ? 'qu' : 'es')}>
+        <PublicLayout language={language} onLanguageChange={() => { const next = language === 'es' ? 'qu' : 'es'; setLanguage(next); try { localStorage.setItem(homeLanguageKey, next); } catch {} }}>
             <Head title={t.title} />
 
             <section className="home-hero" aria-labelledby="home-title">

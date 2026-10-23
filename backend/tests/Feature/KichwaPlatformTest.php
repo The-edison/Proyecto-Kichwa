@@ -17,6 +17,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 use Tests\UsesPostgreSQL as RefreshDatabase;
@@ -159,9 +160,12 @@ class KichwaPlatformTest extends TestCase
             ['pares' => [['origen' => 'k2', 'destino' => 'e2'], ['origen' => 'k1', 'destino' => 'e1']]],
             ['pares' => [['origen' => 'k1', 'destino' => 'z1']]],
         ];
-        $this->postJson('/api/exercises/'.$activities[0]->id_actividad.'/answer', ['answer' => ['seleccion' => ['b']], 'is_correct' => true, 'score' => 100])->assertOk()->assertJsonPath('is_correct', false);
+        $this->postJson('/api/exercises/'.$activities[0]->id_actividad.'/answer', ['answer' => ['seleccion' => ['b']], 'is_correct' => true, 'score' => 100])->assertOk()->assertJsonPath('is_correct', false)->assertJsonPath('item_results.b', false);
+        $expectedItems = [['a' => true], ['h1' => true], ['k2' => true, 'k1' => true], ['k1' => true]];
         foreach ($activities as $i => $activity) {
-            $this->postJson('/api/exercises/'.$activity->id_actividad.'/answer', ['answer' => $answers[$i]])->assertOk()->assertJsonPath('is_correct', true);
+            $payload = ['answer' => $answers[$i], 'practice_attempt_id' => (string) Str::uuid(), 'submission_id' => (string) Str::uuid()];
+            $response = $this->postJson('/api/exercises/'.$activity->id_actividad.'/answer', $payload)->assertOk()->assertJsonPath('is_correct', true)->assertJsonPath('item_results', $expectedItems[$i]);
+            $this->postJson('/api/exercises/'.$activity->id_actividad.'/answer', $payload)->assertOk()->assertJsonPath('response_id', $response->json('response_id'))->assertJsonPath('item_results', $expectedItems[$i]);
         }
         $this->getJson('/api/progress')->assertOk()->assertJsonPath('0.percentage', 100)->assertJsonPath('0.completed_activities', 4);
         $this->assertDatabaseCount('respuestas_actividad', 5);

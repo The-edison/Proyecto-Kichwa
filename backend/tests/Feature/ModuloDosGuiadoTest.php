@@ -37,7 +37,7 @@ class ModuloDosGuiadoTest extends TestCase
         $activityIds = [];
         foreach ($units as $index => $unit) {
             $mode = ['animals-colors', 'body', 'nature', 'verbs'][$index];
-            $count = [8, 5, 3, 4][$index];
+            $count = [15, 6, 3, 4][$index];
             $this->getJson('/api/units/'.$unit->id_unidad)->assertOk()->assertJsonPath('title', $titles[$index])
                 ->assertJsonPath('module_id', $module->id_modulo)->assertJsonPath('sort_order', $index + 1)
                 ->assertJsonPath('config.learning_mode', 'guided')->assertJsonPath('config.guided_lesson', $mode);
@@ -50,7 +50,11 @@ class ModuloDosGuiadoTest extends TestCase
                 $this->assertArrayNotHasKey('correct_feedback', $exercise['config']);
                 $record = Actividad::findOrFail($exercise['id']);
                 $activityIds[] = $record->id_actividad;
-                $responses[] = $this->postJson('/api/exercises/'.$record->id_actividad.'/answer', ['answer' => $record->solucion_actividad,
+                $answer = $record->solucion_actividad;
+                if ($record->tipo_actividad === 'completar') {
+                    $answer['textos'] = array_map(fn (array $variants): string => $variants[0], $answer['textos']);
+                }
+                $responses[] = $this->postJson('/api/exercises/'.$record->id_actividad.'/answer', ['answer' => $answer,
                     'practice_attempt_id' => $session, 'submission_id' => (string) Str::uuid()])->assertOk()->assertJsonPath('is_correct', true)->json('response_id');
             }
             $this->postJson('/api/units/'.$unit->id_unidad.'/guided/result', ['response_ids' => $responses, 'practice_attempt_id' => $session])
@@ -61,7 +65,7 @@ class ModuloDosGuiadoTest extends TestCase
 
         $this->assertSame($activityIds, Actividad::whereIn('id_unidad', $units->pluck('id_unidad'))->where('publicado', true)->orderBy('id_unidad')->orderBy('orden_actividad')->pluck('id_actividad')->all());
         foreach ($units as $index => $unit) {
-            $this->getJson('/api/units/'.$unit->id_unidad.'/guided')->assertOk()->assertJsonPath('completed_count', [8, 5, 3, 4][$index]);
+            $this->getJson('/api/units/'.$unit->id_unidad.'/guided')->assertOk()->assertJsonPath('completed_count', [15, 6, 3, 4][$index]);
         }
         Sanctum::actingAs(Usuario::factory()->administrador()->create());
         foreach ($units as $unit) {

@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api';
 import { GoogleAuthButton } from './GoogleAuthButton';
+import { PrivacyNotice } from './PrivacyNotice';
 import { PasswordInput } from './PasswordInput';
 
 export function LoginForm() {
@@ -29,6 +30,7 @@ export function LoginForm() {
     }
 
     return <div className="login-form-content">
+        <PrivacyNotice />
         {googleError && <p className="auth-alert" role="alert">{googleError}</p>}
         {params.get('password_reset') === '1' && <p className="login-reset-success" role="status">Tu contraseña se actualizó. Ya puedes iniciar sesión con la nueva.</p>}
         <form onSubmit={submit} className="login-fields" aria-label="Iniciar sesión con correo" aria-busy={processing}>

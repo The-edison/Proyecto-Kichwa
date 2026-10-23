@@ -192,12 +192,12 @@
     "order": 1,
     "title": "Animales y colores",
     "description": "Aprende los nombres de algunos animales y colores en kichwa.",
-    "note": "Allku significa «perro» y puka significa «rojo». Aquí encontrarás más animales y colores.",
+    "note": "Observa cada dibujo y lee su significado en español. Pulsa el botón de cada tarjeta para escuchar la palabra en kichwa.",
     "sections": [
       { "title": "Animales domésticos", "kicker": "LOS ANIMALES CERCANOS", "rows": [["allku", "perro"], ["misi", "gato"], ["kuy", "cuy"], ["llama", "oveja"], ["wakra", "ganado"], ["kuchi", "cerdo"], ["atalpa", "gallina"], ["kunu", "conejo"], ["apiw", "caballo"], ["chantasu", "burro"]], "paragraphs": [] },
-      { "title": "Otros animales", "kicker": "DESCUBRE MÁS ANIMALES", "rows": [["taruka", "venado"], ["ukucha", "ratón"], ["urpi", "tórtola"], ["hampatu", "rana"], ["pilpintu", "mariposa"], ["kinti", "colibrí"]], "paragraphs": ["Taruka significa «venado»."] },
+      { "title": "Animales salvajes", "kicker": "DESCUBRE MÁS ANIMALES", "rows": [["taruka", "venado"], ["ukucha", "ratón"], ["urpi", "tórtola"], ["hampatu", "rana"], ["pilpintu", "mariposa"], ["kinti", "colibrí"], ["atuk", "lobo"], ["añas", "zorro"], ["yutu", "perdiz"], ["uturunku", "oso"]], "paragraphs": [] },
       { "title": "Colores", "kicker": "OBSERVA Y DISTINGUE", "rows": [["yurak", "blanco"], ["yana", "negro"], ["puka", "rojo"], ["killu", "amarillo"], ["ankas", "azul"], ["waylla", "verde"], ["paku", "marrón"], ["maywa", "morado"], ["kishpu", "naranja"], ["waminsi", "rosado"], ["suku", "gris"]], "paragraphs": [] },
-      { "title": "Una frase con un color", "kicker": "EL COLOR EN UNA ORACIÓN", "rows": [["Ñuka muchikuka yurakmi kan.", "Mi sombrero es blanco."]], "paragraphs": ["Yurak significa «blanco». En la oración se habla de un sombrero blanco."] }
+      { "title": "Una frase con un color", "kicker": "EL COLOR EN UNA ORACIÓN", "rows": [["Ñuka misika yanami kan.", "Mi gato es negro."]], "paragraphs": ["Misi significa «gato» y yana significa «negro»."] }
     ]
   },
   {
@@ -205,13 +205,13 @@
     "module": 2,
     "order": 2,
     "title": "Partes del cuerpo",
-    "description": "Aprende cómo se dicen las partes del cuerpo en kichwa.",
-    "note": "Chaki significa «pie». Lee cada nombre y señala esa parte de tu cuerpo.",
+    "description": "Aprende los nombres de estas 16 partes del cuerpo en kichwa.",
+    "note": "La parte resaltada en cada dibujo te ayuda a reconocerla. Lee su significado en español y pulsa la tarjeta para escuchar su nombre en kichwa.",
     "sections": [
       { "title": "Cabeza y rostro", "kicker": "RECONOCE CADA PARTE", "rows": [["uma", "cabeza"], ["ñawi", "cara"], ["rinri", "oreja"], ["shimi", "boca"], ["kiru", "diente"], ["hallu", "lengua"], ["kunka", "cuello"]], "paragraphs": [] },
       { "title": "Brazos y manos", "kicker": "APRENDE A SEÑALARLAS", "rows": [["rikra", "brazo"], ["maki", "mano"], ["ruka", "dedo"], ["sillu", "uña"]], "paragraphs": [] },
-      { "title": "Tronco y piernas", "kicker": "CONTINÚA EL RECORRIDO", "rows": [["wiksa", "barriga"], ["washa", "espalda"], ["kunkuri", "rodilla"], ["chaki", "pie"], ["chaki washa", "talón"]], "paragraphs": [] },
-      { "title": "Una frase sobre el cuerpo", "kicker": "IDENTIFICA LA PARTE", "rows": [["Chakitami nanan.", "Me duele el pie."]], "paragraphs": ["Chaki significa «pie». La oración dice que te duele el pie.", "Usa la lista para encontrar las otras partes del cuerpo."] }
+      { "title": "Tronco y piernas", "kicker": "CONTINÚA EL RECORRIDO", "rows": [["wiksa", "barriga"], ["washa", "espalda"], ["kunkuri", "rodilla"], ["chaki", "pie / pies"], ["chaki washa", "talón"]], "paragraphs": [] },
+      { "title": "Una frase sobre el cuerpo", "kicker": "IDENTIFICA LA PARTE", "rows": [["Chakitami nanan.", "Me duele el pie."]], "paragraphs": ["Chaki significa «pie». En esta frase, la persona dice que le duele el pie."] }
     ]
   },
   {

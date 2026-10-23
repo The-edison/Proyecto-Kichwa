@@ -19,7 +19,7 @@ export function SceneChoicePanel({ exercises, answers, feedback, busy, onChange 
             const question = exercise.config?.conversation_group === 'q';
             const farewell = exercise.config?.conversation_group === 'd';
             const courtesy = exercise.config?.conversation_group === 'c';
-            return <article className="scene-choice-card" key={exercise.id}>
+            return <article data-exercise-correct={result?.is_correct} className="scene-choice-card" key={exercise.id}>
                 <header><h2>{courtesy ? 'Sé amable según la escena' : farewell ? 'Despídete según la escena' : question ? 'Elige según la escena' : 'Responde según la escena'}</h2><span>{exercise.config?.context_meaning}</span></header>
                 <figure className="scene-choice-figure">
                     <img src={mediaUrl(exercise.config?.prompt_image)} alt={exercise.config?.prompt_image_alt ?? 'Escena de una conversación en kichwa'} width={320} height={240} decoding="async" fetchPriority="high" />
@@ -27,7 +27,7 @@ export function SceneChoicePanel({ exercises, answers, feedback, busy, onChange 
                 </figure>
                 <fieldset className="scene-choice-fieldset">
                     <legend>{courtesy ? '¿Qué expresión de cortesía usarías en kichwa?' : farewell ? '¿Cómo te despedirías en kichwa?' : question ? '¿Cómo harías esta pregunta en kichwa?' : '¿Cómo responderías en kichwa?'}</legend>
-                    {exercise.elements.map(option => <div className={`scene-choice-option${answer.seleccion?.includes(option.id) ? ' is-selected' : ''}`} key={option.id}>
+                    {exercise.elements.map(option => <div data-answer-correct={answer.seleccion?.includes(option.id) ? result?.item_results?.[option.id] ?? result?.is_correct : undefined} className={`scene-choice-option${answer.seleccion?.includes(option.id) ? ' is-selected' : ''}`} key={option.id}>
                         <label><input type="radio" disabled={busy || checked} name={`guided-${exercise.id}`} value={option.id} checked={answer.seleccion?.includes(option.id) ?? false} onChange={() => { if (!busy && !checked) onChange(exercise, {seleccion:[option.id]}); }} /><span>{option.texto}</span></label>
                         <button type="button" aria-label={`Escuchar ${option.texto}`} title={`Escuchar ${option.texto}`} className={state.clip === option.id && ['loading','playing'].includes(state.phase) ? 'is-playing' : ''} onClick={() => play(option.id as LessonAudioClip)}><Volume2 size={19} aria-hidden="true" /></button>
                     </div>)}

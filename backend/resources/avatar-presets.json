@@ -1,0 +1,14 @@
+[
+  { "id": "condor", "label": "Cóndor", "background": "#e6e0fa" },
+  { "id": "llama", "label": "Llama", "background": "#fbe6d5" },
+  { "id": "colibri", "label": "Colibrí", "background": "#daf3ee" },
+  { "id": "zorro", "label": "Zorro", "background": "#ffe5d8" },
+  { "id": "oso", "label": "Oso de anteojos", "background": "#dceaf3" },
+  { "id": "venado", "label": "Venado", "background": "#e7eed6" },
+  { "id": "tortuga", "label": "Tortuga", "background": "#d8efdf" },
+  { "id": "rana", "label": "Rana", "background": "#e7efd2" },
+  { "id": "mariposa", "label": "Mariposa", "background": "#f4def0" },
+  { "id": "jaguar", "label": "Jaguar", "background": "#fff0c8" },
+  { "id": "mujer", "label": "Mujer", "background": "#f4dfec" },
+  { "id": "hombre", "label": "Hombre", "background": "#dce8f5" }
+]

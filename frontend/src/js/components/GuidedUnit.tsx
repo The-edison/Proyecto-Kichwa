@@ -1,3 +1,8 @@
+import { ShortDialoguesIntroduction } from './ShortDialoguesIntroduction';
+import { VerbalAnalysisIntroduction } from './VerbalAnalysisIntroduction';
+import { TimeMorphemesIntroduction } from './TimeMorphemesIntroduction';
+import { AdvancedMorphemesIntroduction } from './AdvancedMorphemesIntroduction';
+import { MatchingLines } from './MatchingLines';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type SetStateAction } from 'react';
 import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, LoaderCircle, RotateCcw, X } from 'lucide-react';
 import '../../css/guided-unit.css';
@@ -21,6 +26,9 @@ import { NumbersPractice } from './NumbersPractice';
 import { NumbersMatchingExercise } from './NumbersMatchingExercise';
 import { InteractiveSentencePractice } from './InteractiveSentencePractice';
 import { PronounsPracticePanel } from './PronounsPracticePanel';
+import { AnimalsPracticePanel } from './AnimalsPracticePanel';
+import { ColorsPracticePanel } from './ColorsPracticePanel';
+import { BodyPracticePanel } from './BodyPracticePanel';
 import { useAuth } from '../context/AuthContext';
 import { useAnswerSound } from '../hooks/useAnswerSound';
 import { emptyGuidedAttempt, readGuidedAttempt, writeGuidedAttempt, subscribeGuidedAttempt, type GuidedAttempt, type GuidedResult } from '../services/guidedAttempt';
@@ -44,6 +52,9 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
     const setSummary = (value: GuidedResult | null) => setField('summary', value);
     const setSelectedOrigin = (value: SetStateAction<string>) => setField('selectedOrigin', value);
     const [busy, setBusy] = useState(false);
+    const [lessonPage, setLessonPage] = useState(0);
+    const pagedLesson = unit.config?.guided_lesson === 'advanced-morphemes' || unit.config?.guided_lesson === 'time-morphemes' || unit.config?.guided_lesson === 'verbal-analysis' || unit.config?.guided_lesson === 'short-dialogues';
+    const lessonPageCount = unit.config?.guided_lesson === 'verbal-analysis' ? 5 : 4;
     const [error, setError] = useState('');
     const [celebration, setCelebration] = useState(0);
     const sending = useRef(false);
@@ -61,6 +72,8 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
         if (triple.length === 3 && triple[0].config?.conversation_group !== 'c' && triple.every(exercise => exercise.type === 'seleccion_multiple' && exercise.config?.scene_choice
             && exercise.config.conversation_group === triple[0].config?.conversation_group)) return 3;
         const pair = exercises.slice(start - 1, start + 1);
+        if (pair.length === 2 && pair.every(exercise => exercise.config?.body_activity && exercise.config.body_panel === pair[0].config?.body_panel)) return 2;
+        if (pair.length === 2 && pair.every(exercise => exercise.config?.color_activity && exercise.config.color_panel === pair[0].config?.color_panel)) return 2;
         if (pair.length === 2 && pair.every(exercise => exercise.config?.pronouns_activity)) return 2;
         if (pair.length === 2 && pair.every(exercise => exercise.type === 'ordenar' && exercise.config?.sentence_order)) return 2;
         if (pair.length === 2 && pair.every(exercise => exercise.type === 'seleccion_multiple' && exercise.config?.scene_choice
@@ -87,6 +100,8 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
     const lastPanelStep = isGrouped ? groupStart + groupedChoices.length - 1 : step;
     const previousStep = panelStart((isGrouped ? groupStart : step) - 1);
     const current = step > 0 ? sequence.data?.exercises[step - 1] : undefined;
+    const colorsPanel = Boolean(current?.config?.color_activity);
+    const bodyPanel = Boolean(current?.config?.body_activity);
     const answer = current ? answers[current.id] ?? {} : {};
     const result = current ? feedback[current.id] : undefined;
     const feedbackText = result ? feedbackMessage(result.feedback) : '';
@@ -100,7 +115,8 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
     } : undefined) : result;
     const activityCount = sequence.data?.exercises.length ?? 0;
     const screenCount = activityCount + 1;
-    const ready = activityCount > 0 && sequence.data?.total === activityCount;
+    const lessonOnly = pagedLesson && activityCount === 0;
+    const ready = (activityCount > 0 || pagedLesson) && sequence.data?.total === activityCount;
     const moduleHref = `/aprender/modulo/${unit.module_id}`;
     const catalog = useMemo(() => sequence.data ? JSON.stringify(sequence.data.exercises.map(({ id, type, prompt, elements, zones, config }) => ({ id, type, prompt, elements, zones, config }))) : null, [sequence.data]);
 
@@ -112,7 +128,7 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
             return;
         }
         const incomplete = exercises.findIndex(exercise => saved.feedback[exercise.id]?.is_correct !== true);
-        const allowedStep = incomplete < 0 ? screenCount : panelStart(incomplete + 1);
+        const allowedStep = lessonOnly ? 0 : incomplete < 0 ? screenCount : panelStart(incomplete + 1);
         if (saved.step > allowedStep) {
             writeGuidedAttempt(draftKey, { ...saved, catalog, step: allowedStep, summary: null });
         } else if (saved.summary && incomplete < 0 && saved.summary.max_score !== activityCount) {
@@ -120,7 +136,7 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
         } else if (!saved.catalog) {
             writeGuidedAttempt(draftKey, { ...saved, catalog });
         }
-    }, [catalog, draftKey, screenCount]);
+    }, [catalog, draftKey, screenCount, lessonOnly]);
 
     useEffect(() => { if (step > 0) heading.current?.focus(); main.current?.scrollTo({ top: 0 }); window.scrollTo({ top: 0 }); }, [step]);
     useEffect(() => {
@@ -236,7 +252,7 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
     const origins = current?.elements.filter(item => item.grupo === 'origen') ?? [];
     const destinations = current?.elements.filter(item => item.grupo === 'destino') ?? [];
 
-    return <div className={`guided-unit-shell${unit.config?.guided_lesson === 'pronouns' ? ' is-pronouns' : ''}${unit.config?.guided_lesson === 'greetings' ? ' is-greetings' : ''}${unit.config?.guided_lesson === 'numbers' ? ' is-numbers' : ''}${unit.config?.guided_lesson === 'calendar' ? ' is-calendar' : ''}${step > 0 && step < screenCount ? ' is-activity' : ''}${summary && step === screenCount ? ' is-result' : ''}`}>
+    return <div className={`guided-unit-shell${unit.config?.guided_lesson === 'pronouns' ? ' is-pronouns' : ''}${unit.config?.guided_lesson === 'greetings' ? ' is-greetings' : ''}${unit.config?.guided_lesson === 'numbers' ? ' is-numbers' : ''}${unit.config?.guided_lesson === 'animals-colors' ? ' is-animals' : ''}${unit.config?.guided_lesson === 'calendar' ? ' is-calendar' : ''}${unit.config?.guided_lesson === 'body' ? ' is-body' : ''}${step > 0 && step < screenCount ? ' is-activity' : ''}${summary && step === screenCount ? ' is-result' : ''}`}>
         {celebration > 0 && <SuccessConfetti key={celebration} onDone={() => setCelebration(current => current === celebration ? 0 : current)} />}
         <Head title={`${unit.title} · Actividades`} />
         <header className="guided-unit-header">
@@ -244,7 +260,7 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
             <span className="guided-unit-level">NIVEL {unit.level_name}</span>
             <div className="guided-unit-location"><span title={unit.module_name}>Unidad {unit.sort_order} · {unit.title}</span><Link href={moduleHref} aria-label="Salir de las actividades" title="Volver al módulo"><X size={22} aria-hidden="true" /></Link></div>
         </header>
-        <section ref={main} className="guided-unit-main" aria-label="Contenido de la unidad" aria-busy={sequence.loading || busy}>
+        <section ref={main} className="guided-unit-main" data-panel-correct={step > 0 && step < screenCount ? displayResult?.is_correct : undefined} aria-label="Contenido de la unidad" aria-busy={sequence.loading || busy}>
             <div key={step} className={`exercise-page-turn guided-page-turn${turnDirection.current === 'backward' ? ' is-turning-back' : ''}`}>
             {sequence.loading ? <LoadingState label="Preparando tu unidad…" /> : sequence.error ? <ErrorState message={sequence.error} /> : !ready ? <ErrorState message="Las actividades de esta unidad están en preparación." /> : summary && step === screenCount ? <section className="guided-result" aria-labelledby="guided-result-title">
                 <p className="eyebrow">RESULTADO DE LA UNIDAD</p>
@@ -262,49 +278,49 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
                     <Link className="guided-result-exit" href={moduleHref}><ArrowLeft size={17} aria-hidden="true" />Salir a unidades</Link>
                 </div>
             </section> : <>
-                {step > 0 && <div className="exercise-companion-header"><div><h1 className="guided-exercise-heading" ref={heading} tabIndex={-1}>{pronounsPanel ? `Pronombres · Panel ${Math.ceil(groupStart / 2)} de 3` : current?.config?.title}</h1>
-                <p className="guided-unit-description">{pronounsPanel ? 'Shutirantikuna · Completa los dos ejercicios para continuar.' : orderPanel ? 'Toca las palabras para formar cada oración en kichwa. Puedes quitar una palabra o reiniciar para cambiar el orden.' : scenePanel ? `Observa las ${groupedChoices.length === 2 ? 'dos' : 'tres'} escenas. Escucha las opciones y elige la expresión en kichwa que corresponde a cada una.` : isGrouped ? greetingsPanel ? 'Observa las tres imágenes. Elige el saludo en kichwa que corresponde a cada momento del día.' : unit.config?.guided_lesson === 'pronouns' ? 'Observa las dos escenas. Selecciona el pronombre correcto en kichwa para cada una.' : 'Observa las dos imágenes. Selecciona el nombre en kichwa de cada una.' : current?.prompt}</p></div><LearningCompanion key={displayResult ? `response-${displayResult.response_id}` : `ready-${current?.id}`} correct={displayResult?.is_correct} xpEarned={displayResult?.xp_earned} xpTotal={isGrouped ? undefined : result?.xp_total} /></div>}
-                {step === 0 ? (unit.config?.guided_lesson === 'greetings' ? <GreetingsIntroduction /> : unit.config?.guided_lesson && ['pronouns', 'numbers', 'calendar', 'animals-colors', 'body', 'nature', 'verbs'].includes(unit.config.guided_lesson) ? <TopicIntroduction lesson={unit.config.guided_lesson} /> : <GuidedIntroduction />) : pronounsPanel ? <PronounsPracticePanel key={groupStart} exercises={groupedChoices} answers={answers} feedback={feedback} busy={busy} start={groupStart} onChange={updateExercise} /> : orderPanel ? <SentenceOrderPanel exercises={groupedChoices} answers={answers} feedback={feedback} busy={busy} onChange={updateExercise} /> : scenePanel ? <SceneChoicePanel key={groupStart} exercises={groupedChoices} answers={answers} feedback={feedback} busy={busy} onChange={updateExercise} /> : isGrouped ? <section className="guided-choice-panel" aria-label={greetingsPanel ? "Reconoce los tres saludos" : "Reconoce las dos imágenes"}>
+                {step > 0 && <div className="exercise-companion-header"><div><h1 className="guided-exercise-heading" ref={heading} tabIndex={-1}>{bodyPanel ? `El cuerpo humano · Panel ${current?.config?.body_panel} de 4` : colorsPanel ? `Los colores · Panel ${current?.config?.color_panel} de 5` : pronounsPanel ? `Pronombres · Panel ${Math.ceil(groupStart / 2)} de 3` : current?.config?.title}</h1>
+                <p className="guided-unit-description">{bodyPanel ? isGrouped ? 'Completa ambos ejercicios. Puedes corregir las respuestas marcadas antes de continuar.' : 'Runapa unku shutikuna · Practica las partes del cuerpo en kichwa.' : colorsPanel ? isGrouped ? 'Completa los dos ejercicios y comprueba tus respuestas para continuar.' : 'Practica los colores en kichwa con ayuda de las imágenes y las oraciones.' : pronounsPanel ? 'Shutirantikuna · Completa los dos ejercicios para continuar.' : orderPanel ? 'Toca las palabras para formar cada oración en kichwa. Puedes quitar una palabra o reiniciar para cambiar el orden.' : scenePanel ? `Observa las ${groupedChoices.length === 2 ? 'dos' : 'tres'} escenas. Escucha las opciones y elige la expresión en kichwa que corresponde a cada una.` : isGrouped ? greetingsPanel ? 'Observa las tres imágenes. Elige el saludo en kichwa que corresponde a cada momento del día.' : unit.config?.guided_lesson === 'pronouns' ? 'Observa las dos escenas. Selecciona el pronombre correcto en kichwa para cada una.' : 'Observa las dos imágenes. Selecciona el nombre en kichwa de cada una.' : current?.prompt}</p></div><LearningCompanion key={displayResult ? `response-${displayResult.response_id}` : `ready-${current?.id}`} correct={displayResult?.is_correct} xpEarned={displayResult?.xp_earned} xpTotal={isGrouped ? undefined : result?.xp_total} /></div>}
+                {step === 0 ? (pagedLesson ? (unit.config?.guided_lesson === 'short-dialogues' ? <ShortDialoguesIntroduction page={lessonPage} onSelectPage={setLessonPage} /> : unit.config?.guided_lesson === 'verbal-analysis' ? <VerbalAnalysisIntroduction page={lessonPage} onSelectPage={setLessonPage} /> : unit.config?.guided_lesson === 'time-morphemes' ? <TimeMorphemesIntroduction page={lessonPage} onSelectPage={setLessonPage} /> : <AdvancedMorphemesIntroduction page={lessonPage} onSelectPage={setLessonPage} />) : unit.config?.guided_lesson === 'greetings' ? <GreetingsIntroduction /> : unit.config?.guided_lesson && ['pronouns', 'numbers', 'calendar', 'animals-colors', 'body', 'nature', 'verbs'].includes(unit.config.guided_lesson) ? <TopicIntroduction lesson={unit.config.guided_lesson} /> : <GuidedIntroduction />) : bodyPanel ? <BodyPracticePanel key={groupStart} exercises={isGrouped ? groupedChoices : current ? [current] : []} answers={answers} feedback={feedback} busy={busy} onChange={updateExercise} /> : colorsPanel ? <ColorsPracticePanel key={groupStart} exercises={isGrouped ? groupedChoices : current ? [current] : []} answers={answers} feedback={feedback} busy={busy} onChange={updateExercise} /> : current?.config?.animal_activity ? <AnimalsPracticePanel key={current.id} exercise={current} answer={answer} feedback={result} busy={busy} onChange={update} /> : pronounsPanel ? <PronounsPracticePanel key={groupStart} exercises={groupedChoices} answers={answers} feedback={feedback} busy={busy} start={groupStart} onChange={updateExercise} /> : orderPanel ? <SentenceOrderPanel exercises={groupedChoices} answers={answers} feedback={feedback} busy={busy} onChange={updateExercise} /> : scenePanel ? <SceneChoicePanel key={groupStart} exercises={groupedChoices} answers={answers} feedback={feedback} busy={busy} onChange={updateExercise} /> : isGrouped ? <section className="guided-choice-panel" aria-label={greetingsPanel ? "Reconoce los tres saludos" : "Reconoce las dos imágenes"}>
                     {groupedChoices.map((exercise, index) => {
                         const selection = answers[exercise.id] ?? {};
                         const graded = feedback[exercise.id];
                         const message = graded ? feedbackMessage(graded.feedback) : '';
-                        return <article className="guided-choice-panel-item" key={exercise.id}>
+                        return <article data-exercise-correct={graded?.is_correct} className="guided-choice-panel-item" key={exercise.id}>
                             <fieldset className="guided-choice" disabled={busy || graded?.is_correct === true}>
                                 <legend className="guided-choice-panel-label">Imagen {index + 1}</legend>
                                 <figure className="guided-choice-visual"><img className="guided-choice-image" src={mediaUrl(exercise.config?.prompt_image)} alt={exercise.config?.prompt_image_alt ?? 'Imagen para reconocer una palabra en kichwa'} width={280} height={210} decoding="async" fetchPriority="high" />{greetingsPanel && exercise.config?.context_text && <figcaption className="guided-image-time" aria-label={`Hora de la escena: ${exercise.config.context_text}`}>{exercise.config.context_text}</figcaption>}</figure>
                                 {!greetingsPanel && exercise.config?.context_text && <p className="guided-choice-context">{exercise.config.context_text}</p>}
-                                <div className="guided-choice-options">{exercise.elements.map(option => <label key={option.id} className={selection.seleccion?.includes(option.id) ? 'is-selected' : ''}>
+                                <div className="guided-choice-options">{exercise.elements.map(option => <label data-answer-correct={selection.seleccion?.includes(option.id) ? graded?.item_results?.[option.id] ?? graded?.is_correct : undefined} key={option.id} className={selection.seleccion?.includes(option.id) ? 'is-selected' : ''}>
                                     <input type="radio" name={`guided-${exercise.id}`} value={option.id} checked={selection.seleccion?.includes(option.id) ?? false} onChange={() => updateExercise(exercise, { seleccion: [option.id] })} /><span>{option.texto}</span>
                                 </label>)}</div>
                             </fieldset>
                             {graded && message && <p className={`guided-feedback ${graded.is_correct ? 'is-correct' : 'is-incorrect'}`} role="status">{graded.is_correct && <CheckCircle2 size={20} aria-hidden="true" />}<span>{message}</span></p>}
                         </article>;
                     })}
-                </section> : current?.config?.interactive_activity && (unit.config?.guided_lesson === 'numbers' || unit.config?.guided_lesson === 'calendar') ? <InteractiveSentencePractice key={current.id} exercise={current} answer={answer} disabled={busy || result?.is_correct === true} lesson={unit.config.guided_lesson} onChange={update} /> : current?.type === 'seleccion_multiple' ? <fieldset className="guided-choice" disabled={busy || result?.is_correct === true}>
+                </section> : current?.config?.interactive_activity && (unit.config?.guided_lesson === 'numbers' || unit.config?.guided_lesson === 'calendar') ? <InteractiveSentencePractice feedback={result} key={current.id} exercise={current} answer={answer} disabled={busy || result?.is_correct === true} lesson={unit.config.guided_lesson} onChange={update} /> : current?.type === 'seleccion_multiple' ? <fieldset data-exercise-correct={result?.is_correct} className="guided-choice" disabled={busy || result?.is_correct === true}>
                     <legend className="sr-only">Selecciona el nombre en kichwa de la imagen</legend>
                     <figure className="guided-choice-visual">
                         <img className="guided-choice-image" src={mediaUrl(current.config?.prompt_image)} alt={current.config?.prompt_image_alt ?? "Imagen del ejercicio para reconocer una palabra en kichwa"} width={280} height={210} decoding="async" fetchPriority="high" />
                         {unit.config?.guided_lesson === 'greetings' && current.config?.context_text && <figcaption className="guided-image-time" aria-label={`Hora de la escena: ${current.config.context_text}`}>{current.config.context_text}</figcaption>}
                     </figure>
-                    <div className="guided-choice-options">{current.elements.map(option => <label key={option.id} className={answer.seleccion?.includes(option.id) ? 'is-selected' : ''}>
+                    <div className="guided-choice-options">{current.elements.map(option => <label data-answer-correct={answer.seleccion?.includes(option.id) ? result?.item_results?.[option.id] ?? result?.is_correct : undefined} key={option.id} className={answer.seleccion?.includes(option.id) ? 'is-selected' : ''}>
                         <input type="radio" name={`guided-${current.id}`} value={option.id} checked={answer.seleccion?.includes(option.id) ?? false} onChange={() => update({ seleccion: [option.id] })} /><span>{option.texto}</span>
                     </label>)}</div>
-                </fieldset> : current?.type === 'completar' && (current.config?.numbers_activity === 'count' || current.config?.numbers_activity === 'sentences') ? <NumbersPractice key={current.id} exercise={current} answer={answer} disabled={busy || result?.is_correct === true} onChange={update} /> : current?.type === 'relacionar' && current.config?.numbers_activity === 'small' ? <NumbersMatchingExercise key={current.id} exercise={current} answer={answer} selectedOrigin={selectedOrigin} disabled={busy || result?.is_correct === true} onSelectOrigin={selectOrigin} onPair={pair} /> : current?.type === 'relacionar' && current.config?.conversation_pairs ? <ConversationMatchingExercise key={current.id} group={current.config.conversation_group ?? 'q'} exercise={current} answer={answer} selectedOrigin={selectedOrigin} disabled={busy || result?.is_correct === true} onSelectOrigin={selectOrigin} onPair={pair} /> : current?.type === 'completar' && (current.config?.listening_greetings || current.config?.listening_questions) ? <ListeningGreetingsExercise key={current.id} exercise={current} answer={answer} disabled={busy || result?.is_correct === true} onChange={update} /> : current?.type === 'relacionar' && current.config?.listening_questions ? <AudioMatchingExercise key={current.id} exercise={current} answer={answer} selectedOrigin={selectedOrigin} disabled={busy || result?.is_correct === true} onSelectOrigin={selectOrigin} onPair={pair} /> : current?.type === 'completar' && current.config?.listening_vowels ? <MissingVowelExercise key={current.id} exercise={current} answer={answer} disabled={busy || result?.is_correct === true} onChange={update} /> : <section className="guided-matching-panel" aria-label="Asociación de palabras">
+                </fieldset> : current?.type === 'completar' && (current.config?.numbers_activity === 'count' || current.config?.numbers_activity === 'sentences') ? <NumbersPractice feedback={result} key={current.id} exercise={current} answer={answer} disabled={busy || result?.is_correct === true} onChange={update} /> : current?.type === 'relacionar' && current.config?.numbers_activity === 'small' ? <NumbersMatchingExercise feedback={result} key={current.id} exercise={current} answer={answer} selectedOrigin={selectedOrigin} disabled={busy || result?.is_correct === true} onSelectOrigin={selectOrigin} onPair={pair} /> : current?.type === 'relacionar' && current.config?.conversation_pairs ? <ConversationMatchingExercise feedback={result} key={current.id} group={current.config.conversation_group ?? 'q'} exercise={current} answer={answer} selectedOrigin={selectedOrigin} disabled={busy || result?.is_correct === true} onSelectOrigin={selectOrigin} onPair={pair} /> : current?.type === 'completar' && (current.config?.listening_greetings || current.config?.listening_questions) ? <ListeningGreetingsExercise feedback={result} key={current.id} exercise={current} answer={answer} disabled={busy || result?.is_correct === true} onChange={update} /> : current?.type === 'relacionar' && current.config?.listening_questions ? <AudioMatchingExercise feedback={result} key={current.id} exercise={current} answer={answer} selectedOrigin={selectedOrigin} disabled={busy || result?.is_correct === true} onSelectOrigin={selectOrigin} onPair={pair} /> : current?.type === 'completar' && current.config?.listening_vowels ? <MissingVowelExercise feedback={result} key={current.id} exercise={current} answer={answer} disabled={busy || result?.is_correct === true} onChange={update} /> : <section data-exercise-correct={result?.is_correct} className="guided-matching-panel" aria-label="Asociación de palabras">
                     <header className="guided-matching-intro">
                         <div className="guided-matching-progress"><span><strong>{answer.pares?.length ?? 0}<small> / {origins.length}</small></strong><span>parejas</span></span><progress value={answer.pares?.length ?? 0} max={origins.length || 1} aria-label="Parejas seleccionadas" /></div>
                     </header>
-                    <fieldset className="guided-matching" disabled={busy || result?.is_correct === true}>
+                    <fieldset data-matching-board className="guided-matching" disabled={busy || result?.is_correct === true}>
                     <legend className="sr-only">Relaciona cada expresión en español con su pareja en kichwa</legend>
-                    <div className="guided-matching-column"><div className="guided-matching-column-heading"><h3>ESPAÑOL</h3></div>{origins.map((origin, index) => <button type="button" key={origin.id} className={`${selectedOrigin === origin.id ? 'is-selected' : ''}${answer.pares?.some(item => item.origen === origin.id) ? ' is-paired' : ''}`} aria-label={origin.texto} aria-pressed={selectedOrigin === origin.id || answer.pares?.some(item => item.origen === origin.id) === true} onClick={() => selectOrigin(origin.id)}>
+                    <div className="guided-matching-column"><div className="guided-matching-column-heading"><h3>ESPAÑOL</h3></div>{origins.map((origin, index) => <button data-matching-origin={origin.id} data-answer-correct={result?.item_results?.[origin.id] ?? result?.is_correct} type="button" key={origin.id} className={`${selectedOrigin === origin.id ? 'is-selected' : ''}${answer.pares?.some(item => item.origen === origin.id) ? ' is-paired' : ''}`} aria-label={origin.texto} aria-pressed={selectedOrigin === origin.id || answer.pares?.some(item => item.origen === origin.id) === true} onClick={() => selectOrigin(origin.id)}>
                         <span className="guided-matching-word"><strong>{origin.texto}</strong></span>{answer.pares?.some(item => item.origen === origin.id) ? <span className="guided-pair-number" aria-label={`Pareja ${index + 1}`}>{index + 1}</span> : <span className="guided-matching-dot" aria-hidden="true" />}
                     </button>)}</div>
                     <div className="guided-matching-column"><div className="guided-matching-column-heading"><h3>KICHWA</h3></div>{destinations.map(destination => {
                         const matched = answer.pares?.find(item => item.destino === destination.id);
                         const number = matched ? origins.findIndex(origin => origin.id === matched.origen) + 1 : 0;
-                        return <button type="button" key={destination.id} className={matched ? 'is-paired' : ''} aria-label={destination.texto} aria-pressed={Boolean(matched)} disabled={(!selectedOrigin && !matched) || busy} onClick={() => pair(destination.id)}><span className="guided-matching-word"><strong>{destination.texto}</strong></span>{number > 0 ? <span className="guided-pair-number" aria-label={`Pareja ${number}`}>{number}</span> : <span className="guided-matching-dot" aria-hidden="true" />}</button>;
+                        return <button data-matching-destination={destination.id} data-answer-correct={matched ? result?.item_results?.[matched.origen] ?? result?.is_correct : undefined} type="button" key={destination.id} className={matched ? 'is-paired' : ''} aria-label={destination.texto} aria-pressed={Boolean(matched)} disabled={(!selectedOrigin && !matched) || busy} onClick={() => pair(destination.id)}><span className="guided-matching-word"><strong>{destination.texto}</strong></span>{number > 0 ? <span className="guided-pair-number" aria-label={`Pareja ${number}`}>{number}</span> : <span className="guided-matching-dot" aria-hidden="true" />}</button>;
                     })}</div>
-                    <p className="sr-only" role="status">{answer.pares?.length ?? 0} de {origins.length} parejas seleccionadas. {result?.is_correct ? 'Las parejas están comprobadas.' : selectedOrigin ? `Ahora elige la pareja de «${origins.find(origin => origin.id === selectedOrigin)?.texto}» en kichwa.` : 'Puedes cambiar una pareja antes de comprobar.'}</p>
+                    <MatchingLines pairs={answer.pares} feedback={result} /><p className="sr-only" role="status">{answer.pares?.length ?? 0} de {origins.length} parejas seleccionadas. {result?.is_correct ? 'Las parejas están comprobadas.' : selectedOrigin ? `Ahora elige la pareja de «${origins.find(origin => origin.id === selectedOrigin)?.texto}» en kichwa.` : 'Puedes cambiar una pareja antes de comprobar.'}</p>
                     </fieldset>
 
                 </section>}
@@ -314,9 +330,10 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
             </div>
         </section>
         {step < screenCount && <footer className="guided-unit-footer">
-            {step === 0 ? <Link href={moduleHref} className="guided-back"><ArrowLeft size={16} aria-hidden="true" />Volver</Link> : <button type="button" className="guided-back" disabled={busy} onClick={() => move(previousStep)}><ArrowLeft size={16} aria-hidden="true" />Volver</button>}
+            {step === 0 && pagedLesson && lessonPage > 0 ? <button type="button" className="guided-back" onClick={() => setLessonPage(page => page - 1)}><ArrowLeft size={16} aria-hidden="true" />Anterior</button> : step === 0 ? <Link href={moduleHref} className="guided-back"><ArrowLeft size={16} aria-hidden="true" />Volver</Link> : <button type="button" className="guided-back" disabled={busy} onClick={() => move(previousStep)}><ArrowLeft size={16} aria-hidden="true" />Volver</button>}
+            {step === 0 && pagedLesson && <span className="guided-step" aria-label={`Parte ${lessonPage + 1} de ${lessonPageCount}`}>{lessonPage + 1} <span>/ {lessonPageCount}</span></span>}
             {step > 0 && <div className="guided-attempt-progress"><span className="guided-step" aria-label={isGrouped ? `Ejercicios ${groupStart} ${greetingsPanel ? 'a' : 'y'} ${lastPanelStep} de ${activityCount}` : `Ejercicio ${step} de ${activityCount}`}>{isGrouped ? `${String(groupStart).padStart(2, '0')}–${String(lastPanelStep).padStart(2, '0')}` : String(step).padStart(2, '0')} <span>/ {String(activityCount).padStart(2, '0')}</span></span><span className="guided-attempt-xp">{xpEarned} XP en este intento</span></div>}
-            {ready && !sequence.error && !sequence.loading && (step === 0 ? <button type="button" className="primary-button" onClick={() => move(1)}>Continuar <ArrowRight size={17} aria-hidden="true" /></button> : correct ? <button type="button" className="primary-button" disabled={busy} onClick={() => lastPanelStep === activityCount ? void finish() : move(lastPanelStep + 1)}>{busy ? <><LoaderCircle size={17} className="animate-spin" aria-hidden="true" />Calculando…</> : lastPanelStep === activityCount ? <>Ver mi puntaje <ArrowRight size={17} aria-hidden="true" /></> : <>Continuar <ArrowRight size={17} aria-hidden="true" /></>}</button> : <button type="button" className="primary-button" disabled={busy || !canCheck} onClick={() => void check()}>{busy && <LoaderCircle size={17} className="animate-spin" aria-hidden="true" />}{busy ? 'Comprobando…' : 'Comprobar'}</button>)}
+            {ready && !sequence.error && !sequence.loading && (step === 0 && pagedLesson && lessonPage < lessonPageCount - 1 ? <button type="button" className="primary-button" onClick={() => setLessonPage(page => page + 1)}>Siguiente <ArrowRight size={17} aria-hidden="true" /></button> : step === 0 && lessonOnly ? <Link className="primary-button" href={moduleHref}>Finalizar lección <ArrowRight size={17} aria-hidden="true" /></Link> : step === 0 ? <button type="button" className="primary-button" onClick={() => move(1)}>Continuar <ArrowRight size={17} aria-hidden="true" /></button> : correct ? <button type="button" className="primary-button" disabled={busy} onClick={() => lastPanelStep === activityCount ? void finish() : move(lastPanelStep + 1)}>{busy ? <><LoaderCircle size={17} className="animate-spin" aria-hidden="true" />Calculando…</> : lastPanelStep === activityCount ? <>Ver mi puntaje <ArrowRight size={17} aria-hidden="true" /></> : <>Continuar <ArrowRight size={17} aria-hidden="true" /></>}</button> : <button type="button" className="primary-button" disabled={busy || !canCheck} onClick={() => void check()}>{busy && <LoaderCircle size={17} className="animate-spin" aria-hidden="true" />}{busy ? 'Comprobando…' : 'Comprobar'}</button>)}
         </footer>}
     </div>;
 }

@@ -91,6 +91,9 @@ class UnidadesTematicasGuiadasSeeder extends Seeder
         $this->call(UnidadTresPronombresSeeder::class);
         $this->call(UnidadCuatroNumerosSeeder::class);
         $this->call(UnidadCincoCalendarioSeeder::class);
+        $this->call(ModuloDosAnimalesSeeder::class);
+        $this->call(ModuloDosColoresSeeder::class);
+        $this->call(ModuloDosCuerpoSeeder::class);
     }
 
     public static function topicBody(array $topic): string

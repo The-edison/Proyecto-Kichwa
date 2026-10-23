@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { LoaderCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { ApiError, apiPost } from '../services/api';
+import { Link } from '../navigation';
 
 export function GoogleAuthButton({ label = 'Continuar con Google', disabled = false }: { label?: string; disabled?: boolean }) {
     const { googleEnabled, googleLoading } = useAuth();
@@ -21,6 +22,7 @@ export function GoogleAuthButton({ label = 'Continuar con Google', disabled = fa
     }, []);
     const busy = disabled || redirecting;
     return <div className="space-y-3 google-auth-options">
+        <p className="google-privacy-notice">Google es opcional. Si creas una cuenta con Google, Yachay recibe tu nombre, correo verificado e identificador de Google para darte acceso. <Link href="/informacion/privacidad">Consulta el aviso antes de continuar.</Link></p>
         <div className="flex items-center gap-3 text-xs text-muted"><span className="h-px flex-1 bg-positive-soft" />O continúa con<span className="h-px flex-1 bg-positive-soft" /></div>
         {googleEnabled && !busy ? <button type="button" className="secondary-button w-full" aria-label={label} onClick={() => void start()}><span className="google-mark" aria-hidden="true">G</span>{label}</button> :
             <button type="button" className="secondary-button w-full disabled:cursor-not-allowed disabled:opacity-60" disabled aria-busy={googleLoading || redirecting}>

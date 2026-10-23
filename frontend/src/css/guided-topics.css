@@ -46,6 +46,54 @@
 .topic-color-swatch { flex: none; align-self: center; width: 17px; height: 17px; border: 1px solid var(--color-control-border); border-radius: 50%; background: var(--topic-swatch); box-shadow: inset 0 0 0 2px var(--notebook-panel); }
 .topic-month-number { display: inline-grid; place-items: center; align-self: center; flex: none; width: 23px; height: 23px; border: 1px solid var(--lesson-border); border-radius: 4px; color: var(--color-text-secondary); font-size: 10px; font-weight: 500; font-variant-numeric: tabular-nums; }
 .topic-quantity { display: inline-block; min-width: 34px; padding: 0 7px; border-radius: 4px; background: var(--lesson-fill); color: var(--lesson-accent); font-variant-numeric: tabular-nums; text-align: center; }
+.topic-animals-colors .topic-section-2, .topic-animals-colors .topic-section-3 { grid-column: 1 / -1; }
+.topic-animals-colors .topic-section-0, .topic-animals-colors .topic-section-1 { display: flex; flex-direction: column; }
+.animals-word-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; flex: 1; }
+.animals-word-audio { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 13px 10px; border: 1px solid var(--lesson-border); border-radius: 12px; background: var(--notebook-paper,var(--color-surface)); color: var(--lesson-accent); box-shadow: 0 3px 0 var(--lesson-border); text-align: left; font: inherit; cursor: pointer; transition: background-color 150ms, border-color 150ms, transform 150ms; }
+.animals-word-audio:hover, .animals-word-audio.is-playing { border-color: var(--lesson-accent); background: var(--lesson-fill); }
+.animals-word-audio:active { transform: translateY(1px); }
+.animals-word-audio:focus-visible { outline: 3px solid var(--lesson-accent); outline-offset: 3px; }
+.animals-word-picture { flex: none; display: grid; place-items: center; width: 42px; height: 46px; font-size: 33px; line-height: 1; }
+.animals-word-copy { display: grid; gap: 4px; min-width: 0; }
+.animals-word-copy > strong { font-size: 20px; line-height: 1.3; font-weight: 800; overflow-wrap: anywhere; }
+.animals-word-copy > span { font-size: 16px; line-height: 1.4; color: var(--color-text-secondary); }
+.animals-word-speaker { display: inline-flex; align-items: center; gap: 5px; flex: none; margin-left: auto; color: var(--lesson-accent); }
+.animals-word-speaker > span { font-size: 12px; font-weight: 800; }
+.animals-word-grid:not(.animals-color-grid) .animals-word-speaker > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.animals-color-grid { grid-template-columns: repeat(6,minmax(0,1fr)); gap: 12px; }
+.animals-color-grid .animals-word-audio { flex-direction: column; justify-content: center; text-align: center; padding: 18px 8px 12px; }
+.animals-color-picture { display: grid; place-items: center; padding: 5px; border: 1px solid var(--lesson-border); border-radius: 50%; }
+.animals-color-picture .topic-color-swatch { width: 38px; height: 38px; box-shadow: none; border-color: var(--lesson-border); }
+.animals-color-grid .animals-word-speaker { margin-left: 0; margin-top: 6px; padding: 5px 7px; border-radius: 6px; background: var(--lesson-fill); }
+.animals-example-audio { width: 100%; padding: 18px; gap: 22px; }
+.animals-example-hat { flex: none; color: var(--lesson-accent); width: 110px; }
+.animals-example-audio .animals-word-copy > strong { font-size: clamp(21px,2.3vw,28px); }
+.animals-word-copy mark { border-radius: 4px; padding-inline: 3px; color: var(--lesson-accent); background: var(--lesson-fill); }
+.animals-example-audio .animals-word-speaker { padding: 9px 12px; border: 1px solid var(--lesson-accent); border-radius: 8px; }
+.animals-audio-status { margin-top: 12px; font-size: 15px; line-height: 1.6; color: var(--lesson-accent); }
+.animals-audio-status.is-error { color: var(--color-error); }
+.topic-body .topic-section-2, .topic-body .topic-section-3 { grid-column: 1 / -1; }
+.topic-body .topic-section-0, .topic-body .topic-section-1 { display: flex; flex-direction: column; }
+.body-part-visual { display: block; flex: none; width: 48px; height: 58px; color: var(--lesson-accent); }
+.topic-body .animals-word-picture { width: 50px; height: 60px; }
+.body-part-base { fill: var(--lesson-fill); }
+.body-part-highlight { fill: #edb495; stroke: #a95538; }
+.body-part-detail { stroke: #a95538; }
+.body-part-hair { fill: var(--lesson-accent); }
+.body-word-grid .animals-word-audio { min-height: 94px; }
+.body-group-2 { grid-template-columns: repeat(5,minmax(0,1fr)); gap: 12px; }
+.body-group-2 .animals-word-audio { flex-direction: column; text-align: center; padding: 16px 8px 12px; }
+.body-group-2 .animals-word-picture { height: 60px; }
+.body-group-2 .body-part-visual { width: 56px; height: 66px; }
+.body-group-2 .animals-word-speaker { margin-left: 0; padding: 5px 7px; border-radius: 6px; background: var(--lesson-fill); }
+.topic-body .body-group-2.animals-word-grid .animals-word-speaker > span { position: static; width: auto; height: auto; clip-path: none; }
+.body-example-picture { display: grid; place-items: center; }
+.body-example-picture .body-part-visual { width: 75px; height: 90px; }
+@media (max-width: 1200px) { .topic-body .body-group-2.animals-word-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } }
+@media (max-width: 480px) { .topic-body .body-group-2.animals-word-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 1200px) { .animals-word-grid:not(.animals-color-grid) { grid-template-columns: minmax(0,1fr); } .animals-color-grid { grid-template-columns: repeat(4,minmax(0,1fr)); } .animals-word-grid:not(.animals-color-grid) .animals-word-speaker > span { position: static; width: auto; height: auto; clip-path: none; } }
+@media (max-width: 700px) { .animals-word-grid:not(.animals-color-grid) { grid-template-columns: repeat(2,minmax(0,1fr)); } .animals-word-grid:not(.animals-color-grid) .animals-word-speaker > span { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); } .animals-color-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } .animals-example-audio { flex-wrap: wrap; gap: 16px; } .animals-example-hat { width: 80px; } .animals-example-audio .animals-word-copy { flex: 1 1 180px; } .animals-example-audio .animals-word-speaker { margin-left: 0; } }
+@media (max-width: 480px) { .animals-word-grid:not(.animals-color-grid) { grid-template-columns: minmax(0,1fr); } .animals-word-grid:not(.animals-color-grid) .animals-word-speaker > span { position: static; width: auto; height: auto; clip-path: none; } .animals-color-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (max-width: 480px) {
     .topic-vocabulary > div { gap: 10px; font-size: 14px; }
     .guided-introduction .topic-section-icon { width: 30px; height: 30px; }

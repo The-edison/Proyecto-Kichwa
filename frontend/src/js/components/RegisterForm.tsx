@@ -7,6 +7,7 @@ import { ApiError } from '../services/api';
 import { cedulaError, normalizePersonName, passwordChecks, registrationErrors, type RegistrationData } from '../services/registration';
 import { GoogleAuthButton } from './GoogleAuthButton';
 import { PasswordInput } from './PasswordInput';
+import { PrivacyNotice } from './PrivacyNotice';
 
 export function RegisterForm() {
     const { register } = useAuth();
@@ -50,6 +51,7 @@ export function RegisterForm() {
     const accessibility = (field: string, help?: string) => ({ 'aria-invalid': Boolean(errors[field]), 'aria-describedby': [help, errors[field] ? field + '-error' : null].filter(Boolean).join(' ') || undefined });
 
     return <div className="register-form-content">
+        <PrivacyNotice />
         {googleError && <p className="auth-alert" role="alert">{googleError}</p>}
         <form onSubmit={submit} noValidate aria-label="Crear una cuenta con correo" aria-busy={processing}>
             <fieldset disabled={processing} className="register-fieldset">
