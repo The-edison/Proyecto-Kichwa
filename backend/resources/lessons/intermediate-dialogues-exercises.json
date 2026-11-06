@@ -1,0 +1,620 @@
+[
+  {
+    "type": "seleccion_multiple",
+    "prompt": "Lee la conversación y selecciona la idea principal.",
+    "elements": [
+      {
+        "id": "o0",
+        "texto": "Una receta de cocina."
+      },
+      {
+        "id": "o1",
+        "texto": "Saludo y conversación sobre a dónde van."
+      },
+      {
+        "id": "o2",
+        "texto": "Una despedida de viaje."
+      }
+    ],
+    "solution": {
+      "seleccion": [
+        "o1"
+      ]
+    },
+    "zones": [],
+    "resource": null,
+    "config": {
+      "title": "Actividad 1. Comprende la conversación",
+      "dialogue_practice": 1,
+      "managed": true,
+      "reviewed": true,
+      "correct_feedback": "¡Muy bien! Completaste la actividad.",
+      "incorrect_feedback": "Revisa las respuestas marcadas y vuelve a intentarlo.",
+      "max_selections": 1,
+      "dialogue_turns": [
+        {
+          "speaker": "Alex",
+          "text": "Imanalla mashi Evelin."
+        },
+        {
+          "speaker": "Evelin",
+          "text": "Allillami kani mashi Alexito."
+        },
+        {
+          "speaker": "Alex",
+          "text": "Maymantatak rinki."
+        },
+        {
+          "speaker": "Evelin",
+          "text": "Ñukaka hatun yachana ukumanmi rini."
+        }
+      ],
+      "dialogue_name": "Alex y Evelin",
+      "dialogue_hint": "La idea principal es el tema más importante de la conversación.",
+      "dialogue_expressions": [
+        "Imanalla = ¿Cómo estás?",
+        "Allillami kani = Estoy bien.",
+        "Maymantatak rinki = ¿Adónde vas?"
+      ]
+    }
+  },
+  {
+    "type": "ordenar",
+    "prompt": "Usa Subir y Bajar para poner las frases en el orden de la conversación.",
+    "elements": [
+      {
+        "id": "t5",
+        "texto": "Alex: Ñukaka Quitopi llankanamanmi rikuni."
+      },
+      {
+        "id": "t4",
+        "texto": "Evelin: Kutin kikinka maymantatak rikunki."
+      },
+      {
+        "id": "t3",
+        "texto": "Evelin: Ñukaka hatun yachana ukumanmi rini."
+      },
+      {
+        "id": "t2",
+        "texto": "Alex: Maymantatak rinki."
+      },
+      {
+        "id": "t1",
+        "texto": "Evelin: Allillami kani mashi Alexito."
+      },
+      {
+        "id": "t0",
+        "texto": "Alex: Imanalla mashi Evelin."
+      }
+    ],
+    "solution": {
+      "orden": [
+        "t0",
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5"
+      ]
+    },
+    "zones": [],
+    "resource": null,
+    "config": {
+      "title": "Actividad 2. Ordena la conversación",
+      "dialogue_practice": 2,
+      "managed": true,
+      "reviewed": true,
+      "correct_feedback": "¡Orden correcto! Reconstruiste la conversación.",
+      "incorrect_feedback": "Revisa las respuestas marcadas y vuelve a intentarlo.",
+      "dialogue_hint": "Sigue el saludo, las preguntas, las respuestas y el cierre."
+    }
+  },
+  {
+    "type": "completar",
+    "published": false,
+    "prompt": "Selecciona la respuesta correcta en cada espacio para completar la conversación.",
+    "elements": [
+      {
+        "id": "t1",
+        "texto": "Evelin: _____",
+        "opciones": [
+          "Ñukaka Quitopi llankanamanmi rikuni.",
+          "Kutin kikinka maymantatak rikunki.",
+          "Maymantatak rinki.",
+          "Allillami kani mashi Alexito."
+        ]
+      },
+      {
+        "id": "t2",
+        "texto": "Alex: _____",
+        "opciones": [
+          "Ñukaka Quitopi llankanamanmi rikuni.",
+          "Kutin kikinka maymantatak rikunki.",
+          "Maymantatak rinki.",
+          "Allillami kani mashi Alexito."
+        ]
+      },
+      {
+        "id": "t4",
+        "texto": "Evelin: _____",
+        "opciones": [
+          "Ñukaka Quitopi llankanamanmi rikuni.",
+          "Kutin kikinka maymantatak rikunki.",
+          "Maymantatak rinki.",
+          "Allillami kani mashi Alexito."
+        ]
+      },
+      {
+        "id": "t5",
+        "texto": "Alex: _____",
+        "opciones": [
+          "Ñukaka Quitopi llankanamanmi rikuni.",
+          "Kutin kikinka maymantatak rikunki.",
+          "Maymantatak rinki.",
+          "Allillami kani mashi Alexito."
+        ]
+      }
+    ],
+    "solution": {
+      "textos": {
+        "t1": [
+          "Allillami kani mashi Alexito."
+        ],
+        "t2": [
+          "Maymantatak rinki."
+        ],
+        "t4": [
+          "Kutin kikinka maymantatak rikunki."
+        ],
+        "t5": [
+          "Ñukaka Quitopi llankanamanmi rikuni."
+        ]
+      }
+    },
+    "zones": [],
+    "resource": null,
+    "config": {
+      "title": "Actividad 3. Completa la conversación",
+      "dialogue_practice": 3,
+      "managed": true,
+      "reviewed": true,
+      "correct_feedback": "¡Muy bien! Completaste la actividad.",
+      "incorrect_feedback": "Revisa las respuestas marcadas y vuelve a intentarlo.",
+      "dialogue_turns": [
+        {
+          "speaker": "Alex",
+          "text": "Imanalla mashi Evelin."
+        },
+        {
+          "speaker": "Evelin",
+          "blank": "t1"
+        },
+        {
+          "speaker": "Alex",
+          "blank": "t2"
+        },
+        {
+          "speaker": "Evelin",
+          "text": "Ñukaka hatun yachana ukumanmi rini."
+        },
+        {
+          "speaker": "Evelin",
+          "blank": "t4"
+        },
+        {
+          "speaker": "Alex",
+          "blank": "t5"
+        }
+      ],
+      "dialogue_name": "Alex y Evelin",
+      "dialogue_hint": "Observa el sentido de la conversación para elegir la expresión adecuada.",
+      "dialogue_expressions": []
+    }
+  },
+  {
+    "type": "completar",
+    "prompt": "Selecciona la respuesta que continúa mejor cada intervención.",
+    "elements": [
+      {
+        "id": "r1",
+        "texto": "Imanalla mashi Evelin.",
+        "opciones": [
+          "Kayakama.",
+          "Allillami kani mashi Alexito.",
+          "Apamuy."
+        ]
+      },
+      {
+        "id": "r2",
+        "texto": "Maymantatak rinki.",
+        "opciones": [
+          "Ñukaka hatun yachana ukumanmi rini.",
+          "Yupaychani.",
+          "Alli puncha."
+        ]
+      },
+      {
+        "id": "r3",
+        "texto": "Kutin kikinka maymantatak rikunki.",
+        "opciones": [
+          "Mana.",
+          "Hakuyari.",
+          "Ñukaka Quitopi llankanamanmi rikuni."
+        ]
+      },
+      {
+        "id": "r4",
+        "texto": "Shuktipunchakama mashi Evelin.",
+        "opciones": [
+          "Imanalla kanki.",
+          "Ashtakama mashi Alex, ukta tikramunki.",
+          "Mikunayan."
+        ]
+      }
+    ],
+    "solution": {
+      "textos": {
+        "r1": [
+          "Allillami kani mashi Alexito."
+        ],
+        "r2": [
+          "Ñukaka hatun yachana ukumanmi rini."
+        ],
+        "r3": [
+          "Ñukaka Quitopi llankanamanmi rikuni."
+        ],
+        "r4": [
+          "Ashtakama mashi Alex, ukta tikramunki."
+        ]
+      }
+    },
+    "zones": [],
+    "resource": null,
+    "config": {
+      "title": "Actividad 4. Elige la continuación correcta",
+      "dialogue_practice": 4,
+      "managed": true,
+      "reviewed": true,
+      "correct_feedback": "¡Muy bien! Completaste la actividad.",
+      "incorrect_feedback": "Revisa las respuestas marcadas y vuelve a intentarlo.",
+      "dialogue_hint": "Elige la opción que mantiene el sentido de la conversación."
+    }
+  },
+  {
+    "type": "seleccion_multiple",
+    "prompt": "Lee la conversación y selecciona la idea principal.",
+    "elements": [
+      {
+        "id": "o0",
+        "texto": "Una receta de cocina tradicional."
+      },
+      {
+        "id": "o1",
+        "texto": "Una lista de compras para la casa."
+      },
+      {
+        "id": "o2",
+        "texto": "Un saludo, una conversación personal y a dónde van."
+      }
+    ],
+    "solution": {
+      "seleccion": [
+        "o2"
+      ]
+    },
+    "zones": [],
+    "resource": null,
+    "config": {
+      "title": "Actividad 5. Comprende la conversación",
+      "dialogue_practice": 5,
+      "managed": true,
+      "reviewed": true,
+      "correct_feedback": "¡Muy bien! Completaste la actividad.",
+      "incorrect_feedback": "Revisa las respuestas marcadas y vuelve a intentarlo.",
+      "max_selections": 1,
+      "dialogue_turns": [
+        {
+          "speaker": "Edgar",
+          "text": "Imanalla kuitza Janeth."
+        },
+        {
+          "speaker": "Janeth",
+          "text": "Imanalla kanki musu Edgar."
+        },
+        {
+          "speaker": "Edgar",
+          "text": "Allillami kani ñukaka – kikinka imanalla kanki."
+        },
+        {
+          "speaker": "Janeth",
+          "text": "Ñukapish allillami kani."
+        },
+        {
+          "speaker": "Edgar",
+          "text": "Kikinka ñachu kasararkanki."
+        },
+        {
+          "speaker": "Janeth",
+          "text": "Mana casaranichu – kikinka."
+        },
+        {
+          "speaker": "Edgar",
+          "text": "Mmmm, ñukapish manari kasaranichu."
+        },
+        {
+          "speaker": "Janeth",
+          "text": "Alalay, llullakunkimi."
+        },
+        {
+          "speaker": "Edgar",
+          "text": "Imamantatak llullashari, jajaj… Manari casaranika… Imapatatak kasarashari."
+        },
+        {
+          "speaker": "Janeth",
+          "text": "Tapunillami ama piñarinki."
+        },
+        {
+          "speaker": "Edgar",
+          "text": "Jajjaja, na maymantatak rikunki."
+        },
+        {
+          "speaker": "Janeth",
+          "text": "Wasimanmi rikuni – kikinka."
+        },
+        {
+          "speaker": "Edgar",
+          "text": "Ñukapish wasimanmi rikuni."
+        },
+        {
+          "speaker": "Janeth",
+          "text": "Chashnaka hakuyari."
+        },
+        {
+          "speaker": "Edgar",
+          "text": "Haku haku."
+        }
+      ],
+      "dialogue_name": "Edgar y Janeth",
+      "dialogue_hint": "La idea principal es el tema más importante de la conversación.",
+      "dialogue_expressions": []
+    }
+  },
+  {
+    "type": "ordenar",
+    "prompt": "Usa Subir y Bajar para poner las frases en el orden de la conversación.",
+    "elements": [
+      {
+        "id": "t8",
+        "texto": "Edgar: Kaya kama."
+      },
+      {
+        "id": "t7",
+        "texto": "Janeth: Ahhh, chashnaka Kaya kama."
+      },
+      {
+        "id": "t6",
+        "texto": "Edgar: Ñukapish manari kasaranichu."
+      },
+      {
+        "id": "t5",
+        "texto": "Janeth: Mana mari casaranichu – kikinka."
+      },
+      {
+        "id": "t4",
+        "texto": "Edgar: Kikinka ñachu kasararkanki."
+      },
+      {
+        "id": "t3",
+        "texto": "Janeth: Ñukapish allillami kani."
+      },
+      {
+        "id": "t2",
+        "texto": "Edgar: Allillami kani ñukaka – kikinka imanalla kanki."
+      },
+      {
+        "id": "t1",
+        "texto": "Janeth: Imanalla kanki musu Edgar."
+      },
+      {
+        "id": "t0",
+        "texto": "Edgar: Imanalla kuitza Janeth."
+      }
+    ],
+    "solution": {
+      "orden": [
+        "t0",
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5",
+        "t6",
+        "t7",
+        "t8"
+      ]
+    },
+    "zones": [],
+    "resource": null,
+    "config": {
+      "title": "Actividad 6. Ordena la conversación",
+      "dialogue_practice": 6,
+      "managed": true,
+      "reviewed": true,
+      "correct_feedback": "¡Orden correcto! Reconstruiste la conversación.",
+      "incorrect_feedback": "Revisa las respuestas marcadas y vuelve a intentarlo.",
+      "dialogue_hint": "Sigue el saludo, las preguntas, las respuestas y el cierre."
+    }
+  },
+  {
+    "type": "completar",
+    "published": false,
+    "prompt": "Selecciona la respuesta correcta en cada espacio para completar la conversación.",
+    "elements": [
+      {
+        "id": "t1",
+        "texto": "Janeth: _____",
+        "opciones": [
+          "Chashnaka hakuyari.",
+          "Wasimanmi rikuni – kikinka.",
+          "Kikinka ñachu kasararkanki.",
+          "Imanalla kanki musu Edgar."
+        ]
+      },
+      {
+        "id": "t4",
+        "texto": "Edgar: _____",
+        "opciones": [
+          "Chashnaka hakuyari.",
+          "Wasimanmi rikuni – kikinka.",
+          "Kikinka ñachu kasararkanki.",
+          "Imanalla kanki musu Edgar."
+        ]
+      },
+      {
+        "id": "t7",
+        "texto": "Janeth: _____",
+        "opciones": [
+          "Chashnaka hakuyari.",
+          "Wasimanmi rikuni – kikinka.",
+          "Kikinka ñachu kasararkanki.",
+          "Imanalla kanki musu Edgar."
+        ]
+      }
+    ],
+    "solution": {
+      "textos": {
+        "t1": [
+          "Imanalla kanki musu Edgar."
+        ],
+        "t4": [
+          "Kikinka ñachu kasararkanki."
+        ],
+        "t7": [
+          "Wasimanmi rikuni – kikinka."
+        ]
+      }
+    },
+    "zones": [],
+    "resource": null,
+    "config": {
+      "title": "Actividad 7. Completa la conversación",
+      "dialogue_practice": 7,
+      "managed": true,
+      "reviewed": true,
+      "correct_feedback": "¡Muy bien! Completaste la actividad.",
+      "incorrect_feedback": "Revisa las respuestas marcadas y vuelve a intentarlo.",
+      "dialogue_turns": [
+        {
+          "speaker": "Edgar",
+          "text": "Imanalla kuitza Janeth."
+        },
+        {
+          "speaker": "Janeth",
+          "blank": "t1"
+        },
+        {
+          "speaker": "Edgar",
+          "text": "Allillami kani ñukaka – kikinka imanalla kanki."
+        },
+        {
+          "speaker": "Janeth",
+          "text": "Ñukapish allillami kani."
+        },
+        {
+          "speaker": "Edgar",
+          "blank": "t4"
+        },
+        {
+          "speaker": "Janeth",
+          "text": "Mana mari casaranichu – kikinka."
+        },
+        {
+          "speaker": "Edgar",
+          "text": "Ñukapish manari kasaranichu."
+        },
+        {
+          "speaker": "Janeth",
+          "blank": "t7"
+        },
+        {
+          "speaker": "Edgar",
+          "text": "Ñukapish wasimanmi rikuni."
+        }
+      ],
+      "dialogue_name": "Edgar y Janeth",
+      "dialogue_hint": "Observa el sentido de la conversación para elegir la expresión adecuada.",
+      "dialogue_expressions": [
+        "Chashnaka hakuyari = Entonces, ¡nos vemos!"
+      ]
+    }
+  },
+  {
+    "type": "completar",
+    "prompt": "Selecciona la opción adecuada para cada espacio.",
+    "elements": [
+      {
+        "id": "r1",
+        "texto": "_____ mashi Evelin.",
+        "opciones": [
+          "Wasimanmi",
+          "Imanalla",
+          "Yupaychani"
+        ]
+      },
+      {
+        "id": "r2",
+        "texto": "Allillami kani mashi _____.",
+        "opciones": [
+          "Quito",
+          "yachachik",
+          "Alexito"
+        ]
+      },
+      {
+        "id": "r3",
+        "texto": "Kikinka ñachu _____?",
+        "opciones": [
+          "kasararkanki",
+          "rikuni",
+          "allillami"
+        ]
+      },
+      {
+        "id": "r4",
+        "texto": "Ñukapish _____ rikuni.",
+        "opciones": [
+          "allillami",
+          "wasimanmi",
+          "apamuy"
+        ]
+      }
+    ],
+    "solution": {
+      "textos": {
+        "r1": [
+          "Imanalla"
+        ],
+        "r2": [
+          "Alexito"
+        ],
+        "r3": [
+          "kasararkanki"
+        ],
+        "r4": [
+          "wasimanmi"
+        ]
+      }
+    },
+    "zones": [],
+    "resource": null,
+    "config": {
+      "title": "Actividad 8. Completa el diálogo con opciones",
+      "dialogue_practice": 8,
+      "managed": true,
+      "reviewed": true,
+      "correct_feedback": "¡Muy bien! Completaste la actividad.",
+      "incorrect_feedback": "Revisa las respuestas marcadas y vuelve a intentarlo.",
+      "dialogue_hint": "Elige la opción que mantiene el sentido de la conversación."
+    }
+  }
+]

@@ -16,7 +16,7 @@ async function screen({ pathname = '/aprender', loading = false, error = null, c
         const exports = specifier === 'react' ? {
             useState(initial) { const index = cursor++; if (!(index in states)) states[index] = typeof initial === 'function' ? initial() : initial; return [states[index], value => { states[index] = typeof value === 'function' ? value(states[index]) : value; }]; },
             useEffect(callback, deps) { const index = cursor++; if (!dependencies[index] || deps.some((value, i) => value !== dependencies[index][i])) { dependencies[index] = deps; effects.push(callback); } },
-        } : specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx } : specifier === 'react-router-dom' ? { useLocation: () => ({ pathname }) }
+        } : specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx, Fragment: 'fragment' } : specifier === 'react-router-dom' ? { useLocation: () => ({ pathname }) }
             : specifier === 'lucide-react' ? { BookOpen: 'BookOpen', ChevronDown: 'ChevronDown', GraduationCap: 'GraduationCap' }
             : specifier.endsWith('/useApi') ? { useApi: () => ({ data: catalog, loading, error, refresh: () => refreshed++ }) }
             : specifier.endsWith('/AuthContext') ? { useAuth: () => ({ user: { id: 3 } }) }

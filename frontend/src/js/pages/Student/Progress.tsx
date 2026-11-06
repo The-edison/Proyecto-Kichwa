@@ -7,8 +7,7 @@ import type { ProgressSummary, Mastery } from '../../types';
 import '../../../css/student-progress.css';
 
 interface TestProgress {
-    id: number; title: string; best: number | null; passed: boolean;
-    latest?: number | null; attempts?: number; inProgress?: boolean;
+    id: number; title: string; score: number | null; passed: boolean;
 }
 
 export default function Progress() {
@@ -25,16 +24,13 @@ export default function Progress() {
         ['Experiencia ganada', mastery.loading ? '…' : mastery.data?.xp ?? '—', Zap, 'XP acumulados de todos tus intentos'],
     ] as const;
     const tests = new Map<number, TestProgress>();
-    for (const level of progress.data ?? []) {
-        for (const result of level.evaluation_results) {
-            tests.set(result.evaluation_id, { id: result.evaluation_id, title: result.title ?? 'Evaluación', best: Number(result.best_score), passed: result.passed ?? Number(result.best_score) >= 80 });
-        }
-    }
     for (const level of report?.levels ?? []) {
         for (const module of level.modules) {
             const final = module.final_evaluation;
-            if (final) tests.set(final.id, { id: final.id, title: final.title, best: final.best_score, passed: final.passed,
-                latest: final.latest_score, attempts: final.attempt_count, inProgress: final.in_progress });
+            if (final && (final.latest_score !== null || final.in_progress)) {
+                tests.set(module.id, { id: final.id, title: final.title, score: final.latest_score,
+                    passed: final.latest_passed ?? (final.latest_score !== null && final.latest_score >= final.pass_percentage) });
+            }
         }
     }
 
@@ -47,11 +43,11 @@ export default function Progress() {
             </section>}
             {mastery.error && <ErrorState message={mastery.error} />}
             <section aria-labelledby="progress-tests-title">
-                <div className="section-heading"><div><span className="eyebrow">TUS RESULTADOS</span><h2 id="progress-tests-title">Pruebas y evaluaciones</h2></div><ClipboardCheck size={21} className="text-forest" aria-hidden="true" /></div>
-                {progress.loading || mastery.loading ? <LoadingState label="Cargando tus resultados…" /> : progress.error ? <p className="soft-note">No se pudieron cargar los resultados.</p> : !tests.size ? <EmptyState title="Todavía no tienes resultados" description="Completa tus actividades y realiza una prueba para ver aquí tu resultado." action={<Link href="/aprender" className="primary-button">Seguir aprendiendo</Link>} /> : <div className="student-progress-test-list">
+                <div className="section-heading"><div><span className="eyebrow">TUS RESULTADOS</span><h2 id="progress-tests-title">Pruebas de módulo</h2></div><ClipboardCheck size={21} className="text-forest" aria-hidden="true" /></div>
+                {mastery.loading ? <LoadingState label="Cargando tus resultados…" /> : mastery.error ? <p className="soft-note">No se pudieron cargar los resultados.</p> : !tests.size ? <EmptyState title="Todavía no tienes resultados" description="Realiza una prueba de módulo para ver aquí tu última nota." action={<Link href="/aprender" className="primary-button">Seguir aprendiendo</Link>} /> : <div className="student-progress-test-list">
                     {[...tests.values()].map(test => <article key={test.id} className="glass-panel student-progress-test">
-                        <header><h3>{test.title}</h3><span className={`badge ${test.passed ? 'success' : 'neutral'}`}>{test.passed ? 'Aprobada' : test.inProgress ? 'Intento en curso' : test.best === null ? 'Sin realizar' : 'Pendiente de aprobar'}</span></header>
-                        <dl><div><dt>Mejor nota</dt><dd>{test.best === null ? 'Sin resultado' : `${test.best}%`}</dd></div>{test.latest !== undefined && <div><dt>Última nota</dt><dd>{test.latest === null ? 'Sin resultado' : `${test.latest}%`}</dd></div>}{test.attempts !== undefined && <div><dt>Intentos finalizados</dt><dd>{test.attempts}</dd></div>}</dl>
+                        <h3>{test.title}</h3>
+                        <div className="student-progress-test-result"><span className="student-progress-test-score" aria-label={test.score === null ? 'Sin nota todavía' : `Última nota: ${test.score} de 100`}>{test.score === null ? '—' : `${test.score} / 100`}</span><span className={`badge ${test.passed ? 'success' : 'neutral'}`}>{test.score === null ? 'En curso' : test.passed ? 'Aprobada' : 'No aprobada'}</span></div>
                     </article>)}
                 </div>}
             </section>

@@ -58,6 +58,7 @@ async function screen({ completed = false, post, exercises = [choice, matching],
         AnimalsPracticePanel: { AnimalsPracticePanel: 'AnimalsPracticePanel' },
         ColorsPracticePanel: { ColorsPracticePanel: 'ColorsPracticePanel' },
         BodyPracticePanel: { BodyPracticePanel: 'BodyPracticePanel' },
+        DialoguePractice: { DialoguePractice: 'DialoguePractice' },
         States: { ErrorState: 'ErrorState', LoadingState: 'LoadingState' },
         AuthContext: { useAuth: () => ({ user: { id: userId } }) },
     };

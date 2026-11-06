@@ -34,7 +34,8 @@ class ProgresoAprendizaje
         $modules = Modulo::where('publicado', true)->whereIn('id_nivel', $levels->modelKeys())->orderBy('orden_modulo')->orderBy('id_modulo')->get();
         $units = Unidad::where('publicado', true)->whereIn('id_modulo', $modules->modelKeys())->orderBy('orden_unidad')->orderBy('id_unidad')->get();
         $finals = EvaluacionKichwa::where('publicado', true)->where('tipo_evaluacion', 'modulo')->whereIn('id_modulo', $modules->modelKeys())->get()->keyBy('id_modulo');
-        $attempts = IntentoEvaluacion::where('id_usuario', $user)->whereIn('id_evaluacion', $finals->modelKeys())->orderByDesc('id_intento')->get()->groupBy('id_evaluacion');
+        $finalVersions = EvaluacionKichwa::where('tipo_evaluacion', 'modulo')->whereIn('id_modulo', $finals->pluck('id_modulo'))->get(['id_evaluacion', 'id_modulo'])->keyBy('id_evaluacion');
+        $attempts = IntentoEvaluacion::where('id_usuario', $user)->whereIn('id_evaluacion', $finalVersions->modelKeys())->orderByDesc('id_intento')->get()->groupBy(fn ($attempt) => $finalVersions[$attempt->id_evaluacion]->id_modulo);
         $unitFinals = EvaluacionKichwa::where('publicado', true)->where('tipo_evaluacion', 'unidad')->whereIn('id_unidad', $units->modelKeys())
             ->where(fn ($query) => $query->whereNull('id_tema')->orWhere('configuracion->final', true))->pluck('id_unidad');
         $unitReports = $units->map(function (Unidad $unit) use ($activityCounts, $completedUnits, $unitFinals): array {
@@ -54,7 +55,7 @@ class ProgresoAprendizaje
             $exam = $finals->get($module->id_modulo);
             $final = $exam ? EvaluacionModulo::status($exam, $user, $activityCounts) : null;
             if ($final) {
-                $history = $attempts->get($exam->id_evaluacion, collect());
+                $history = $attempts->get($module->id_modulo, collect());
                 $finished = $history->where('estado_intento', 'finalizado');
                 $final += ['attempt_count' => $finished->count(), 'latest_score' => $finished->first()?->resultado['score'] ?? null,
                     'in_progress' => $history->contains('estado_intento', 'en_curso')];

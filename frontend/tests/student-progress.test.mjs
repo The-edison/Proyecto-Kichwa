@@ -71,7 +71,8 @@ test('learning home retains courses and progress navigation without duplicating 
 
 test('progress keeps results without badges, repeated curriculum or lesson listings', async () => {
     const { tree } = await screen();
-    assert.ok(content(tree).includes('Mejor nota90%'));
+    assert.equal(content(tree).includes('Mejor nota'), false);
+    assert.equal(content(tree).includes('90%'), false);
     assert.equal(content(tree).includes('Primer logro'), false);
     assert.equal(content(tree).includes('Insignias conseguidas'), false);
     assert.equal(content(tree).includes('Primeras palabras'), false);
@@ -119,14 +120,17 @@ test('guided achievements show completed units and passed finals even with no le
 test('progress shows each final once while admin retains the curriculum detail', async()=>{
     for(const component of ['progress','admin']) {
         const {tree}=await screen({component,rewards:{...mastery,learning_report:finalReport}});
-        for(const label of ['Prueba final del módulo 1','Aprobada','80%','73.33%']) assert.ok(content(tree).includes(label),`${component}: ${label}`);
-        if(component==='admin') for(const label of ['Conociendo el kichwa','2 intentos finalizados','En preparación']) assert.ok(content(tree).includes(label));
+        assert.ok(content(tree).includes('Prueba final del módulo 1'));
+        if(component==='admin') for(const label of ['Aprobada','80%','73.33%','Conociendo el kichwa','2 intentos finalizados','En preparación']) assert.ok(content(tree).includes(label));
         else {
             assert.equal(content(tree).includes('Conociendo el kichwa'),false);
             assert.equal(content(tree).includes('Insignias conseguidas'),false);
             assert.equal(content(tree).includes('Cada nuevo intento puede sumar experiencia'),false);
             assert.equal(nodes(tree).filter(node=>node.type==='h3'&&content(node)==='Prueba final del módulo 1').length,1);
-            assert.ok(content(tree).includes('Intentos finalizados2'));
+            assert.ok(content(tree).includes('73.33 / 100'));
+            assert.ok(content(tree).includes('No aprobada'));
+            assert.equal(content(tree).includes('Mejor nota'),false);
+            assert.equal(content(tree).includes('Intentos finalizados'),false);
         }
         assert.equal(content(tree).includes('Evaluación #'),false);
         const unitLinks=nodes(tree).filter(node=>node.type==='Link'&&node.props.href==='/aprender/unidad/4');
@@ -144,10 +148,24 @@ test('locked and unfinished finals communicate their state without inventing a s
     const final=report.levels[0].modules[0].final_evaluation;
     Object.assign(final,{passed:false,unlocked:false,best_score:null,latest_score:null,attempt_count:0});
     const locked=await screen({rewards:{...mastery,learning_report:report}});
-    assert.ok(content(locked.tree).includes('Sin realizar'));assert.ok(content(locked.tree).includes('Sin resultado'));
+    assert.ok(nodes(locked.tree).some(node=>node.type==='EmptyState'));
     assert.equal(nodes(locked.tree).some(node=>node.type==='Link'&&node.props.href==='/aprender/evaluacion/9'),false);
     Object.assign(final,{unlocked:true,in_progress:true});
     const active=await screen({rewards:{...mastery,learning_report:report}});
-    assert.ok(content(active.tree).includes('Intento en curso'));
-    assert.ok(content(active.tree).includes('Intentos finalizados0'));
+    assert.ok(content(active.tree).includes('En curso'));
+    assert.ok(nodes(active.tree).some(node=>node.props['aria-label']==='Sin nota todavía'));
+    assert.equal(content(active.tree).includes('0 / 100'),false);
+});
+
+test('progress excludes internal lessons and retired versions and keeps one current final per module', async()=>{
+    const summaries=[{...progress[0],evaluation_results:[
+        {evaluation_id:1,title:'Descubre las vocales',best_score:'100'},
+        {evaluation_id:2,title:'Prueba de la Unidad 1',best_score:'100'},
+        {evaluation_id:3,title:'Versión anterior',best_score:'100'},
+    ]}];
+    const {tree}=await screen({summaries,rewards:{...mastery,learning_report:finalReport}});
+    const rows=nodes(tree).filter(node=>node.props.className==='glass-panel student-progress-test');
+    assert.equal(rows.length,1);
+    for(const title of ['Descubre las vocales','Prueba de la Unidad 1','Versión anterior']) assert.equal(content(tree).includes(title),false);
+    assert.ok(content(rows[0]).includes('73.33 / 100'));
 });

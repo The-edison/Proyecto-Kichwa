@@ -21,6 +21,7 @@ use App\Services\EvaluacionModulo;
 use App\Services\KichwaResource;
 use App\Services\PublicacionContenido;
 use App\Services\SecuenciaUnidad;
+use App\Services\VersionesEvaluacion;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -47,6 +48,14 @@ class KichwaCatalogController extends Controller
         if ($evaluation->id_unidad !== null) {
             self::publishedUnit($evaluation->id_unidad);
         }
+    }
+
+    public static function publishedAttemptEvaluation(EvaluacionKichwa $evaluation): EvaluacionKichwa
+    {
+        $current = $evaluation->publicado ? $evaluation : VersionesEvaluacion::related($evaluation)->where('publicado', true)->orderByDesc('id_evaluacion')->firstOrFail();
+        self::publishedEvaluation($current);
+
+        return $current;
     }
 
     private function publishedLevel(int $id): Nivel
@@ -308,9 +317,12 @@ class KichwaCatalogController extends Controller
         $level = $record->tipo_evaluacion === 'modulo' ? Modulo::findOrFail($record->id_modulo)->id_nivel
             : ($record->id_unidad !== null ? self::publishedUnit($record->id_unidad)->id_nivel : Nivel::where('orden_nivel', 1)->firstOrFail()->id_nivel);
 
-        return response()->json(KichwaResource::present('evaluations', $record) + ['level_id' => $level, 'description' => 'Evaluación del nivel.',
-            'history' => IntentoEvaluacion::where('id_usuario', $request->user()->id_usuario)->where('id_evaluacion', $evaluation)->orderByDesc('numero_intento')->limit(10)->get()->map(fn ($attempt) => [
-                'id' => $attempt->id_intento, 'number' => $attempt->numero_intento, 'state' => $attempt->estado_intento, 'result' => DominioLecciones::result($attempt)]),
+        $resource = KichwaResource::present('evaluations', $record);
+        $resource['module_id'] = $record->id_modulo ?? ($record->id_unidad !== null ? Unidad::findOrFail($record->id_unidad)->id_modulo : null);
+
+        return response()->json($resource + ['level_id' => $level, 'description' => 'Evaluación del nivel.',
+            'history' => IntentoEvaluacion::where('id_usuario', $request->user()->id_usuario)->whereIn('id_evaluacion', VersionesEvaluacion::related($record)->select('id_evaluacion'))->orderByDesc('id_intento')->limit(1)->get()->map(fn ($attempt) => [
+                'id' => $attempt->id_intento, 'evaluation_id' => $attempt->id_evaluacion, 'number' => $attempt->numero_intento, 'state' => $attempt->estado_intento, 'result' => DominioLecciones::result($attempt)]),
             'module_final' => $record->tipo_evaluacion === 'modulo' ? EvaluacionModulo::status($record, $request->user()->id_usuario) : null,
             'questions' => ($record->configuracion['managed'] ?? false) ? [] : EstadoContenido::eligible($evaluation)->map(fn ($r) => KichwaResource::present('questions', $r))]);
     }

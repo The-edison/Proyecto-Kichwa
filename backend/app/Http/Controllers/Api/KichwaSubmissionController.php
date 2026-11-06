@@ -18,6 +18,7 @@ use App\Services\EstadoContenido;
 use App\Services\KichwaResource;
 use App\Services\PublicacionContenido;
 use App\Services\SecuenciaUnidad;
+use App\Services\VersionesEvaluacion;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -31,6 +32,7 @@ class KichwaSubmissionController extends Controller
         $record = IntentoEvaluacion::where('id_usuario', $request->user()->id_usuario)->findOrFail($attempt);
         abort_unless($record->estado_intento === 'en_curso', 409, 'El intento ya está cerrado.');
         $evaluation = EvaluacionKichwa::findOrFail($record->id_evaluacion);
+        self::assertAttemptAvailable($evaluation, $request->user()->id_usuario);
         abort_unless($evaluation->configuracion['managed'] ?? false, 403, 'Esta evaluación se corrige al finalizar.');
         abort_if($evaluation->configuracion['final'] ?? false, 403, 'El desafío se corrige al finalizar.');
         $question = DominioLecciones::selected($record)->firstWhere('id_pregunta', $data['question_id']);
@@ -134,18 +136,27 @@ class KichwaSubmissionController extends Controller
 
     public function start(Request $request, int $evaluation): JsonResponse
     {
+        $request->validate(['new_version' => ['sometimes', 'boolean']]);
         $record = EvaluacionKichwa::findOrFail($evaluation);
         abort_unless(Pregunta::where('id_evaluacion', $evaluation)->exists(), 422, 'Añade preguntas antes de iniciar una evaluación.');
         $attempt = DB::transaction(function () use ($request, $evaluation) {
             Usuario::whereKey($request->user()->id_usuario)->lockForUpdate()->firstOrFail();
             $record = EvaluacionKichwa::whereKey($evaluation)->lockForUpdate()->firstOrFail();
-            if ($record->tipo_evaluacion === 'modulo') {
-                KichwaCatalogController::publishedEvaluation($record);
-                DominioLecciones::assertUnlocked($record, $request->user()->id_usuario);
+            if ($request->boolean('new_version')) {
+                $record = KichwaCatalogController::publishedAttemptEvaluation($record);
+                $evaluation = $record->id_evaluacion;
+                $record = EvaluacionKichwa::whereKey($evaluation)->lockForUpdate()->firstOrFail();
             }
             $open = IntentoEvaluacion::where('id_usuario', $request->user()->id_usuario)->where('id_evaluacion', $evaluation)->where('estado_intento', 'en_curso')->first();
+            if (! $open && $record->publicado && ! $request->boolean('new_version')) {
+                $open = IntentoEvaluacion::where('id_usuario', $request->user()->id_usuario)
+                    ->whereIn('id_evaluacion', VersionesEvaluacion::related($record)->select('id_evaluacion'))
+                    ->where('estado_intento', 'en_curso')->orderByDesc('id_intento')->first();
+            }
 
             if ($open) {
+                self::assertAttemptAvailable(EvaluacionKichwa::findOrFail($open->id_evaluacion), $request->user()->id_usuario);
+
                 return $open;
             }
             $record = EvaluacionKichwa::whereKey($evaluation)->lockForUpdate()->firstOrFail();
@@ -160,7 +171,7 @@ class KichwaSubmissionController extends Controller
                 $selected = ($record->configuracion['fixed_order'] ?? false) ? $eligible->take($count)->pluck('id_pregunta')->all() : $eligible->shuffle()->take($count)->pluck('id_pregunta')->all();
             }
 
-            return IntentoEvaluacion::create(['preguntas_seleccionadas' => $selected] + ['id_usuario' => $request->user()->id_usuario, 'id_evaluacion' => $evaluation,
+            return IntentoEvaluacion::create(['preguntas_seleccionadas' => $selected, 'estado_intento' => 'en_curso'] + ['id_usuario' => $request->user()->id_usuario, 'id_evaluacion' => $evaluation,
                 'numero_intento' => 1 + (int) IntentoEvaluacion::where('id_usuario', $request->user()->id_usuario)->where('id_evaluacion', $evaluation)->max('numero_intento')]);
         });
 
@@ -179,13 +190,10 @@ class KichwaSubmissionController extends Controller
             Usuario::whereKey($request->user()->id_usuario)->lockForUpdate()->firstOrFail();
             $attempt = IntentoEvaluacion::where('id_usuario', $request->user()->id_usuario)->where('id_evaluacion', $evaluation)->lockForUpdate()->findOrFail($data['attempt_id']);
             if ($attempt->estado_intento === 'finalizado' && $attempt->resultado !== null) {
-                return $attempt->resultado;
+                return DominioLecciones::result($attempt);
             }
             abort_unless($attempt->estado_intento === 'en_curso', 409, 'Este intento ya finalizó.');
-            if ($record->tipo_evaluacion === 'modulo') {
-                KichwaCatalogController::publishedEvaluation($record);
-                DominioLecciones::assertUnlocked($record, $request->user()->id_usuario);
-            }
+            self::assertAttemptAvailable($record, $request->user()->id_usuario);
             $questions = DominioLecciones::selected($attempt)->keyBy('id_pregunta');
             $submitted = collect($data['answers'])->keyBy('question_id');
             if ($questions->isEmpty() || $submitted->count() !== $questions->count() || $submitted->keys()->diff($questions->keys())->isNotEmpty()) {
@@ -198,7 +206,7 @@ class KichwaSubmissionController extends Controller
                 RespuestaEvaluacion::updateOrCreate(['id_intento' => $attempt->id_intento, 'id_pregunta' => $id],
                     ['id_evaluacion' => $evaluation, 'respuesta_evaluacion' => $answer,
                         'puntaje_respuesta_evaluacion' => $correct ? $question->puntaje_pregunta : 0]);
-                $results[] = ['question_id' => $id, 'is_correct' => $correct,
+                $results[] = ['question_id' => $id, 'is_correct' => $correct, 'correct_answer' => $question->solucion_pregunta,
                     'feedback' => ContratoEjercicio::feedback(KichwaResource::present('questions', $question, true), $correct)];
             }
             $maximum = (float) $questions->sum('puntaje_pregunta');
@@ -211,7 +219,7 @@ class KichwaSubmissionController extends Controller
             $attempt->fecha_fin_intento = now();
             $attempt->save();
 
-            return $attempt->resultado;
+            return DominioLecciones::result($attempt);
         });
 
         return response()->json($results);
@@ -221,17 +229,17 @@ class KichwaSubmissionController extends Controller
     {
         $record = IntentoEvaluacion::where('id_usuario', $request->user()->id_usuario)->findOrFail($attempt);
         $evaluation = EvaluacionKichwa::findOrFail($record->id_evaluacion);
-        if ($evaluation->tipo_evaluacion === 'modulo' && $record->estado_intento === 'en_curso') {
-            self::publishedModuleAttempt($evaluation, $request->user()->id_usuario);
+        if ($record->estado_intento === 'en_curso') {
+            self::assertAttemptAvailable($evaluation, $request->user()->id_usuario);
         }
 
         return response()->json(DominioLecciones::present($record));
     }
 
-    private static function publishedModuleAttempt(EvaluacionKichwa $evaluation, int $user): void
+    private static function assertAttemptAvailable(EvaluacionKichwa $evaluation, int $user): void
     {
-        KichwaCatalogController::publishedEvaluation($evaluation);
-        DominioLecciones::assertUnlocked($evaluation, $user);
+        $current = KichwaCatalogController::publishedAttemptEvaluation($evaluation);
+        DominioLecciones::assertUnlocked($current, $user);
     }
 
     public function draft(Request $request, int $attempt): JsonResponse
@@ -241,9 +249,7 @@ class KichwaSubmissionController extends Controller
             $record = IntentoEvaluacion::where('id_usuario', $request->user()->id_usuario)->lockForUpdate()->findOrFail($attempt);
             abort_unless($record->estado_intento === 'en_curso', 409, 'Este intento ya está cerrado.');
             $evaluation = EvaluacionKichwa::findOrFail($record->id_evaluacion);
-            if ($evaluation->tipo_evaluacion === 'modulo') {
-                self::publishedModuleAttempt($evaluation, $request->user()->id_usuario);
-            }
+            self::assertAttemptAvailable($evaluation, $request->user()->id_usuario);
             $questions = DominioLecciones::selected($record)->keyBy('id_pregunta');
             $ids = $questions->keys()->all();
             foreach (array_keys($data['answers']) as $id) {

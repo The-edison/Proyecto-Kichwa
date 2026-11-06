@@ -1,0 +1,288 @@
+[
+  [
+    1,
+    "Quieres nombrar a quien cuida un lugar. ¿Qué parte añades al nombre?",
+    [
+      "-niki",
+      "-kamak",
+      "la-",
+      "-kama"
+    ],
+    [
+      1
+    ],
+    "-kamak permite nombrar a la persona que cuida algo o se encarga de ello."
+  ],
+  [
+    1,
+    "¿Cuál es la diferencia entre -kamak y -kama?",
+    [
+      "-kamak nombra a quien se encarga de algo; -kama indica hasta.",
+      "-kamak indica pasado; -kama indica futuro.",
+      "Ambos indican una posición en una fila.",
+      "Ambos expresan parentesco."
+    ],
+    [
+      0
+    ],
+    "-kamak expresa quién tiene una responsabilidad. -kama indica hasta dónde llega algo."
+  ],
+  [
+    1,
+    "Llegas en quinto lugar. ¿Qué palabra indica tu posición?",
+    [
+      "Pichka",
+      "Chuskuniki",
+      "Pichkaniki",
+      "Sukta"
+    ],
+    [
+      2
+    ],
+    "Pichka expresa cinco. Al añadir -niki se forma pichkaniki: quinto."
+  ],
+  [
+    1,
+    "¿Dónde se coloca un prefijo como la-?",
+    [
+      "Después de la palabra completa.",
+      "Entre dos oraciones.",
+      "Al final de una raíz verbal.",
+      "Antes de la base de la palabra."
+    ],
+    [
+      3
+    ],
+    "Un prefijo se coloca antes de la base. La- aparece al inicio de ciertas palabras de parentesco."
+  ],
+  [
+    1,
+    "Quieres nombrar a una madrastra y a un hijastro. Elige las DOS palabras.",
+    [
+      "Lamama",
+      "Layaya",
+      "Lachuri",
+      "Laushushi"
+    ],
+    [
+      0,
+      2
+    ],
+    "Lamama significa madrastra y lachuri significa entenado o hijastro."
+  ],
+  [
+    2,
+    "Una acción ya ocurrió. ¿Qué morfema permite expresarla en pasado?",
+    [
+      "-sha",
+      "-niki",
+      "-rka",
+      "-pay"
+    ],
+    [
+      2
+    ],
+    "-rka indica que una acción ocurrió en el pasado."
+  ],
+  [
+    2,
+    "¿Qué oración expresa una acción de ayer?",
+    [
+      "Kaya ñuka sirasha.",
+      "Kayna pay urmarka.",
+      "Ñuka purini.",
+      "Kaya pay purinka."
+    ],
+    [
+      1
+    ],
+    "Kayna sitúa la acción ayer y -rka indica pasado: pay urmarka significa él o ella cayó."
+  ],
+  [
+    2,
+    "¿Qué oración expresa algo que tú harás mañana?",
+    [
+      "Kayna pay samarirka.",
+      "Kaya ñuka sirasha.",
+      "Ñuka purini.",
+      "Pay wakarka."
+    ],
+    [
+      1
+    ],
+    "Kaya indica mañana. Con ñuka, sirasha expresa una acción futura de yo: coseré."
+  ],
+  [
+    2,
+    "¿Qué oración expresa una acción en presente?",
+    [
+      "Ñuka purini.",
+      "Ñuka purirkani.",
+      "Kaya ñuka purisha.",
+      "Pay purinka."
+    ],
+    [
+      0
+    ],
+    "Ñuka purini expresa «Yo camino». Las otras formas indican pasado o futuro."
+  ],
+  [
+    2,
+    "Completa para hablar del futuro de otra persona: «Kaya pay llanka___».",
+    [
+      "-sha",
+      "-rka",
+      "-nka",
+      "-ni"
+    ],
+    [
+      2
+    ],
+    "Con pay, el futuro usa -nka. La oración completa es Kaya pay llankanka."
+  ],
+  [
+    3,
+    "¿Qué puede expresar -ku según la palabra en que aparece?",
+    [
+      "Pasado en un verbo y orden en un número.",
+      "Cariño en un nombre o acción en curso en un verbo.",
+      "Una profesión en un nombre y destino en un verbo.",
+      "Siempre una petición dirigida a varias personas."
+    ],
+    [
+      1
+    ],
+    "Con nombres, -ku puede expresar cariño. En un verbo, puede indicar que una acción está en curso."
+  ],
+  [
+    3,
+    "¿Qué cambio produce -chi al añadirse a una raíz verbal?",
+    [
+      "Expresa que la acción ya terminó.",
+      "Convierte el verbo en un número ordinal.",
+      "Indica quién cuida un lugar.",
+      "Añade la idea de hacer que alguien realice la acción."
+    ],
+    [
+      3
+    ],
+    "El uso causativo de -chi expresa que alguien hace que otra persona realice una acción."
+  ],
+  [
+    3,
+    "Quieres expresar ganas de hacer algo. ¿Qué morfema necesitas?",
+    [
+      "-naya",
+      "-kama",
+      "-rka",
+      "-niki"
+    ],
+    [
+      0
+    ],
+    "-naya aporta la idea de deseo o ganas de realizar una acción."
+  ],
+  [
+    3,
+    "¿Qué expresión usarías para pedir que alguien se siente con amabilidad?",
+    [
+      "Shamuychi",
+      "Mikunayan",
+      "Tiyaripay",
+      "Armachina"
+    ],
+    [
+      2
+    ],
+    "Tiyaripay significa siéntate, por favor. -pay aporta cortesía a esta petición."
+  ],
+  [
+    3,
+    "Elige las CUATRO relaciones correctas entre morfema y función.",
+    [
+      "-pi: lugar.",
+      "-pak: beneficiario.",
+      "-nkapak: finalidad.",
+      "-mi: afirmación.",
+      "-naya: pasado.",
+      "-rka: cariño."
+    ],
+    [
+      0,
+      1,
+      2,
+      3
+    ],
+    "-pi indica lugar; -pak, para quién es algo; -nkapak, para qué se realiza una acción; -mi aporta afirmación."
+  ],
+  [
+    4,
+    "Alguien te pregunta cómo estás. ¿Qué respuesta corresponde?",
+    [
+      "Kaya kama.",
+      "Kimsaniki.",
+      "Punkukamak.",
+      "Allillami kani."
+    ],
+    [
+      3
+    ],
+    "Allillami kani significa estoy bien y responde a una pregunta sobre cómo te encuentras."
+  ],
+  [
+    4,
+    "¿Qué pregunta haces para saber adónde va una persona?",
+    [
+      "Imanalla?",
+      "Mayman rinki?",
+      "Imata ruran?",
+      "Maypi?"
+    ],
+    [
+      1
+    ],
+    "Mayman rinki? pregunta adónde vas. La respuesta debe indicar un destino."
+  ],
+  [
+    4,
+    "Te dicen «Kaya kama». ¿Qué respuesta cierra el diálogo?",
+    [
+      "Kaya kama.",
+      "Imata ruran?",
+      "Mayman rinki?",
+      "Ñuka wasiman rini."
+    ],
+    [
+      0
+    ],
+    "Kaya kama es una despedida. Responder con la misma expresión permite cerrar el diálogo."
+  ],
+  [
+    4,
+    "Lee: «Kaya ñuka Kitoman risha. Kitopi purisha». ¿Cuál es el tema del texto?",
+    [
+      "Un viaje y una caminata planeados para mañana.",
+      "Un paseo que terminó ayer.",
+      "La presentación de una familia.",
+      "La descripción de una receta."
+    ],
+    [
+      0
+    ],
+    "Las dos oraciones comparten un plan futuro: iré a Quito y caminaré allí."
+  ],
+  [
+    4,
+    "¿Qué expresa «Ñukapish wasimanmi rikuni»?",
+    [
+      "Yo también voy a casa.",
+      "Tú estás en casa.",
+      "Él fue a trabajar.",
+      "Mañana iré a estudiar."
+    ],
+    [
+      0
+    ],
+    "Ñukapish significa «yo también» y wasiman indica el destino: a casa."
+  ]
+]
