@@ -117,6 +117,22 @@ test('the intermediate lesson can lead to future practice after its four explana
     assert.equal(nodes(view.render()).some(node => node.type === 'AdvancedMorphemesIntroduction'), false);
 });
 
+test('university practice uses the shared interaction for an ordering exercise', async () => {
+    const exercise = { id: 310, type: 'ordenar', prompt: 'Ordena el plan.',
+        elements: [{ id: 'destination', texto: 'wasiman' }, { id: 'time', texto: 'Kaya' }, { id: 'verb', texto: 'risha' }, { id: 'speaker', texto: 'ñuka' }],
+        zones: [], config: { title: 'Construye un plan', university_practice: true } };
+    const view = await screen({ exercises: [exercise], config: { guided_lesson: 'short-dialogues' } });
+    nodes(view.render()).find(node => node.type === 'ShortDialoguesIntroduction').props.onSelectPage(3);
+    click(view, 'Continuar');
+    const interaction = nodes(view.render()).find(node => node.type?.name === 'ExerciseInteraction');
+    assert.ok(interaction);
+    assert.equal(interaction.props.exercise.id, 310);
+    interaction.props.onChange({ orden: ['time', 'speaker', 'destination', 'verb'] });
+    assert.equal(button(view, 'Comprobar').props.disabled, false);
+    await check(view);
+    assert.equal(view.requests[0].path, '/exercises/310/answer');
+});
+
 test('four morpheme listening exercises form two panels, preserve correct answers and finish with four response ids', async () => {
     const exercises = ['julio', 'manuelito', 'marilin', 'luis'].map((name, index) => ({
         id: 21 + index, type: 'seleccion_multiple', prompt: 'Escucha cada oración y elige su significado.',

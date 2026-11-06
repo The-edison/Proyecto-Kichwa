@@ -1,0 +1,182 @@
+[
+  {
+    "title": "Conjugación en presente, pasado y futuro",
+    "objective": "Reconocer acciones actuales, pasadas y futuras en oraciones de la vida cotidiana.",
+    "topics": [
+      {
+        "key": "present",
+        "title": "Presente · kunan pacha",
+        "body": "Kunan significa hoy o ahora. Observa la acción y la referencia temporal antes de traducir.\n\nKunan punchapimi ñuka chakrapi llankani. = Hoy trabajo en la chacra.\nKunanmi ñuka yachana wasiman rini. = Hoy voy a la escuela.\nKunanmi yakuta upini. = Hoy bebo agua.",
+        "prompt": "Elige la expresión que completa cada oración en presente.",
+        "rows": [
+          ["hoy", "_____ punchapimi ñuka chakrapi llankani. · Hoy trabajo en la chacra.", ["Kunan", "Kayna", "Kaya"], "Kunan"],
+          ["agua", "Kunanmi _____ upini. · Hoy bebo agua.", ["yakuta", "wasiman", "mishita"], "yakuta"],
+          ["trabajo", "Kunan punchapimi ñuka chakrapi _____. · Hoy trabajo en la chacra.", ["llankani", "llankarkani", "llankasha"], "llankani"]
+        ]
+      },
+      {
+        "key": "past",
+        "title": "Pasado · yallishka pacha",
+        "body": "Kayna significa ayer. En los ejemplos del material, -rka aparece en acciones terminadas.\n\nKaynami ñuka yachana wasiman rirkani. = Ayer fui a la escuela.\nÑuka turika kayna punchami shuk allkuta rikurka. = Mi hermano vio un perro ayer.\nPaykunaka ashka yakutami upiarkakuna. = Ellos bebieron mucha agua.",
+        "prompt": "Completa las acciones que ya ocurrieron.",
+        "rows": [
+          ["ayer", "_____ ñuka yachana wasiman rirkani. · Ayer fui a la escuela.", ["Kaynami", "Kunanmi", "Kayami"], "Kaynami"],
+          ["fui", "Kaynami ñuka yachana wasiman _____. · Ayer fui a la escuela.", ["rirkani", "rini", "risha"], "rirkani"],
+          ["vio", "Ñuka turika kayna punchami shuk allkuta _____. · Mi hermano vio un perro ayer.", ["rikurka", "rikun", "rikunka"], "rikurka"]
+        ]
+      },
+      {
+        "key": "future",
+        "title": "Futuro · shamuk pacha",
+        "body": "Kaya significa mañana. Compara el momento de la acción con la forma verbal.\n\nKayamantami ashka yakuta upiasha. = Desde mañana beberé mucha agua.\nÑukanchikka murutami tarpushun. = Nosotros sembraremos granos.\nKaya punchami chakraman risha. = Mañana iré a la chacra.",
+        "prompt": "Elige la forma que expresa una acción futura.",
+        "rows": [
+          ["manana", "_____ punchami chakraman risha. · Mañana iré a la chacra.", ["Kaya", "Kayna", "Kunan"], "Kaya"],
+          ["iremos", "Kaya punchami chakraman _____. · Mañana iré a la chacra.", ["risha", "rirkani", "rini"], "risha"],
+          ["sembraremos", "Ñukanchikka murutami _____. · Nosotros sembraremos granos.", ["tarpushun", "tarpurkackik", "tarpunchik"], "tarpushun"]
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Morfemas básicos",
+    "objective": "Reconocer cómo -ka, -pa, -ta, -man, -pi y -manta cambian el significado de una palabra.",
+    "topics": [
+      {
+        "key": "ka-pa",
+        "title": "-ka y -pa · tema y pertenencia",
+        "body": "-ka marca el tema del que hablamos; -pa expresa pertenencia.\n\nmamaka = la mamá, como tema de la oración.\nwasika = la casa, como tema de la oración.\nñukapa = mío o de mí.\nmamapa = de la mamá.\nPanipa = de la hermana.",
+        "prompt": "Selecciona la forma que corresponde al significado indicado.",
+        "rows": [
+          ["tema-mama", "La mamá, como tema de la oración: _____", ["mamaka", "mamapa", "mamawan"], "mamaka"],
+          ["de-mama", "De la mamá: _____", ["mamaka", "mamapa", "mamaman"], "mamapa"],
+          ["mio", "Mío o de mí: _____", ["ñukapa", "ñukaka", "ñukapi"], "ñukapa"],
+          ["de-hermana", "De la hermana: _____", ["panipa", "panika", "panita"], "panipa"]
+        ]
+      },
+      {
+        "key": "ta-man",
+        "title": "-ta y -man · objeto y destino",
+        "body": "-ta señala aquello sobre lo que recae una acción; -man indica una dirección o un destino.\n\nPaymi wawata wakichirka. = Él cuidó al bebé.\nPaymi allkuta waktarka. = Él golpeó al perro.\nPaymi wasiman rinka. = Él irá a la casa.\nPaymi yachanaman rirka. = Él fue a estudiar.",
+        "prompt": "Distingue el objeto de la acción y el destino.",
+        "rows": [
+          ["bebe", "Al bebé: _____", ["wawata", "wawaman", "wawapi"], "wawata"],
+          ["perro", "Al perro: _____", ["allkuta", "allkuman", "allkupa"], "allkuta"],
+          ["casa", "A la casa: _____", ["wasiman", "wasita", "wasipi"], "wasiman"],
+          ["estudiar", "A estudiar: _____", ["yachanaman", "yachanata", "yachanapi"], "yachanaman"]
+        ]
+      },
+      {
+        "key": "pi-manta",
+        "title": "-pi y -manta · lugar y procedencia",
+        "body": "-pi indica dónde sucede algo. -manta indica de dónde procede o sale algo.\n\nChakrapi ashka papakuna tyan. = En la chacra hay muchas papas.\nAyllullaktapi pukllanakuna tyan. = En la comunidad hay juegos.\nchakramanta = de la chacra.\nwasimanta = de la casa.\nQuitomanta = desde Quito.",
+        "prompt": "Completa con el lugar o la procedencia correcta.",
+        "rows": [
+          ["en-chacra", "En la chacra: _____", ["chakrapi", "chakramanta", "chakraman"], "chakrapi"],
+          ["de-chacra", "De la chacra: _____", ["chakramanta", "chakrapi", "chakrata"], "chakramanta"],
+          ["en-comunidad", "En la comunidad: _____", ["ayllullaktapi", "ayllullaktaman", "ayllullaktapa"], "ayllullaktapi"],
+          ["desde-quito", "Desde Quito: _____", ["Quitomanta", "Quitopi", "Quitoman"], "Quitomanta"]
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Morfemas medios",
+    "objective": "Usar -wan, -kama, -rayku, -shina y -sapa para expresar compañía, límite, motivo, semejanza y abundancia.",
+    "topics": [
+      {
+        "key": "wan-kama",
+        "title": "-wan y -kama · compañía y límite",
+        "body": "-wan expresa compañía o instrumento; -kama indica hasta dónde o hasta cuándo.\n\nmamawan = con mamá.\nmashiwan = con el compañero.\nyantawan = con la leña.\nchaykama = hasta allí.\nkayakama = hasta mañana.\nyachanawasikama = hasta la escuela.",
+        "prompt": "Elige la terminación que expresa compañía o límite.",
+        "rows": [
+          ["con-mama", "Con mamá: _____", ["mamawan", "mamakama", "mamarayku"], "mamawan"],
+          ["con-amigo", "Con el compañero: _____", ["mashiwan", "mashikama", "mashishina"], "mashiwan"],
+          ["hasta-manana", "Hasta mañana: _____", ["kayakama", "kayawan", "kayarayku"], "kayakama"],
+          ["hasta-alli", "Hasta allí: _____", ["chaykama", "chaywan", "chaysapa"], "chaykama"]
+        ]
+      },
+      {
+        "key": "rayku-shina",
+        "title": "-rayku y -shina · motivo y semejanza",
+        "body": "-rayku expresa un motivo; -shina establece una comparación.\n\nmamarayku = por la mamá.\nwawarayku = por el bebé.\nkullkirayku = por el dinero.\ntaytashina = como el papá.\nwawashina = como el niño.\nayllushina = como la familia.",
+        "prompt": "Reconoce si la palabra indica motivo o semejanza.",
+        "rows": [
+          ["por-mama", "Por la mamá: _____", ["mamarayku", "mamashina", "mamawan"], "mamarayku"],
+          ["por-dinero", "Por el dinero: _____", ["kullkirayku", "kullkishina", "kullkisapa"], "kullkirayku"],
+          ["como-papa", "Como el papá: _____", ["taytashina", "taytarayku", "taytakama"], "taytashina"],
+          ["como-nino", "Como el niño: _____", ["wawashina", "wawarayku", "wawawan"], "wawashina"]
+        ]
+      },
+      {
+        "key": "sapa",
+        "title": "-sapa · abundancia o característica marcada",
+        "body": "En estos ejemplos, -sapa aporta la idea de abundancia o de una característica muy visible.\n\nwiksasapa = barrigón.\nyuyaysapa = persona con mucho pensamiento o conocimiento.\nyakusapa = jugoso.\nshunkusapa = de corazón grande.\n\nCompara la palabra base con la forma completa antes de elegir su significado.",
+        "prompt": "Elige la palabra que expresa la característica descrita.",
+        "rows": [
+          ["barrigon", "Barrigón: _____", ["wiksasapa", "wiksashina", "wiksarayku"], "wiksasapa"],
+          ["jugoso", "Jugoso: _____", ["yakusapa", "yakukama", "yakuwan"], "yakusapa"],
+          ["corazon", "De corazón grande: _____", ["shunkusapa", "shunkushina", "shunkurayku"], "shunkusapa"]
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Adverbios y ampliación de la oración",
+    "objective": "Agregar referencias de tiempo, lugar y modo a una oración en kichwa.",
+    "topics": [
+      {
+        "key": "time-words",
+        "title": "Kayna, kunan y kaya · cuándo ocurre",
+        "body": "Una referencia de tiempo ubica la acción.\n\nkayna = ayer. Kayna punchami ashkata puñushkani. = Ayer dormí mucho.\nkunan = hoy o ahora. Kunan punchapimi ñuka yayawan Quitoman rikrini. = Hoy iré a Quito con mi papá.\nkaya = mañana. Kaya punchami chakraman risha. = Mañana iré a la chacra.",
+        "prompt": "Escoge la palabra de tiempo que corresponde a la traducción.",
+        "rows": [
+          ["ayer", "Ayer: _____", ["kayna", "kunan", "kaya"], "kayna"],
+          ["hoy", "Hoy o ahora: _____", ["kunan", "kayna", "kaya"], "kunan"],
+          ["manana", "Mañana: _____", ["kaya", "kayna", "kunan"], "kaya"],
+          ["frase", "_____ punchami chakraman risha. · Mañana iré a la chacra.", ["Kaya", "Kayna", "Kunan"], "Kaya"]
+        ]
+      },
+      {
+        "key": "place-manner",
+        "title": "Kaypi y alli · dónde y cómo",
+        "body": "Kaypi significa aquí: indica el lugar. Alli significa bien: describe el modo o una cualidad.\n\nKaypimi shuk sumak wawa kawsan. = Aquí vive un hermoso bebé.\nÑuka mamaka allimi kan. = Mi mamá está bien.\n\nAl ampliar una oración, pregunta cuándo, dónde y cómo ocurre la acción.",
+        "prompt": "Completa cada oración según indique lugar o modo.",
+        "rows": [
+          ["aqui", "Aquí vive un niño: _____ shuk wawa kawsan.", ["Kaypi", "Alli", "Kayna"], "Kaypi"],
+          ["bien", "Ñuka mamaka _____ kan. · Mi mamá está bien.", ["allimi", "kaypimi", "kayami"], "allimi"],
+          ["lugar", "¿Qué palabra significa «aquí»? _____", ["kaypi", "alli", "kunan"], "kaypi"]
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Afirmación, negación, pregunta y duda",
+    "objective": "Distinguir las marcas -mi/-m, mana…-chu, -chu y -cha/-chari en oraciones sencillas.",
+    "topics": [
+      {
+        "key": "affirm-negative",
+        "title": "-mi/-m y mana…-chu · afirmar o negar",
+        "body": "-mi o -m destaca una afirmación. En los ejemplos del material, mana junto con -chu niega una acción.\n\nKay allpami alli kan. = Esta tierra sí es buena.\nÑukami Kichwa shimita yachakuni. = Yo aprendo kichwa.\nÑuka mana yachana wasiman rirkani-chu. = Yo no fui a la escuela.\n\nLee la oración completa: -chu también puede aparecer en preguntas sin mana.",
+        "prompt": "Identifica la marca de afirmación o la construcción negativa.",
+        "rows": [
+          ["afirmacion", "Marca de afirmación: _____", ["-mi", "mana…-chu", "-chari"], "-mi"],
+          ["negacion", "Construcción negativa: _____", ["mana…-chu", "-mi", "-cha"], "mana…-chu"],
+          ["no-fui", "Ñuka _____ yachana wasiman rirkani-chu. · Yo no fui a la escuela.", ["mana", "mi", "cha"], "mana"]
+        ]
+      },
+      {
+        "key": "question-doubt",
+        "title": "-chu y -cha/-chari · preguntar o dudar",
+        "body": "Una pregunta cerrada se puede responder sí o no; en los ejemplos del material lleva -chu. -cha o -chari expresa duda o posibilidad.\n\nKan Kichwa shimita yachakunkichu? = ¿Estás aprendiendo kichwa?\nKan kunan yachana wasiman rinkichu? = ¿Irás hoy a la escuela?\nPaycha kunan yachana wasiman rinka. = Tal vez él irá hoy a la escuela.\nPachamamaka parata karankachari. = Quizás la Pachamama dará lluvia.",
+        "prompt": "Distingue una pregunta de una posibilidad.",
+        "rows": [
+          ["pregunta", "Kan Kichwa shimita yachakunkichu? es una _____", ["pregunta", "negación", "orden"], "pregunta"],
+          ["duda", "Paycha kunan yachana wasiman rinka expresa _____", ["duda", "negación", "certeza"], "duda"],
+          ["marca-pregunta", "En una pregunta cerrada se usa la marca _____", ["-chu", "-sapa", "-rayku"], "-chu"],
+          ["marca-duda", "Para expresar probabilidad aparece _____", ["-cha/-chari", "-kama", "-ta"], "-cha/-chari"]
+        ]
+      }
+    ]
+  }
+]

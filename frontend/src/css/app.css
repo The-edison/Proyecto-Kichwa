@@ -848,6 +848,22 @@ tbody tr:hover { background: var(--color-bg); }
 .learning-section-heading { margin-bottom: 24px; }
 .learning-section-heading h2 { font-size: clamp(22px,2vw,26px); }
 .learning-section-heading p { margin-top: 8px; color: var(--color-text-secondary); font-size: 13px; }
+.level-video-section { margin: 0 0 44px; }
+.level-video-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.level-video-heading .secondary-button { display: inline-flex; align-items: center; gap: 8px; flex: none; }
+.level-video-dialog { position: fixed; inset: 0; width: 100%; max-width: none; height: 100dvh; max-height: none; margin: 0; padding: 0; overflow: hidden; border: 0; border-radius: 0; color: var(--color-text); background: #17122d; }
+.level-video-dialog[open] { display: flex; flex-direction: column; }
+.level-video-dialog::backdrop { background: #07051bd9; }
+.level-video-dialog-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 12px 20px; }
+.level-video-dialog-header h2 { margin-top: 3px; font-size: clamp(18px,2vw,24px); }
+.level-video-actions { display: flex; align-items: center; gap: 18px; flex: none; }
+.level-video-actions a { display: inline-flex; align-items: center; gap: 5px; color: var(--color-primary); font-size: 13px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.level-video-actions a:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+.level-video-close { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border: 1px solid var(--color-border); border-radius: 10px; color: var(--color-text); background: var(--color-soft); cursor: pointer; }
+.level-video-close:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+.level-video-stage { display: flex; align-items: center; justify-content: center; flex: 1; min-height: 0; padding: 8px 16px 16px; }
+.level-video-frame { width: min(100%,calc(177.778dvh - 151px)); max-height: 100%; aspect-ratio: 16 / 9; background: #1f1a41; }
+.level-video-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
 .level-module-heading { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 24px; }
 .level-module-heading h2 { margin-top: 5px; }
 .level-module-heading p { margin-top: 5px; }
@@ -1142,6 +1158,12 @@ tbody tr:hover { background: var(--color-bg); }
     .learning-progress-ring strong { font-size: 28px; }
     .learning-overview-emblem { width: 80px; height: 80px; border-radius: 24px; }
     .learning-module-grid { grid-template-columns: minmax(0,1fr); gap: 26px; }
+    .level-video-section { margin-bottom: 36px; }
+    .level-video-heading { align-items: flex-start; flex-direction: column; }
+    .level-video-dialog-header { align-items: flex-start; padding: 10px 12px; }
+    .level-video-actions { gap: 8px; }
+    .level-video-actions a { display: none; }
+    .level-video-stage { padding: 8px 8px 16px; }
     .learning-module-cover { min-height: 128px; padding: 18px; }
     .learning-module-body { padding: 18px; }
     .level-module-summary { flex-direction: column-reverse; gap: 4px; }

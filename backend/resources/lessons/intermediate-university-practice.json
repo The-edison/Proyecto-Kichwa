@@ -1,0 +1,591 @@
+[
+  {
+    "unit": 1,
+    "exercises": [
+      {
+        "key": "meaning-contrast",
+        "type": "relacionar",
+        "prompt": "En una ficha de análisis lingüístico, relaciona cada forma con su función y significado. Distingue especialmente -kamak de -kama.",
+        "elements": [
+          {
+            "id": "k1",
+            "texto": "wasikamak",
+            "grupo": "origen"
+          },
+          {
+            "id": "k2",
+            "texto": "wasikama",
+            "grupo": "origen"
+          },
+          {
+            "id": "k3",
+            "texto": "shukniki",
+            "grupo": "origen"
+          },
+          {
+            "id": "k4",
+            "texto": "layaya",
+            "grupo": "origen"
+          },
+          {
+            "id": "s3",
+            "texto": "primero: posición en una secuencia",
+            "grupo": "destino"
+          },
+          {
+            "id": "s1",
+            "texto": "persona que cuida la casa",
+            "grupo": "destino"
+          },
+          {
+            "id": "s4",
+            "texto": "padrastro: término de parentesco",
+            "grupo": "destino"
+          },
+          {
+            "id": "s2",
+            "texto": "hasta la casa: límite del recorrido",
+            "grupo": "destino"
+          }
+        ],
+        "solution": {
+          "pares": [
+            {
+              "origen": "k1",
+              "destino": "s1"
+            },
+            {
+              "origen": "k2",
+              "destino": "s2"
+            },
+            {
+              "origen": "k3",
+              "destino": "s3"
+            },
+            {
+              "origen": "k4",
+              "destino": "s4"
+            }
+          ]
+        },
+        "config": {
+          "title": "Análisis de formas cercanas"
+        },
+        "topic": "derivacion"
+      },
+      {
+        "key": "field-report",
+        "type": "completar",
+        "prompt": "Completa las notas de un trabajo de campo con la forma precisa en kichwa.",
+        "elements": [
+          {
+            "id": "guardian",
+            "texto": "La persona encargada de la puerta es el _____.",
+            "opciones": [
+              "punkukamak",
+              "punkukama",
+              "wasikamak"
+            ]
+          },
+          {
+            "id": "limit",
+            "texto": "El trayecto llega hasta la casa: _____.",
+            "opciones": [
+              "wasikama",
+              "wasikamak",
+              "wasiman"
+            ]
+          },
+          {
+            "id": "position",
+            "texto": "Quien ocupa el tercer lugar es _____.",
+            "opciones": [
+              "kimsaniki",
+              "kimsa",
+              "iskunniki"
+            ]
+          },
+          {
+            "id": "family",
+            "texto": "El término de parentesco para «madrastra» es _____.",
+            "opciones": [
+              "lamama",
+              "layaya",
+              "mama"
+            ]
+          }
+        ],
+        "solution": {
+          "textos": {
+            "guardian": [
+              "punkukamak"
+            ],
+            "limit": [
+              "wasikama"
+            ],
+            "position": [
+              "kimsaniki"
+            ],
+            "family": [
+              "lamama"
+            ]
+          }
+        },
+        "config": {
+          "title": "Informe de campo: forma precisa"
+        },
+        "topic": "relaciones"
+      }
+    ],
+    "title": "Morfología derivativa y relaciones semánticas",
+    "objective": "Analizar la función y posición de -kamak, -kama, -niki y la-; justificar cómo cada morfema modifica la base léxica.",
+    "topics": [
+      {
+        "key": "derivacion",
+        "title": "Derivación y segmentación morfológica",
+        "body": "En kichwa, una base léxica puede recibir morfemas que modifican su función. Wasi designa una casa. En wasi-kamak, -kamak forma un nombre de agente: la persona encargada de cuidar la casa. En wasi-kama, -kama delimita el trayecto: hasta la casa. La semejanza gráfica entre ambos segmentos exige atender al significado y a la función en la oración.\n\nProcedimiento de análisis: identifica la base; delimita el morfema; describe el significado de cada parte; comprueba la interpretación de la forma completa en contexto. Compara wasi-kamak con punku-kamak (encargado de la puerta) y wasi-kama (hasta la casa)."
+      },
+      {
+        "key": "relaciones",
+        "title": "Orden y parentesco en la formación de palabras",
+        "body": "El segmento -niki indica posición ordinal: shuk-niki expresa «primero» y kimsa-niki, «tercero». El elemento la- interviene en términos de parentesco como la-yaya («padrastro») y la-mama («madrastra»). Estos procesos no expresan la misma relación semántica: uno organiza una secuencia y el otro especifica parentesco.\n\nEn una ficha de campo, registra la forma, su segmentación y la interpretación. Justifica cada elección por el morfema presente, no solo por la traducción de la palabra."
+      }
+    ]
+  },
+  {
+    "unit": 2,
+    "exercises": [
+      {
+        "key": "timeline",
+        "type": "ordenar",
+        "prompt": "Ordena las tres formas de caminar desde una acción concluida hasta una que aún no ocurre.",
+        "elements": [
+          {
+            "id": "future",
+            "texto": "purisha · yo caminaré"
+          },
+          {
+            "id": "past",
+            "texto": "purirkani · yo caminé"
+          },
+          {
+            "id": "present",
+            "texto": "purini · yo camino"
+          }
+        ],
+        "solution": {
+          "orden": [
+            "past",
+            "present",
+            "future"
+          ]
+        },
+        "config": {
+          "title": "Línea temporal del verbo"
+        },
+        "topic": "referencia-temporal"
+      },
+      {
+        "key": "tense-analysis",
+        "type": "completar",
+        "prompt": "Escribe la forma verbal que corresponde a cada situación. Conserva la marca de tiempo y persona.",
+        "elements": [
+          {
+            "id": "arrived",
+            "texto": "En el registro de ayer, él o ella llegó: Pay _____."
+          },
+          {
+            "id": "will-work",
+            "texto": "En el plan de mañana, yo trabajaré: Ñuka _____."
+          },
+          {
+            "id": "walked",
+            "texto": "En la memoria de la visita, yo caminé: Ñuka _____."
+          }
+        ],
+        "solution": {
+          "textos": {
+            "arrived": [
+              "chayarka"
+            ],
+            "will-work": [
+              "llankasha"
+            ],
+            "walked": [
+              "purirkani"
+            ]
+          }
+        },
+        "config": {
+          "title": "Redacción de formas temporales",
+          "presentation": "writing"
+        },
+        "topic": "concordancia"
+      }
+    ],
+    "title": "Análisis temporal del verbo",
+    "objective": "Contrastar pasado, presente y futuro mediante la segmentación de raíz, marca temporal y referencia de persona.",
+    "topics": [
+      {
+        "key": "referencia-temporal",
+        "title": "Referencia temporal y formas verbales",
+        "body": "La interpretación temporal de un verbo depende de sus marcas morfológicas y del contexto. Compara purirkani («yo caminé»), purini («yo camino») y purisha («yo caminaré»). La raíz puri- conserva la noción de caminar; la forma completa sitúa la acción en relación con el momento de habla.\n\nOrdena los enunciados por tiempo de referencia e identifica qué información cambia. No confundas el orden temporal de los hechos con el orden de las palabras en una oración."
+      },
+      {
+        "key": "concordancia",
+        "title": "Tiempo y persona en el enunciado",
+        "body": "Para interpretar una forma verbal, observa quién realiza la acción y cuándo ocurre. Ñuka purirkani señala una acción pasada de primera persona; pay chayarka se refiere a una acción pasada de tercera persona; ñuka llankasha presenta una acción futura de primera persona.\n\nEn un registro académico, conserva la forma verbal completa. Una raíz aislada, como puri- o llanka-, no informa por sí sola el tiempo y la persona requeridos por el enunciado."
+      }
+    ]
+  },
+  {
+    "unit": 3,
+    "exercises": [
+      {
+        "key": "verbal-functions",
+        "type": "relacionar",
+        "prompt": "Relaciona cada expresión con el cambio de significado que aporta su morfema.",
+        "elements": [
+          {
+            "id": "k1",
+            "texto": "mikukuni",
+            "grupo": "origen"
+          },
+          {
+            "id": "k2",
+            "texto": "mikuchina",
+            "grupo": "origen"
+          },
+          {
+            "id": "k3",
+            "texto": "mikunayani",
+            "grupo": "origen"
+          },
+          {
+            "id": "k4",
+            "texto": "shamupay",
+            "grupo": "origen"
+          },
+          {
+            "id": "s4",
+            "texto": "petición amable: ven, por favor",
+            "grupo": "destino"
+          },
+          {
+            "id": "s2",
+            "texto": "causación: hacer comer",
+            "grupo": "destino"
+          },
+          {
+            "id": "s1",
+            "texto": "acción en curso: estoy comiendo",
+            "grupo": "destino"
+          },
+          {
+            "id": "s3",
+            "texto": "deseo: quiero comer",
+            "grupo": "destino"
+          }
+        ],
+        "solution": {
+          "pares": [
+            {
+              "origen": "k1",
+              "destino": "s1"
+            },
+            {
+              "origen": "k2",
+              "destino": "s2"
+            },
+            {
+              "origen": "k3",
+              "destino": "s3"
+            },
+            {
+              "origen": "k4",
+              "destino": "s4"
+            }
+          ]
+        },
+        "config": {
+          "title": "Comparación de funciones verbales"
+        },
+        "topic": "funciones"
+      },
+      {
+        "key": "morpheme-segmentation",
+        "type": "completar",
+        "prompt": "Reconstruye cada palabra a partir de su raíz, su función y su terminación.",
+        "elements": [
+          {
+            "id": "ongoing",
+            "texto": "miku + _____ + ni = mikukuni · estoy comiendo",
+            "opciones": [
+              "ku",
+              "chi",
+              "naya",
+              "pay"
+            ]
+          },
+          {
+            "id": "cause",
+            "texto": "miku + _____ + na = mikuchina · hacer comer",
+            "opciones": [
+              "chi",
+              "ku",
+              "naya",
+              "pay"
+            ]
+          },
+          {
+            "id": "desire",
+            "texto": "killka + _____ + ni = killkanayani · quiero escribir",
+            "opciones": [
+              "naya",
+              "chi",
+              "ku",
+              "pay"
+            ]
+          },
+          {
+            "id": "courtesy",
+            "texto": "shamu + _____ = shamupay · ven, por favor",
+            "opciones": [
+              "pay",
+              "ku",
+              "chi",
+              "naya"
+            ]
+          }
+        ],
+        "solution": {
+          "textos": {
+            "ongoing": [
+              "ku"
+            ],
+            "cause": [
+              "chi"
+            ],
+            "desire": [
+              "naya"
+            ],
+            "courtesy": [
+              "pay"
+            ]
+          }
+        },
+        "config": {
+          "title": "Segmentación y reconstrucción"
+        },
+        "topic": "composicion"
+      }
+    ],
+    "title": "Procesos de derivación verbal",
+    "objective": "Distinguir acción en curso, causatividad, deseo y cortesía mediante el análisis de -ku, -chi, -naya y -pay.",
+    "topics": [
+      {
+        "key": "funciones",
+        "title": "Contraste funcional de morfemas verbales",
+        "body": "Una misma raíz admite ampliaciones que cambian la interpretación del evento. En los ejemplos de esta unidad, miku-ku-ni se interpreta como «estoy comiendo»; miku-chi-na expresa «hacer comer»; miku-naya-ni, «quiero comer». La comparación permite distinguir acción en curso, causación y deseo.\n\nEl segmento -pay aparece en peticiones corteses como shamu-pay («ven, por favor»). Analiza la función de cada morfema antes de traducir la forma completa."
+      },
+      {
+        "key": "composicion",
+        "title": "Composición y reconstrucción de formas",
+        "body": "Una segmentación explícita facilita la comprobación: raíz + morfema derivativo + terminación. Miku + ku + ni produce mikukuni; miku + chi + na produce mikuchina. De manera análoga, killka + naya + ni forma killkanayani («quiero escribir»).\n\nCuando reconstruyas una forma, verifica tres aspectos: que el morfema expresa la función solicitada, que ocupa la posición adecuada y que la forma completa conserva el significado de la raíz."
+      }
+    ]
+  },
+  {
+    "unit": 4,
+    "exercises": [
+      {
+        "key": "dialogue-response",
+        "type": "relacionar",
+        "prompt": "Reconstruye tres intercambios del diálogo: relaciona cada pregunta con una respuesta coherente.",
+        "elements": [
+          {
+            "id": "q1",
+            "texto": "Imanalla, mashi Evelin?",
+            "grupo": "origen"
+          },
+          {
+            "id": "q2",
+            "texto": "Maypi kan kanpak yaya?",
+            "grupo": "origen"
+          },
+          {
+            "id": "q3",
+            "texto": "Imata ruran?",
+            "grupo": "origen"
+          },
+          {
+            "id": "a3",
+            "texto": "Pay mikukun.",
+            "grupo": "destino"
+          },
+          {
+            "id": "a1",
+            "texto": "Allillami kani, mashi Alex.",
+            "grupo": "destino"
+          },
+          {
+            "id": "a2",
+            "texto": "Ñuka yayaka wasipi kan.",
+            "grupo": "destino"
+          }
+        ],
+        "solution": {
+          "pares": [
+            {
+              "origen": "q1",
+              "destino": "a1"
+            },
+            {
+              "origen": "q2",
+              "destino": "a2"
+            },
+            {
+              "origen": "q3",
+              "destino": "a3"
+            }
+          ]
+        },
+        "config": {
+          "title": "Reconstrucción de una conversación"
+        },
+        "topic": "intercambio"
+      },
+      {
+        "key": "future-sentence",
+        "type": "ordenar",
+        "prompt": "Ordena las palabras para escribir el plan «Mañana yo iré a la casa» en kichwa.",
+        "elements": [
+          {
+            "id": "destination",
+            "texto": "wasiman"
+          },
+          {
+            "id": "time",
+            "texto": "Kaya"
+          },
+          {
+            "id": "verb",
+            "texto": "risha"
+          },
+          {
+            "id": "speaker",
+            "texto": "ñuka"
+          }
+        ],
+        "solution": {
+          "orden": [
+            "time",
+            "speaker",
+            "destination",
+            "verb"
+          ]
+        },
+        "config": {
+          "title": "Construcción de un plan futuro"
+        },
+        "topic": "cohesion"
+      },
+      {
+        "key": "destination-and-place",
+        "type": "completar",
+        "prompt": "Completa el diálogo y distingue destino, lugar y tiempo verbal.",
+        "elements": [
+          {
+            "id": "to-school",
+            "texto": "Ñuka yachanawasi_____ rini. · Voy a la escuela.",
+            "opciones": [
+              "man",
+              "pi",
+              "kama"
+            ]
+          },
+          {
+            "id": "at-home",
+            "texto": "Ñuka yayaka wasi_____ kan. · Mi papá está en la casa.",
+            "opciones": [
+              "pi",
+              "man",
+              "kama"
+            ]
+          },
+          {
+            "id": "will-go",
+            "texto": "Kaya ñuka wasiman ri_____. · Mañana iré a la casa.",
+            "opciones": [
+              "sha",
+              "ni",
+              "rka"
+            ]
+          }
+        ],
+        "solution": {
+          "textos": {
+            "to-school": [
+              "man"
+            ],
+            "at-home": [
+              "pi"
+            ],
+            "will-go": [
+              "sha"
+            ]
+          }
+        },
+        "config": {
+          "title": "Destino, lugar y plan"
+        },
+        "topic": "cohesion"
+      },
+      {
+        "key": "paragraph-interpretation",
+        "type": "seleccion_multiple",
+        "prompt": "Interpreta las dos oraciones como un solo plan: «Kaya ñuka wasiman risha. Wasipi samarisha.»",
+        "elements": [
+          {
+            "id": "past",
+            "texto": "Ayer fui a la casa y allí descansé."
+          },
+          {
+            "id": "correct",
+            "texto": "Mañana iré a la casa y allí descansaré."
+          },
+          {
+            "id": "other",
+            "texto": "Mañana iré a la escuela y allí trabajaré."
+          }
+        ],
+        "solution": {
+          "seleccion": [
+            "correct"
+          ]
+        },
+        "config": {
+          "title": "Interpretación de un texto breve",
+          "presentation": "buttons",
+          "max_selections": 1,
+          "exact_selections": true
+        },
+        "topic": "cohesion"
+      }
+    ],
+    "title": "Análisis de diálogos y cohesión textual",
+    "objective": "Reconstruir intercambios y textos breves; distinguir destino, ubicación y proyección temporal en contexto.",
+    "topics": [
+      {
+        "key": "intercambio",
+        "title": "Coherencia entre pregunta y respuesta",
+        "body": "Un diálogo coherente mantiene la relación entre la información solicitada y la respuesta. Imanalla? solicita una valoración del estado de la persona; Maypi? pregunta por ubicación; Imata ruran? pregunta por la acción. La concordancia temática permite reconstruir un intercambio aun cuando sus intervenciones estén desordenadas.\n\nLee cada turno como parte de una secuencia conversacional. Identifica el tipo de pregunta y comprueba que la respuesta aporta la información requerida."
+      },
+      {
+        "key": "cohesion",
+        "title": "Destino, ubicación y continuidad textual",
+        "body": "En un texto breve, -man marca destino (wasiman, «a la casa») y -pi marca ubicación (wasipi, «en la casa»). La marca futura -sha sitúa un plan por realizar. Kaya ñuka wasiman risha. Wasipi samarisha expresa dos acciones futuras relacionadas: ir a la casa y descansar allí.\n\nPara reconstruir o interpretar un texto, verifica la dirección del movimiento, el lugar del segundo evento y la continuidad temporal entre las oraciones. La coherencia depende de estas relaciones, además del orden de las palabras."
+      }
+    ]
+  }
+]

@@ -157,6 +157,12 @@ class KichwaCatalogController extends Controller
         abort_unless(($record->configuracion['learning_mode'] ?? '') === 'guided', 404);
         $exercises = collect(PublicacionContenido::remember('guided:'.$unit, fn () => PublicacionContenido::exercises($unit)->orderBy('orden_actividad')->get()
             ->map(fn (Actividad $exercise): array => ['origin' => SecuenciaUnidad::origin($exercise), 'exercise' => KichwaResource::present('exercises', $exercise)])->all()));
+        $seed = $request->user()->id_usuario.':'.$unit;
+        $university = $exercises->filter(fn (array $entry): bool => (bool) ($entry['exercise']['config']['university_practice'] ?? false))
+            ->sortBy(fn (array $entry): string => hash('sha256', $seed.':order:'.$entry['origin']))
+            ->map(fn (array $entry): array => array_replace($entry, ['exercise' => $this->shuffleUniversityExercise($entry['exercise'], $seed)]));
+        $exercises = $exercises->reject(fn (array $entry): bool => (bool) ($entry['exercise']['config']['university_practice'] ?? false))
+            ->concat($university)->values();
         $completed = DB::table('respuestas_actividad as r')->join('actividades as a', 'a.id_actividad', '=', 'r.id_actividad')
             ->where('r.id_usuario', $request->user()->id_usuario)->where('a.id_unidad', $unit)->where('r.acierto_actividad', true)
             ->whereIn(DB::raw('COALESCE(a.origen_reactivo,a.id_actividad::text)'), $exercises->pluck('origin'))
@@ -167,6 +173,36 @@ class KichwaCatalogController extends Controller
             'completed_count' => $completed->count(),
             'total' => $exercises->count(),
         ]);
+    }
+
+    private function shuffleUniversityExercise(array $exercise, string $seed): array
+    {
+        $salt = $seed.':'.$exercise['id'];
+        if ($exercise['type'] === 'relacionar') {
+            $origins = array_values(array_filter($exercise['elements'], fn (array $element): bool => ($element['grupo'] ?? '') === 'origen'));
+            $destinations = array_values(array_filter($exercise['elements'], fn (array $element): bool => ($element['grupo'] ?? '') === 'destino'));
+            $exercise['elements'] = array_merge($this->shuffledItems($origins, $salt.':origins'), $this->shuffledItems($destinations, $salt.':destinations'));
+        } else {
+            $exercise['elements'] = $this->shuffledItems($exercise['elements'], $salt.':elements');
+        }
+        foreach ($exercise['elements'] as &$element) {
+            if (isset($element['opciones'])) {
+                $element['opciones'] = $this->shuffledItems($element['opciones'], $salt.':'.$element['id'].':options');
+            }
+        }
+        unset($element);
+
+        return $exercise;
+    }
+
+    private function shuffledItems(array $items, string $salt): array
+    {
+        usort($items, fn (mixed $left, mixed $right): int => strcmp(
+            hash('sha256', $salt.':'.json_encode($left, JSON_UNESCAPED_UNICODE)),
+            hash('sha256', $salt.':'.json_encode($right, JSON_UNESCAPED_UNICODE)),
+        ));
+
+        return $items;
     }
 
     public function contents(Request $request, int $unit): JsonResponse
@@ -228,7 +264,15 @@ class KichwaCatalogController extends Controller
             $query->whereNull('id_tema');
         }
 
-        return response()->json($query->select(array_values(array_diff(KichwaResource::FIELDS['exercises'], ['solucion_actividad'])) + [])->addSelect('id_tema', 'configuracion', 'publicado')->orderBy('orden_actividad')->paginate(20)->through(fn ($r) => KichwaResource::present('exercises', $r)));
+        $seed = $request->user()->id_usuario.':'.$unit;
+
+        return response()->json($query->select(array_values(array_diff(KichwaResource::FIELDS['exercises'], ['solucion_actividad'])) + [])->addSelect('id_tema', 'configuracion', 'publicado')->orderBy('orden_actividad')->paginate(20)->through(function ($record) use ($seed): array {
+            $exercise = KichwaResource::present('exercises', $record);
+
+            return ($exercise['config']['university_practice'] ?? false)
+                ? $this->shuffleUniversityExercise($exercise, $seed)
+                : $exercise;
+        }));
     }
 
     public function evaluations(Request $request, int $level): JsonResponse
