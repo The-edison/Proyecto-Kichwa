@@ -91,6 +91,7 @@ class ContratoEjercicio
             'config.sentence_order' => ['sometimes', 'boolean'],
             'config.requires_images' => ['sometimes', 'boolean'],
             'config.reviewed' => ['sometimes', 'boolean'],
+            'config.verbal_practice' => ['sometimes', 'integer', 'between:1,8'],
             'config.presentation' => ['sometimes', 'in:buttons,visual,letter,tiles,writing'],
             'config.word_target' => ['nullable', 'string', 'max:50', 'regex:/^[\p{L}]+$/u'],
             'config.missing_index' => ['sometimes', 'integer', 'between:0,49'],
@@ -299,7 +300,8 @@ class ContratoEjercicio
                     if (! is_string($variant) || trim($variant) === '' || mb_strlen($variant) > 500) {
                         self::fail();
                     }
-                    if (($data['config']['pronouns_activity'] ?? null) === 'order' || ($data['config']['animal_activity'] ?? null) === 'order' || ($data['config']['color_activity'] ?? null) === 'order' || ($data['config']['body_activity'] ?? null) === 'order') {
+                    if (($data['config']['pronouns_activity'] ?? null) === 'order' || ($data['config']['animal_activity'] ?? null) === 'order' || ($data['config']['color_activity'] ?? null) === 'order' || ($data['config']['body_activity'] ?? null) === 'order'
+                        || ($data['config']['verbal_practice'] ?? null) === 2 || (($data['config']['verbal_practice'] ?? null) === 8 && $element['id'] === 'segments')) {
                         $words = explode(' ', $variant);
                         $options = $element['opciones'] ?? [];
                         sort($words);

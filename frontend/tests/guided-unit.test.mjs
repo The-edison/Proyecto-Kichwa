@@ -19,7 +19,8 @@ async function screen({ completed = false, post, exercises = [choice, matching],
     const context = vm.createContext({ crypto: { randomUUID }, Image: class { constructor() { preloads.push(this); } decode() { return Promise.resolve(); } }, window: { scrollTo() {}, sessionStorage: { getItem(key) { if (blockedStorage) throw Error('blocked'); return storage.get(key) ?? null; }, setItem(key, value) { if (blockedStorage) throw Error('blocked'); storage.set(key, value); } } } });
     const jsx = (type, props) => ({ type, props });
     class ApiError extends Error { constructor(message) { super(message); this.errors = {}; } }
-    const dependencies = {
+    const dependencies = { useExerciseViewport: { useExerciseViewport: () => {} }, VerbalPractice: { VerbalPractice: 'VerbalPractice' }, TimeMorphemePractice: { TimeMorphemePractice: 'TimeMorphemePractice' },
+        MorphemePractice: { MorphemePractice: 'MorphemePractice', MorphemeListeningPanel: 'MorphemeListeningPanel' },
         MatchingLines: { MatchingLines: 'MatchingLines' },
         AdvancedMorphemesIntroduction: { AdvancedMorphemesIntroduction: 'AdvancedMorphemesIntroduction' },
         TimeMorphemesIntroduction: { TimeMorphemesIntroduction: 'TimeMorphemesIntroduction' },
@@ -116,6 +117,110 @@ test('the intermediate lesson can lead to future practice after its four explana
     assert.equal(nodes(view.render()).some(node => node.type === 'AdvancedMorphemesIntroduction'), false);
 });
 
+test('four morpheme listening exercises form two panels, preserve correct answers and finish with four response ids', async () => {
+    const exercises = ['julio', 'manuelito', 'marilin', 'luis'].map((name, index) => ({
+        id: 21 + index, type: 'seleccion_multiple', prompt: 'Escucha cada oración y elige su significado.',
+        elements: [{ id: 'a', texto: 'Significado A' }, { id: 'b', texto: 'Significado B' }], zones: [],
+        config: { title: 'Actividad 2. Escucha y selecciona', morpheme_practice: 2, morpheme_listening: name, morpheme_panel: index < 2 ? 1 : 2 },
+    }));
+    let retried = false;
+    let responseId = 500;
+    const view = await screen({ exercises, config: { guided_lesson: 'advanced-morphemes' }, post: ({ path }) => {
+        if (path.endsWith('/guided/result')) return { score: 4, max_score: 4, correct_count: 4, total_items: 4, passed: true };
+        const incorrect = path.includes('/22/') && !retried;
+        if (incorrect) retried = true;
+        return { response_id: ++responseId, is_correct: !incorrect, feedback: incorrect ? 'Escucha de nuevo.' : 'Correcto.', xp_earned: incorrect ? 0 : 10 };
+    } });
+    nodes(view.render()).find(node => node.type === 'AdvancedMorphemesIntroduction').props.onSelectPage(3);
+    click(view, 'Continuar');
+    const panel = () => nodes(view.render()).find(node => node.type === 'MorphemeListeningPanel');
+    assert.deepEqual(Array.from(panel().props.exercises, item => item.id), [21, 22]);
+    assert.equal(button(view, 'Comprobar').props.disabled, true);
+    panel().props.onChange(exercises[0], { seleccion: ['a'] });
+    assert.equal(button(view, 'Comprobar').props.disabled, true);
+    panel().props.onChange(exercises[1], { seleccion: ['b'] });
+    await check(view);
+    assert.equal(panel().props.feedback[21].is_correct, true);
+    assert.equal(panel().props.feedback[22].is_correct, false);
+    panel().props.onChange(exercises[1], { seleccion: ['a'] });
+    await check(view);
+    assert.deepEqual(view.requests.map(item => item.path), ['/exercises/21/answer', '/exercises/22/answer', '/exercises/22/answer']);
+    click(view, 'Continuar');
+    assert.deepEqual(Array.from(panel().props.exercises, item => item.id), [23, 24]);
+    panel().props.onChange(exercises[2], { seleccion: ['b'] });
+    panel().props.onChange(exercises[3], { seleccion: ['a'] });
+    await check(view);
+    await finish(view);
+    const scoreRequest = view.requests.at(-1);
+    assert.equal(scoreRequest.path, '/units/4/guided/result');
+    assert.equal(scoreRequest.payload.response_ids.length, 4);
+    assert.equal(new Set(scoreRequest.payload.response_ids).size, 4);
+});
+
+test('first and third place share a panel, require both answers and retry only the incorrect answer', async () => {
+    const exercises = [31, 32].map((id, index) => ({
+        id, type: 'seleccion_multiple', prompt: 'Escucha la posición.',
+        elements: [{ id: 'o0', texto: 'Primero' }, { id: 'o1', texto: 'Tercero' }, { id: 'o2', texto: 'Noveno' }], zones: [],
+        config: { title: 'Actividad 6. Escucha e identifica el lugar', morpheme_practice: 6, ...(index ? { morpheme_position: 'tercero' } : {}) },
+    }));
+    let failed = false;
+    let responseId = 700;
+    const view = await screen({ exercises, config: { guided_lesson: 'advanced-morphemes' }, post: ({ path }) => {
+        if (path.endsWith('/guided/result')) return { score: 2, max_score: 2, correct_count: 2, total_items: 2, passed: true };
+        const wrong = path.includes('/32/') && !failed;
+        if (wrong) failed = true;
+        return { response_id: ++responseId, is_correct: !wrong, feedback: wrong ? 'Escucha otra vez.' : 'Correcto.', xp_earned: wrong ? 0 : 10 };
+    } });
+    nodes(view.render()).find(node => node.type === 'AdvancedMorphemesIntroduction').props.onSelectPage(3);
+    click(view, 'Continuar');
+    const panel = () => nodes(view.render()).find(node => node.type === 'MorphemeListeningPanel');
+    assert.equal(panel().props.positions, true);
+    assert.deepEqual(Array.from(panel().props.exercises, item => item.id), [31, 32]);
+    assert.equal(button(view, 'Comprobar').props.disabled, true);
+    panel().props.onChange(exercises[0], { seleccion: ['o0'] });
+    assert.equal(button(view, 'Comprobar').props.disabled, true);
+    panel().props.onChange(exercises[1], { seleccion: ['o0'] });
+    await check(view);
+    assert.equal(panel().props.feedback[31].is_correct, true);
+    assert.equal(panel().props.feedback[32].is_correct, false);
+    panel().props.onChange(exercises[1], { seleccion: ['o1'] });
+    await check(view);
+    assert.deepEqual(view.requests.map(request => request.path), ['/exercises/31/answer', '/exercises/32/answer', '/exercises/32/answer']);
+    await finish(view);
+    assert.equal(view.requests.at(-1).payload.response_ids.length, 2);
+});
+
+test('family meanings form two panels of two with independent answers and a complete final result', async () => {
+    const exercises = ['laushushi', 'layaya', 'lamama', 'lachuri'].map((word, index) => ({
+        id: 41 + index, type: 'seleccion_multiple', prompt: 'Escucha y elige el significado en español.',
+        elements: [{ id: 'a', texto: 'Significado A' }, { id: 'b', texto: 'Significado B' }], zones: [],
+        config: { title: 'Actividad 11. Escucha y elige el significado', morpheme_practice: 8, morpheme_family_listening: word, morpheme_panel: index < 2 ? 1 : 2 },
+    }));
+    let responseId = 800;
+    const view = await screen({ exercises, config: { guided_lesson: 'advanced-morphemes' }, post: ({ path }) => path.endsWith('/guided/result') ? { score: 4, max_score: 4, correct_count: 4, total_items: 4, passed: true } : { response_id: ++responseId, is_correct: true, feedback: 'Correcto.', xp_earned: 10 } });
+    nodes(view.render()).find(node => node.type === 'AdvancedMorphemesIntroduction').props.onSelectPage(3);
+    click(view, 'Continuar');
+    const panel = () => nodes(view.render()).find(node => node.type === 'MorphemeListeningPanel');
+    assert.deepEqual(Array.from(panel().props.exercises, item => item.id), [41, 42]);
+    assert.ok(nodes(view.render()).some(node => node.type === 'h1' && content(node).includes('Actividad 11.') && content(node).includes('Panel 1 de 2')));
+    panel().props.onChange(exercises[0], { seleccion: ['a'] });
+    assert.equal(button(view, 'Comprobar').props.disabled, true);
+    panel().props.onChange(exercises[1], { seleccion: ['b'] });
+    await check(view);
+    click(view, 'Continuar');
+    assert.deepEqual(Array.from(panel().props.exercises, item => item.id), [43, 44]);
+    click(view, 'Volver');
+    assert.deepEqual(Array.from(panel().props.exercises, item => item.id), [41, 42]);
+    assert.equal(panel().props.feedback[41].is_correct, true);
+    click(view, 'Continuar');
+    panel().props.onChange(exercises[2], { seleccion: ['b'] });
+    panel().props.onChange(exercises[3], { seleccion: ['a'] });
+    await check(view);
+    await finish(view);
+    assert.equal(view.requests.at(-1).payload.response_ids.length, 4);
+    assert.equal(new Set(view.requests.at(-1).payload.response_ids).size, 4);
+});
+
 test('the time lesson teaches its four parts without exercises and returns to the module without awarding points', async () => {
     const view = await screen({ exercises: [], config: { guided_lesson: 'time-morphemes' }, unitId: 19 });
     const lesson = () => nodes(view.render()).find(node => node.type === 'TimeMorphemesIntroduction');
@@ -134,6 +239,78 @@ test('the time lesson teaches its four parts without exercises and returns to th
     assert.equal(button(view, 'Comprobar'), undefined);
 });
 
+test('time exercises follow the unchanged four lesson pages and keep answers when navigating back', async () => {
+    const exercises = [
+        { id: 91, type: 'completar', prompt: 'Forma el futuro.', elements: [{ id: 'puri', texto: 'puri' }], config: { title: 'Actividad 5. Forma el futuro', time_practice: 5 } },
+        { id: 92, type: 'completar', prompt: 'Clasifica.', elements: [{ id: 'samari', texto: 'Samarirka' }], config: { title: 'Actividad 8. Actividad integradora', time_practice: 8 } },
+    ];
+    const view = await screen({ exercises, config: { guided_lesson: 'time-morphemes' } });
+    const lesson = () => nodes(view.render()).find(node => node.type === 'TimeMorphemesIntroduction');
+    for (let page = 0; page < 3; page++) click(view, 'Siguiente');
+    assert.equal(lesson().props.page, 3);
+    click(view, 'Continuar');
+    const practice = () => nodes(view.render()).find(node => node.type === 'TimeMorphemePractice');
+    assert.equal(practice().props.exercise.id, 91);
+    assert.equal(button(view, 'Comprobar').props.disabled, true);
+    practice().props.onChange({ textos: { puri: 'purisha' } });
+    await check(view);
+    click(view, 'Continuar');
+    assert.equal(practice().props.exercise.id, 92);
+    click(view, 'Volver');
+    assert.equal(practice().props.answer.textos.puri, 'purisha');
+    assert.equal(practice().props.feedback.is_correct, true);
+});
+
+test('four past sentences form two panels, require both answers and preserve progress when returning', async () => {
+    const exercises = ['alex', 'edgar', 'kaled', 'pakarina'].map((word, index) => ({ id: 71 + index, type: 'seleccion_multiple', prompt: 'Escucha cada oración.', elements: [{ id: 'a', texto: 'Correcto' }, { id: 'b', texto: 'Otra opción' }], config: { title: 'Actividad 3. Escucha y selecciona', time_practice: 3, time_listening: word, time_panel: Math.floor(index / 2) + 1, morpheme_practice: 2 } }));
+    const view = await screen({ exercises, config: { guided_lesson: 'time-morphemes' } });
+    for (let page = 0; page < 3; page++) click(view, 'Siguiente');
+    click(view, 'Continuar');
+    const panel = () => nodes(view.render()).find(node => node.type === 'MorphemeListeningPanel');
+    assert.deepEqual(Array.from(panel().props.exercises, item => item.config.time_listening), ['alex', 'edgar']);
+    panel().props.onChange(exercises[0], { seleccion: ['a'] });
+    assert.equal(button(view, 'Comprobar').props.disabled, true);
+    panel().props.onChange(exercises[1], { seleccion: ['b'] });
+    await check(view);
+    click(view, 'Continuar');
+    assert.deepEqual(Array.from(panel().props.exercises, item => item.config.time_listening), ['kaled', 'pakarina']);
+    click(view, 'Volver');
+    assert.equal(panel().props.answers[71].seleccion[0], 'a');
+    assert.equal(panel().props.answers[72].seleccion[0], 'b');
+    click(view, 'Continuar');
+    panel().props.onChange(exercises[2], { seleccion: ['a'] });
+    panel().props.onChange(exercises[3], { seleccion: ['b'] });
+    await check(view);
+    await finish(view);
+    assert.equal(view.requests.at(-1).payload.response_ids.length, 4);
+});
+
+test('future panels show activity 6, keep independent answers and lead to the final comparison', async () => {
+    const exercises = ['llanka', 'yachachi', 'puri', 'sira'].map((word, index) => ({ id: 81 + index, type: 'seleccion_multiple', prompt: 'Escucha cada oración.', elements: [{ id: 'a', texto: 'Respuesta' }, { id: 'b', texto: 'Otra respuesta' }], config: { title: 'Actividad 6. Escucha e identifica', time_practice: 6, time_listening: word, time_panel: Math.floor(index / 2) + 1, morpheme_practice: 2 } }));
+    exercises.push({ id: 85, type: 'completar', elements: [{ id: 'samari-past', texto: 'Pasado' }], config: { title: 'Actividad 7. Compara el tiempo verbal', time_practice: 7 } });
+    const view = await screen({ exercises, config: { guided_lesson: 'time-morphemes' } });
+    for (let page = 0; page < 3; page++) click(view, 'Siguiente');
+    click(view, 'Continuar');
+    const panel = () => nodes(view.render()).find(node => node.type === 'MorphemeListeningPanel');
+    assert.ok(content(view.render()).includes('Actividad 6. Escucha e identifica · Panel 1 de 2'));
+    assert.deepEqual(Array.from(panel().props.exercises, item => item.config.time_listening), ['llanka', 'yachachi']);
+    panel().props.onChange(exercises[0], { seleccion: ['a'] });
+    assert.equal(button(view, 'Comprobar').props.disabled, true);
+    panel().props.onChange(exercises[1], { seleccion: ['b'] });
+    await check(view);
+    click(view, 'Continuar');
+    assert.ok(content(view.render()).includes('Actividad 6. Escucha e identifica · Panel 2 de 2'));
+    assert.deepEqual(Array.from(panel().props.exercises, item => item.config.time_listening), ['puri', 'sira']);
+    panel().props.onChange(exercises[2], { seleccion: ['a'] });
+    panel().props.onChange(exercises[3], { seleccion: ['b'] });
+    await check(view);
+    click(view, 'Volver');
+    assert.equal(panel().props.answers[81].seleccion[0], 'a');
+    click(view, 'Continuar');
+    click(view, 'Continuar');
+    assert.equal(nodes(view.render()).find(node => node.type === 'TimeMorphemePractice').props.exercise.id, 85);
+});
+
 test('verbal analysis keeps all five lesson parts reachable and finishes only after the fifth part', async () => {
     const view = await screen({ exercises: [], config: { guided_lesson: 'verbal-analysis' }, unitId: 20 });
     const lesson = () => nodes(view.render()).find(node => node.type === 'VerbalAnalysisIntroduction');
@@ -149,6 +326,69 @@ test('verbal analysis keeps all five lesson parts reachable and finishes only af
     click(view, 'Anterior'); assert.equal(lesson().props.page, 3);
     lesson().props.onSelectPage(0); assert.equal(lesson().props.page, 0);
     assert.equal(view.requests.length, 0);
+});
+
+test('verbal analysis practice follows five lesson pages and checks blocks only when every segment is present', async () => {
+    const exercises=[{id:201,type:'completar',prompt:'Forma la palabra.',config:{title:'Actividad 2. Forma y separa la palabra',verbal_practice:2},elements:[{id:'miku-build',texto:'mikukuni',opciones:['ni','miku','ku']}]},{id:202,type:'completar',prompt:'Clasifica.',config:{title:'Actividad 7. Clasifica el morfema',verbal_practice:7},elements:[{id:'warmi',texto:'Warmiku',opciones:['ku','chi','naya','pay']}]}];
+    const view=await screen({exercises,config:{guided_lesson:'verbal-analysis'}});
+    for(let page=0;page<4;page++)click(view,'Siguiente');
+    click(view,'Continuar');
+    const practice=()=>nodes(view.render()).find(node=>node.type==='VerbalPractice');
+    assert.equal(practice().props.exercise.id,201);
+    practice().props.onChange({textos:{'miku-build':'miku ku'}});
+    assert.equal(button(view,'Comprobar').props.disabled,true);
+    practice().props.onChange({textos:{'miku-build':'miku ku ni'}});
+    await check(view);
+    click(view,'Continuar');
+    assert.equal(practice().props.exercise.id,202);
+    click(view,'Volver');
+    assert.equal(practice().props.answer.textos['miku-build'],'miku ku ni');
+});
+
+test('four verbal listening exercises use two panels and preserve both answers when navigating back', async () => {
+    const exercises=['wawaku','warmiku','wasiku','mashiku'].map((word,index)=>({id:301+index,type:'seleccion_multiple',prompt:'Escucha.',elements:[{id:'o0',texto:'Significado'},{id:'o1',texto:'Otra opción'}],config:{title:'Actividad 3. Escucha y selecciona',verbal_practice:3,verbal_listening:word,verbal_panel:Math.floor(index/2)+1,morpheme_practice:2}}));
+    const view=await screen({exercises,config:{guided_lesson:'verbal-analysis'}});
+    for(let page=0;page<4;page++)click(view,'Siguiente');
+    click(view,'Continuar');
+    const panel=()=>nodes(view.render()).find(node=>node.type==='MorphemeListeningPanel');
+    assert.deepEqual(Array.from(panel().props.exercises,item=>item.config.verbal_listening),['wawaku','warmiku']);
+    panel().props.onChange(exercises[0],{seleccion:['o0']});
+    assert.equal(button(view,'Comprobar').props.disabled,true);
+    panel().props.onChange(exercises[1],{seleccion:['o1']});
+    await check(view);click(view,'Continuar');
+    assert.deepEqual(Array.from(panel().props.exercises,item=>item.config.verbal_listening),['wasiku','mashiku']);
+    assert.ok(content(view.render()).includes('Panel 2 de 2'));
+    click(view,'Volver');
+    assert.equal(panel().props.answers[301].seleccion[0],'o0');
+    assert.equal(panel().props.answers[302].seleccion[0],'o1');
+    click(view,'Continuar');
+    panel().props.onChange(exercises[2],{seleccion:['o0']});
+    panel().props.onChange(exercises[3],{seleccion:['o1']});
+    await check(view);await finish(view);
+    assert.equal(view.requests.at(-1).payload.response_ids.length,4);
+});
+
+test('four desire listening exercises use two panels and preserve both answers when navigating back', async () => {
+    const exercises=['mikunayan','millanayan','killkanayan','yachanayan'].map((word,index)=>({id:301+index,type:'seleccion_multiple',prompt:'Escucha.',elements:[{id:'o0',texto:'Significado'},{id:'o1',texto:'Otra opción'}],config:{title:'Actividad 6. Escucha e identifica el deseo',verbal_practice:6,verbal_listening:word,verbal_panel:Math.floor(index/2)+1,morpheme_practice:2}}));
+    const view=await screen({exercises,config:{guided_lesson:'verbal-analysis'}});
+    for(let page=0;page<4;page++)click(view,'Siguiente');
+    click(view,'Continuar');
+    const panel=()=>nodes(view.render()).find(node=>node.type==='MorphemeListeningPanel');
+    assert.deepEqual(Array.from(panel().props.exercises,item=>item.config.verbal_listening),['mikunayan','millanayan']);
+    panel().props.onChange(exercises[0],{seleccion:['o0']});
+    assert.equal(button(view,'Comprobar').props.disabled,true);
+    panel().props.onChange(exercises[1],{seleccion:['o1']});
+    await check(view);click(view,'Continuar');
+    assert.deepEqual(Array.from(panel().props.exercises,item=>item.config.verbal_listening),['killkanayan','yachanayan']);
+    assert.ok(content(view.render()).includes('Panel 2 de 2'));
+    click(view,'Volver');
+    assert.equal(panel().props.answers[301].seleccion[0],'o0');
+    assert.equal(panel().props.answers[302].seleccion[0],'o1');
+    click(view,'Continuar');
+    panel().props.onChange(exercises[2],{seleccion:['o0']});
+    panel().props.onChange(exercises[3],{seleccion:['o1']});
+    await check(view);await finish(view);
+    assert.equal(view.requests.at(-1).payload.response_ids.length,4);
 });
 
 test('the short conversation lesson reaches four parts and returns to its module without grading the reading', async () => {

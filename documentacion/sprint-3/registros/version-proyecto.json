@@ -1,0 +1,27 @@
+{
+  "fecha": "2026-10-23T10:59:38.953649-05:00",
+  "commit": "df7aed7d6968f0e49ff52932e097b40bf7879749",
+  "estado_inicial": "git status --short no produjo entradas antes de crear documentación",
+  "estado_actual": "?? documentacion/sprint-3/",
+  "cambios_rastreados": [],
+  "node": "v24.16.0",
+  "php": "8.4.22",
+  "laravel": "13.34.0",
+  "postgresql": "18.6",
+  "hash_driver": "bcrypt",
+  "php_packages": {
+    "laravel/framework": "v13.34.0",
+    "laravel/sanctum": "v4.3.3",
+    "laravel/socialite": "v5.31.0",
+    "phpunit/phpunit": "12.5.37"
+  },
+  "js_packages": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-router-dom": "7.18.4",
+    "typescript": "7.0.2",
+    "vite": "8.3.1",
+    "tailwindcss": "4.3.3",
+    "@tanstack/react-query": "5.104.1"
+  }
+}

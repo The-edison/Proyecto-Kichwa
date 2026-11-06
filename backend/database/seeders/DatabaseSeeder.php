@@ -8,6 +8,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call([NivelSeeder::class, AdministradorSeeder::class, UnidadUnoGuiadaSeeder::class, UnidadDosGuiadaSeeder::class, UnidadesTematicasGuiadasSeeder::class, ModuloUnoEvaluacionSeeder::class, IntermedioMorfemasSeeder::class, IntermedioTiemposSeeder::class, IntermedioAnalisisVerbalSeeder::class, IntermedioDialogosSeeder::class]);
+        $this->call([NivelSeeder::class, AdministradorSeeder::class, UnidadUnoGuiadaSeeder::class, UnidadDosGuiadaSeeder::class, UnidadesTematicasGuiadasSeeder::class, ModuloUnoEvaluacionSeeder::class, IntermedioMorfemasSeeder::class, IntermedioMorfemasEjerciciosSeeder::class, IntermedioTiemposSeeder::class, IntermedioTiemposEjerciciosSeeder::class, IntermedioAnalisisVerbalSeeder::class, IntermedioAnalisisVerbalEjerciciosSeeder::class, IntermedioDialogosSeeder::class]);
     }
 }

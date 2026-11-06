@@ -11,11 +11,16 @@ export function feedbackMessage(message?: string | null): string {
     return (message ?? '').replace(/^\s*[¡¿]?(?:alli\s+rurashka|kutin\s+rurapay)\s*[.!¡?:;,–—-]*\s*/i, '').trim();
 }
 export function answerComplete(exercise: Exercise, answer: ExerciseAnswer): boolean {
-    if (exercise.type === 'ordenar') return answer.orden?.length === exercise.elements.length;
+    if (exercise.type === 'ordenar') {
+        const order = answer.orden ?? [];
+        const ids = new Set(exercise.elements.map(element => element.id));
+        return order.length === exercise.elements.length && new Set(order).size === order.length && order.every(id => ids.has(id));
+    }
     if (exercise.type === 'seleccion_multiple') return exercise.config?.exact_selections ? answer.seleccion?.length === exercise.config.max_selections : Boolean(answer.seleccion?.length);
     if (exercise.type === 'completar') return exercise.elements.every(e => {
         const text = answer.textos?.[e.id]?.trim();
         if (!text) return false;
+        if (exercise.config?.verbal_practice === 2 || exercise.config?.verbal_practice === 8 && e.id === 'segments') return text.split(/\s+/).sort().join(' ') === [...(e.opciones ?? [])].sort().join(' ');
         return (exercise.config?.pronouns_activity !== 'order' && exercise.config?.animal_activity !== 'order' && exercise.config?.color_activity !== 'order' && exercise.config?.body_activity !== 'order') || text.split(/\s+/).sort().join(' ') === [...(e.opciones ?? [])].sort().join(' ');
     });
     const origins = exercise.elements.filter(e => exercise.type === 'arrastrar' || e.grupo === 'origen');
@@ -78,7 +83,7 @@ export function ExerciseInteraction({ exercise, answer, onChange, name, onCheckP
     const itemCorrect = (id: string) => corrected?.item_results?.[id] ?? corrected?.is_correct;
     const pairCorrect = (origin?: string) => origin ? corrected?.item_results?.[origin] ?? corrected?.is_correct ?? (locked.includes(origin) ? true : pairCheck?.origen === origin ? pairCheck.correct : undefined) : undefined;
     const pairControls = <div className="grid gap-4">{origins.map(e => <label key={e.id} className="grid gap-2" data-answer-correct={pairCorrect(e.id)}><ElementLabel element={e} /><select className="field" aria-label={`Destino para ${e.texto}`} value={answer.pares?.find(p => p.origen === e.id)?.destino ?? ''} disabled={checkingPair || locked.includes(e.id)} onChange={event => void choosePair(e.id, event.target.value)}><option value="">Elige el destino</option>{destinations.map(d => <option key={d.id} value={d.id} disabled={answer.pares?.some(p=>p.destino === d.id && p.origen !== e.id && locked.includes(p.origen))}>{d.texto}</option>)}</select></label>)}</div>;
-    return <div className="space-y-5" data-exercise-correct={corrected?.is_correct}>
+    return <div className="space-y-5" data-exercise-content data-exercise-correct={corrected?.is_correct}>
         {exercise.config?.prompt_image && <img className="mx-auto max-h-64 rounded-xl object-contain" src={mediaUrl(exercise.config.prompt_image)} alt="Imagen del ejercicio" />}
         {exercise.config?.context_text && <div className="rounded-2xl bg-positive-soft p-5 text-center"><p className="font-serif text-3xl">{corrected?.highlight && exercise.config.context_text.startsWith(corrected.highlight) ? <><mark className="rounded bg-caution-soft text-caution px-1">{corrected.highlight}</mark>{exercise.config.context_text.slice(corrected.highlight.length)}</> : exercise.config.context_text}</p>{exercise.config.context_meaning && <p className="mt-2 text-muted">{exercise.config.context_meaning}</p>}</div>}
         {exercise.config?.requires_audio && !exercise.resource && <p role="status">Audio pendiente de incorporación.</p>}{exercise.config?.requires_images && exercise.elements.some(e=>!e.imagen) && <p role="status">Imágenes pendientes de incorporación.</p>}{exercise.resource && <><audio ref={audioRef} onError={() => setAudioError(true)} onLoadedMetadata={() => setAudioError(false)} controls preload="metadata" className="w-full" src={mediaUrl(exercise.resource)}>Tu navegador no permite audio.</audio><button type="button" className="secondary-button" onClick={() => { if (audioRef.current) { audioRef.current.currentTime = 0; void audioRef.current.play().catch(() => setAudioError(true)); } }}>Escuchar de nuevo</button>{audioError && <p role="alert">No se pudo reproducir el audio. Comprueba tu conexión e inténtalo nuevamente.</p>}</>}

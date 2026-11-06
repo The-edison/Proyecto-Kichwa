@@ -1,0 +1,19 @@
+﻿nivel,modulo,id_unidad,unidad,publicado,visible_por_jerarquia,modo,temas_publicados,actividades_publicadas,practicas_visibles
+Básico,Módulo 1  Primeros contactos con el kichwa,4,Conociendo el Kichwa,True,True,guided,1,6,6
+Básico,Módulo 1  Primeros contactos con el kichwa,5,Saludos y conversación,True,True,guided,1,30,30
+Básico,Módulo 1  Primeros contactos con el kichwa,6,Pronombres personales,True,True,guided,1,6,6
+Básico,Módulo 1  Primeros contactos con el kichwa,7,Números y cantidades,True,True,guided,1,7,7
+Básico,Módulo 1  Primeros contactos con el kichwa,8,"Días, meses y calendario",True,True,guided,1,6,6
+Básico,Módulo 2  Vocabulario y gramática básica,9,Animales y colores,True,True,guided,1,15,15
+Básico,Módulo 2  Vocabulario y gramática básica,10,Partes del cuerpo,True,True,guided,1,6,6
+Básico,Módulo 2  Vocabulario y gramática básica,11,Naturaleza y entorno cercano,True,True,guided,1,3,3
+Básico,Módulo 2  Vocabulario y gramática básica,12,Verbos frecuentes y raíz verbal,True,True,guided,1,4,4
+Intermedio,Modulo 1 Conjugación y estudio de los morfemas 1 y 2,13,"Unidad 1  Conjugación en presente, pasado y futuro",True,True,,0,0,0
+Intermedio,Modulo 1 Conjugación y estudio de los morfemas 1 y 2,14,Unidad 2  Estudio de los morfemas 1: básicos,True,True,,0,0,0
+Intermedio,Modulo 1 Conjugación y estudio de los morfemas 1 y 2,15,Unidad 3  Estudio de los morfemas 2: medios,True,True,,0,0,0
+Intermedio,Modulo 1 Conjugación y estudio de los morfemas 1 y 2,16,Unidad 4  Adverbios y ampliación de la oración,True,True,,0,0,0
+Intermedio,Modulo 1 Conjugación y estudio de los morfemas 1 y 2,17,"Unidad 5  Afirmación, negación, interrogación y duda",True,True,,0,0,0
+Intermedio,Módulo 2  Morfemas avanzados y construcción escrita,18,"Morfemas Avanzados de Ocupaciones, orden y parentesco",True,True,guided,1,0,0
+Intermedio,Módulo 2  Morfemas avanzados y construcción escrita,19,Morfemas Avanzados: Pasado y futuro: -rka y -sha,True,True,guided,1,0,0
+Intermedio,Módulo 2  Morfemas avanzados y construcción escrita,20,Morfemas verbales: comprende cada parte,True,True,guided,1,0,0
+Intermedio,Módulo 2  Morfemas avanzados y construcción escrita,21,Conversaciones cortas y textos breves,True,True,guided,1,0,0

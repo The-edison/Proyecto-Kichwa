@@ -1,0 +1,2629 @@
+{
+    "fecha": "2026-10-23T10:24:41-05:00",
+    "php": "8.4.22",
+    "laravel": "13.34.0",
+    "hash_driver": "bcrypt",
+    "read_only": "on",
+    "postgresql": "18.6",
+    "migraciones": [
+        {
+            "migration": "0001_01_01_000000_create_users_table",
+            "batch": 1
+        },
+        {
+            "migration": "0001_01_01_000001_create_cache_table",
+            "batch": 1
+        },
+        {
+            "migration": "0001_01_01_000002_create_jobs_table",
+            "batch": 1
+        },
+        {
+            "migration": "2026_09_30_000001_create_usuarios_table",
+            "batch": 1
+        },
+        {
+            "migration": "2026_09_30_000002_create_niveles_table",
+            "batch": 1
+        },
+        {
+            "migration": "2026_09_30_000003_create_modulos_table",
+            "batch": 1
+        },
+        {
+            "migration": "2026_09_30_000004_create_unidades_table",
+            "batch": 1
+        },
+        {
+            "migration": "2026_09_30_000005_create_usuarios_niveles_table",
+            "batch": 1
+        },
+        {
+            "migration": "2026_09_30_000006_create_progreso_table",
+            "batch": 1
+        },
+        {
+            "migration": "2026_09_30_000007_create_temas_table",
+            "batch": 1
+        },
+        {
+            "migration": "2026_09_30_000008_create_actividades_table",
+            "batch": 1
+        },
+        {
+            "migration": "2026_09_30_000009_create_respuestas_actividad_table",
+            "batch": 1
+        },
+        {
+            "migration": "2026_09_30_000010_create_evaluaciones_table",
+            "batch": 1
+        },
+        {
+            "migration": "2026_09_30_000011_create_preguntas_table",
+            "batch": 1
+        },
+        {
+            "migration": "2026_09_30_000012_create_intentos_evaluacion_table",
+            "batch": 1
+        },
+        {
+            "migration": "2026_09_30_000013_create_respuestas_evaluacion_table",
+            "batch": 1
+        },
+        {
+            "migration": "2026_09_30_000014_create_diccionario_table",
+            "batch": 1
+        },
+        {
+            "migration": "2026_09_30_000015_reglas_integridad",
+            "batch": 1
+        },
+        {
+            "migration": "2026_09_30_000016_vistas",
+            "batch": 1
+        },
+        {
+            "migration": "2026_09_30_040017_create_personal_access_tokens_table",
+            "batch": 1
+        },
+        {
+            "migration": "2026_10_01_000000_create_learning_schema",
+            "batch": 1
+        },
+        {
+            "migration": "2026_10_01_192920_create_testimonials_table",
+            "batch": 1
+        },
+        {
+            "migration": "2026_10_02_000000_add_google_sign_in_to_users_table",
+            "batch": 1
+        },
+        {
+            "migration": "2026_10_06_011344_extend_usuarios_for_secure_authentication",
+            "batch": 1
+        },
+        {
+            "migration": "2026_10_06_022312_add_publication_and_topic_hierarchy",
+            "batch": 2
+        },
+        {
+            "migration": "2026_10_06_022314_optimize_dictionary_search",
+            "batch": 2
+        },
+        {
+            "migration": "2026_10_06_022725_add_dictionary_search_indexes_and_metadata",
+            "batch": 3
+        },
+        {
+            "migration": "2026_10_06_022726_allow_safe_reordering_of_used_exercises",
+            "batch": 3
+        },
+        {
+            "migration": "2026_10_06_163017_simplify_diccionario_and_remove_legacy_glossary",
+            "batch": 4
+        },
+        {
+            "migration": "2026_10_10_214852_make_dictionary_normalization_independent_of_unaccent",
+            "batch": 5
+        },
+        {
+            "migration": "2026_10_10_223714_extend_learning_for_lesson_mastery",
+            "batch": 6
+        },
+        {
+            "migration": "2026_10_10_224431_preserve_learning_versions_and_publication",
+            "batch": 6
+        },
+        {
+            "migration": "2026_10_10_225000_enforce_published_practice_and_lesson_hierarchy",
+            "batch": 6
+        },
+        {
+            "migration": "2026_10_10_225100_reward_first_correct_published_practice",
+            "batch": 7
+        },
+        {
+            "migration": "2026_10_10_225200_preserve_practice_progress_across_versions",
+            "batch": 8
+        },
+        {
+            "migration": "2026_10_10_234314_add_learning_mode_to_units",
+            "batch": 9
+        },
+        {
+            "migration": "2026_10_14_012101_connect_testimonials_to_usuarios",
+            "batch": 10
+        },
+        {
+            "migration": "2026_10_14_144135_track_practice_attempts_and_submissions_on_answers",
+            "batch": 11
+        },
+        {
+            "migration": "2026_10_14_161254_add_avatar_to_usuarios_table",
+            "batch": 12
+        },
+        {
+            "migration": "2026_10_15_152715_add_language_to_testimonials_table",
+            "batch": 13
+        },
+        {
+            "migration": "2026_10_20_144432_add_module_evaluations",
+            "batch": 14
+        }
+    ],
+    "tablas": [
+        {
+            "tablename": "actividades"
+        },
+        {
+            "tablename": "cache"
+        },
+        {
+            "tablename": "cache_locks"
+        },
+        {
+            "tablename": "contents"
+        },
+        {
+            "tablename": "diccionario"
+        },
+        {
+            "tablename": "evaluaciones"
+        },
+        {
+            "tablename": "evaluation_attempt_answers"
+        },
+        {
+            "tablename": "evaluation_attempts"
+        },
+        {
+            "tablename": "evaluation_questions"
+        },
+        {
+            "tablename": "evaluations"
+        },
+        {
+            "tablename": "exercise_attempts"
+        },
+        {
+            "tablename": "exercises"
+        },
+        {
+            "tablename": "failed_jobs"
+        },
+        {
+            "tablename": "intentos_evaluacion"
+        },
+        {
+            "tablename": "job_batches"
+        },
+        {
+            "tablename": "jobs"
+        },
+        {
+            "tablename": "levels"
+        },
+        {
+            "tablename": "migrations"
+        },
+        {
+            "tablename": "modules"
+        },
+        {
+            "tablename": "modulos"
+        },
+        {
+            "tablename": "niveles"
+        },
+        {
+            "tablename": "password_reset_tokens"
+        },
+        {
+            "tablename": "personal_access_tokens"
+        },
+        {
+            "tablename": "preguntas"
+        },
+        {
+            "tablename": "progreso"
+        },
+        {
+            "tablename": "progress"
+        },
+        {
+            "tablename": "recompensas"
+        },
+        {
+            "tablename": "respuestas_actividad"
+        },
+        {
+            "tablename": "respuestas_evaluacion"
+        },
+        {
+            "tablename": "roles"
+        },
+        {
+            "tablename": "sessions"
+        },
+        {
+            "tablename": "temas"
+        },
+        {
+            "tablename": "testimonials"
+        },
+        {
+            "tablename": "unidades"
+        },
+        {
+            "tablename": "units"
+        },
+        {
+            "tablename": "users"
+        },
+        {
+            "tablename": "usuarios"
+        },
+        {
+            "tablename": "usuarios_niveles"
+        }
+    ],
+    "vistas": [
+        {
+            "viewname": "v_evaluaciones",
+            "definition": " SELECT e.id_evaluacion,\n    e.id_unidad,\n    e.titulo_evaluacion,\n    e.tipo_evaluacion,\n    (COALESCE(p.puntaje_maximo_evaluacion, (0)::numeric))::numeric(12,2) AS puntaje_maximo_evaluacion\n   FROM (evaluaciones e\n     LEFT JOIN ( SELECT preguntas.id_evaluacion,\n            sum(preguntas.puntaje_pregunta) AS puntaje_maximo_evaluacion\n           FROM preguntas\n          GROUP BY preguntas.id_evaluacion) p USING (id_evaluacion));"
+        },
+        {
+            "viewname": "v_intentos_evaluacion",
+            "definition": " SELECT i.id_intento,\n    i.id_usuario,\n    i.id_evaluacion,\n    i.numero_intento,\n    i.fecha_inicio_intento,\n    i.fecha_fin_intento,\n    i.estado_intento,\n    (COALESCE(r.puntaje_obtenido, (0)::numeric))::numeric(12,2) AS puntaje_obtenido,\n    (COALESCE(s.maximo, e.puntaje_maximo_evaluacion))::numeric(12,2) AS puntaje_maximo_evaluacion,\n        CASE\n            WHEN ((i.estado_intento)::text = 'finalizado'::text) THEN (COALESCE(r.puntaje_obtenido, (0)::numeric))::numeric(12,2)\n            ELSE NULL::numeric\n        END AS calificacion_intento,\n        CASE\n            WHEN (((i.estado_intento)::text = 'finalizado'::text) AND (COALESCE(s.maximo, e.puntaje_maximo_evaluacion) > (0)::numeric)) THEN round((((100)::numeric * COALESCE(r.puntaje_obtenido, (0)::numeric)) / COALESCE(s.maximo, e.puntaje_maximo_evaluacion)), 2)\n            ELSE NULL::numeric\n        END AS porcentaje_calificacion\n   FROM (((intentos_evaluacion i\n     JOIN v_evaluaciones e USING (id_evaluacion))\n     LEFT JOIN ( SELECT respuestas_evaluacion.id_intento,\n            sum(respuestas_evaluacion.puntaje_respuesta_evaluacion) AS puntaje_obtenido\n           FROM respuestas_evaluacion\n          GROUP BY respuestas_evaluacion.id_intento) r USING (id_intento))\n     LEFT JOIN LATERAL ( SELECT sum(p.puntaje_pregunta) AS maximo\n           FROM preguntas p\n          WHERE (p.id_pregunta IN ( SELECT (jsonb_array_elements_text.value)::bigint AS value\n                   FROM jsonb_array_elements_text(i.preguntas_seleccionadas) jsonb_array_elements_text(value)))) s ON (true));"
+        },
+        {
+            "viewname": "v_progreso",
+            "definition": " SELECT p.id_progreso,\n    p.id_usuario,\n    p.id_unidad,\n    p.fecha_inicio_progreso,\n    p.fecha_actualizacion_progreso,\n    COALESCE(a.total_actividades, (0)::bigint) AS total_actividades,\n    COALESCE(r.actividades_completadas, (0)::bigint) AS actividades_completadas,\n        CASE\n            WHEN (COALESCE(a.total_actividades, (0)::bigint) = 0) THEN (0)::numeric\n            ELSE round(((100.0 * (COALESCE(r.actividades_completadas, (0)::bigint))::numeric) / (a.total_actividades)::numeric), 2)\n        END AS porcentaje_progreso,\n    (\n        CASE\n            WHEN ((COALESCE(a.total_actividades, (0)::bigint) > 0) AND (COALESCE(r.actividades_completadas, (0)::bigint) = a.total_actividades)) THEN 'completado'::text\n            ELSE 'en_curso'::text\n        END)::character varying(30) AS estado_progreso\n   FROM ((progreso p\n     LEFT JOIN ( SELECT a_1.id_unidad,\n            count(DISTINCT COALESCE(a_1.origen_reactivo, ((a_1.id_actividad)::text)::character varying)) AS total_actividades\n           FROM actividades a_1\n          WHERE (a_1.publicado AND ((a_1.id_tema IS NULL) OR (EXISTS ( SELECT 1\n                   FROM temas t\n                  WHERE ((t.id_tema = a_1.id_tema) AND t.publicado)))))\n          GROUP BY a_1.id_unidad) a USING (id_unidad))\n     LEFT JOIN ( SELECT r_1.id_usuario,\n            a_1.id_unidad,\n            count(DISTINCT COALESCE(a_1.origen_reactivo, ((a_1.id_actividad)::text)::character varying)) AS actividades_completadas\n           FROM (respuestas_actividad r_1\n             JOIN actividades a_1 USING (id_actividad))\n          WHERE (r_1.acierto_actividad AND (EXISTS ( SELECT 1\n                   FROM actividades v\n                  WHERE ((v.id_unidad = a_1.id_unidad) AND v.publicado AND ((COALESCE(v.origen_reactivo, ((v.id_actividad)::text)::character varying))::text = (COALESCE(a_1.origen_reactivo, ((a_1.id_actividad)::text)::character varying))::text) AND ((v.id_tema IS NULL) OR (EXISTS ( SELECT 1\n                           FROM temas t\n                          WHERE ((t.id_tema = v.id_tema) AND t.publicado))))))))\n          GROUP BY r_1.id_usuario, a_1.id_unidad) r ON (((r.id_usuario = p.id_usuario) AND (r.id_unidad = p.id_unidad))));"
+        },
+        {
+            "viewname": "v_progreso_modulos",
+            "definition": " SELECT un.id_usuario,\n    m.id_modulo,\n    m.id_nivel,\n    COALESCE(round(avg(COALESCE(p.porcentaje_progreso, (0)::numeric)), 2), (0)::numeric) AS porcentaje_progreso_modulo\n   FROM (((usuarios_niveles un\n     JOIN modulos m ON (((m.id_nivel = un.id_nivel) AND m.publicado)))\n     LEFT JOIN unidades u ON (((u.id_modulo = m.id_modulo) AND u.publicado)))\n     LEFT JOIN v_progreso p ON (((p.id_usuario = un.id_usuario) AND (p.id_unidad = u.id_unidad))))\n  GROUP BY un.id_usuario, m.id_modulo, m.id_nivel;"
+        },
+        {
+            "viewname": "v_progreso_niveles",
+            "definition": " SELECT un.id_usuario,\n    un.id_nivel,\n    COALESCE(round(avg(COALESCE(p.porcentaje_progreso, (0)::numeric)) FILTER (WHERE (u.id_unidad IS NOT NULL)), 2), (0)::numeric) AS porcentaje_progreso_nivel\n   FROM (((usuarios_niveles un\n     LEFT JOIN modulos m ON (((m.id_nivel = un.id_nivel) AND m.publicado)))\n     LEFT JOIN unidades u ON (((u.id_modulo = m.id_modulo) AND u.publicado)))\n     LEFT JOIN v_progreso p ON (((p.id_usuario = un.id_usuario) AND (p.id_unidad = u.id_unidad))))\n  GROUP BY un.id_usuario, un.id_nivel;"
+        }
+    ],
+    "rutinas": [
+        {
+            "nombre": "kichwa_normalizar",
+            "clase": "f",
+            "lenguaje": "sql"
+        },
+        {
+            "nombre": "kichwa_proteger_actividad",
+            "clase": "f",
+            "lenguaje": "plpgsql"
+        },
+        {
+            "nombre": "kichwa_proteger_evaluacion",
+            "clase": "f",
+            "lenguaje": "plpgsql"
+        },
+        {
+            "nombre": "kichwa_proteger_pregunta",
+            "clase": "f",
+            "lenguaje": "plpgsql"
+        },
+        {
+            "nombre": "kichwa_proteger_recompensa",
+            "clase": "f",
+            "lenguaje": "plpgsql"
+        },
+        {
+            "nombre": "kichwa_proteger_rol",
+            "clase": "f",
+            "lenguaje": "plpgsql"
+        },
+        {
+            "nombre": "kichwa_proteger_seleccion",
+            "clase": "f",
+            "lenguaje": "plpgsql"
+        },
+        {
+            "nombre": "kichwa_registrar_practica",
+            "clase": "f",
+            "lenguaje": "plpgsql"
+        },
+        {
+            "nombre": "kichwa_validar_estudiante",
+            "clase": "f",
+            "lenguaje": "plpgsql"
+        },
+        {
+            "nombre": "kichwa_validar_intento",
+            "clase": "f",
+            "lenguaje": "plpgsql"
+        },
+        {
+            "nombre": "kichwa_validar_origen_recompensa",
+            "clase": "f",
+            "lenguaje": "plpgsql"
+        },
+        {
+            "nombre": "kichwa_validar_respuesta_evaluacion",
+            "clase": "f",
+            "lenguaje": "plpgsql"
+        },
+        {
+            "nombre": "kichwa_validar_seleccion_inicial",
+            "clase": "f",
+            "lenguaje": "plpgsql"
+        }
+    ],
+    "triggers": [
+        {
+            "tabla": "actividades",
+            "nombre": "proteger_actividad",
+            "eventos": "DELETE, UPDATE"
+        },
+        {
+            "tabla": "evaluaciones",
+            "nombre": "proteger_evaluacion",
+            "eventos": "DELETE, UPDATE"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "estudiante_intento",
+            "eventos": "INSERT, UPDATE"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "proteger_seleccion",
+            "eventos": "UPDATE"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "validar_intento",
+            "eventos": "INSERT, UPDATE"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "validar_seleccion_inicial",
+            "eventos": "INSERT"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "proteger_pregunta",
+            "eventos": "DELETE, INSERT, UPDATE"
+        },
+        {
+            "tabla": "progreso",
+            "nombre": "estudiante_progreso",
+            "eventos": "INSERT, UPDATE"
+        },
+        {
+            "tabla": "recompensas",
+            "nombre": "estudiante_recompensa",
+            "eventos": "INSERT"
+        },
+        {
+            "tabla": "recompensas",
+            "nombre": "proteger_recompensa",
+            "eventos": "DELETE, UPDATE"
+        },
+        {
+            "tabla": "recompensas",
+            "nombre": "validar_origen_recompensa",
+            "eventos": "INSERT"
+        },
+        {
+            "tabla": "respuestas_actividad",
+            "nombre": "estudiante_actividad",
+            "eventos": "INSERT, UPDATE"
+        },
+        {
+            "tabla": "respuestas_actividad",
+            "nombre": "registrar_practica",
+            "eventos": "DELETE, INSERT, UPDATE"
+        },
+        {
+            "tabla": "respuestas_evaluacion",
+            "nombre": "validar_respuesta_evaluacion",
+            "eventos": "DELETE, INSERT, UPDATE"
+        },
+        {
+            "tabla": "usuarios",
+            "nombre": "proteger_rol",
+            "eventos": "UPDATE"
+        },
+        {
+            "tabla": "usuarios_niveles",
+            "nombre": "estudiante_nivel",
+            "eventos": "INSERT, UPDATE"
+        }
+    ],
+    "restricciones": [
+        {
+            "tabla": "actividades",
+            "nombre": "actividad_tema_unidad_fk",
+            "definicion": "FOREIGN KEY (id_tema, id_unidad) REFERENCES temas(id_tema, id_unidad) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "actividades",
+            "nombre": "actividades_configuracion_not_null",
+            "definicion": "NOT NULL configuracion"
+        },
+        {
+            "tabla": "actividades",
+            "nombre": "actividades_elementos_actividad_check",
+            "definicion": "CHECK ((jsonb_typeof(elementos_actividad) = 'array'::text))"
+        },
+        {
+            "tabla": "actividades",
+            "nombre": "actividades_elementos_actividad_not_null",
+            "definicion": "NOT NULL elementos_actividad"
+        },
+        {
+            "tabla": "actividades",
+            "nombre": "actividades_enunciado_actividad_not_null",
+            "definicion": "NOT NULL enunciado_actividad"
+        },
+        {
+            "tabla": "actividades",
+            "nombre": "actividades_id_actividad_not_null",
+            "definicion": "NOT NULL id_actividad"
+        },
+        {
+            "tabla": "actividades",
+            "nombre": "actividades_id_unidad_fkey",
+            "definicion": "FOREIGN KEY (id_unidad) REFERENCES unidades(id_unidad) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "actividades",
+            "nombre": "actividades_id_unidad_not_null",
+            "definicion": "NOT NULL id_unidad"
+        },
+        {
+            "tabla": "actividades",
+            "nombre": "actividades_id_unidad_orden_actividad_key",
+            "definicion": "UNIQUE (id_unidad, orden_actividad)"
+        },
+        {
+            "tabla": "actividades",
+            "nombre": "actividades_orden_actividad_check",
+            "definicion": "CHECK ((orden_actividad > 0))"
+        },
+        {
+            "tabla": "actividades",
+            "nombre": "actividades_orden_actividad_not_null",
+            "definicion": "NOT NULL orden_actividad"
+        },
+        {
+            "tabla": "actividades",
+            "nombre": "actividades_pkey",
+            "definicion": "PRIMARY KEY (id_actividad)"
+        },
+        {
+            "tabla": "actividades",
+            "nombre": "actividades_publicado_not_null",
+            "definicion": "NOT NULL publicado"
+        },
+        {
+            "tabla": "actividades",
+            "nombre": "actividades_solucion_actividad_check",
+            "definicion": "CHECK ((jsonb_typeof(solucion_actividad) = 'object'::text))"
+        },
+        {
+            "tabla": "actividades",
+            "nombre": "actividades_solucion_actividad_not_null",
+            "definicion": "NOT NULL solucion_actividad"
+        },
+        {
+            "tabla": "actividades",
+            "nombre": "actividades_tipo_actividad_check",
+            "definicion": "CHECK (((tipo_actividad)::text = ANY ((ARRAY['seleccion_multiple'::character varying, 'completar'::character varying, 'relacionar'::character varying, 'arrastrar'::character varying, 'ordenar'::character varying])::text[])))"
+        },
+        {
+            "tabla": "actividades",
+            "nombre": "actividades_tipo_actividad_not_null",
+            "definicion": "NOT NULL tipo_actividad"
+        },
+        {
+            "tabla": "actividades",
+            "nombre": "actividades_zonas_actividad_check",
+            "definicion": "CHECK ((jsonb_typeof(zonas_actividad) = 'array'::text))"
+        },
+        {
+            "tabla": "actividades",
+            "nombre": "actividades_zonas_actividad_not_null",
+            "definicion": "NOT NULL zonas_actividad"
+        },
+        {
+            "tabla": "cache",
+            "nombre": "cache_expiration_not_null",
+            "definicion": "NOT NULL expiration"
+        },
+        {
+            "tabla": "cache",
+            "nombre": "cache_key_not_null",
+            "definicion": "NOT NULL key"
+        },
+        {
+            "tabla": "cache",
+            "nombre": "cache_pkey",
+            "definicion": "PRIMARY KEY (key)"
+        },
+        {
+            "tabla": "cache",
+            "nombre": "cache_value_not_null",
+            "definicion": "NOT NULL value"
+        },
+        {
+            "tabla": "cache_locks",
+            "nombre": "cache_locks_expiration_not_null",
+            "definicion": "NOT NULL expiration"
+        },
+        {
+            "tabla": "cache_locks",
+            "nombre": "cache_locks_key_not_null",
+            "definicion": "NOT NULL key"
+        },
+        {
+            "tabla": "cache_locks",
+            "nombre": "cache_locks_owner_not_null",
+            "definicion": "NOT NULL owner"
+        },
+        {
+            "tabla": "cache_locks",
+            "nombre": "cache_locks_pkey",
+            "definicion": "PRIMARY KEY (key)"
+        },
+        {
+            "tabla": "contents",
+            "nombre": "contents_body_not_null",
+            "definicion": "NOT NULL body"
+        },
+        {
+            "tabla": "contents",
+            "nombre": "contents_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "contents",
+            "nombre": "contents_is_published_not_null",
+            "definicion": "NOT NULL is_published"
+        },
+        {
+            "tabla": "contents",
+            "nombre": "contents_kind_check",
+            "definicion": "CHECK (((kind)::text = ANY ((ARRAY['vocabulary'::character varying, 'grammar'::character varying])::text[])))"
+        },
+        {
+            "tabla": "contents",
+            "nombre": "contents_kind_not_null",
+            "definicion": "NOT NULL kind"
+        },
+        {
+            "tabla": "contents",
+            "nombre": "contents_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "contents",
+            "nombre": "contents_sort_order_not_null",
+            "definicion": "NOT NULL sort_order"
+        },
+        {
+            "tabla": "contents",
+            "nombre": "contents_title_not_null",
+            "definicion": "NOT NULL title"
+        },
+        {
+            "tabla": "contents",
+            "nombre": "contents_unit_id_foreign",
+            "definicion": "FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "contents",
+            "nombre": "contents_unit_id_not_null",
+            "definicion": "NOT NULL unit_id"
+        },
+        {
+            "tabla": "diccionario",
+            "nombre": "diccionario_id_diccionario_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "diccionario",
+            "nombre": "diccionario_kichwa_espanol_unique",
+            "definicion": "UNIQUE (kichwa, \"español\")"
+        },
+        {
+            "tabla": "diccionario",
+            "nombre": "diccionario_palabra_espanol_diccionario_not_null",
+            "definicion": "NOT NULL \"español\""
+        },
+        {
+            "tabla": "diccionario",
+            "nombre": "diccionario_palabra_kichwa_diccionario_not_null",
+            "definicion": "NOT NULL kichwa"
+        },
+        {
+            "tabla": "diccionario",
+            "nombre": "diccionario_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "evaluaciones",
+            "nombre": "evaluacion_tema_requiere_unidad",
+            "definicion": "CHECK (((id_tema IS NULL) OR (id_unidad IS NOT NULL)))"
+        },
+        {
+            "tabla": "evaluaciones",
+            "nombre": "evaluacion_tema_unidad_fk",
+            "definicion": "FOREIGN KEY (id_tema, id_unidad) REFERENCES temas(id_tema, id_unidad) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "evaluaciones",
+            "nombre": "evaluaciones_check",
+            "definicion": "CHECK (((((tipo_evaluacion)::text = 'unidad'::text) AND (id_unidad IS NOT NULL) AND (id_modulo IS NULL)) OR (((tipo_evaluacion)::text = 'diagnostica'::text) AND (id_unidad IS NULL) AND (id_modulo IS NULL)) OR (((tipo_evaluacion)::text = 'modulo'::text) AND (id_modulo IS NOT NULL) AND (id_unidad IS NULL) AND (id_tema IS NULL))))"
+        },
+        {
+            "tabla": "evaluaciones",
+            "nombre": "evaluaciones_configuracion_not_null",
+            "definicion": "NOT NULL configuracion"
+        },
+        {
+            "tabla": "evaluaciones",
+            "nombre": "evaluaciones_id_evaluacion_not_null",
+            "definicion": "NOT NULL id_evaluacion"
+        },
+        {
+            "tabla": "evaluaciones",
+            "nombre": "evaluaciones_id_modulo_fkey",
+            "definicion": "FOREIGN KEY (id_modulo) REFERENCES modulos(id_modulo) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "evaluaciones",
+            "nombre": "evaluaciones_id_tema_fkey",
+            "definicion": "FOREIGN KEY (id_tema) REFERENCES temas(id_tema) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "evaluaciones",
+            "nombre": "evaluaciones_id_unidad_fkey",
+            "definicion": "FOREIGN KEY (id_unidad) REFERENCES unidades(id_unidad) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "evaluaciones",
+            "nombre": "evaluaciones_pkey",
+            "definicion": "PRIMARY KEY (id_evaluacion)"
+        },
+        {
+            "tabla": "evaluaciones",
+            "nombre": "evaluaciones_publicado_not_null",
+            "definicion": "NOT NULL publicado"
+        },
+        {
+            "tabla": "evaluaciones",
+            "nombre": "evaluaciones_tipo_evaluacion_check",
+            "definicion": "CHECK (((tipo_evaluacion)::text = ANY ((ARRAY['unidad'::character varying, 'diagnostica'::character varying, 'modulo'::character varying])::text[])))"
+        },
+        {
+            "tabla": "evaluaciones",
+            "nombre": "evaluaciones_tipo_evaluacion_not_null",
+            "definicion": "NOT NULL tipo_evaluacion"
+        },
+        {
+            "tabla": "evaluaciones",
+            "nombre": "evaluaciones_titulo_evaluacion_not_null",
+            "definicion": "NOT NULL titulo_evaluacion"
+        },
+        {
+            "tabla": "evaluation_attempt_answers",
+            "nombre": "evaluation_answer_unique",
+            "definicion": "UNIQUE (evaluation_attempt_id, evaluation_question_id)"
+        },
+        {
+            "tabla": "evaluation_attempt_answers",
+            "nombre": "evaluation_attempt_answers_evaluation_attempt_id_foreign",
+            "definicion": "FOREIGN KEY (evaluation_attempt_id) REFERENCES evaluation_attempts(id) ON DELETE CASCADE"
+        },
+        {
+            "tabla": "evaluation_attempt_answers",
+            "nombre": "evaluation_attempt_answers_evaluation_attempt_id_not_null",
+            "definicion": "NOT NULL evaluation_attempt_id"
+        },
+        {
+            "tabla": "evaluation_attempt_answers",
+            "nombre": "evaluation_attempt_answers_evaluation_question_id_foreign",
+            "definicion": "FOREIGN KEY (evaluation_question_id) REFERENCES evaluation_questions(id) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "evaluation_attempt_answers",
+            "nombre": "evaluation_attempt_answers_evaluation_question_id_not_null",
+            "definicion": "NOT NULL evaluation_question_id"
+        },
+        {
+            "tabla": "evaluation_attempt_answers",
+            "nombre": "evaluation_attempt_answers_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "evaluation_attempt_answers",
+            "nombre": "evaluation_attempt_answers_is_correct_not_null",
+            "definicion": "NOT NULL is_correct"
+        },
+        {
+            "tabla": "evaluation_attempt_answers",
+            "nombre": "evaluation_attempt_answers_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "evaluation_attempt_answers",
+            "nombre": "evaluation_attempt_answers_submitted_answer_not_null",
+            "definicion": "NOT NULL submitted_answer"
+        },
+        {
+            "tabla": "evaluation_attempts",
+            "nombre": "evaluation_attempts_correct_count_not_null",
+            "definicion": "NOT NULL correct_count"
+        },
+        {
+            "tabla": "evaluation_attempts",
+            "nombre": "evaluation_attempts_created_at_not_null",
+            "definicion": "NOT NULL created_at"
+        },
+        {
+            "tabla": "evaluation_attempts",
+            "nombre": "evaluation_attempts_evaluation_id_foreign",
+            "definicion": "FOREIGN KEY (evaluation_id) REFERENCES evaluations(id) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "evaluation_attempts",
+            "nombre": "evaluation_attempts_evaluation_id_not_null",
+            "definicion": "NOT NULL evaluation_id"
+        },
+        {
+            "tabla": "evaluation_attempts",
+            "nombre": "evaluation_attempts_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "evaluation_attempts",
+            "nombre": "evaluation_attempts_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "evaluation_attempts",
+            "nombre": "evaluation_attempts_score_check",
+            "definicion": "CHECK (((score >= (0)::numeric) AND (score <= (100)::numeric)))"
+        },
+        {
+            "tabla": "evaluation_attempts",
+            "nombre": "evaluation_attempts_score_not_null",
+            "definicion": "NOT NULL score"
+        },
+        {
+            "tabla": "evaluation_attempts",
+            "nombre": "evaluation_attempts_total_questions_not_null",
+            "definicion": "NOT NULL total_questions"
+        },
+        {
+            "tabla": "evaluation_attempts",
+            "nombre": "evaluation_attempts_user_id_foreign",
+            "definicion": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "evaluation_attempts",
+            "nombre": "evaluation_attempts_user_id_not_null",
+            "definicion": "NOT NULL user_id"
+        },
+        {
+            "tabla": "evaluation_questions",
+            "nombre": "evaluation_questions_correct_answer_not_null",
+            "definicion": "NOT NULL correct_answer"
+        },
+        {
+            "tabla": "evaluation_questions",
+            "nombre": "evaluation_questions_evaluation_id_foreign",
+            "definicion": "FOREIGN KEY (evaluation_id) REFERENCES evaluations(id) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "evaluation_questions",
+            "nombre": "evaluation_questions_evaluation_id_not_null",
+            "definicion": "NOT NULL evaluation_id"
+        },
+        {
+            "tabla": "evaluation_questions",
+            "nombre": "evaluation_questions_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "evaluation_questions",
+            "nombre": "evaluation_questions_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "evaluation_questions",
+            "nombre": "evaluation_questions_prompt_not_null",
+            "definicion": "NOT NULL prompt"
+        },
+        {
+            "tabla": "evaluation_questions",
+            "nombre": "evaluation_questions_sort_order_not_null",
+            "definicion": "NOT NULL sort_order"
+        },
+        {
+            "tabla": "evaluation_questions",
+            "nombre": "evaluation_questions_type_not_null",
+            "definicion": "NOT NULL type"
+        },
+        {
+            "tabla": "evaluation_questions",
+            "nombre": "questions_type_check",
+            "definicion": "CHECK (((type)::text = ANY ((ARRAY['multiple_choice'::character varying, 'complete'::character varying, 'select'::character varying])::text[])))"
+        },
+        {
+            "tabla": "evaluations",
+            "nombre": "evaluations_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "evaluations",
+            "nombre": "evaluations_is_published_not_null",
+            "definicion": "NOT NULL is_published"
+        },
+        {
+            "tabla": "evaluations",
+            "nombre": "evaluations_level_id_foreign",
+            "definicion": "FOREIGN KEY (level_id) REFERENCES levels(id) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "evaluations",
+            "nombre": "evaluations_level_id_not_null",
+            "definicion": "NOT NULL level_id"
+        },
+        {
+            "tabla": "evaluations",
+            "nombre": "evaluations_passing_score_check",
+            "definicion": "CHECK (((passing_score >= 0) AND (passing_score <= 100)))"
+        },
+        {
+            "tabla": "evaluations",
+            "nombre": "evaluations_passing_score_not_null",
+            "definicion": "NOT NULL passing_score"
+        },
+        {
+            "tabla": "evaluations",
+            "nombre": "evaluations_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "evaluations",
+            "nombre": "evaluations_title_not_null",
+            "definicion": "NOT NULL title"
+        },
+        {
+            "tabla": "exercise_attempts",
+            "nombre": "exercise_attempts_created_at_not_null",
+            "definicion": "NOT NULL created_at"
+        },
+        {
+            "tabla": "exercise_attempts",
+            "nombre": "exercise_attempts_exercise_id_foreign",
+            "definicion": "FOREIGN KEY (exercise_id) REFERENCES exercises(id) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "exercise_attempts",
+            "nombre": "exercise_attempts_exercise_id_not_null",
+            "definicion": "NOT NULL exercise_id"
+        },
+        {
+            "tabla": "exercise_attempts",
+            "nombre": "exercise_attempts_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "exercise_attempts",
+            "nombre": "exercise_attempts_is_correct_not_null",
+            "definicion": "NOT NULL is_correct"
+        },
+        {
+            "tabla": "exercise_attempts",
+            "nombre": "exercise_attempts_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "exercise_attempts",
+            "nombre": "exercise_attempts_submitted_answer_not_null",
+            "definicion": "NOT NULL submitted_answer"
+        },
+        {
+            "tabla": "exercise_attempts",
+            "nombre": "exercise_attempts_user_id_foreign",
+            "definicion": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "exercise_attempts",
+            "nombre": "exercise_attempts_user_id_not_null",
+            "definicion": "NOT NULL user_id"
+        },
+        {
+            "tabla": "exercises",
+            "nombre": "exercises_content_id_foreign",
+            "definicion": "FOREIGN KEY (content_id) REFERENCES contents(id) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "exercises",
+            "nombre": "exercises_content_id_not_null",
+            "definicion": "NOT NULL content_id"
+        },
+        {
+            "tabla": "exercises",
+            "nombre": "exercises_correct_answer_not_null",
+            "definicion": "NOT NULL correct_answer"
+        },
+        {
+            "tabla": "exercises",
+            "nombre": "exercises_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "exercises",
+            "nombre": "exercises_is_published_not_null",
+            "definicion": "NOT NULL is_published"
+        },
+        {
+            "tabla": "exercises",
+            "nombre": "exercises_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "exercises",
+            "nombre": "exercises_prompt_not_null",
+            "definicion": "NOT NULL prompt"
+        },
+        {
+            "tabla": "exercises",
+            "nombre": "exercises_sort_order_not_null",
+            "definicion": "NOT NULL sort_order"
+        },
+        {
+            "tabla": "exercises",
+            "nombre": "exercises_type_check",
+            "definicion": "CHECK (((type)::text = ANY ((ARRAY['multiple_choice'::character varying, 'complete'::character varying, 'select'::character varying])::text[])))"
+        },
+        {
+            "tabla": "exercises",
+            "nombre": "exercises_type_not_null",
+            "definicion": "NOT NULL type"
+        },
+        {
+            "tabla": "failed_jobs",
+            "nombre": "failed_jobs_connection_not_null",
+            "definicion": "NOT NULL connection"
+        },
+        {
+            "tabla": "failed_jobs",
+            "nombre": "failed_jobs_exception_not_null",
+            "definicion": "NOT NULL exception"
+        },
+        {
+            "tabla": "failed_jobs",
+            "nombre": "failed_jobs_failed_at_not_null",
+            "definicion": "NOT NULL failed_at"
+        },
+        {
+            "tabla": "failed_jobs",
+            "nombre": "failed_jobs_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "failed_jobs",
+            "nombre": "failed_jobs_payload_not_null",
+            "definicion": "NOT NULL payload"
+        },
+        {
+            "tabla": "failed_jobs",
+            "nombre": "failed_jobs_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "failed_jobs",
+            "nombre": "failed_jobs_queue_not_null",
+            "definicion": "NOT NULL queue"
+        },
+        {
+            "tabla": "failed_jobs",
+            "nombre": "failed_jobs_uuid_not_null",
+            "definicion": "NOT NULL uuid"
+        },
+        {
+            "tabla": "failed_jobs",
+            "nombre": "failed_jobs_uuid_unique",
+            "definicion": "UNIQUE (uuid)"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "intentos_evaluacion_check",
+            "definicion": "CHECK (((((estado_intento)::text = 'en_curso'::text) AND (fecha_fin_intento IS NULL)) OR (((estado_intento)::text = ANY ((ARRAY['finalizado'::character varying, 'abandonado'::character varying])::text[])) AND (fecha_fin_intento IS NOT NULL) AND (fecha_fin_intento >= fecha_inicio_intento))))"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "intentos_evaluacion_estado_intento_check",
+            "definicion": "CHECK (((estado_intento)::text = ANY ((ARRAY['en_curso'::character varying, 'finalizado'::character varying, 'abandonado'::character varying])::text[])))"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "intentos_evaluacion_estado_intento_not_null",
+            "definicion": "NOT NULL estado_intento"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "intentos_evaluacion_fecha_inicio_intento_not_null",
+            "definicion": "NOT NULL fecha_inicio_intento"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "intentos_evaluacion_id_evaluacion_fkey",
+            "definicion": "FOREIGN KEY (id_evaluacion) REFERENCES evaluaciones(id_evaluacion) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "intentos_evaluacion_id_evaluacion_not_null",
+            "definicion": "NOT NULL id_evaluacion"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "intentos_evaluacion_id_intento_id_evaluacion_key",
+            "definicion": "UNIQUE (id_intento, id_evaluacion)"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "intentos_evaluacion_id_intento_not_null",
+            "definicion": "NOT NULL id_intento"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "intentos_evaluacion_id_usuario_fkey",
+            "definicion": "FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "intentos_evaluacion_id_usuario_id_evaluacion_numero_intento_key",
+            "definicion": "UNIQUE (id_usuario, id_evaluacion, numero_intento)"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "intentos_evaluacion_id_usuario_not_null",
+            "definicion": "NOT NULL id_usuario"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "intentos_evaluacion_numero_intento_check",
+            "definicion": "CHECK ((numero_intento > 0))"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "intentos_evaluacion_numero_intento_not_null",
+            "definicion": "NOT NULL numero_intento"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "intentos_evaluacion_pkey",
+            "definicion": "PRIMARY KEY (id_intento)"
+        },
+        {
+            "tabla": "intentos_evaluacion",
+            "nombre": "intentos_evaluacion_respuestas_borrador_not_null",
+            "definicion": "NOT NULL respuestas_borrador"
+        },
+        {
+            "tabla": "job_batches",
+            "nombre": "job_batches_created_at_not_null",
+            "definicion": "NOT NULL created_at"
+        },
+        {
+            "tabla": "job_batches",
+            "nombre": "job_batches_failed_job_ids_not_null",
+            "definicion": "NOT NULL failed_job_ids"
+        },
+        {
+            "tabla": "job_batches",
+            "nombre": "job_batches_failed_jobs_not_null",
+            "definicion": "NOT NULL failed_jobs"
+        },
+        {
+            "tabla": "job_batches",
+            "nombre": "job_batches_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "job_batches",
+            "nombre": "job_batches_name_not_null",
+            "definicion": "NOT NULL name"
+        },
+        {
+            "tabla": "job_batches",
+            "nombre": "job_batches_pending_jobs_not_null",
+            "definicion": "NOT NULL pending_jobs"
+        },
+        {
+            "tabla": "job_batches",
+            "nombre": "job_batches_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "job_batches",
+            "nombre": "job_batches_total_jobs_not_null",
+            "definicion": "NOT NULL total_jobs"
+        },
+        {
+            "tabla": "jobs",
+            "nombre": "jobs_attempts_not_null",
+            "definicion": "NOT NULL attempts"
+        },
+        {
+            "tabla": "jobs",
+            "nombre": "jobs_available_at_not_null",
+            "definicion": "NOT NULL available_at"
+        },
+        {
+            "tabla": "jobs",
+            "nombre": "jobs_created_at_not_null",
+            "definicion": "NOT NULL created_at"
+        },
+        {
+            "tabla": "jobs",
+            "nombre": "jobs_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "jobs",
+            "nombre": "jobs_payload_not_null",
+            "definicion": "NOT NULL payload"
+        },
+        {
+            "tabla": "jobs",
+            "nombre": "jobs_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "jobs",
+            "nombre": "jobs_queue_not_null",
+            "definicion": "NOT NULL queue"
+        },
+        {
+            "tabla": "levels",
+            "nombre": "levels_code_not_null",
+            "definicion": "NOT NULL code"
+        },
+        {
+            "tabla": "levels",
+            "nombre": "levels_code_unique",
+            "definicion": "UNIQUE (code)"
+        },
+        {
+            "tabla": "levels",
+            "nombre": "levels_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "levels",
+            "nombre": "levels_is_published_not_null",
+            "definicion": "NOT NULL is_published"
+        },
+        {
+            "tabla": "levels",
+            "nombre": "levels_name_not_null",
+            "definicion": "NOT NULL name"
+        },
+        {
+            "tabla": "levels",
+            "nombre": "levels_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "levels",
+            "nombre": "levels_sort_order_not_null",
+            "definicion": "NOT NULL sort_order"
+        },
+        {
+            "tabla": "migrations",
+            "nombre": "migrations_batch_not_null",
+            "definicion": "NOT NULL batch"
+        },
+        {
+            "tabla": "migrations",
+            "nombre": "migrations_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "migrations",
+            "nombre": "migrations_migration_not_null",
+            "definicion": "NOT NULL migration"
+        },
+        {
+            "tabla": "migrations",
+            "nombre": "migrations_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "modules",
+            "nombre": "modules_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "modules",
+            "nombre": "modules_is_published_not_null",
+            "definicion": "NOT NULL is_published"
+        },
+        {
+            "tabla": "modules",
+            "nombre": "modules_level_id_foreign",
+            "definicion": "FOREIGN KEY (level_id) REFERENCES levels(id) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "modules",
+            "nombre": "modules_level_id_not_null",
+            "definicion": "NOT NULL level_id"
+        },
+        {
+            "tabla": "modules",
+            "nombre": "modules_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "modules",
+            "nombre": "modules_sort_order_not_null",
+            "definicion": "NOT NULL sort_order"
+        },
+        {
+            "tabla": "modules",
+            "nombre": "modules_title_not_null",
+            "definicion": "NOT NULL title"
+        },
+        {
+            "tabla": "modulos",
+            "nombre": "modulos_descripcion_modulo_not_null",
+            "definicion": "NOT NULL descripcion_modulo"
+        },
+        {
+            "tabla": "modulos",
+            "nombre": "modulos_id_modulo_not_null",
+            "definicion": "NOT NULL id_modulo"
+        },
+        {
+            "tabla": "modulos",
+            "nombre": "modulos_id_nivel_fkey",
+            "definicion": "FOREIGN KEY (id_nivel) REFERENCES niveles(id_nivel) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "modulos",
+            "nombre": "modulos_id_nivel_not_null",
+            "definicion": "NOT NULL id_nivel"
+        },
+        {
+            "tabla": "modulos",
+            "nombre": "modulos_id_nivel_orden_modulo_key",
+            "definicion": "UNIQUE (id_nivel, orden_modulo)"
+        },
+        {
+            "tabla": "modulos",
+            "nombre": "modulos_nombre_modulo_not_null",
+            "definicion": "NOT NULL nombre_modulo"
+        },
+        {
+            "tabla": "modulos",
+            "nombre": "modulos_orden_modulo_check",
+            "definicion": "CHECK ((orden_modulo > 0))"
+        },
+        {
+            "tabla": "modulos",
+            "nombre": "modulos_orden_modulo_not_null",
+            "definicion": "NOT NULL orden_modulo"
+        },
+        {
+            "tabla": "modulos",
+            "nombre": "modulos_pkey",
+            "definicion": "PRIMARY KEY (id_modulo)"
+        },
+        {
+            "tabla": "modulos",
+            "nombre": "modulos_publicado_not_null",
+            "definicion": "NOT NULL publicado"
+        },
+        {
+            "tabla": "niveles",
+            "nombre": "niveles_descripcion_nivel_not_null",
+            "definicion": "NOT NULL descripcion_nivel"
+        },
+        {
+            "tabla": "niveles",
+            "nombre": "niveles_id_nivel_not_null",
+            "definicion": "NOT NULL id_nivel"
+        },
+        {
+            "tabla": "niveles",
+            "nombre": "niveles_nombre_nivel_key",
+            "definicion": "UNIQUE (nombre_nivel)"
+        },
+        {
+            "tabla": "niveles",
+            "nombre": "niveles_nombre_nivel_not_null",
+            "definicion": "NOT NULL nombre_nivel"
+        },
+        {
+            "tabla": "niveles",
+            "nombre": "niveles_orden_nivel_check",
+            "definicion": "CHECK ((orden_nivel > 0))"
+        },
+        {
+            "tabla": "niveles",
+            "nombre": "niveles_orden_nivel_key",
+            "definicion": "UNIQUE (orden_nivel)"
+        },
+        {
+            "tabla": "niveles",
+            "nombre": "niveles_orden_nivel_not_null",
+            "definicion": "NOT NULL orden_nivel"
+        },
+        {
+            "tabla": "niveles",
+            "nombre": "niveles_pkey",
+            "definicion": "PRIMARY KEY (id_nivel)"
+        },
+        {
+            "tabla": "niveles",
+            "nombre": "niveles_publicado_not_null",
+            "definicion": "NOT NULL publicado"
+        },
+        {
+            "tabla": "password_reset_tokens",
+            "nombre": "password_reset_tokens_email_not_null",
+            "definicion": "NOT NULL email"
+        },
+        {
+            "tabla": "password_reset_tokens",
+            "nombre": "password_reset_tokens_pkey",
+            "definicion": "PRIMARY KEY (email)"
+        },
+        {
+            "tabla": "password_reset_tokens",
+            "nombre": "password_reset_tokens_token_not_null",
+            "definicion": "NOT NULL token"
+        },
+        {
+            "tabla": "personal_access_tokens",
+            "nombre": "personal_access_tokens_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "personal_access_tokens",
+            "nombre": "personal_access_tokens_name_not_null",
+            "definicion": "NOT NULL name"
+        },
+        {
+            "tabla": "personal_access_tokens",
+            "nombre": "personal_access_tokens_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "personal_access_tokens",
+            "nombre": "personal_access_tokens_token_not_null",
+            "definicion": "NOT NULL token"
+        },
+        {
+            "tabla": "personal_access_tokens",
+            "nombre": "personal_access_tokens_token_unique",
+            "definicion": "UNIQUE (token)"
+        },
+        {
+            "tabla": "personal_access_tokens",
+            "nombre": "personal_access_tokens_tokenable_id_not_null",
+            "definicion": "NOT NULL tokenable_id"
+        },
+        {
+            "tabla": "personal_access_tokens",
+            "nombre": "personal_access_tokens_tokenable_type_not_null",
+            "definicion": "NOT NULL tokenable_type"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_configuracion_not_null",
+            "definicion": "NOT NULL configuracion"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_elementos_pregunta_check",
+            "definicion": "CHECK ((jsonb_typeof(elementos_pregunta) = 'array'::text))"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_elementos_pregunta_not_null",
+            "definicion": "NOT NULL elementos_pregunta"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_enunciado_pregunta_not_null",
+            "definicion": "NOT NULL enunciado_pregunta"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_id_evaluacion_fkey",
+            "definicion": "FOREIGN KEY (id_evaluacion) REFERENCES evaluaciones(id_evaluacion) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_id_evaluacion_not_null",
+            "definicion": "NOT NULL id_evaluacion"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_id_evaluacion_orden_pregunta_key",
+            "definicion": "UNIQUE (id_evaluacion, orden_pregunta)"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_id_pregunta_id_evaluacion_key",
+            "definicion": "UNIQUE (id_pregunta, id_evaluacion)"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_id_pregunta_not_null",
+            "definicion": "NOT NULL id_pregunta"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_orden_pregunta_check",
+            "definicion": "CHECK ((orden_pregunta > 0))"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_orden_pregunta_not_null",
+            "definicion": "NOT NULL orden_pregunta"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_pkey",
+            "definicion": "PRIMARY KEY (id_pregunta)"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_publicado_not_null",
+            "definicion": "NOT NULL publicado"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_puntaje_pregunta_check",
+            "definicion": "CHECK ((puntaje_pregunta > (0)::numeric))"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_puntaje_pregunta_not_null",
+            "definicion": "NOT NULL puntaje_pregunta"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_solucion_pregunta_check",
+            "definicion": "CHECK ((jsonb_typeof(solucion_pregunta) = 'object'::text))"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_solucion_pregunta_not_null",
+            "definicion": "NOT NULL solucion_pregunta"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_tipo_pregunta_check",
+            "definicion": "CHECK (((tipo_pregunta)::text = ANY ((ARRAY['seleccion_multiple'::character varying, 'completar'::character varying, 'relacionar'::character varying, 'arrastrar'::character varying, 'ordenar'::character varying])::text[])))"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_tipo_pregunta_not_null",
+            "definicion": "NOT NULL tipo_pregunta"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_zonas_pregunta_check",
+            "definicion": "CHECK ((jsonb_typeof(zonas_pregunta) = 'array'::text))"
+        },
+        {
+            "tabla": "preguntas",
+            "nombre": "preguntas_zonas_pregunta_not_null",
+            "definicion": "NOT NULL zonas_pregunta"
+        },
+        {
+            "tabla": "progreso",
+            "nombre": "progreso_check",
+            "definicion": "CHECK ((fecha_actualizacion_progreso >= fecha_inicio_progreso))"
+        },
+        {
+            "tabla": "progreso",
+            "nombre": "progreso_fecha_actualizacion_progreso_not_null",
+            "definicion": "NOT NULL fecha_actualizacion_progreso"
+        },
+        {
+            "tabla": "progreso",
+            "nombre": "progreso_fecha_inicio_progreso_not_null",
+            "definicion": "NOT NULL fecha_inicio_progreso"
+        },
+        {
+            "tabla": "progreso",
+            "nombre": "progreso_id_progreso_not_null",
+            "definicion": "NOT NULL id_progreso"
+        },
+        {
+            "tabla": "progreso",
+            "nombre": "progreso_id_unidad_fkey",
+            "definicion": "FOREIGN KEY (id_unidad) REFERENCES unidades(id_unidad) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "progreso",
+            "nombre": "progreso_id_unidad_not_null",
+            "definicion": "NOT NULL id_unidad"
+        },
+        {
+            "tabla": "progreso",
+            "nombre": "progreso_id_usuario_fkey",
+            "definicion": "FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "progreso",
+            "nombre": "progreso_id_usuario_id_unidad_key",
+            "definicion": "UNIQUE (id_usuario, id_unidad)"
+        },
+        {
+            "tabla": "progreso",
+            "nombre": "progreso_id_usuario_not_null",
+            "definicion": "NOT NULL id_usuario"
+        },
+        {
+            "tabla": "progreso",
+            "nombre": "progreso_pkey",
+            "definicion": "PRIMARY KEY (id_progreso)"
+        },
+        {
+            "tabla": "progress",
+            "nombre": "progress_best_score_check",
+            "definicion": "CHECK (((best_score >= (0)::numeric) AND (best_score <= (100)::numeric)))"
+        },
+        {
+            "tabla": "progress",
+            "nombre": "progress_completed_at_not_null",
+            "definicion": "NOT NULL completed_at"
+        },
+        {
+            "tabla": "progress",
+            "nombre": "progress_evaluation_id_foreign",
+            "definicion": "FOREIGN KEY (evaluation_id) REFERENCES evaluations(id) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "progress",
+            "nombre": "progress_exercise_id_foreign",
+            "definicion": "FOREIGN KEY (exercise_id) REFERENCES exercises(id) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "progress",
+            "nombre": "progress_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "progress",
+            "nombre": "progress_level_id_foreign",
+            "definicion": "FOREIGN KEY (level_id) REFERENCES levels(id) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "progress",
+            "nombre": "progress_level_id_not_null",
+            "definicion": "NOT NULL level_id"
+        },
+        {
+            "tabla": "progress",
+            "nombre": "progress_one_activity",
+            "definicion": "CHECK (((exercise_id IS NOT NULL) <> (evaluation_id IS NOT NULL)))"
+        },
+        {
+            "tabla": "progress",
+            "nombre": "progress_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "progress",
+            "nombre": "progress_user_id_foreign",
+            "definicion": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "progress",
+            "nombre": "progress_user_id_not_null",
+            "definicion": "NOT NULL user_id"
+        },
+        {
+            "tabla": "recompensas",
+            "nombre": "recompensa_origen_unico",
+            "definicion": "CHECK (((id_intento IS NULL) <> (id_respuesta_actividad IS NULL)))"
+        },
+        {
+            "tabla": "recompensas",
+            "nombre": "recompensas_clave_not_null",
+            "definicion": "NOT NULL clave"
+        },
+        {
+            "tabla": "recompensas",
+            "nombre": "recompensas_fecha_not_null",
+            "definicion": "NOT NULL fecha"
+        },
+        {
+            "tabla": "recompensas",
+            "nombre": "recompensas_id_intento_fkey",
+            "definicion": "FOREIGN KEY (id_intento) REFERENCES intentos_evaluacion(id_intento) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "recompensas",
+            "nombre": "recompensas_id_recompensa_not_null",
+            "definicion": "NOT NULL id_recompensa"
+        },
+        {
+            "tabla": "recompensas",
+            "nombre": "recompensas_id_respuesta_actividad_fkey",
+            "definicion": "FOREIGN KEY (id_respuesta_actividad) REFERENCES respuestas_actividad(id_respuesta_actividad) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "recompensas",
+            "nombre": "recompensas_id_usuario_clave_key",
+            "definicion": "UNIQUE (id_usuario, clave)"
+        },
+        {
+            "tabla": "recompensas",
+            "nombre": "recompensas_id_usuario_fkey",
+            "definicion": "FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "recompensas",
+            "nombre": "recompensas_id_usuario_not_null",
+            "definicion": "NOT NULL id_usuario"
+        },
+        {
+            "tabla": "recompensas",
+            "nombre": "recompensas_pkey",
+            "definicion": "PRIMARY KEY (id_recompensa)"
+        },
+        {
+            "tabla": "recompensas",
+            "nombre": "recompensas_xp_check",
+            "definicion": "CHECK ((xp = ANY (ARRAY[0, 10, 20, 50])))"
+        },
+        {
+            "tabla": "recompensas",
+            "nombre": "recompensas_xp_not_null",
+            "definicion": "NOT NULL xp"
+        },
+        {
+            "tabla": "respuestas_actividad",
+            "nombre": "respuesta_envio_usuario_unico",
+            "definicion": "UNIQUE (id_usuario, clave_envio)"
+        },
+        {
+            "tabla": "respuestas_actividad",
+            "nombre": "respuestas_actividad_acierto_actividad_not_null",
+            "definicion": "NOT NULL acierto_actividad"
+        },
+        {
+            "tabla": "respuestas_actividad",
+            "nombre": "respuestas_actividad_fecha_respuesta_actividad_not_null",
+            "definicion": "NOT NULL fecha_respuesta_actividad"
+        },
+        {
+            "tabla": "respuestas_actividad",
+            "nombre": "respuestas_actividad_id_actividad_fkey",
+            "definicion": "FOREIGN KEY (id_actividad) REFERENCES actividades(id_actividad) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "respuestas_actividad",
+            "nombre": "respuestas_actividad_id_actividad_not_null",
+            "definicion": "NOT NULL id_actividad"
+        },
+        {
+            "tabla": "respuestas_actividad",
+            "nombre": "respuestas_actividad_id_respuesta_actividad_not_null",
+            "definicion": "NOT NULL id_respuesta_actividad"
+        },
+        {
+            "tabla": "respuestas_actividad",
+            "nombre": "respuestas_actividad_id_usuario_fkey",
+            "definicion": "FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "respuestas_actividad",
+            "nombre": "respuestas_actividad_id_usuario_not_null",
+            "definicion": "NOT NULL id_usuario"
+        },
+        {
+            "tabla": "respuestas_actividad",
+            "nombre": "respuestas_actividad_pkey",
+            "definicion": "PRIMARY KEY (id_respuesta_actividad)"
+        },
+        {
+            "tabla": "respuestas_actividad",
+            "nombre": "respuestas_actividad_respuesta_actividad_check",
+            "definicion": "CHECK ((jsonb_typeof(respuesta_actividad) = 'object'::text))"
+        },
+        {
+            "tabla": "respuestas_actividad",
+            "nombre": "respuestas_actividad_respuesta_actividad_not_null",
+            "definicion": "NOT NULL respuesta_actividad"
+        },
+        {
+            "tabla": "respuestas_actividad",
+            "nombre": "respuestas_actividad_retroalimentacion_actividad_not_null",
+            "definicion": "NOT NULL retroalimentacion_actividad"
+        },
+        {
+            "tabla": "respuestas_evaluacion",
+            "nombre": "respuestas_evaluacion_fecha_respuesta_evaluacion_not_null",
+            "definicion": "NOT NULL fecha_respuesta_evaluacion"
+        },
+        {
+            "tabla": "respuestas_evaluacion",
+            "nombre": "respuestas_evaluacion_id_evaluacion_not_null",
+            "definicion": "NOT NULL id_evaluacion"
+        },
+        {
+            "tabla": "respuestas_evaluacion",
+            "nombre": "respuestas_evaluacion_id_intento_id_evaluacion_fkey",
+            "definicion": "FOREIGN KEY (id_intento, id_evaluacion) REFERENCES intentos_evaluacion(id_intento, id_evaluacion) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "respuestas_evaluacion",
+            "nombre": "respuestas_evaluacion_id_intento_id_pregunta_key",
+            "definicion": "UNIQUE (id_intento, id_pregunta)"
+        },
+        {
+            "tabla": "respuestas_evaluacion",
+            "nombre": "respuestas_evaluacion_id_intento_not_null",
+            "definicion": "NOT NULL id_intento"
+        },
+        {
+            "tabla": "respuestas_evaluacion",
+            "nombre": "respuestas_evaluacion_id_pregunta_id_evaluacion_fkey",
+            "definicion": "FOREIGN KEY (id_pregunta, id_evaluacion) REFERENCES preguntas(id_pregunta, id_evaluacion) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "respuestas_evaluacion",
+            "nombre": "respuestas_evaluacion_id_pregunta_not_null",
+            "definicion": "NOT NULL id_pregunta"
+        },
+        {
+            "tabla": "respuestas_evaluacion",
+            "nombre": "respuestas_evaluacion_id_respuesta_evaluacion_not_null",
+            "definicion": "NOT NULL id_respuesta_evaluacion"
+        },
+        {
+            "tabla": "respuestas_evaluacion",
+            "nombre": "respuestas_evaluacion_pkey",
+            "definicion": "PRIMARY KEY (id_respuesta_evaluacion)"
+        },
+        {
+            "tabla": "respuestas_evaluacion",
+            "nombre": "respuestas_evaluacion_puntaje_respuesta_evaluacion_check",
+            "definicion": "CHECK ((puntaje_respuesta_evaluacion >= (0)::numeric))"
+        },
+        {
+            "tabla": "respuestas_evaluacion",
+            "nombre": "respuestas_evaluacion_puntaje_respuesta_evaluacion_not_null",
+            "definicion": "NOT NULL puntaje_respuesta_evaluacion"
+        },
+        {
+            "tabla": "respuestas_evaluacion",
+            "nombre": "respuestas_evaluacion_respuesta_evaluacion_check",
+            "definicion": "CHECK ((jsonb_typeof(respuesta_evaluacion) = 'object'::text))"
+        },
+        {
+            "tabla": "respuestas_evaluacion",
+            "nombre": "respuestas_evaluacion_respuesta_evaluacion_not_null",
+            "definicion": "NOT NULL respuesta_evaluacion"
+        },
+        {
+            "tabla": "roles",
+            "nombre": "roles_code_not_null",
+            "definicion": "NOT NULL code"
+        },
+        {
+            "tabla": "roles",
+            "nombre": "roles_code_unique",
+            "definicion": "UNIQUE (code)"
+        },
+        {
+            "tabla": "roles",
+            "nombre": "roles_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "roles",
+            "nombre": "roles_name_not_null",
+            "definicion": "NOT NULL name"
+        },
+        {
+            "tabla": "roles",
+            "nombre": "roles_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "sessions",
+            "nombre": "sessions_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "sessions",
+            "nombre": "sessions_last_activity_not_null",
+            "definicion": "NOT NULL last_activity"
+        },
+        {
+            "tabla": "sessions",
+            "nombre": "sessions_payload_not_null",
+            "definicion": "NOT NULL payload"
+        },
+        {
+            "tabla": "sessions",
+            "nombre": "sessions_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "temas",
+            "nombre": "temas_clave_leccion_key",
+            "definicion": "UNIQUE (clave_leccion)"
+        },
+        {
+            "tabla": "temas",
+            "nombre": "temas_contenido_tema_not_null",
+            "definicion": "NOT NULL contenido_tema"
+        },
+        {
+            "tabla": "temas",
+            "nombre": "temas_id_tema_not_null",
+            "definicion": "NOT NULL id_tema"
+        },
+        {
+            "tabla": "temas",
+            "nombre": "temas_id_unidad_fkey",
+            "definicion": "FOREIGN KEY (id_unidad) REFERENCES unidades(id_unidad) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "temas",
+            "nombre": "temas_id_unidad_not_null",
+            "definicion": "NOT NULL id_unidad"
+        },
+        {
+            "tabla": "temas",
+            "nombre": "temas_id_unidad_orden_tema_key",
+            "definicion": "UNIQUE (id_unidad, orden_tema)"
+        },
+        {
+            "tabla": "temas",
+            "nombre": "temas_identidad_unidad_unique",
+            "definicion": "UNIQUE (id_tema, id_unidad)"
+        },
+        {
+            "tabla": "temas",
+            "nombre": "temas_orden_tema_check",
+            "definicion": "CHECK ((orden_tema > 0))"
+        },
+        {
+            "tabla": "temas",
+            "nombre": "temas_orden_tema_not_null",
+            "definicion": "NOT NULL orden_tema"
+        },
+        {
+            "tabla": "temas",
+            "nombre": "temas_pkey",
+            "definicion": "PRIMARY KEY (id_tema)"
+        },
+        {
+            "tabla": "temas",
+            "nombre": "temas_publicado_not_null",
+            "definicion": "NOT NULL publicado"
+        },
+        {
+            "tabla": "temas",
+            "nombre": "temas_tipo_tema_check",
+            "definicion": "CHECK (((tipo_tema)::text = ANY ((ARRAY['vocabulario'::character varying, 'gramatica'::character varying, 'cultura'::character varying])::text[])))"
+        },
+        {
+            "tabla": "temas",
+            "nombre": "temas_tipo_tema_not_null",
+            "definicion": "NOT NULL tipo_tema"
+        },
+        {
+            "tabla": "temas",
+            "nombre": "temas_titulo_tema_not_null",
+            "definicion": "NOT NULL titulo_tema"
+        },
+        {
+            "tabla": "testimonials",
+            "nombre": "testimonials_body_not_null",
+            "definicion": "NOT NULL body"
+        },
+        {
+            "tabla": "testimonials",
+            "nombre": "testimonials_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "testimonials",
+            "nombre": "testimonials_language_not_null",
+            "definicion": "NOT NULL language"
+        },
+        {
+            "tabla": "testimonials",
+            "nombre": "testimonials_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "testimonials",
+            "nombre": "testimonials_user_id_foreign",
+            "definicion": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
+        },
+        {
+            "tabla": "testimonials",
+            "nombre": "testimonials_user_id_unique",
+            "definicion": "UNIQUE (user_id)"
+        },
+        {
+            "tabla": "testimonials",
+            "nombre": "testimonials_usuario_id_foreign",
+            "definicion": "FOREIGN KEY (usuario_id) REFERENCES usuarios(id_usuario) ON DELETE CASCADE"
+        },
+        {
+            "tabla": "testimonials",
+            "nombre": "testimonials_usuario_id_language_unique",
+            "definicion": "UNIQUE (usuario_id, language)"
+        },
+        {
+            "tabla": "unidades",
+            "nombre": "unidades_configuracion_not_null",
+            "definicion": "NOT NULL configuracion"
+        },
+        {
+            "tabla": "unidades",
+            "nombre": "unidades_id_modulo_fkey",
+            "definicion": "FOREIGN KEY (id_modulo) REFERENCES modulos(id_modulo) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "unidades",
+            "nombre": "unidades_id_modulo_not_null",
+            "definicion": "NOT NULL id_modulo"
+        },
+        {
+            "tabla": "unidades",
+            "nombre": "unidades_id_modulo_orden_unidad_key",
+            "definicion": "UNIQUE (id_modulo, orden_unidad)"
+        },
+        {
+            "tabla": "unidades",
+            "nombre": "unidades_id_unidad_not_null",
+            "definicion": "NOT NULL id_unidad"
+        },
+        {
+            "tabla": "unidades",
+            "nombre": "unidades_objetivo_unidad_not_null",
+            "definicion": "NOT NULL objetivo_unidad"
+        },
+        {
+            "tabla": "unidades",
+            "nombre": "unidades_orden_unidad_check",
+            "definicion": "CHECK ((orden_unidad > 0))"
+        },
+        {
+            "tabla": "unidades",
+            "nombre": "unidades_orden_unidad_not_null",
+            "definicion": "NOT NULL orden_unidad"
+        },
+        {
+            "tabla": "unidades",
+            "nombre": "unidades_pkey",
+            "definicion": "PRIMARY KEY (id_unidad)"
+        },
+        {
+            "tabla": "unidades",
+            "nombre": "unidades_publicado_not_null",
+            "definicion": "NOT NULL publicado"
+        },
+        {
+            "tabla": "unidades",
+            "nombre": "unidades_titulo_unidad_not_null",
+            "definicion": "NOT NULL titulo_unidad"
+        },
+        {
+            "tabla": "units",
+            "nombre": "units_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "units",
+            "nombre": "units_is_published_not_null",
+            "definicion": "NOT NULL is_published"
+        },
+        {
+            "tabla": "units",
+            "nombre": "units_module_id_foreign",
+            "definicion": "FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "units",
+            "nombre": "units_module_id_not_null",
+            "definicion": "NOT NULL module_id"
+        },
+        {
+            "tabla": "units",
+            "nombre": "units_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "units",
+            "nombre": "units_sort_order_not_null",
+            "definicion": "NOT NULL sort_order"
+        },
+        {
+            "tabla": "units",
+            "nombre": "units_title_not_null",
+            "definicion": "NOT NULL title"
+        },
+        {
+            "tabla": "users",
+            "nombre": "users_cedula_format",
+            "definicion": "CHECK (((cedula)::text ~ '^[0-9]{10}$'::text))"
+        },
+        {
+            "tabla": "users",
+            "nombre": "users_cedula_unique",
+            "definicion": "UNIQUE (cedula)"
+        },
+        {
+            "tabla": "users",
+            "nombre": "users_email_not_null",
+            "definicion": "NOT NULL email"
+        },
+        {
+            "tabla": "users",
+            "nombre": "users_email_unique",
+            "definicion": "UNIQUE (email)"
+        },
+        {
+            "tabla": "users",
+            "nombre": "users_google_id_unique",
+            "definicion": "UNIQUE (google_id)"
+        },
+        {
+            "tabla": "users",
+            "nombre": "users_id_not_null",
+            "definicion": "NOT NULL id"
+        },
+        {
+            "tabla": "users",
+            "nombre": "users_name_not_null",
+            "definicion": "NOT NULL name"
+        },
+        {
+            "tabla": "users",
+            "nombre": "users_pkey",
+            "definicion": "PRIMARY KEY (id)"
+        },
+        {
+            "tabla": "users",
+            "nombre": "users_role_id_foreign",
+            "definicion": "FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "users",
+            "nombre": "users_role_id_not_null",
+            "definicion": "NOT NULL role_id"
+        },
+        {
+            "tabla": "usuarios",
+            "nombre": "usuario_cedula",
+            "definicion": "CHECK (((cedula_usuario IS NULL) OR ((cedula_usuario)::text ~ '^[0-9]{10}$'::text)))"
+        },
+        {
+            "tabla": "usuarios",
+            "nombre": "usuario_identidad",
+            "definicion": "CHECK (((contrasena_usuario IS NOT NULL) OR (google_id IS NOT NULL)))"
+        },
+        {
+            "tabla": "usuarios",
+            "nombre": "usuarios_cedula_usuario_key",
+            "definicion": "UNIQUE (cedula_usuario)"
+        },
+        {
+            "tabla": "usuarios",
+            "nombre": "usuarios_correo_usuario_check",
+            "definicion": "CHECK ((((correo_usuario)::text = lower(btrim((correo_usuario)::text))) AND (POSITION(('@'::text) IN (correo_usuario)) > 1)))"
+        },
+        {
+            "tabla": "usuarios",
+            "nombre": "usuarios_correo_usuario_key",
+            "definicion": "UNIQUE (correo_usuario)"
+        },
+        {
+            "tabla": "usuarios",
+            "nombre": "usuarios_correo_usuario_not_null",
+            "definicion": "NOT NULL correo_usuario"
+        },
+        {
+            "tabla": "usuarios",
+            "nombre": "usuarios_debe_cambiar_contrasena_not_null",
+            "definicion": "NOT NULL debe_cambiar_contrasena"
+        },
+        {
+            "tabla": "usuarios",
+            "nombre": "usuarios_estado_usuario_check",
+            "definicion": "CHECK (((estado_usuario)::text = ANY ((ARRAY['activo'::character varying, 'bloqueado'::character varying])::text[])))"
+        },
+        {
+            "tabla": "usuarios",
+            "nombre": "usuarios_estado_usuario_not_null",
+            "definicion": "NOT NULL estado_usuario"
+        },
+        {
+            "tabla": "usuarios",
+            "nombre": "usuarios_google_id_key",
+            "definicion": "UNIQUE (google_id)"
+        },
+        {
+            "tabla": "usuarios",
+            "nombre": "usuarios_id_usuario_not_null",
+            "definicion": "NOT NULL id_usuario"
+        },
+        {
+            "tabla": "usuarios",
+            "nombre": "usuarios_nombre_usuario_not_null",
+            "definicion": "NOT NULL nombre_usuario"
+        },
+        {
+            "tabla": "usuarios",
+            "nombre": "usuarios_pkey",
+            "definicion": "PRIMARY KEY (id_usuario)"
+        },
+        {
+            "tabla": "usuarios",
+            "nombre": "usuarios_rol_usuario_check",
+            "definicion": "CHECK (((rol_usuario)::text = ANY ((ARRAY['administrador'::character varying, 'estudiante'::character varying])::text[])))"
+        },
+        {
+            "tabla": "usuarios",
+            "nombre": "usuarios_rol_usuario_not_null",
+            "definicion": "NOT NULL rol_usuario"
+        },
+        {
+            "tabla": "usuarios_niveles",
+            "nombre": "usuarios_niveles_id_nivel_fkey",
+            "definicion": "FOREIGN KEY (id_nivel) REFERENCES niveles(id_nivel) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "usuarios_niveles",
+            "nombre": "usuarios_niveles_id_nivel_not_null",
+            "definicion": "NOT NULL id_nivel"
+        },
+        {
+            "tabla": "usuarios_niveles",
+            "nombre": "usuarios_niveles_id_usuario_fkey",
+            "definicion": "FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE RESTRICT"
+        },
+        {
+            "tabla": "usuarios_niveles",
+            "nombre": "usuarios_niveles_id_usuario_id_nivel_key",
+            "definicion": "UNIQUE (id_usuario, id_nivel)"
+        },
+        {
+            "tabla": "usuarios_niveles",
+            "nombre": "usuarios_niveles_id_usuario_nivel_not_null",
+            "definicion": "NOT NULL id_usuario_nivel"
+        },
+        {
+            "tabla": "usuarios_niveles",
+            "nombre": "usuarios_niveles_id_usuario_not_null",
+            "definicion": "NOT NULL id_usuario"
+        },
+        {
+            "tabla": "usuarios_niveles",
+            "nombre": "usuarios_niveles_pkey",
+            "definicion": "PRIMARY KEY (id_usuario_nivel)"
+        }
+    ],
+    "indices_diccionario": [
+        {
+            "indexname": "diccionario_espanol_busqueda_gin",
+            "indexdef": "CREATE INDEX diccionario_espanol_busqueda_gin ON public.diccionario USING gin (kichwa_normalizar((\"español\")::text) gin_trgm_ops)"
+        },
+        {
+            "indexname": "diccionario_kichwa_busqueda_gin",
+            "indexdef": "CREATE INDEX diccionario_kichwa_busqueda_gin ON public.diccionario USING gin (kichwa_normalizar((kichwa)::text) gin_trgm_ops)"
+        },
+        {
+            "indexname": "diccionario_kichwa_espanol_unique",
+            "indexdef": "CREATE UNIQUE INDEX diccionario_kichwa_espanol_unique ON public.diccionario USING btree (kichwa, \"español\")"
+        },
+        {
+            "indexname": "diccionario_pkey",
+            "indexdef": "CREATE UNIQUE INDEX diccionario_pkey ON public.diccionario USING btree (id)"
+        }
+    ],
+    "niveles": [
+        {
+            "id_nivel": 1,
+            "nombre_nivel": "Básico",
+            "orden_nivel": 1,
+            "publicado": true
+        },
+        {
+            "id_nivel": 2,
+            "nombre_nivel": "Intermedio",
+            "orden_nivel": 2,
+            "publicado": true
+        }
+    ],
+    "modulos": [
+        {
+            "id_modulo": 8,
+            "nombre_nivel": "Básico",
+            "nombre_modulo": "Módulo 1  Primeros contactos con el kichwa",
+            "publicado": true,
+            "visible": true
+        },
+        {
+            "id_modulo": 9,
+            "nombre_nivel": "Básico",
+            "nombre_modulo": "Módulo 2  Vocabulario y gramática básica",
+            "publicado": true,
+            "visible": true
+        },
+        {
+            "id_modulo": 10,
+            "nombre_nivel": "Intermedio",
+            "nombre_modulo": "Modulo 1 Conjugación y estudio de los morfemas 1 y 2",
+            "publicado": true,
+            "visible": true
+        },
+        {
+            "id_modulo": 11,
+            "nombre_nivel": "Intermedio",
+            "nombre_modulo": "Módulo 2  Morfemas avanzados y construcción escrita",
+            "publicado": true,
+            "visible": true
+        }
+    ],
+    "unidades": [
+        {
+            "id_unidad": 4,
+            "nombre_nivel": "Básico",
+            "nombre_modulo": "Módulo 1  Primeros contactos con el kichwa",
+            "titulo_unidad": "Conociendo el Kichwa",
+            "publicado": true,
+            "visible": true,
+            "modo": "guided",
+            "temas_publicados": 1,
+            "actividades_publicadas": 6
+        },
+        {
+            "id_unidad": 5,
+            "nombre_nivel": "Básico",
+            "nombre_modulo": "Módulo 1  Primeros contactos con el kichwa",
+            "titulo_unidad": "Saludos y conversación",
+            "publicado": true,
+            "visible": true,
+            "modo": "guided",
+            "temas_publicados": 1,
+            "actividades_publicadas": 30
+        },
+        {
+            "id_unidad": 6,
+            "nombre_nivel": "Básico",
+            "nombre_modulo": "Módulo 1  Primeros contactos con el kichwa",
+            "titulo_unidad": "Pronombres personales",
+            "publicado": true,
+            "visible": true,
+            "modo": "guided",
+            "temas_publicados": 1,
+            "actividades_publicadas": 6
+        },
+        {
+            "id_unidad": 7,
+            "nombre_nivel": "Básico",
+            "nombre_modulo": "Módulo 1  Primeros contactos con el kichwa",
+            "titulo_unidad": "Números y cantidades",
+            "publicado": true,
+            "visible": true,
+            "modo": "guided",
+            "temas_publicados": 1,
+            "actividades_publicadas": 7
+        },
+        {
+            "id_unidad": 8,
+            "nombre_nivel": "Básico",
+            "nombre_modulo": "Módulo 1  Primeros contactos con el kichwa",
+            "titulo_unidad": "Días, meses y calendario",
+            "publicado": true,
+            "visible": true,
+            "modo": "guided",
+            "temas_publicados": 1,
+            "actividades_publicadas": 6
+        },
+        {
+            "id_unidad": 9,
+            "nombre_nivel": "Básico",
+            "nombre_modulo": "Módulo 2  Vocabulario y gramática básica",
+            "titulo_unidad": "Animales y colores",
+            "publicado": true,
+            "visible": true,
+            "modo": "guided",
+            "temas_publicados": 1,
+            "actividades_publicadas": 15
+        },
+        {
+            "id_unidad": 10,
+            "nombre_nivel": "Básico",
+            "nombre_modulo": "Módulo 2  Vocabulario y gramática básica",
+            "titulo_unidad": "Partes del cuerpo",
+            "publicado": true,
+            "visible": true,
+            "modo": "guided",
+            "temas_publicados": 1,
+            "actividades_publicadas": 6
+        },
+        {
+            "id_unidad": 11,
+            "nombre_nivel": "Básico",
+            "nombre_modulo": "Módulo 2  Vocabulario y gramática básica",
+            "titulo_unidad": "Naturaleza y entorno cercano",
+            "publicado": true,
+            "visible": true,
+            "modo": "guided",
+            "temas_publicados": 1,
+            "actividades_publicadas": 3
+        },
+        {
+            "id_unidad": 12,
+            "nombre_nivel": "Básico",
+            "nombre_modulo": "Módulo 2  Vocabulario y gramática básica",
+            "titulo_unidad": "Verbos frecuentes y raíz verbal",
+            "publicado": true,
+            "visible": true,
+            "modo": "guided",
+            "temas_publicados": 1,
+            "actividades_publicadas": 4
+        },
+        {
+            "id_unidad": 13,
+            "nombre_nivel": "Intermedio",
+            "nombre_modulo": "Modulo 1 Conjugación y estudio de los morfemas 1 y 2",
+            "titulo_unidad": "Unidad 1  Conjugación en presente, pasado y futuro",
+            "publicado": true,
+            "visible": true,
+            "modo": null,
+            "temas_publicados": 0,
+            "actividades_publicadas": 0
+        },
+        {
+            "id_unidad": 14,
+            "nombre_nivel": "Intermedio",
+            "nombre_modulo": "Modulo 1 Conjugación y estudio de los morfemas 1 y 2",
+            "titulo_unidad": "Unidad 2  Estudio de los morfemas 1: básicos",
+            "publicado": true,
+            "visible": true,
+            "modo": null,
+            "temas_publicados": 0,
+            "actividades_publicadas": 0
+        },
+        {
+            "id_unidad": 15,
+            "nombre_nivel": "Intermedio",
+            "nombre_modulo": "Modulo 1 Conjugación y estudio de los morfemas 1 y 2",
+            "titulo_unidad": "Unidad 3  Estudio de los morfemas 2: medios",
+            "publicado": true,
+            "visible": true,
+            "modo": null,
+            "temas_publicados": 0,
+            "actividades_publicadas": 0
+        },
+        {
+            "id_unidad": 16,
+            "nombre_nivel": "Intermedio",
+            "nombre_modulo": "Modulo 1 Conjugación y estudio de los morfemas 1 y 2",
+            "titulo_unidad": "Unidad 4  Adverbios y ampliación de la oración",
+            "publicado": true,
+            "visible": true,
+            "modo": null,
+            "temas_publicados": 0,
+            "actividades_publicadas": 0
+        },
+        {
+            "id_unidad": 17,
+            "nombre_nivel": "Intermedio",
+            "nombre_modulo": "Modulo 1 Conjugación y estudio de los morfemas 1 y 2",
+            "titulo_unidad": "Unidad 5  Afirmación, negación, interrogación y duda",
+            "publicado": true,
+            "visible": true,
+            "modo": null,
+            "temas_publicados": 0,
+            "actividades_publicadas": 0
+        },
+        {
+            "id_unidad": 18,
+            "nombre_nivel": "Intermedio",
+            "nombre_modulo": "Módulo 2  Morfemas avanzados y construcción escrita",
+            "titulo_unidad": "Morfemas Avanzados de Ocupaciones, orden y parentesco",
+            "publicado": true,
+            "visible": true,
+            "modo": "guided",
+            "temas_publicados": 1,
+            "actividades_publicadas": 0
+        },
+        {
+            "id_unidad": 19,
+            "nombre_nivel": "Intermedio",
+            "nombre_modulo": "Módulo 2  Morfemas avanzados y construcción escrita",
+            "titulo_unidad": "Morfemas Avanzados: Pasado y futuro: -rka y -sha",
+            "publicado": true,
+            "visible": true,
+            "modo": "guided",
+            "temas_publicados": 1,
+            "actividades_publicadas": 0
+        },
+        {
+            "id_unidad": 20,
+            "nombre_nivel": "Intermedio",
+            "nombre_modulo": "Módulo 2  Morfemas avanzados y construcción escrita",
+            "titulo_unidad": "Morfemas verbales: comprende cada parte",
+            "publicado": true,
+            "visible": true,
+            "modo": "guided",
+            "temas_publicados": 1,
+            "actividades_publicadas": 0
+        },
+        {
+            "id_unidad": 21,
+            "nombre_nivel": "Intermedio",
+            "nombre_modulo": "Módulo 2  Morfemas avanzados y construcción escrita",
+            "titulo_unidad": "Conversaciones cortas y textos breves",
+            "publicado": true,
+            "visible": true,
+            "modo": "guided",
+            "temas_publicados": 1,
+            "actividades_publicadas": 0
+        }
+    ],
+    "evaluaciones": [
+        {
+            "id_evaluacion": 2,
+            "titulo_evaluacion": "Descubre las vocales",
+            "tipo_evaluacion": "unidad",
+            "id_unidad": 4,
+            "id_modulo": null,
+            "id_tema": 4,
+            "publicado": false,
+            "configuracion": "{\"final\": false, \"managed\": true, \"question_count\": 10, \"pass_percentage\": 80}",
+            "preguntas": 11,
+            "preguntas_publicadas": 10
+        },
+        {
+            "id_evaluacion": 3,
+            "titulo_evaluacion": "Reconoce las consonantes",
+            "tipo_evaluacion": "unidad",
+            "id_unidad": 4,
+            "id_modulo": null,
+            "id_tema": 5,
+            "publicado": false,
+            "configuracion": "{\"final\": false, \"managed\": true, \"question_count\": 10, \"pass_percentage\": 80}",
+            "preguntas": 10,
+            "preguntas_publicadas": 10
+        },
+        {
+            "id_evaluacion": 4,
+            "titulo_evaluacion": "Aprende tus primeras palabras",
+            "tipo_evaluacion": "unidad",
+            "id_unidad": 4,
+            "id_modulo": null,
+            "id_tema": 6,
+            "publicado": false,
+            "configuracion": "{\"final\": false, \"managed\": true, \"question_count\": 10, \"pass_percentage\": 80}",
+            "preguntas": 11,
+            "preguntas_publicadas": 10
+        },
+        {
+            "id_evaluacion": 5,
+            "titulo_evaluacion": "Desafío final de la Unidad 1",
+            "tipo_evaluacion": "unidad",
+            "id_unidad": 4,
+            "id_modulo": null,
+            "id_tema": 7,
+            "publicado": false,
+            "configuracion": "{\"final\": true, \"managed\": true, \"question_count\": 10, \"pass_percentage\": 80}",
+            "preguntas": 30,
+            "preguntas_publicadas": 30
+        },
+        {
+            "id_evaluacion": 6,
+            "titulo_evaluacion": "Prueba de la Unidad 1",
+            "tipo_evaluacion": "unidad",
+            "id_unidad": 4,
+            "id_modulo": null,
+            "id_tema": 8,
+            "publicado": false,
+            "configuracion": "{\"final\": true, \"managed\": true, \"fixed_order\": true, \"sequence_mode\": true, \"question_count\": 6, \"pass_percentage\": 80, \"required_correct\": 5, \"prerequisite_activities\": [42, 43, 44, 45, 46, 47, 48]}",
+            "preguntas": 6,
+            "preguntas_publicadas": 6
+        },
+        {
+            "id_evaluacion": 7,
+            "titulo_evaluacion": "Prueba final del módulo 1",
+            "tipo_evaluacion": "modulo",
+            "id_unidad": null,
+            "id_modulo": 8,
+            "id_tema": null,
+            "publicado": true,
+            "configuracion": "{\"final\": true, \"managed\": true, \"bank_key\": \"modulo1-final-v1\", \"question_count\": 15, \"pass_percentage\": 80, \"prerequisite_units\": [4, 5, 6, 7, 8]}",
+            "preguntas": 15,
+            "preguntas_publicadas": 15
+        }
+    ],
+    "diccionario": {
+        "entradas": 3776
+    },
+    "columnas_diccionario": [
+        {
+            "column_name": "id",
+            "data_type": "bigint"
+        },
+        {
+            "column_name": "kichwa",
+            "data_type": "character varying"
+        },
+        {
+            "column_name": "español",
+            "data_type": "character varying"
+        }
+    ],
+    "practicas_visibles": {
+        "4": 6,
+        "9": 15,
+        "11": 3,
+        "12": 4,
+        "7": 7,
+        "5": 30,
+        "8": 6,
+        "10": 6,
+        "6": 6
+    },
+    "elegibilidad_evaluaciones": [
+        {
+            "id": 7,
+            "elegibles": 15
+        }
+    ],
+    "normalizacion": {
+        "ejemplo": "  corazon  "
+    },
+    "middleware_admin_overview": [
+        "Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful",
+        "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+        "Illuminate\\Routing\\Middleware\\SubstituteBindings",
+        "App\\Http\\Middleware\\CuentaActiva",
+        "App\\Http\\Middleware\\RequireRole:admin"
+    ],
+    "cierre": "ROLLBACK"
+}

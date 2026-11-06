@@ -32,10 +32,16 @@
       "morpheme": "-niki",
       "position": "Se añade al final de un número",
       "explanation": "Shuk significa «uno». Shukniki significa «primero». El número dice cuántos hay; con -niki indica un lugar en el orden.",
-      "instruction": "Sigue la fila de posiciones. El primer lugar es 1.º, el tercero es 3.º y el noveno es 9.º.",
+      "instruction": "Reconoce cada posición, desde el primer hasta el noveno lugar.",
       "forms": [
         { "base": "shuk", "baseMeaning": "uno · 1", "word": "shukniki", "meaning": "primero · 1.º", "icon": "1" },
+        { "base": "ishkay", "baseMeaning": "dos · 2", "word": "ishkayniki", "meaning": "segundo · 2.º", "icon": "2" },
         { "base": "kimsa", "baseMeaning": "tres · 3", "word": "kimsaniki", "meaning": "tercero · 3.º", "icon": "3" },
+        { "base": "chusku", "baseMeaning": "cuatro · 4", "word": "chuskuniki", "meaning": "cuarto · 4.º", "icon": "4" },
+        { "base": "pichka", "baseMeaning": "cinco · 5", "word": "pichkaniki", "meaning": "quinto · 5.º", "icon": "5" },
+        { "base": "sukta", "baseMeaning": "seis · 6", "word": "suktaniki", "meaning": "sexto · 6.º", "icon": "6" },
+        { "base": "kanchis", "baseMeaning": "siete · 7", "word": "kanchisniki", "meaning": "séptimo · 7.º", "icon": "7" },
+        { "base": "pusak", "baseMeaning": "ocho · 8", "word": "pusakniki", "meaning": "octavo · 8.º", "icon": "8" },
         { "base": "iskun", "baseMeaning": "nueve · 9", "word": "iskunniki", "meaning": "noveno · 9.º", "icon": "9" }
       ],
       "example": { "before": "", "focus": "Shukniki", "after": "", "meaning": "Primero: ocupa el lugar 1 en una fila o una llegada." },

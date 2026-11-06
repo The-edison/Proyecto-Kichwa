@@ -31,7 +31,7 @@ export function ConversationMatchingExercise({ exercise, answer, feedback, selec
                         <div className="guided-matching-column" style={rows}><h3>KICHWA</h3>{origins.map(origin => {
                             const paired = answer.pares?.some(pair => pair.origen === origin.id);
                             const number = origins.findIndex(item => item.id === origin.id) + 1;
-                            return <div className="guided-expression-row" key={origin.id} data-matching-origin={origin.id}><button type="button" disabled={disabled} aria-label={origin.texto} aria-pressed={selectedOrigin === origin.id || Boolean(paired)} data-answer-correct={paired ? feedback?.item_results?.[origin.id] ?? feedback?.is_correct : undefined} className={`${selectedOrigin === origin.id ? 'is-selected' : ''}${paired ? ' is-paired' : ''}`} onClick={() => { if (!disabled) onSelectOrigin(origin.id); }}>
+                            return <div className="guided-expression-row" key={origin.id} data-matching-origin={origin.id}><button type="button" disabled={disabled} aria-label={origin.texto} aria-pressed={selectedOrigin === origin.id || Boolean(paired)} data-answer-correct={paired ? feedback?.item_results?.[origin.id] ?? feedback?.is_correct : undefined} className={`${selectedOrigin === origin.id ? 'is-selected' : ''}${paired ? ' is-paired' : ''}`} onClick={() => { if (!disabled) { onSelectOrigin(origin.id); play(origin.id as LessonAudioClip); } }}>
                                 <span>{origin.texto}</span>{paired && <span className="guided-pair-number" aria-label={`Pareja ${number}`}>{number}</span>}
                             </button>{hasAudio && <button type="button" className={`guided-expression-audio${state.clip === origin.id && ['loading','playing'].includes(state.phase) ? ' is-playing' : ''}`} aria-label={`Escuchar ${origin.texto}`} title={`Escuchar ${origin.texto}`} onClick={() => play(origin.id as LessonAudioClip)}><Volume2 size={19} aria-hidden="true" /></button>}</div>;
                         })}</div>
@@ -48,6 +48,6 @@ export function ConversationMatchingExercise({ exercise, answer, feedback, selec
             })}
         </div>
         <p role="status" className="guided-conversation-status">{answer.pares?.filter(pair => pair.origen.startsWith(`${group}-`)).length ?? 0} de {allOrigins.length} parejas seleccionadas. {disabled ? 'Las parejas están comprobadas.' : 'Pulsa una expresión en kichwa y su significado. Vuelve a pulsar una pareja para quitarla.'}</p>
-        {hasAudio && <p className={state.phase === 'error' ? 'form-error' : 'sr-only'} role="status" aria-live="polite">{state.message}</p>}
+        <p className={state.phase === 'error' ? 'form-error' : 'sr-only'} role="status" aria-live="polite">{state.message}</p>
     </section>;
 }

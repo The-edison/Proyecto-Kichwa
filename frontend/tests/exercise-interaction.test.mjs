@@ -5,6 +5,15 @@ import vm from 'node:vm';
 import { transformWithOxc } from 'vite';
 
 const { code } = await transformWithOxc(await readFile(new URL('../src/js/components/ExerciseCard.tsx', import.meta.url), 'utf8'), 'ExerciseCard.tsx');
+
+test('verbal block activities require the whole token bank before checking', async () => {
+    for (const [activity,id] of [[2,'miku-build'],[8,'segments']]) {
+        const exercise={type:'completar',config:{verbal_practice:activity},elements:[{id,texto:'mikukuni',opciones:['ni','miku','ku']}]};
+        for(const text of ['miku','miku ku','miku ku ku','miku ku ni extra'])assert.equal((await interaction(exercise,{textos:{[id]:text}})).complete(),false);
+        assert.equal((await interaction(exercise,{textos:{[id]:'miku ku ni'}})).complete(),true);
+        assert.equal((await interaction(exercise,{textos:{[id]:'ni ku miku'}})).complete(),true);
+    }
+});
 async function interaction(exercise, initial = {}, checkPair, initialLockedPairs = [], corrected) {
     let cursor = 0, answer = initial;
     const states = [];
@@ -24,6 +33,14 @@ async function interaction(exercise, initial = {}, checkPair, initialLockedPairs
 }
 function nodes(tree) { if (Array.isArray(tree)) return tree.flatMap(nodes); if (!tree?.props) return []; return [tree, ...nodes(tree.props.children)]; }
 const button = (view, text) => nodes(view.render()).find(node => node.type === 'button' && node.props.children === text);
+
+test('ordering cannot be checked with empty places, duplicates or unknown words', async () => {
+    const exercise = { type: 'ordenar', elements: [{ id: 'one', texto: 'Shukniki' }, { id: 'two', texto: 'Ishkayniki' }, { id: 'three', texto: 'Kimsaniki' }], zones: [] };
+    for (const order of [['one', '', 'three'], ['one', 'one', 'three'], ['one', 'two', 'unknown']]) {
+        assert.equal((await interaction(exercise, { orden: order })).complete(), false);
+    }
+    assert.equal((await interaction(exercise, { orden: ['one', 'two', 'three'] })).complete(), true);
+});
 
 test('checked choices and text answers use individual grades while the entire exercise reflects any error', async () => {
     const exercise = { type: 'seleccion_multiple', elements: ['a', 'b', 'c'].map(id => ({ id, texto: id })), zones: [], config: { presentation: 'buttons', max_selections: 2 } };

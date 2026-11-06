@@ -67,9 +67,9 @@ async function screen(base = '/') {
             answer: sentenceAnswer, disabled, onChange(value) { sentenceAnswer = value; },
         }); },
         sentenceAnswer() { return sentenceAnswer; },
-        expressions(group, words, disabled=false) { cursor=0;return expressions.namespace.ConversationMatchingExercise({
+        expressions(group, words, disabled=false, onSelectOrigin=()=>{throw Error('Playback changed a selection')}) { cursor=0;return expressions.namespace.ConversationMatchingExercise({
             group,exercise:{elements:[...words.map((texto,i)=>({id:`${group}-${i}`,texto,grupo:'origen'})),...words.map((_,i)=>({id:`es-${group}-${i}`,texto:`Meaning ${i}`,grupo:'destino'}))]},
-            answer:{},selectedOrigin:'',disabled,onSelectOrigin(){throw Error('Playback changed a selection')},onPair(){},
+            answer:{},selectedOrigin:'',disabled,onSelectOrigin,onPair(){},
         }); },
         questionChoices(disabled = false) { cursor = 0; return sentences.namespace.ListeningGreetingsExercise({
             exercise: { id:26, config:{listening_questions:true}, elements:['imatak','pitak-kan','imamanta'].map(id=>({id,texto:id,imagen:`questions/${id}.webp`,opciones:['¿Qué es?','¿Quién es?','¿Por qué?']})) },
@@ -109,6 +109,25 @@ test('farewell and courtesy words play all nine unit recordings without selectin
     view.audios.at(-1).reject(Error('Missing file'));await Promise.resolve();
     assert.ok(nodes(view.expressions('c',['Alli shamushka','Yupaychani','Kishpichiway','Tiyaripay'])).some(node=>node.props.role==='status'&&String(node.props.children).includes('No se pudo reproducir')));
     view.unmount();assert.equal(view.audios.at(-1).paused,true);
+});
+
+test('selecting a question, response, farewell or courtesy expression also plays its recording once', async () => {
+    for (const [group, word, file] of [['q', 'Imanalla kanki', 'escenas/preguntas/imanalla-kanki'], ['a', 'Allilla kani', 'escenas/respuestas/allilla-kani'], ['d', 'Kipakaman', 'despedidas/kipakaman'], ['c', 'Alli shamushka', 'cortesia/alli-shamushka']]) {
+        const view = await screen('/kichwa/');
+        const selected = [];
+        const render = disabled => nodes(view.expressions(group, [word], disabled, id => selected.push(id)));
+        render(false).find(node => node.props['aria-label'] === word).props.onClick();
+        assert.deepEqual(selected, [`${group}-0`]);
+        assert.equal(view.audios.length, 1);
+        assert.equal(view.audios[0].src, `/kichwa/audios/unidad-2/${file}.mp3`);
+        render(false).find(node => node.props['aria-label'] === word).props.onClick();
+        assert.equal(view.audios.length, 2);
+        assert.equal(view.audios[0].paused, true);
+        render(true).find(node => node.props['aria-label'] === word).props.onClick();
+        assert.equal(view.audios.length, 2);
+        assert.equal(selected.length, 2);
+        view.unmount();
+    }
 });
 
 test('question cards show an image, its audio and three independent Spanish options', async () => {
@@ -372,7 +391,7 @@ test('listening inputs save one Kichwa vowel per word, normalize uppercase and l
     assert.ok(nodes(view.missing(true)).filter(node => node.type === 'button').every(node => !node.props.disabled));
 });
 
-test('scene choices keep audio separate from selection and lock only correct cards', async () => {
+test('scene choices play audio on selection, keep speaker replay independent and lock only correct cards', async () => {
     const view = await screen('/kichwa/');
     const changes = [];
     const exercises = [0,1,2].map(i => ({id:101+i,config:{scene_choice:true,conversation_group:'q',context_text:`Spanish ${i}`,prompt_image:`scene-${i}.webp`},elements:[0,1,2].map(n=>({id:`q-${n}`,texto:`Question ${n}`}))}));
@@ -391,9 +410,18 @@ test('scene choices keep audio separate from selection and lock only correct car
     assert.equal(changes.length,0);
     assert.equal(view.audios.at(-1).src,'/kichwa/audios/unidad-2/escenas/preguntas/imanalla-kanki.mp3');
     view.audios.at(-1).resolve();
+    radios[3].props.onClick();
     radios[3].props.onChange();
     assert.equal(changes[0][0].id,102);
     assert.deepEqual(JSON.parse(JSON.stringify(changes[0][1])),{seleccion:['q-0']});
+    assert.equal(view.audios.length,2);
+    assert.equal(view.audios[0].paused,true);
+    assert.equal(view.audios[1].src,'/kichwa/audios/unidad-2/escenas/preguntas/imanalla-kanki.mp3');
+    radios[3].props.onClick();
+    assert.equal(view.audios.length,3);
+    assert.equal(changes.length,1);
+    radios[0].props.onClick();
+    assert.equal(view.audios.length,3);
     view.unmount();
     assert.ok(view.audios.at(-1).paused);
 });

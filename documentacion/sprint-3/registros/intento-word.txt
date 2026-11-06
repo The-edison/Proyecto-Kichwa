@@ -1,0 +1,9 @@
+New-Object : No se pudo recuperar el generador de clases COM para el componente con CLSID 
+{000209FF-0000-0000-C000-000000000046} debido al siguiente error: 80070520 Una sesión de inicio especificada no 
+existe. Es posible que haya finalizado. (Excepción de HRESULT: 0x80070520).
+En C:\PROYECTOS\Proyecto-Kichwa\tmp\sprint3\verificar-word.ps1: 7 Carácter: 13
++     $word = New-Object -ComObject Word.Application
++             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ResourceUnavailable: (:) [New-Object], COMException
+    + FullyQualifiedErrorId : NoCOMClassIdentified,Microsoft.PowerShell.Commands.NewObjectCommand
+ 

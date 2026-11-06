@@ -1,0 +1,139 @@
+.time-practice .morpheme-origin .time-practice-illustration { width: 54px !important; flex: none; }
+.time-practice .morpheme-origin [data-matching-origin] { gap: 10px; }
+.time-practice select, .time-practice input:not([type='radio']):not([type='range']) { min-width: 0; padding: 10px 12px; border: 1px solid var(--color-control-border); border-radius: 9px; background: var(--color-surface); color: var(--color-text); font: inherit; font-weight: 750; }
+.time-practice select { cursor: pointer; }
+.time-practice-sentences { display: grid; gap: 20px; }
+.time-practice-sentence { display: flex; align-items: center; gap: 24px; }
+.time-practice-sentence > label { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; flex: 1; font-size: 19px; line-height: 1.6; }
+.time-practice-sentence > .time-practice-illustration { width: 130px !important; flex: none; }
+.time-practice-sentences > .time-practice-sentence + .time-practice-sentence { border-top: 1px dashed var(--color-border); padding-top: 20px; }
+.time-future-layout { display: grid; grid-template-columns: minmax(0,1.8fr) minmax(150px,1fr); gap: 30px; align-items: center; }
+.time-future-words { display: grid; gap: 14px; }
+.time-future-words > label { display: grid; grid-template-columns: minmax(90px,.8fr) 24px minmax(0,1.3fr); gap: 12px; align-items: center; }
+.time-future-words strong { padding: 11px; border-radius: 9px; background: var(--color-secondary-soft); text-align: center; }
+.time-future-words svg { color: var(--color-secondary); }
+.time-future-words input { width: 100%; text-align: center; }
+.time-practice-7 { background: transparent; border: 0; box-shadow: none; padding: 0; }
+.time-comparison-cards { display: grid; gap: 18px; }
+.time-comparison-card { display: grid; grid-template-columns: 175px minmax(0,1fr); gap: 22px; padding: 22px; border: 1px solid var(--color-control-border); border-radius: 20px; background: var(--color-surface); box-shadow: 0 4px 14px #45316f08; }
+.time-comparison-action { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding-right: 20px; border-right: 1px solid var(--color-border); text-align: center; }
+.time-comparison-action .time-practice-illustration { width: 92px !important; }
+.time-comparison-action h2 { font-size: 19px; font-weight: 800; text-transform: capitalize; }
+.time-root { display: inline-block; margin-top: 6px; padding: 3px 12px; border-radius: 20px; color: var(--color-secondary); background: var(--color-secondary-soft); font-size: 13px; font-weight: 750; }
+.time-comparison-tenses { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; align-items: stretch; min-width: 0; }
+.time-tense { display: flex; flex-direction: column; justify-content: center; gap: 7px; min-width: 0; padding: 14px 10px; border-radius: 13px; background: var(--color-secondary-soft); }
+.time-tense.is-present { background: transparent; }
+.time-tense-heading { display: flex; align-items: center; justify-content: center; gap: 7px; color: var(--color-text); font-size: 15px; }
+.time-tense-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-secondary); flex: none; }
+.is-present .time-tense-dot { background: #1b9187; }
+.is-future .time-tense-dot { background: #d69129; }
+.time-tense-person { color: var(--color-text-secondary); font-size: 12px; text-align: center; }
+.time-present-word { min-height: 60px; display: grid; align-content: center; gap: 5px; text-align: center; }
+.time-present-word > strong { font-size: 18px; }
+.time-present-word > span { color: var(--color-text-secondary); font-size: 13px; }
+.time-tense input { width: 100%; min-height: 48px; margin-top: 6px; padding: 10px 5px !important; font-size: 16px !important; text-align: center; }
+.time-tense input::placeholder { font-size: 13px; font-weight: 400; }
+.time-comparison-nav { display: none; }
+.is-time-comparison .guided-unit-main { padding-top: 14px; padding-bottom: 8px; }
+.is-time-comparison .exercise-companion-header { margin-bottom: 10px; }
+.is-time-comparison .guided-unit-description { margin: 6px 0; font-size: 15px; line-height: 1.5; }
+.is-time-comparison .guided-exercise-heading { font-size: clamp(23px,2.4vw,30px); }
+.is-time-comparison .learning-companion-portrait { width: 60px; margin-left: auto; }
+.is-time-comparison .learning-companion-message { display: none; }
+.is-time-comparison .time-practice-7 { margin-top: 10px; padding: 0; }
+.is-time-comparison .time-comparison-cards { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
+.is-time-comparison .time-comparison-card { grid-template-columns: minmax(0,1fr); gap: 14px; padding: 18px; border-radius: 16px; }
+.is-time-comparison .time-comparison-action { flex-direction: row; justify-content: start; gap: 12px; padding: 0 0 14px; border-right: 0; border-bottom: 1px solid var(--color-border); text-align: left; }
+.is-time-comparison .time-comparison-action .time-practice-illustration { width: 64px !important; flex: none; }
+.is-time-comparison .time-comparison-action h2 { font-size: 18px; }
+.is-time-comparison .time-root { margin-top: 5px; padding: 2px 10px; }
+.is-time-comparison .time-comparison-tenses { grid-template-columns: minmax(0,1fr); gap: 10px; }
+.is-time-comparison .time-tense { display: grid; grid-template-columns: 84px minmax(0,1fr); align-items: center; gap: 4px 8px; padding: 12px 10px; }
+.is-time-comparison .time-tense-heading { grid-column: 1; justify-content: start; font-size: 14px; gap: 5px; }
+.is-time-comparison .time-tense-person { grid-column: 1; grid-row: 2; text-align: left; font-size: 11px; }
+.is-time-comparison .time-tense input, .is-time-comparison .time-present-word { grid-column: 2; grid-row: 1 / 3; margin: 0; min-height: 44px; }
+.is-time-comparison .time-present-word > strong { font-size: 16px; }
+.is-time-comparison .time-tense input { font-size: 15px !important; }
+.is-time-comparison .time-tense input::placeholder { font-size: 12px; }
+.is-time-comparison .guided-feedback { margin-top: 10px; padding: 10px 14px; font-size: 14px; }
+@media (max-width: 900px) {
+    .is-time-comparison .time-comparison-nav { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; margin-bottom: 12px; }
+    .time-comparison-nav > button { display: grid; justify-items: center; gap: 3px; min-height: 44px; padding: 7px 4px; border: 1px solid var(--color-control-border); border-radius: 10px; background: var(--color-surface); color: var(--color-text); font-size: 13px; font-weight: 750; }
+    .time-comparison-nav > button[aria-pressed='true'] { background: var(--color-secondary-soft); border-color: var(--color-secondary); color: var(--color-secondary); }
+    .time-comparison-nav > button > span { font-size: 10px; font-weight: 400; }
+    .is-time-comparison .time-comparison-cards { grid-template-columns: minmax(0,1fr); }
+    .is-time-comparison .time-comparison-card:not(.is-active) { display: none; }
+    .is-time-comparison .time-comparison-card { padding: 14px; gap: 10px; }
+    .is-time-comparison .time-comparison-action { padding-bottom: 10px; }
+    .is-time-comparison .time-tense { grid-template-columns: 90px minmax(0,1fr); }
+    .is-time-comparison .guided-exercise-heading { font-size: 22px; }
+    .is-time-comparison .learning-companion { width: 64px; }
+}
+@media (max-height: 720px) {
+    .is-time-comparison .guided-unit-main { padding-top: 8px; }
+    .is-time-comparison .time-comparison-card { padding: 12px; gap: 8px; }
+    .is-time-comparison .time-comparison-action { padding-bottom: 8px; }
+    .is-time-comparison .time-comparison-action .time-practice-illustration { width: 48px !important; }
+    .is-time-comparison .time-comparison-tenses { gap: 7px; }
+    .is-time-comparison .time-tense { padding: 7px 8px; }
+    .is-time-comparison .learning-companion-portrait { width: 48px; }
+    .is-time-comparison .time-comparison-nav { margin-bottom: 8px; }
+}
+@media (max-width: 900px) and (max-height: 680px) {
+    .is-time-comparison .guided-unit-main { padding-top: 4px; padding-bottom: 4px; }
+    .is-time-comparison .exercise-companion-header { margin-bottom: 4px; }
+    .is-time-comparison .guided-exercise-heading { font-size: 20px; line-height: 1.2; }
+    .is-time-comparison .guided-unit-description { font-size: 13px; line-height: 1.4; margin: 4px 0; }
+    .is-time-comparison .time-comparison-nav { margin-bottom: 6px; }
+    .is-time-comparison .time-comparison-nav > button { display: flex; justify-content: center; gap: 6px; min-height: 44px; font-size: 12px; }
+    .is-time-comparison .time-comparison-card { padding: 10px; gap: 6px; }
+    .is-time-comparison .time-comparison-tenses { gap: 6px; }
+    .is-time-comparison .time-tense { padding: 5px 8px; }
+    .is-time-comparison .guided-feedback.is-correct { display: none; }
+}
+.time-integrator-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.time-integrator-heading h2 { color: var(--color-text); font-size: 19px; font-weight: 800; }
+.time-integrator-step { display: grid; place-items: center; width: 30px; height: 30px; flex: none; border-radius: 50%; background: var(--color-secondary); color: var(--color-surface); font-weight: 800; }
+.time-integrator-key { display: flex; flex-wrap: wrap; gap: 10px 24px; margin-bottom: 20px; color: var(--color-text-secondary); font-size: 13px; }
+.time-integrator-key b { display: inline-block; margin-right: 5px; padding: 4px 9px; border-radius: 7px; background: var(--color-secondary-soft); color: var(--color-secondary); }
+.time-integrator-cards { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; margin-bottom: 28px; }
+.time-integrator-card { padding: 16px; border: 1px solid var(--color-border); border-radius: 15px; background: var(--color-surface); }
+.time-integrator-word { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 14px; }
+.time-integrator-word > .time-practice-illustration { width: 64px !important; flex: none; }
+.time-integrator-word > strong { font-size: 21px; overflow-wrap: anywhere; }
+.time-integrator-word mark { padding: 2px 3px; border-radius: 5px; color: var(--color-secondary); background: var(--color-secondary-soft); }
+.time-integrator-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; min-width: 0; border: 0; padding: 0; margin: 0; }
+.time-integrator-options > label { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 10px; min-height: 46px; border: 1px solid var(--color-control-border); border-radius: 10px; color: var(--color-text); background: var(--color-surface); cursor: pointer; font-size: 15px; font-weight: 750; transition: background 120ms,border-color 120ms; }
+.time-integrator-options > label:hover, .time-integrator-options > label.is-selected { border-color: var(--color-secondary); background: var(--color-secondary-soft); }
+.time-integrator-options > label:focus-within { outline: 3px solid var(--color-secondary); outline-offset: 2px; }
+.time-integrator-options input { flex: none; width: 17px; height: 17px; accent-color: var(--color-secondary); }
+.time-integrator-options:disabled > label { cursor: default; }
+.time-integrator-options > label > span { overflow-wrap: anywhere; }
+.time-integrator-challenge { display: flex; align-items: center; gap: 22px; padding: 20px; border-radius: 15px; border: 1px solid var(--color-border); background: var(--color-surface); }
+.time-integrator-challenge > .time-practice-illustration { width: 110px !important; flex: none; }
+.time-integrator-challenge > div { flex: 1; min-width: 0; }
+.time-integrator-target { margin-bottom: 16px; color: var(--color-text); font-size: 21px; font-weight: 800; }
+@media (max-width: 680px) {
+    .time-future-layout { grid-template-columns: minmax(0,1fr); }
+    .time-future-layout > .time-practice-illustration { width: 160px !important; justify-self: center; }
+    .time-integrator-cards { grid-template-columns: minmax(0,1fr); }
+    .time-integrator-word { justify-content: start; }
+    .time-integrator-challenge { flex-direction: column; padding: 16px; gap: 14px; }
+    .time-integrator-challenge > div { width: 100%; }
+    .time-integrator-target { text-align: center; font-size: 19px; }
+    .time-integrator-options.is-sentence { grid-template-columns: minmax(0,1fr); }
+    .time-practice-sentence { gap: 10px; }
+    .time-practice-sentence > .time-practice-illustration { width: 80px !important; }
+    .time-practice-sentence > label { font-size: 16px; }
+    .time-comparison-card { grid-template-columns: minmax(0,1fr); padding: 16px; gap: 16px; }
+    .time-comparison-action { flex-direction: row; justify-content: start; padding: 0 0 14px; border-right: 0; border-bottom: 1px solid var(--color-border); text-align: left; }
+    .time-comparison-action .time-practice-illustration { width: 70px !important; }
+    .time-comparison-tenses { grid-template-columns: minmax(0,1fr); gap: 9px; }
+    .time-tense { display: grid; grid-template-columns: 90px minmax(0,1fr); gap: 5px 12px; padding: 12px; align-items: center; }
+    .time-tense-heading { grid-column: 1; justify-content: start; }
+    .time-tense-person { grid-column: 1; grid-row: 2; text-align: left; }
+    .time-tense input, .time-present-word { grid-column: 2; grid-row: 1 / 3; margin: 0; }
+    .time-future-words > label { gap: 8px; grid-template-columns: minmax(74px,.8fr) 20px minmax(0,1.3fr); font-size: 14px; }
+    .time-practice .morpheme-origin .time-practice-illustration { width: 32px !important; }
+    .time-practice .morpheme-origin [data-matching-origin] { gap: 5px; }
+}

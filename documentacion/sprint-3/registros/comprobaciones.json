@@ -1,0 +1,42 @@
+[
+  {
+    "id": "tipos-frontend",
+    "fecha": "2026-10-23T10:24:35.7084289-05:00",
+    "directorio": "frontend",
+    "comando": "npm.cmd run typecheck",
+    "codigo": 0,
+    "alcance": "Tipos TypeScript; no acredita navegación ni API."
+  },
+  {
+    "id": "pruebas-frontend",
+    "fecha": "2026-10-23T10:24:37.0470902-05:00",
+    "directorio": "frontend",
+    "comando": "npm.cmd test",
+    "codigo": 0,
+    "alcance": "Suite existente Node; componentes y servicios con dependencias aisladas."
+  },
+  {
+    "id": "pruebas-unitarias-php",
+    "fecha": "2026-10-23T10:24:39.4063286-05:00",
+    "directorio": "backend",
+    "comando": "php -c ../php.ini -d extension_dir=<ext-PHP84> vendor/phpunit/phpunit/phpunit --testsuite Unit --do-not-cache-result",
+    "codigo": 0,
+    "alcance": "Pruebas unitarias puras; sin base de datos ni pruebas Feature."
+  },
+  {
+    "id": "rutas-api",
+    "fecha": "2026-10-23T10:24:40.3601047-05:00",
+    "directorio": "backend",
+    "comando": "php -c ../php.ini -d extension_dir=<ext-PHP84> artisan route:list --path=api --except-vendor --json",
+    "codigo": 0,
+    "alcance": "Registro de rutas; no ejecuta operaciones de negocio."
+  },
+  {
+    "id": "auditoria-db",
+    "fecha": "2026-10-23T10:24:41.2403259-05:00",
+    "directorio": ".",
+    "comando": "php -c php.ini -d extension_dir=<ext-PHP84> documentacion/sprint-3/recursos/auditoria-solo-lectura.php",
+    "codigo": 0,
+    "alcance": "Metadatos, catálogo y reglas ejecutadas en transacción READ ONLY terminada con ROLLBACK; sin datos de usuarios."
+  }
+]

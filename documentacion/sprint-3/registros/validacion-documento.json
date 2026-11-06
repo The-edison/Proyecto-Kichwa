@@ -1,0 +1,21 @@
+{
+  "fecha": "2026-10-23T10:59:38.029056-05:00",
+  "archivo": "TESIS 2.3 - Sprint 3 revisado.docx",
+  "fuente_sha256": "ff1ee6b76f570a7b214ec6eca8307e11332d01941de0218354ae46266e626031",
+  "resultado_sha256": "55ec403b7f0570850bd4e9bc8c4507ec7da1bdc143be29a5f9b7e5e86141d65b",
+  "elementos_anteriores_intactos": 801,
+  "elementos_posteriores_intactos": 137,
+  "prefijo_xml_identico": true,
+  "sufijo_xml_identico": true,
+  "partes_originales_modificadas": [
+    "word/document.xml",
+    "word/_rels/document.xml.rels"
+  ],
+  "partes_originales_intactas": 74,
+  "imagenes_nuevas": 5,
+  "fragmentos_literales": 13,
+  "xml_valido": true,
+  "zip_valido": true,
+  "estilos_margenes_numeracion_headers_footers_originales": "Conservados sin modificación en sus partes XML",
+  "renderizado_word": "No observado: COM devolvió 80070520; estructura y contenido validados"
+}

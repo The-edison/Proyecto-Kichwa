@@ -1,0 +1,122 @@
+{
+  "screens": [
+    {
+      "archivo": "01-iniciar-sesion.png",
+      "titulo": "Formulario de inicio de sesión de Yachay",
+      "ruta": "/iniciar-sesion",
+      "fecha": "2026-10-23T15:51:13.158Z",
+      "encuadre": {
+        "x": 478,
+        "y": 133.9375,
+        "width": 484,
+        "height": 754.109375,
+        "scale": 1
+      },
+      "alcance": "Interfaz pública real; consultas GET; PostgreSQL en solo lectura; sesión y caché efímeras en memoria.",
+      "texto_visible": "Yachay\nKICHWA\nNuestra cultura\nDiccionario\nIniciar sesión\n\nTU ESPACIO DE APRENDIZAJE\n\nIniciar sesión\n\nIngresa con tu correo y contraseña para continuar aprendiendo.\n\nAntes de ingresar tus datos, consulta los Términos de uso y el Aviso de privacidad. Si eres menor de edad, pide a tu representante legal que contacte con soporte antes de crear tu cuenta.\n\nCorreo electrónico\nContraseña\nIniciar sesión\n¿Olvidaste tu contraseña?\n\nRecibe un enlace seguro en tu correo.\n\nRecuperar contraseña\n\n¿Aún no tienes una cuenta?\n\nCrear una cuenta\n\nGoogle es opcional. Si creas una cuenta con Google, Yachay recibe tu nombre, correo verificado e identificador de Google para darte acceso. Consulta el aviso antes de continuar.\n\nO continúa con\nG\nContinuar con Google\nTérminos de uso\nAviso de privacidad\nCookies\nAyuda y contacto\nYachay · Plataforma educativa para aprender kichwa"
+    },
+    {
+      "archivo": "02-registro.png",
+      "titulo": "Formulario de registro de estudiantes",
+      "ruta": "/registro",
+      "fecha": "2026-10-23T15:51:14.453Z",
+      "encuadre": {
+        "x": 268,
+        "y": 115.234375,
+        "width": 904,
+        "height": 791.53125,
+        "scale": 1
+      },
+      "alcance": "Interfaz pública real; consultas GET; PostgreSQL en solo lectura; sesión y caché efímeras en memoria.",
+      "texto_visible": "Yachay\nKICHWA\nNuestra cultura\nDiccionario\nIniciar sesión\n\nCOMIENZA CON YACHAY\n\nUna cuenta.\nTu camino al Kichwa.\n\nAprende a tu ritmo y conecta con nuestra lengua, una palabra a la vez.\n\nLecciones y actividades para practicar.\n\nTu progreso guardado en un solo lugar.\n\nYACHAY · KICHWA\nCrear tu cuenta\n\nCompleta tus datos para empezar a aprender.\n\nAntes de ingresar tus datos, consulta los Términos de uso y el Aviso de privacidad. Si eres menor de edad, pide a tu representante legal que contacte con soporte antes de crear tu cuenta.\n\n01\nDatos personales\nNombres\nApellidos\n\nSolo letras y espacios; se admiten tildes y ñ.\n\nCédula Opcional\n\nSin espacios ni guiones.\n\nCorreo electrónico\n02\nProtege tu cuenta\nContraseña\nConfirmar contraseña\nPendiente:\nMínimo 12 caracteres\nPendiente:\nMayúscula y minúscula\nPendiente:\nAl menos un número\nPendiente:\nAl menos un símbolo\nCrear mi cuenta\n\nGoogle es opcional. Si creas una cuenta con Google, Yachay recibe tu nombre, correo verificado e identificador de Google para darte acceso. Consulta el aviso antes de continuar.\n\nO continúa con\nG\nContinuar con Google\n\n¿Ya tienes una cuenta? Iniciar sesión\n\nTérminos de uso\nAviso de privacidad\nCookies\nAyuda y contacto\nYachay · Plataforma educativa para aprender kichwa"
+    },
+    {
+      "archivo": "03-recuperacion.png",
+      "titulo": "Solicitud de recuperación de contraseña",
+      "ruta": "/recuperar-contrasena",
+      "fecha": "2026-10-23T15:51:15.705Z",
+      "encuadre": {
+        "x": 443,
+        "y": 132,
+        "width": 544,
+        "height": 643.90625,
+        "scale": 1
+      },
+      "alcance": "Interfaz pública real; consultas GET; PostgreSQL en solo lectura; sesión y caché efímeras en memoria.",
+      "texto_visible": "Yachay\nKICHWA\nNuestra cultura\nDiccionario\nIniciar sesión\nVUELVE A TU APRENDIZAJE\nRecupera tu contraseña\n\nAntes de ingresar tus datos, consulta los Términos de uso y el Aviso de privacidad. Si eres menor de edad, pide a tu representante legal que contacte con soporte antes de crear tu cuenta.\n\nEscribe el correo de tu cuenta y te enviaremos un enlace para cambiar la contraseña.\n\nDatos para recuperar tu acceso\nCorreo electrónico\nEnviar enlace de recuperación\nVolver a iniciar sesión\nTérminos de uso\nAviso de privacidad\nCookies\nAyuda y contacto\nYachay · Plataforma educativa para aprender kichwa"
+    },
+    {
+      "archivo": "04-diccionario.png",
+      "titulo": "Consulta de equivalencias de yaku en el diccionario",
+      "ruta": "/diccionario?q=yaku",
+      "fecha": "2026-10-23T15:51:17.746Z",
+      "encuadre": "viewport 1440x1000",
+      "alcance": "Interfaz pública real; consultas GET; PostgreSQL en solo lectura; sesión y caché efímeras en memoria.",
+      "texto_visible": "Yachay\nKICHWA\nNuestra cultura\nDiccionario\nIniciar sesión\n\nPALABRAS PARA DESCUBRIR\n\nDiccionario Kichwa–Español\n\nExplora el vocabulario y sus equivalencias en los dos idiomas.\n\nIdioma de origen\nKichwa\nEspañol\nIdioma de destino\nEspañol\nKichwa\nPalabra o expresión en Kichwa\n\nBusca palabras y expresiones del diccionario Kichwa–Español.\n\n4 / 100\nEspañol\n24 coincidencias\ns. agua, líquido; s. octubre.\n\nyaku ↔ s. agua, líquido; s. octubre.\n\nagua\n\nyaku ↔ agua\n\nel agua\n\nyakuka ↔ el agua\n\nlagartija.\n\nyaku palu ↔ lagartija.\n\ns. agua de regadío.\n\nparku yaku ↔ s. agua de regadío.\n\npez (variedad).\n\nyaku-aycha ↔ pez (variedad).\n\ns. pez, pescado.\n\nyaku aycha ↔ s. pez, pescado.\n\ns. charco.\n\nyaku kucha ↔ s. charco.\n\nrío.\n\nhatun yaku ↔ río.\n\ns. agua termal.\n\nkunuk yaku ↔ s. agua termal.\n\ns. variedad de nutria.\n\nyaku ukucha ↔ s. variedad de nutria.\n\nbrazo — del río.\n\npallka yaku ↔ brazo — del río.\n\nanaconda.\n\nyakumama ↔ anaconda.\n\njugoso\n\nyakusapa ↔ jugoso\n\ndesleirse; diluír.\n\nyakuyana ↔ desleirse; diluír.\n\nv. orinar.\n\nyaku-ishpana ↔ v. orinar.\n\ns. lugar donde el agua es profunda.\n\nyakuku kuska ↔ s. lugar donde el agua es profunda.\n\nv. tener sed.\n\nyakunayay ↔ v. tener sed.\n\ndiluirse.\n\nyakuyarina ↔ diluirse.\n\nadj. líquido.\n\nyakuyashka ↔ adj. líquido.\n\nAnterior\n1 / 2\nSiguiente\n\nConsulta equivalencias registradas por el docente; la búsqueda no traduce documentos ni frases completas.\n\nTérminos de uso\nAviso de privacidad\nCookies\nAyuda y contacto\nYachay · Plataforma educativa para aprender kichwa"
+    },
+    {
+      "archivo": "05-diccionario-inverso.png",
+      "ruta": "/diccionario",
+      "consulta": "agua",
+      "direccion": "es-kichwa",
+      "fecha": "2026-10-23T15:51:19.734Z",
+      "texto_visible": "Yachay\nKICHWA\nNuestra cultura\nDiccionario\nIniciar sesión\n\nPALABRAS PARA DESCUBRIR\n\nDiccionario Kichwa–Español\n\nExplora el vocabulario y sus equivalencias en los dos idiomas.\n\nIdioma de origen\nKichwa\nEspañol\nIdioma de destino\nEspañol\nKichwa\nPalabra o expresión en Español\n\nBusca palabras y expresiones del diccionario Kichwa–Español.\n\n4 / 100\nKichwa\n24 coincidencias\nyaku\n\nyaku ↔ agua\n\nyaku\n\nyaku ↔ s. agua, líquido; s. octubre.\n\nyakuka\n\nyakuka ↔ el agua\n\ntallina\n\ntallina ↔ v. regar, esparcir; verter, regar agua; desbordarse.\n\nchaychu yakuka\n\nchaychu yakuka ↔ eso es el agua\n\nkunuk yaku\n\nkunuk yaku ↔ s. agua termal.\n\npakcha\n\npakcha ↔ s. fuente de agua, chorrera, cascada.\n\npukyu\n\npukyu ↔ s. vertiente, pozo, manantial; fuente de agua.\n\nparku yaku\n\nparku yaku ↔ s. agua de regadío.\n\nmuyuna\n\nmuyuna ↔ v. girar, dar vueltas alrededor; remolino — de agua.\n\nchakichishka\n\nchakichishka ↔ adj. seco, con el agua agotada.\n\nparkuna\n\nparkuna ↔ v. regar o esparcir agua; regar — agua de regadío.\n\nchakchuy\n\nchakchuy ↔ esparcir — agua o granos.\n\nchakchuna\n\nchakchuna ↔ v. descomponer, re gar, botar, esparcir agua o granos; v. hacer algo a escondidas; v. alabarse, ponderar; hacer — algo a escondidas; ponderarse; regar.\n\nparkuy\n\nparkuy ↔ esparcir — agua de regadío.\n\nyakuku kuska\n\nyakuku kuska ↔ s. lugar donde el agua es profunda.\n\nrasuyay\n\nrasuyay ↔ v. congelarse o solidificarse el agua.\n\nchuya\n\nchuya ↔ adj. limpio, aguado; transparente.\n\npallta\n\npallta ↔ s. aguacate.\n\nshuyana\n\nshuyana ↔ v. esperar, aguardar.\n\nAnterior\n1 / 2\nSiguiente\n\nConsulta equivalencias registradas por el docente; la búsqueda no traduce documentos ni frases completas.\n\nTérminos de uso\nAviso de privacidad\nCookies\nAyuda y contacto\nYachay · Plataforma educativa para aprender kichwa"
+    }
+  ],
+  "requests": [
+    {
+      "url": "http://127.0.0.1:8000/api/config",
+      "status": 204
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/config",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/config",
+      "status": 204
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/config",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/config",
+      "status": 204
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/config",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/config",
+      "status": 204
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/config",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/diccionario/buscar?q=yaku&direccion=kichwa-es&page=1",
+      "status": 204
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/diccionario/buscar?q=yaku&direccion=kichwa-es&page=1",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/diccionario/buscar?q=yaku&direccion=es-kichwa&page=1",
+      "status": 204
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/diccionario/buscar?q=agua&direccion=es-kichwa&page=1",
+      "status": 204
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/diccionario/buscar?q=agua&direccion=es-kichwa&page=1",
+      "status": 200
+    }
+  ],
+  "errors": [],
+  "metodo": "Microsoft Edge headless; CDP; aplicación real sin respuestas simuladas; servidor efímero rechaza POST/PATCH/DELETE y configura PostgreSQL default_transaction_read_only=on."
+}

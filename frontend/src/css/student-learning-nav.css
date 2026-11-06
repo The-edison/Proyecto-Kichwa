@@ -36,6 +36,9 @@
 .app-shell.is-learning .app-topbar { display: none; }
 .app-shell.is-learning .guided-unit-header { padding-inline: 24px; }
 @media (min-width: 901px) {
+    .app-shell.is-learning .app-main { padding: 16px 16px 16px 0; }
+    .app-shell.is-learning .guided-unit-shell { min-height: calc(100dvh - 32px); }
+    .app-shell.is-learning .guided-unit-shell.is-activity { height: calc(100dvh - 32px); min-height: 0; }
     .app-shell.is-collapsed .learning-nav-label, .app-shell.is-collapsed .learning-nav-chevron, .app-shell.is-collapsed .learning-nav-children, .app-shell.is-collapsed .learning-nav-message { display: none; }
     .app-shell.is-collapsed .student-overview-toggle { display: none; }
     .app-shell.is-collapsed .student-overview-home { justify-content: center; width: 100%; padding: 12px 0; }

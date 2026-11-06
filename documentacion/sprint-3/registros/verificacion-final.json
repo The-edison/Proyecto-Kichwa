@@ -1,0 +1,16 @@
+{
+  "fecha": "2026-10-23T10:59:39.762241-05:00",
+  "comando": "python recursos/verificar-entrega.py",
+  "resultado": "APROBADO",
+  "original_externo_sin_cambios": true,
+  "codigo_rastreado_sin_cambios": true,
+  "fuentes_con_hash_verificado": 71,
+  "fragmentos_literales": 13,
+  "imagenes_reales": 5,
+  "apartados_de_resultados": 10,
+  "partes_xml_validas": 28,
+  "relaciones_imagen_validas": true,
+  "capturas_api_http_200": 6,
+  "capturas_preflight_http_204": 7,
+  "limite": "Estructura y contenido; sin validación visual de paginación en Microsoft Word."
+}

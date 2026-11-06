@@ -1,0 +1,161 @@
+.morpheme-illustration {
+    display: block; flex: none; width: 100%; aspect-ratio: 1;
+    background-image: url('../images/morpheme-practice-atlas.png');
+    background-size: 400% 300%; background-repeat: no-repeat;
+    border-radius: 14px; overflow: hidden;
+}
+.is-morphemes { --color-secondary: #60349d; --color-secondary-soft: #f1eaff; }
+[data-theme='dark'] .is-morphemes { --color-secondary: #c9b0fa; --color-secondary-soft: #302344; }
+.is-morphemes.is-activity .guided-unit-main { overflow-y: auto; width: min(1060px,calc(100% - 48px)); }
+.is-morphemes.is-activity .exercise-companion-header { grid-template-columns: minmax(0,1fr) auto; }
+.is-morphemes.is-activity .exercise-companion-header > .learning-companion { display: block; justify-self: end; align-self: start; }
+.is-morphemes .guided-exercise-heading { color: var(--color-secondary); }
+.morpheme-practice { margin: 18px auto 0; width: 100%; max-width: 980px; padding: clamp(18px,3vw,32px); border: 1px solid var(--color-border); border-radius: 24px; background: color-mix(in srgb,var(--color-surface) 94%,var(--color-secondary-soft)); background-clip: padding-box; box-shadow: 0 3px 12px #45316f08; }
+.morpheme-practice button { font: inherit; cursor: pointer; }
+.morpheme-practice button:disabled { cursor: default; }
+.morpheme-practice :is(button,input):focus-visible { outline: 3px solid var(--color-secondary); outline-offset: 3px; }
+.morpheme-matching-layout { display: grid; grid-template-columns: minmax(0,1fr); gap: 12px 24px; align-items: center; }
+.morpheme-board { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: clamp(28px,5vw,78px); position: relative; }
+.morpheme-column { display: grid; grid-auto-rows: minmax(58px,auto); gap: 12px; min-width: 0; }
+.morpheme-column button { border: 1px solid #b8a7df; border-radius: 10px; color: var(--color-text); background: var(--color-surface); min-width: 0; padding: 10px 12px; font-size: 18px; font-weight: 750; }
+.morpheme-column button:disabled { opacity: 1; }
+.morpheme-origin { display: flex; align-items: stretch; border: 1px solid #b8a7df; border-radius: 10px; background: var(--color-secondary-soft); min-width: 0; }
+.morpheme-origin > .morpheme-word-audio { border: 0; border-radius: 10px 0 0 10px; width: 42px; flex: none; padding: 0; display: grid; place-items: center; color: var(--color-secondary); background: transparent; }
+.morpheme-origin > [data-matching-origin] { flex: 1; padding-left: 2px; border: 0; border-radius: 0 10px 10px 0; background: transparent; display: flex; align-items: center; justify-content: space-between; gap: 4px; text-align: left; }
+.morpheme-column > [data-matching-destination] { position: relative; text-align: left; display: flex; align-items: center; gap: 10px; }
+.morpheme-column button.is-selected { outline: 2px solid var(--color-secondary); background: var(--color-secondary-soft); }
+.morpheme-origin .morpheme-illustration { width: 48px; height: 44px; aspect-ratio: auto; border-radius: 7px; }
+.morpheme-origin [lang='qu'] { flex: 1; }
+.morpheme-activity-1 .morpheme-board { grid-template-columns: minmax(0,1.3fr) minmax(0,1fr); }
+.morpheme-activity-1 [data-matching-origin] { gap: 10px; }
+.morpheme-matching-hint { grid-column: 1 / -1; margin-top: 4px; font-size: 13px; line-height: 1.5; color: var(--color-text-secondary); }
+.morpheme-matching-layout.is-family { grid-template-columns: minmax(0,1fr) minmax(160px,230px); }
+.morpheme-family { align-self: center; }
+.morpheme-listening-layout { display: grid; grid-template-columns: minmax(170px,.9fr) minmax(0,1.6fr); gap: 26px; align-items: center; }
+.morpheme-listening-scene { position: relative; margin: 0; align-self: end; flex-shrink: 0; }
+.morpheme-listening-scene .morpheme-illustration { border-radius: 18px; }
+.morpheme-listening-scene > img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; border-radius: 18px; }
+.morpheme-listening-scene figcaption { position: absolute; left: 4%; right: 4%; bottom: 4%; height: 24%; display: grid; grid-template-columns: repeat(3,1fr); align-items: center; text-align: center; font-size: clamp(22px,3vw,36px); font-weight: 800; color: #fff; text-shadow: 0 2px 3px #493311; }
+.morpheme-listening-scene figcaption span:nth-child(2) { align-self: start; }
+.morpheme-listening-content { min-width: 0; display: grid; gap: 24px; }
+.morpheme-listening-panel { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; padding-top: 8px; }
+.morpheme-listening-card { min-width: 0; }
+.morpheme-listening-card > h2 { color: var(--color-secondary); font-size: 17px; font-weight: 800; }
+.morpheme-listening-panel .morpheme-practice { margin-top: 10px; padding: 20px; }
+.morpheme-listening-panel .morpheme-listening-layout { grid-template-columns: minmax(0,1fr); gap: 16px; }
+.morpheme-listening-panel .morpheme-listening-scene { width: min(170px,70%); justify-self: center; }
+.morpheme-listening-panel .morpheme-listening-content { gap: 16px; }
+.morpheme-listening-panel .morpheme-options label { min-height: 66px; font-size: 15px; padding: 10px 12px; }
+.morpheme-listening-panel .guided-feedback { font-size: 13px; line-height: 1.5; }
+.morpheme-audio-player { display: flex; align-items: center; gap: 12px; border: 1px solid #bca5ee; border-radius: 24px; padding: 5px 14px 5px 5px; color: var(--color-secondary); background: var(--color-secondary-soft); width: 100%; max-width: 420px; }
+.morpheme-play { display: grid; place-items: center; flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid #49317e; background: linear-gradient(#8963d1,#53349c); color: #fff; }
+.morpheme-audio-time { flex: none; color: var(--color-text); font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.morpheme-audio-player input { min-width: 20px; width: 100%; accent-color: #8561ca; }
+.morpheme-audio-player > svg { flex: none; }
+.morpheme-options { display: grid; gap: 12px; border: 0; margin: 0; padding: 0; min-width: 0; }
+.morpheme-options label { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border: 1px solid var(--color-control-border); border-radius: 11px; background: var(--color-surface); color: var(--color-text); font-size: 17px; line-height: 1.5; cursor: pointer; }
+.morpheme-options label.is-selected { background: var(--color-secondary-soft); border-color: var(--color-secondary); }
+.morpheme-options input { flex: none; width: 20px; height: 20px; accent-color: var(--color-secondary); }
+.morpheme-sentence { color: var(--color-text); font-size: 20px; font-weight: 750; line-height: 1.6; }
+.morpheme-writing-help { max-width: 760px; margin: 0 auto 16px; color: var(--color-text-secondary); font-size: 15px; line-height: 1.5; }
+.morpheme-writing-help strong { color: var(--color-secondary); }
+.morpheme-rows { display: grid; gap: 10px; max-width: 760px; margin-inline: auto; }
+.morpheme-rows label { display: grid; grid-template-columns: 70px 100px minmax(0,1fr); align-items: center; gap: 18px; }
+.morpheme-rows .morpheme-illustration { width: 70px; height: 56px; aspect-ratio: auto; border-radius: 8px; }
+.morpheme-rows label > strong { color: var(--color-text); font-size: 19px; text-align: right; }
+.morpheme-writing-field { display: flex; align-items: center; gap: 8px; padding: 5px 12px; border: 1px solid var(--color-control-border); border-radius: 10px; background: var(--color-surface); }
+.morpheme-writing-field input { width: 100%; min-width: 0; padding: 6px; background: transparent; color: var(--color-text); border: 0; border-bottom: 1px solid var(--color-text-secondary); text-align: center; font-size: 19px; font-weight: 750; }
+.morpheme-writing-field > svg { flex: none; padding: 3px; border-radius: 50%; background: #43a62e; color: white; }
+.morpheme-activity-5 { background: var(--color-surface); }
+.ordinal-exercise { display: grid; gap: 16px; }
+.ordinal-toolbar { display: flex; align-items: center; gap: 12px; }
+.ordinal-toolbar h2 { color: var(--color-text); font-size: 15px; font-weight: 800; }
+.ordinal-count { padding: 3px 9px; border: 1px solid var(--color-border); border-radius: 20px; color: var(--color-secondary); font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.ordinal-count > span { color: var(--color-text-secondary); font-weight: 500; }
+.ordinal-toolbar .ordinal-reset { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; padding: 6px 2px; border: 0; background: transparent; color: var(--color-text-secondary); font-size: 13px; }
+.ordinal-reset:disabled { opacity: .4; }
+.ordinal-word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; padding: 16px; border: 1px solid var(--color-border); border-radius: 14px; background: var(--color-secondary-soft); }
+.ordinal-word-bank .ordinal-chip { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: calc((100% - 36px) / 5); min-height: 38px; padding: 7px 15px; border: 1px solid #baa4dc; border-radius: 9px; background: var(--color-surface); color: var(--color-text); font-size: 15px; font-weight: 750; box-shadow: 0 2px 0 #59328c14; transition: background 120ms,border-color 120ms,transform 120ms; }
+.ordinal-chip:not(:disabled):hover { border-color: var(--color-secondary); transform: translateY(-2px); }
+.ordinal-word-bank .ordinal-chip.is-selected { border-color: #60349d; background: #60349d; color: #fff; box-shadow: 0 0 0 3px #9665d126; }
+.ordinal-word-bank .ordinal-chip.is-used { border-color: transparent; background: transparent; box-shadow: none; color: var(--color-text-secondary); }
+.ordinal-chip > svg { flex: none; color: var(--color-secondary); }
+.ordinal-places { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; }
+.ordinal-place { min-width: 0; position: relative; }
+.ordinal-target { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 90px; padding: 16px; border: 1px solid var(--color-control-border); border-radius: 13px; background: var(--color-surface); color: var(--color-text); text-align: left; transition: border-color 120ms,background 120ms,box-shadow 120ms; }
+.ordinal-target:not(:disabled):hover, .ordinal-place.is-active .ordinal-target { border-color: var(--color-secondary); background: var(--color-secondary-soft); box-shadow: 0 0 0 2px #9665d126; }
+.has-word-selected .ordinal-target:not(:disabled) { border-style: dashed; border-color: var(--color-secondary); }
+.ordinal-number { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 44px; flex: none; border-radius: 11px; background: linear-gradient(145deg,#8053c5,#513080); color: #fff; font-size: 26px; font-weight: 800; line-height: 1; }
+.ordinal-number sup { align-self: start; padding-top: 8px; margin-left: 1px; font-size: 13px; line-height: 1; }
+.ordinal-place-copy { display: grid; align-content: center; gap: 7px; min-width: 0; width: 100%; }
+.ordinal-place-name { color: var(--color-text-secondary); font-size: 12px; line-height: 1.2; }
+.ordinal-place-copy > strong { font-size: 17px; font-weight: 800; line-height: 1.3; }
+.ordinal-empty-line { display: block; width: 75%; height: 16px; border-bottom: 2px dashed #baa4dc; }
+.ordinal-place.is-filled .ordinal-target { background: var(--color-secondary-soft); }
+.ordinal-place.is-filled .ordinal-place-copy { padding-right: 10px; }
+.ordinal-remove { position: absolute; right: 5px; top: 5px; display: grid; place-items: center; width: 24px; height: 24px; border: 0; border-radius: 50%; background: transparent; color: var(--color-text-secondary); }
+.ordinal-remove:hover { background: var(--color-surface); color: var(--color-secondary); }
+.morpheme-audio-error { margin-top: 16px; font-size: 14px; color: var(--color-error); }
+@media (max-width: 760px) {
+    .morpheme-listening-panel { grid-template-columns: minmax(0,1fr); }
+    .morpheme-listening-panel .morpheme-listening-layout { grid-template-columns: minmax(110px,.7fr) minmax(0,1.5fr); }
+    .morpheme-practice { padding: 18px; }
+    .morpheme-matching-layout { gap: 12px; }
+    .morpheme-origin .morpheme-illustration { width: 36px; height: 36px; }
+    .morpheme-column { grid-auto-rows: minmax(54px,auto); }
+    .morpheme-column button { font-size: 15px; padding: 8px; }
+    .morpheme-origin > .morpheme-word-audio { width: 32px; }
+    .morpheme-board { column-gap: 28px; }
+    .morpheme-matching-layout.is-family { grid-template-columns: minmax(0,1fr) 140px; }
+    .morpheme-listening-layout { gap: 18px; grid-template-columns: minmax(120px,.8fr) minmax(0,1.5fr); }
+    .morpheme-options label { padding: 9px 10px; font-size: 15px; }
+    .morpheme-audio-player { gap: 8px; }
+    .morpheme-audio-player > svg { display: none; }
+}
+@media (max-width: 540px) {
+    .morpheme-listening-panel .morpheme-practice { padding: 14px; }
+    .morpheme-listening-panel .morpheme-listening-layout { grid-template-columns: minmax(0,1fr); }
+    .morpheme-listening-panel .morpheme-options label { min-height: 48px; }
+    .is-morphemes.is-activity .guided-unit-main { width: calc(100% - 24px); }
+    .morpheme-practice { padding: 14px; border-radius: 14px; margin-top: 12px; }
+    .morpheme-matching-layout, .morpheme-matching-layout.is-family { grid-template-columns: minmax(0,1fr); gap: 16px; }
+    .morpheme-origin .morpheme-illustration { width: 26px; height: 30px; }
+    .morpheme-activity-1 .morpheme-board { grid-template-columns: minmax(0,1.7fr) minmax(0,1fr); }
+    .morpheme-activity-1 [data-matching-origin] { gap: 4px; }
+    .morpheme-activity-1 [data-matching-origin] [lang='qu'] { font-size: 12px; white-space: nowrap; }
+    .morpheme-activity-1 .morpheme-word-audio { width: 24px; }
+    .morpheme-family { width: min(180px,65%); justify-self: center; }
+    .morpheme-board { column-gap: 24px; }
+    .morpheme-column { gap: 9px; grid-auto-rows: minmax(48px,auto); }
+    .morpheme-origin > .morpheme-word-audio { width: 28px; }
+    .morpheme-word-audio svg { width: 18px; }
+    .morpheme-column button { font-size: 13px; padding: 7px; overflow-wrap: anywhere; }
+    .morpheme-listening-layout { grid-template-columns: minmax(0,1fr); gap: 16px; }
+    .morpheme-listening-scene { width: min(190px,65%); justify-self: center; }
+    .morpheme-listening-content { gap: 16px; }
+    .morpheme-audio-player { max-width: none; }
+    .morpheme-audio-player > svg { display: block; }
+    .morpheme-options { gap: 8px; }
+    .morpheme-sentence { font-size: 17px; }
+    .morpheme-rows { gap: 14px; }
+    .morpheme-rows label { grid-template-columns: 46px 68px minmax(0,1fr); gap: 8px; }
+    .morpheme-rows .morpheme-illustration { width: 46px; height: 42px; }
+    .morpheme-rows label > strong { font-size: 15px; }
+    .morpheme-writing-field { padding: 4px; gap: 3px; }
+    .morpheme-writing-field input { font-size: 15px; padding: 5px 2px; }
+    .morpheme-writing-field input::placeholder { font-size: 12px; }
+    .ordinal-word-bank { padding: 10px; gap: 7px; }
+    .ordinal-word-bank .ordinal-chip { min-width: 0; min-height: 34px; font-size: 13px; padding: 6px 9px; }
+    .ordinal-places { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+    .ordinal-target { min-height: 80px; gap: 8px; padding: 10px; }
+    .ordinal-number { width: 29px; height: 36px; border-radius: 8px; font-size: 22px; }
+    .ordinal-number sup { padding-top: 6px; font-size: 10px; }
+    .ordinal-place-copy > strong { font-size: 13px; }
+    .ordinal-place-name { font-size: 11px; }
+    .ordinal-place.is-filled .ordinal-place-copy { padding-right: 0; }
+}
+@media (max-width: 360px) {
+    .ordinal-target { gap: 6px; padding: 8px; }
+    .ordinal-number { width: 25px; }
+    .ordinal-place-copy > strong { font-size: 12px; }
+}

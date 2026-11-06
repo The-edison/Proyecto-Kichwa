@@ -1,0 +1,570 @@
+[
+  {
+    "apartado": "4.4.4.1",
+    "archivo": "frontend/package.json",
+    "inicio": 1,
+    "fin": 30,
+    "detalle": "Rangos declarados; versiones instaladas en version-proyecto.json.",
+    "sha256": "65e19de9a195b750f285f1b0784ace862ecb8cdfedb2e171d318ae8dae846164"
+  },
+  {
+    "apartado": "4.4.4.1",
+    "archivo": "backend/composer.json",
+    "inicio": 1,
+    "fin": 86,
+    "detalle": "Requisitos PHP/Laravel y scripts; no se ejecutaron scripts de instalación.",
+    "sha256": "fca7cafd8a4ca0fad098685dd6a2f579c00b2b833c0e5596fc7d1ea35e7f9476"
+  },
+  {
+    "apartado": "4.4.4.1",
+    "archivo": "frontend/src/js/app.tsx",
+    "inicio": 1,
+    "fin": 14,
+    "detalle": "Composición de proveedores React.",
+    "sha256": "6afca15ae20df511bb34500222ed3e70af3a6e62d59b231ef68fe3c4a858043a"
+  },
+  {
+    "apartado": "4.4.4.1 / 4.4.4.3",
+    "archivo": "frontend/src/js/router.tsx",
+    "inicio": 1,
+    "fin": 73,
+    "detalle": "Navegación, controles de presentación y estados de nivel.",
+    "sha256": "dab6bc30f5b34f03d0ac25a9ff53a138f364289aa29abf52e1a7bb774d399b6a"
+  },
+  {
+    "apartado": "4.4.4.2",
+    "archivo": "backend/database/migrations/2026_09_30_000004_create_unidades_table.php",
+    "inicio": 1,
+    "fin": 35,
+    "detalle": "FK, identidad, orden y unicidad por módulo.",
+    "sha256": "1afa39c24684a59aaa7210787c0cfcfc331f9e9ab82ff99713b707b08d43aff1"
+  },
+  {
+    "apartado": "4.4.4.2",
+    "archivo": "backend/database/migrations/2026_09_30_000001_create_usuarios_table.php",
+    "inicio": 1,
+    "fin": 39,
+    "detalle": "Rol, estado, unicidad y normalización.",
+    "sha256": "e4bbc4b75c909102284d8233b50cb760bb61aa262dc0f2ce3a47a849b87b62e2"
+  },
+  {
+    "apartado": "4.4.4.2 / 4.4.4.3",
+    "archivo": "backend/database/migrations/2026_10_06_011344_extend_usuarios_for_secure_authentication.php",
+    "inicio": 1,
+    "fin": 30,
+    "detalle": "Identidad local/Google, cédula opcional y contraseña nullable.",
+    "sha256": "4c00355c8f59763b31c41808cd08c53a4a2f7bfb5e1894d86b37d348a496d7f2"
+  },
+  {
+    "apartado": "4.4.4.2",
+    "archivo": "backend/database/migrations/2026_10_01_000000_create_learning_schema.php",
+    "inicio": 1,
+    "fin": 209,
+    "detalle": "Conjunto paralelo de tablas en inglés; no confundir con modelos principales.",
+    "sha256": "493f947945db21dd14b99bb9d30ed23904dea63d387a30855e35b60dc7d27261"
+  },
+  {
+    "apartado": "4.4.4.2",
+    "archivo": "backend/database/migrations/2026_09_30_000015_reglas_integridad.php",
+    "inicio": 1,
+    "fin": 162,
+    "detalle": "Funciones y triggers iniciales; contrastados con migraciones posteriores.",
+    "sha256": "729514a5ff024ec69bd20aa3cf0e0ae7750e5eb94691348f6aad723114ad7ba8"
+  },
+  {
+    "apartado": "4.4.4.2 / 4.4.4.6",
+    "archivo": "backend/database/migrations/2026_09_30_000016_vistas.php",
+    "inicio": 1,
+    "fin": 76,
+    "detalle": "Cinco vistas iniciales; denominador de v_intentos_evaluacion.",
+    "sha256": "5860add240928653e8c04800c8fd6ef0f81db397b5ca274cd3e93fe85d0251d5"
+  },
+  {
+    "apartado": "4.4.4.2 / 4.4.4.4",
+    "archivo": "backend/database/migrations/2026_10_10_224431_preserve_learning_versions_and_publication.php",
+    "inicio": 1,
+    "fin": 57,
+    "detalle": "Protección del historial y excepciones de orden/publicación.",
+    "sha256": "672cb2528c19efe510e4f5c5aca93222558037e2b6e3f70f709e04c9f976fe1d"
+  },
+  {
+    "apartado": "4.4.4.2 / 4.4.4.7",
+    "archivo": "backend/database/migrations/2026_10_10_225200_preserve_practice_progress_across_versions.php",
+    "inicio": 1,
+    "fin": 54,
+    "detalle": "Vista vigente de progreso por linaje y origen de recompensa.",
+    "sha256": "001ba9678aa8c55e96adec85e1a0438b7ae54c5565f27839b45b2d09343fc4e4"
+  },
+  {
+    "apartado": "4.4.4.2 / 4.4.4.6",
+    "archivo": "backend/database/migrations/2026_10_20_144432_add_module_evaluations.php",
+    "inicio": 1,
+    "fin": 38,
+    "detalle": "Evaluación de módulo y unicidad parcial de publicación.",
+    "sha256": "d919dcfa8b0056d6433e2418e6eee256f961041928f6c6d48f1964e1c9e4750e"
+  },
+  {
+    "apartado": "4.4.4.2",
+    "archivo": "backend/app/Models/Unidad.php",
+    "inicio": 1,
+    "fin": 21,
+    "detalle": "Tabla, clave, fillable y casts; sin asociación Eloquent declarada.",
+    "sha256": "6cc92d436d313d7f6ac0ced27929e60e79489666c4b91f9917c47f274e80ed3e"
+  },
+  {
+    "apartado": "4.4.4.2 / 4.4.4.3",
+    "archivo": "backend/config/auth.php",
+    "inicio": 1,
+    "fin": 117,
+    "detalle": "Proveedor Usuario, guard web y broker de 60 minutos.",
+    "sha256": "9917ecbe3a28eb6c0c2b4b81c81aa2bc8bce50be56bd6eaea94796b7e57dd387"
+  },
+  {
+    "apartado": "4.4.4.3",
+    "archivo": "backend/app/Http/Requests/RegisterRequest.php",
+    "inicio": 1,
+    "fin": 104,
+    "detalle": "Reglas de registro, cédula opcional y asignación de rol prohibida.",
+    "sha256": "de89fa7481edc52baaa05fcab499fee75603daa24228595042cc169309f076db"
+  },
+  {
+    "apartado": "4.4.4.3",
+    "archivo": "backend/app/Http/Controllers/Api/AuthController.php",
+    "inicio": 1,
+    "fin": 186,
+    "detalle": "Registro, acceso local, cierre, cambio y recuperación.",
+    "sha256": "fee29b7c2e4935093f7e25e1dd966650c54894be55241400d50dedff509119a0"
+  },
+  {
+    "apartado": "4.4.4.3",
+    "archivo": "backend/app/Models/Usuario.php",
+    "inicio": 1,
+    "fin": 63,
+    "detalle": "Cast hashed, campos ocultos y perfil público de cuenta.",
+    "sha256": "357d50adbe820a1147af23f754768b937cead454f70379c8137645f0fd2246bd"
+  },
+  {
+    "apartado": "4.4.4.3",
+    "archivo": "backend/app/Services/AutenticacionPestana.php",
+    "inicio": 1,
+    "fin": 44,
+    "detalle": "Credencial por pestaña y vínculo con huella de contraseña.",
+    "sha256": "436def3a8647ee179814c33aa84eaf6eace34f16efe05d3b3da0f81a24f900c4"
+  },
+  {
+    "apartado": "4.4.4.3 / 4.4.4.9",
+    "archivo": "backend/app/Http/Middleware/SesionPestana.php",
+    "inicio": 1,
+    "fin": 38,
+    "detalle": "Selección del usuario autenticado según pestaña en solicitudes SPA.",
+    "sha256": "3db21ab46d2fea089857275565a91ceaf3dba8a4393fad23853a578258488afa"
+  },
+  {
+    "apartado": "4.4.4.3 / 4.4.4.9",
+    "archivo": "backend/app/Http/Middleware/CuentaActiva.php",
+    "inicio": 1,
+    "fin": 36,
+    "detalle": "Bloqueo y cambio inicial de contraseña pendiente.",
+    "sha256": "515a2895bfaca8a865d3223d793e6f2b7f2eb6948ac21f7bf9784c3150fef2e8"
+  },
+  {
+    "apartado": "4.4.4.3 / 4.4.4.9",
+    "archivo": "backend/app/Http/Middleware/RequireRole.php",
+    "inicio": 1,
+    "fin": 18,
+    "detalle": "Verificación del rol y continuación de la cadena.",
+    "sha256": "afb3940c0ad87f3864d42bbb06688d00557f083157b0e8c49e09545c62113d14"
+  },
+  {
+    "apartado": "4.4.4.3",
+    "archivo": "backend/app/Http/Controllers/Web/GoogleAuthController.php",
+    "inicio": 1,
+    "fin": 190,
+    "detalle": "Preparación, state de Socialite, correo verificado y vinculación explícita.",
+    "sha256": "ab356eaae1927d9b654f43e20722722784d26a5cf333cafc832ae64e73c66eca"
+  },
+  {
+    "apartado": "4.4.4.3",
+    "archivo": "backend/app/Providers/AppServiceProvider.php",
+    "inicio": 1,
+    "fin": 30,
+    "detalle": "Proveedor de PostgreSQL y notificación de recuperación.",
+    "sha256": "122eb2985da67da7bf8ebc697ea061713e25ca9113b361360649573ac3fc831b"
+  },
+  {
+    "apartado": "4.4.4.3 / 4.4.4.8",
+    "archivo": "frontend/src/js/context/AuthContext.tsx",
+    "inicio": 1,
+    "fin": 115,
+    "detalle": "Eventos de sesión, inactividad y consumidores de la API.",
+    "sha256": "dbd9d9e9d12d576a2a2c92ecf6ad55337fb48d0d439f70260a328f4569bd63e2"
+  },
+  {
+    "apartado": "4.4.4.3 / 4.4.4.9",
+    "archivo": "backend/bootstrap/app.php",
+    "inicio": 1,
+    "fin": 47,
+    "detalle": "Alias de middleware, statefulApi y respuestas de errores de integridad.",
+    "sha256": "cb8fda5bfa5485cb31b57dc98fd708bdccb3f007d9ab164f98b3a5ab0075fc78"
+  },
+  {
+    "apartado": "4.4.4.3 / 4.4.4.9",
+    "archivo": "backend/config/sanctum.php",
+    "inicio": 1,
+    "fin": 87,
+    "detalle": "Inserción de SesionPestana en subcadena stateful.",
+    "sha256": "fdc7e85508673b84cbb6158613c285961595fc70786bba6a35b851fbb774769d"
+  },
+  {
+    "apartado": "4.4.4.3 / 4.4.4.8 / 4.4.4.9",
+    "archivo": "backend/routes/api.php",
+    "inicio": 1,
+    "fin": 98,
+    "detalle": "Rutas, grupos por rol y límites de solicitudes.",
+    "sha256": "4fa688b0928e03c4709c5d9251ba17593f1401508a88ead7c57459eb742c5ec7"
+  },
+  {
+    "apartado": "4.4.4.3",
+    "archivo": "backend/routes/web.php",
+    "inicio": 1,
+    "fin": 14,
+    "detalle": "Callbacks Google y verificación firmada de correo.",
+    "sha256": "9e0e71b305d7b5aadfd8d16e367431a5dfa2133415593d826b38a68c9866e2d2"
+  },
+  {
+    "apartado": "4.4.4.4",
+    "archivo": "backend/app/Http/Controllers/Api/KichwaCatalogController.php",
+    "inicio": 1,
+    "fin": 181,
+    "detalle": "Jerarquía publicada y estados de disponibilidad.",
+    "sha256": "864000c26d5c64af54643e15c14c8750f7cbbe8b66a71c0cf212d50eee11dd20"
+  },
+  {
+    "apartado": "4.4.4.4",
+    "archivo": "backend/app/Services/PublicacionContenido.php",
+    "inicio": 1,
+    "fin": 61,
+    "detalle": "Caché versionada y selección de prácticas vigentes.",
+    "sha256": "ae87b19becae1541713f824aab9d2f047c1319f7d50b2de0c109d4d9c7aedba2"
+  },
+  {
+    "apartado": "4.4.4.4",
+    "archivo": "backend/app/Services/EstadoContenido.php",
+    "inicio": 1,
+    "fin": 91,
+    "detalle": "Revisión, recursos obligatorios y elegibilidad de preguntas.",
+    "sha256": "6f7536d0881531debb8c8ec6158f21fbb41bbe3d1be46ac66d506c587816164d"
+  },
+  {
+    "apartado": "4.4.4.4 / 4.4.4.7",
+    "archivo": "backend/app/Http/Controllers/Api/KichwaAdminController.php",
+    "inicio": 1,
+    "fin": 507,
+    "detalle": "CRUD, versiones, estudiantes, bloqueo y búsqueda.",
+    "sha256": "e15ca995180b77381da58bebec4184103de6758b4ce6d8eb959af4b0549eec55"
+  },
+  {
+    "apartado": "4.4.4.4",
+    "archivo": "backend/app/Http/Requests/SaveKichwaContentRequest.php",
+    "inicio": 1,
+    "fin": 130,
+    "detalle": "Autorización administrativa y reglas de estructura.",
+    "sha256": "58396f8aef32b857d0c645eb8acda49627fc6cdc8159979f2b1a28faebab9def"
+  },
+  {
+    "apartado": "4.4.4.4",
+    "archivo": "backend/app/Services/KichwaResource.php",
+    "inicio": 1,
+    "fin": 107,
+    "detalle": "Modelos activos, traducción de campos y exclusión de soluciones.",
+    "sha256": "f9a38f2c5a6e3661cfb7eae5a74122113b1408d5361fa24d77ad3c8af6649769"
+  },
+  {
+    "apartado": "4.4.4.4",
+    "archivo": "backend/database/migrations/2026_10_06_022312_add_publication_and_topic_hierarchy.php",
+    "inicio": 1,
+    "fin": 25,
+    "detalle": "Borrador predeterminado y FK compuesta tema/unidad.",
+    "sha256": "70e9a2ded59df4392f3edae6cf84cc804ec8289f993b969df8da424d783ea357"
+  },
+  {
+    "apartado": "4.4.4.4",
+    "archivo": "backend/database/seeders/DatabaseSeeder.php",
+    "inicio": 1,
+    "fin": 13,
+    "detalle": "Semillas vigentes declaradas; no fueron ejecutadas.",
+    "sha256": "5c5b58ebf82907c58a18789ec288d6da5f16af415b2cada857ab6e346836efd2"
+  },
+  {
+    "apartado": "4.4.4.4",
+    "archivo": "backend/database/seeders/IntermedioMorfemasSeeder.php",
+    "inicio": 1,
+    "fin": 68,
+    "detalle": "Publicación de tema introductorio sin creación de actividades.",
+    "sha256": "13006228535ad9e6428844cfad08d1036a2eb4a7ab0c893e5af032fbf7cf8214"
+  },
+  {
+    "apartado": "4.4.4.4",
+    "archivo": "backend/database/seeders/IntermedioDialogosSeeder.php",
+    "inicio": 1,
+    "fin": 10,
+    "detalle": "Especialización del recurso introductorio.",
+    "sha256": "3d992799d7625505846fa4e20494ae0b916b3ad3fc68d1d3929edb942d1c775f"
+  },
+  {
+    "apartado": "4.4.4.4 / 4.4.4.5 / 4.4.4.8 / 4.4.4.9",
+    "archivo": "frontend/src/js/components/GuidedUnit.tsx",
+    "inicio": 1,
+    "fin": 339,
+    "detalle": "Lecciones sin práctica, almacén externo, envío y tratamiento de resultados.",
+    "sha256": "000c4446c1a074dc090c7d37c84d4265c792df06ada111ee349f248ede99630e"
+  },
+  {
+    "apartado": "4.4.4.4",
+    "archivo": "frontend/src/js/pages/Student/Unit.tsx",
+    "inicio": 1,
+    "fin": 40,
+    "detalle": "Distinción de modos guiado, secuencia y clásico.",
+    "sha256": "e5c916a3ad4262bacc5129da1bcf9863d6c299f96534223e8d80fb34e215f869"
+  },
+  {
+    "apartado": "4.4.4.4",
+    "archivo": "frontend/src/js/components/AdvancedMorphemesIntroduction.tsx",
+    "inicio": 1,
+    "fin": 65,
+    "detalle": "Presentación de lección JSON.",
+    "sha256": "fe6e71ddabe5c02cc1754ec2ec27c2fb4a8d6e81dbe34814bc4118d53d366185"
+  },
+  {
+    "apartado": "4.4.4.4",
+    "archivo": "frontend/src/js/components/ShortDialoguesIntroduction.tsx",
+    "inicio": 1,
+    "fin": 118,
+    "detalle": "Interacción de lectura y diálogos introductorios.",
+    "sha256": "a2774596401a88a53a6eb03b48a5817fbd39c7ece4be05093cd704dcbca15071"
+  },
+  {
+    "apartado": "4.4.4.5",
+    "archivo": "backend/app/Services/ContratoEjercicio.php",
+    "inicio": 1,
+    "fin": 499,
+    "detalle": "Contrato, validación, corrección, feedback, resultados individuales y normalización.",
+    "sha256": "fdeabb19e2be9c9cfd9da018027632ec492a605cde32f062962eaa48d9d763a5"
+  },
+  {
+    "apartado": "4.4.4.5 / 4.4.4.6",
+    "archivo": "backend/app/Http/Controllers/Api/KichwaSubmissionController.php",
+    "inicio": 1,
+    "fin": 277,
+    "detalle": "Actividad, idempotencia, resultados guiados e intentos de evaluación.",
+    "sha256": "b3096299d7d9f7608f58279c7e65c1faa0ea34b2e2ec62d1cba788ffb282a74c"
+  },
+  {
+    "apartado": "4.4.4.5",
+    "archivo": "backend/database/migrations/2026_10_14_144135_track_practice_attempts_and_submissions_on_answers.php",
+    "inicio": 1,
+    "fin": 28,
+    "detalle": "UUID de intento/envío e índice de idempotencia por usuario.",
+    "sha256": "ce601325ffc60e9e1d092305f7d365f22f43890039a1df9dcd04770c866d819f"
+  },
+  {
+    "apartado": "4.4.4.6",
+    "archivo": "backend/app/Services/EvaluacionModulo.php",
+    "inicio": 1,
+    "fin": 39,
+    "detalle": "Desbloqueo por unidades previstas y todas sus prácticas correctas.",
+    "sha256": "5d16e3cfdb5e8ef2c2b05d8f654c2077f4028aeb0ab9adf38f571fc75ea6c7d2"
+  },
+  {
+    "apartado": "4.4.4.6",
+    "archivo": "backend/app/Services/SecuenciaUnidad.php",
+    "inicio": 1,
+    "fin": 95,
+    "detalle": "Secuencia alternativa de siete prácticas y prueba 6/5.",
+    "sha256": "d6e006d9d65b19b1f703a75624f1479a0bdb8d0be09d0bab19dd397fe5d8a927"
+  },
+  {
+    "apartado": "4.4.4.6",
+    "archivo": "backend/database/seeders/ModuloUnoEvaluacionSeeder.php",
+    "inicio": 1,
+    "fin": 60,
+    "detalle": "Configuración de 15 preguntas, puntaje unitario y umbral 80%.",
+    "sha256": "d377cc5ee1671761c3de12189210b28ddc0dee1e0458fce8a04c4ee2b19bd101"
+  },
+  {
+    "apartado": "4.4.4.7",
+    "archivo": "backend/app/Services/ProgresoAprendizaje.php",
+    "inicio": 1,
+    "fin": 101,
+    "detalle": "Linajes, porcentajes, finalización y próximo paso.",
+    "sha256": "b8b8fcef9c408ca6ff0b4494b89cf5b9944c7fa2750610805aff0e17b37c5a43"
+  },
+  {
+    "apartado": "4.4.4.7",
+    "archivo": "backend/app/Services/DominioLecciones.php",
+    "inicio": 1,
+    "fin": 187,
+    "detalle": "XP, dominio, medallas y reporte de aprendizaje.",
+    "sha256": "53c38e95af523580fcb086623e044164ffdf340347b777c9b22f5e38510ea592"
+  },
+  {
+    "apartado": "4.4.4.7",
+    "archivo": "backend/app/Http/Controllers/Api/KichwaCatalogController.php",
+    "inicio": 297,
+    "fin": 325,
+    "detalle": "Progreso y consulta histórica por usuario.",
+    "sha256": "864000c26d5c64af54643e15c14c8750f7cbbe8b66a71c0cf212d50eee11dd20"
+  },
+  {
+    "apartado": "4.4.4.7",
+    "archivo": "backend/app/Http/Controllers/Api/DiccionarioController.php",
+    "inicio": 1,
+    "fin": 115,
+    "detalle": "Búsqueda bidireccional y carga CSV.",
+    "sha256": "982ee01a645ef0e1005ec20e53f1f576b12e812cbc96c1be700268b4a84170e6"
+  },
+  {
+    "apartado": "4.4.4.7",
+    "archivo": "backend/database/migrations/2026_10_06_163017_simplify_diccionario_and_remove_legacy_glossary.php",
+    "inicio": 1,
+    "fin": 37,
+    "detalle": "Tres columnas y retirada de metadatos/glossary.",
+    "sha256": "3757c7990aa864fe2d56db264e35e416a5478cd7d18713b8897f5f05b654016b"
+  },
+  {
+    "apartado": "4.4.4.7",
+    "archivo": "backend/database/migrations/2026_10_10_214852_make_dictionary_normalization_independent_of_unaccent.php",
+    "inicio": 1,
+    "fin": 39,
+    "detalle": "Normalización SQL vigente.",
+    "sha256": "3c4f9c3158954ffee8cd828980044ba61392fe4bf2f9befc199ba890cf72abce"
+  },
+  {
+    "apartado": "4.4.4.7",
+    "archivo": "frontend/src/js/components/DictionarySearch.tsx",
+    "inicio": 1,
+    "fin": 92,
+    "detalle": "Búsqueda diferida, dirección, paginación y estados.",
+    "sha256": "a6fef858af550f43e72176b0c6706e3df1d089682d2a880e6c641611a80b7e8f"
+  },
+  {
+    "apartado": "4.4.4.8 / 4.4.4.9",
+    "archivo": "frontend/src/js/services/api.ts",
+    "inicio": 1,
+    "fin": 121,
+    "detalle": "Fachada HTTP, CSRF, pestaña, errores e invalidación.",
+    "sha256": "5520427afca6f25b6b2d8937af5d8b83886361e528b1e88f54492b813366a1ed"
+  },
+  {
+    "apartado": "4.4.4.8",
+    "archivo": "frontend/src/js/hooks/useApi.ts",
+    "inicio": 1,
+    "fin": 12,
+    "detalle": "Consultas mediante TanStack Query y apiGet.",
+    "sha256": "11a38d542094e08e1a507400882150969aa1e599536d2b34364f468053df1740"
+  },
+  {
+    "apartado": "4.4.4.9",
+    "archivo": "frontend/src/js/services/guidedAttempt.ts",
+    "inicio": 1,
+    "fin": 54,
+    "detalle": "Almacén, listeners, memoria y sessionStorage.",
+    "sha256": "a059b8cd16574280cb6c6eaee26a6973298f9ba5bbb6281000c2338c7a2f6524"
+  },
+  {
+    "apartado": "4.4.4.9",
+    "archivo": "backend/vendor/laravel/framework/src/Illuminate/Hashing/HashManager.php",
+    "inicio": 1,
+    "fin": 128,
+    "detalle": "Strategy del framework, creación y delegación a drivers.",
+    "sha256": "8e92eab414ee928221cf454f7606c1e5cee68185568cf7d777f4997601a47ae4"
+  },
+  {
+    "apartado": "4.4.4.9",
+    "archivo": "backend/vendor/laravel/framework/src/Illuminate/Validation/ValidatesWhenResolvedTrait.php",
+    "inicio": 17,
+    "fin": 42,
+    "detalle": "Método plantilla de resolución y validación.",
+    "sha256": "b316bc93ae2979a859a378068b4b613d4908ff1ef8c24696ba36168c4ac28723"
+  },
+  {
+    "apartado": "4.4.4.9",
+    "archivo": "backend/vendor/laravel/framework/src/Illuminate/Foundation/Http/FormRequest.php",
+    "inicio": 1,
+    "fin": 35,
+    "detalle": "Uso del trait y extensión por solicitudes de Yachay.",
+    "sha256": "83c51fbfed8154ba2bfad7a5522292ec2410bfd5d76737dfebcfc1274e59bfb4"
+  },
+  {
+    "apartado": "4.4.4.9",
+    "archivo": "backend/vendor/laravel/framework/src/Illuminate/Foundation/Providers/FormRequestServiceProvider.php",
+    "inicio": 1,
+    "fin": 39,
+    "detalle": "afterResolving activa validateResolved().",
+    "sha256": "94404a02b3001fd0f30f1317bb61d0f99b246d8a189fb2f58a2950f63627416e"
+  },
+  {
+    "apartado": "4.4.4.9",
+    "archivo": "backend/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php",
+    "inicio": 128,
+    "fin": 149,
+    "detalle": "Composición de la cadena del framework.",
+    "sha256": "c9a4835e189aba69d39ca93f8616db96905aeb0d19d4f263974f0082c77ed974"
+  },
+  {
+    "apartado": "4.4.4.10",
+    "archivo": "frontend/tests/api-security.test.mjs",
+    "inicio": 1,
+    "fin": 135,
+    "detalle": "Pruebas del cliente con fetch y otros servicios aislados.",
+    "sha256": "46200dd7ac57933ec39021571c94373a74b23d848621e9365b3b4daccf8033bd"
+  },
+  {
+    "apartado": "4.4.4.10",
+    "archivo": "frontend/tests/exercise-interaction.test.mjs",
+    "inicio": 1,
+    "fin": 135,
+    "detalle": "Pruebas de interacciones con representación y hooks aislados.",
+    "sha256": "e1710009dc53d3fb3dcc6249129197f8331e15f23b465a8d1e9a9551d673ee34"
+  },
+  {
+    "apartado": "4.4.4.10",
+    "archivo": "backend/tests/Unit/Services/ContratoEjercicioTest.php",
+    "inicio": 1,
+    "fin": 80,
+    "detalle": "Ocho casos de corrección/feedback sin base.",
+    "sha256": "b93935ba586e8585ca32a74e7234c3279f6d2ec873a06c79839515e5213991a1"
+  },
+  {
+    "apartado": "4.4.4.10",
+    "archivo": "backend/tests/Unit/ExampleTest.php",
+    "inicio": 1,
+    "fin": 16,
+    "detalle": "Caso básico incluido en las nueve pruebas; no aporta cobertura funcional.",
+    "sha256": "ffacae5c1a2a44c809420af5b3b404910da1b12167d58764dac6d10b8ba8cfaf"
+  },
+  {
+    "apartado": "4.4.4.10",
+    "archivo": "backend/tests/UsesPostgreSQL.php",
+    "inicio": 1,
+    "fin": 17,
+    "detalle": "RefreshDatabase, migraciones y seeding: no ejecutado.",
+    "sha256": "65aab2243a9574a234bdede5771e05eb5d2c269d8696e7182cd700394baca97a"
+  },
+  {
+    "apartado": "4.4.4.10",
+    "archivo": "backend/tests/TestCase.php",
+    "inicio": 1,
+    "fin": 25,
+    "detalle": "Salvaguarda de entorno testing y nombre de base terminado en _test.",
+    "sha256": "be357d01856abff7b91c42a9932174e6165ee2d4f67797f606376b60e36202e6"
+  },
+  {
+    "apartado": "4.4.4.10",
+    "archivo": "backend/phpunit.xml",
+    "inicio": 1,
+    "fin": 35,
+    "detalle": "Selección de suites y variables de prueba.",
+    "sha256": "1941ad9642f00f8704a3571affd9a99db225c02b58057a26476ff4662ba6500d"
+  }
+]

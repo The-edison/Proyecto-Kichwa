@@ -1,3 +1,18 @@
+/* Use one selection color across exercise types; grading keeps its own colors. */
+:where(.guided-unit-shell.is-activity,[data-exercise-content],.module-final-options)
+    :is(label.is-selected,label:has(> input:checked),button.is-selected,button.is-paired,button[aria-pressed='true'],.guided-audio-tile.is-selected,.guided-audio-tile.is-paired):not([data-answer-correct]):not([data-answer-correct] *) {
+    background: var(--color-primary-button) !important;
+    border-color: var(--color-primary-button) !important;
+    color: var(--color-on-primary) !important;
+}
+:where(.guided-unit-shell.is-activity,[data-exercise-content],.module-final-options)
+    :is(label.is-selected,label:has(> input:checked),button.is-selected,button.is-paired,button[aria-pressed='true'],.guided-audio-tile.is-selected,.guided-audio-tile.is-paired):not([data-answer-correct]):not([data-answer-correct] *) :is(span,strong,small,button) {
+    color: inherit !important;
+}
+:where(.guided-unit-shell.is-activity,[data-exercise-content],.module-final-options)
+    label:has(> input:checked):not([data-answer-correct]):not([data-answer-correct] *) input {
+    accent-color: var(--color-on-primary);
+}
 [data-answer-correct='true'] {
     --answer-feedback-bg: var(--exercise-correct-bg);
     --answer-feedback-color: var(--exercise-correct);

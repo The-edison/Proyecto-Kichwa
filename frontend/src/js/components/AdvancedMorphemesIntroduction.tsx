@@ -42,7 +42,7 @@ export function AdvancedMorphemesIntroduction({ page, onSelectPage }: { page: nu
                     <ArrowRight className="morphemes-formula-arrow" size={24} aria-hidden="true" />
                     <figcaption><strong lang="qu">{first.word}</strong><span>{first.meaning}</span></figcaption>
                 </figure>}
-                {page === 1 && <div className="morphemes-position-line" role="img" aria-label="Fila de nueve posiciones. Shukniki: primero; kimsaniki: tercero; iskunniki: noveno.">{Array.from({ length: 9 }, (_, index) => <span key={index} className={[0, 2, 8].includes(index) ? 'is-featured' : ''}>{index + 1}<small>º</small></span>)}</div>}
+                {page === 1 && <div className="morphemes-position-line" role="img" aria-label="Nueve posiciones, del primer al noveno lugar.">{Array.from({ length: 9 }, (_, index) => <span key={index} className="is-featured">{index + 1}<small>º</small></span>)}</div>}
                 <div className="morphemes-example"><BookOpen size={21} aria-hidden="true" /><div><span className="cometa-card-kicker">{page === 0 ? 'EN UNA ORACIÓN' : 'LEE CON ATENCIÓN'}</span><p lang={page === 3 ? 'es' : 'qu'}>{section.example.before && <>{section.example.before} </>}<strong>{section.example.focus}</strong>{section.example.after && <> {section.example.after}</>}</p><p>{section.example.meaning}</p></div></div>
             </section>
             <section className="cometa-lesson-card morphemes-vocabulary" aria-labelledby="morphemes-vocabulary-title">
