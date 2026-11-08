@@ -37,7 +37,7 @@ class IntermedioModuloDosEvaluacionTest extends TestCase
             IntermedioModuloDosEvaluacionSeeder::class,
         ]);
 
-        return EvaluacionKichwa::where('configuracion->bank_key', 'intermedio-modulo2-final-v5')->firstOrFail();
+        return EvaluacionKichwa::where('configuracion->bank_key', 'intermedio-modulo2-final-v6')->firstOrFail();
     }
 
     private function complete(Usuario $student, EvaluacionKichwa $exam, ?int $except = null): void
@@ -76,21 +76,21 @@ class IntermedioModuloDosEvaluacionTest extends TestCase
         $unit = Unidad::where('configuracion->guided_lesson', 'short-dialogues')->firstOrFail();
         $previous = EvaluacionKichwa::create(['id_modulo' => $unit->id_modulo, 'id_unidad' => null, 'id_tema' => null,
             'titulo_evaluacion' => 'Prueba anterior', 'tipo_evaluacion' => 'modulo', 'publicado' => true,
-            'configuracion' => ['managed' => true, 'final' => true, 'bank_key' => 'intermedio-modulo2-final-v1']]);
+            'configuracion' => ['managed' => true, 'final' => true, 'bank_key' => 'intermedio-modulo2-final-v5']]);
 
         $this->seed(IntermedioModuloDosEvaluacionSeeder::class);
         $this->seed(IntermedioModuloDosEvaluacionSeeder::class);
 
         $this->assertFalse($previous->fresh()->publicado);
         $this->assertSame(1, EvaluacionKichwa::where('id_modulo', $unit->id_modulo)->where('publicado', true)->count());
-        $current = EvaluacionKichwa::where('configuracion->bank_key', 'intermedio-modulo2-final-v5')->firstOrFail();
+        $current = EvaluacionKichwa::where('configuracion->bank_key', 'intermedio-modulo2-final-v6')->firstOrFail();
         $this->assertSame('¿Cuál es la diferencia entre -kamak y -kama?', Pregunta::where('id_evaluacion', $current->id_evaluacion)->where('orden_pregunta', 2)->firstOrFail()->enunciado_pregunta);
         $this->assertSame(20, Pregunta::where('id_evaluacion', $current->id_evaluacion)->count());
         $prompts = Pregunta::where('id_evaluacion', $current->id_evaluacion)->orderBy('orden_pregunta')->pluck('enunciado_pregunta')->all();
         $this->assertSame('¿Qué oración expresa una acción de ayer?', $prompts[6]);
-        $this->assertSame('Te dicen «Kaya kama». ¿Qué respuesta cierra el diálogo?', $prompts[17]);
+        $this->assertSame('Alguien pregunta «Imata ruran?» (¿Qué hace?). ¿Qué respuesta corresponde?', $prompts[17]);
         $this->assertSame('¿Qué oración expresa una acción en presente?', $prompts[8]);
-        $this->assertSame('¿Qué expresa «Ñukapish wasimanmi rikuni»?', $prompts[19]);
+        $this->assertSame('Lee: «Kaya ñuka wasiman risha. Wasipi samarisha». ¿Dónde descansaré?', $prompts[19]);
     }
 
     public function test_final_unlocks_only_after_all_current_activities_in_all_four_units_are_correct(): void

@@ -76,17 +76,21 @@ class IntermedioPracticaSeeder extends Seeder
                         'managed' => true,
                         'reviewed' => true,
                         'difficulty' => 'intermedio',
+                        'content_revision' => 3,
                         'correct_feedback' => 'Análisis correcto. La forma concuerda con la función solicitada.',
                         'incorrect_feedback' => 'Revisa el contexto y la función de cada morfema antes de responder.',
                     ];
                     EstadoContenido::assertReady($exercise);
                     $origin = 'intermedio-m2-u'.$lesson['unit'].'-aplicacion-'.$key.'-v2';
-                    $activity = Actividad::where('id_unidad', $unit->id_unidad)->where('origen_reactivo', $origin)->first();
+                    $activity = Actividad::where('id_unidad', $unit->id_unidad)->where('origen_reactivo', $origin)
+                        ->where('configuracion->content_revision', 3)->first();
                     if ($activity) {
                         $activity->update(['publicado' => true]);
 
                         continue;
                     }
+                    Actividad::where('id_unidad', $unit->id_unidad)->where('origen_reactivo', $origin)
+                        ->update(['publicado' => false]);
                     $activity = new Actividad;
                     $activity->fill(KichwaResource::attributes('exercises', $exercise));
                     $activity->id_unidad = $unit->id_unidad;

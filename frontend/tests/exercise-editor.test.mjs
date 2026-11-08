@@ -11,9 +11,10 @@ async function editor() {
     const module = new vm.SourceTextModule(code, { context });
     const jsx = (type, props) => ({ type, props });
     await module.link(specifier => {
-        const dependency = specifier === 'react' ? { useState: initial => [initial, () => {}] }
+        const dependency = specifier === 'react' ? { useState: initial => [initial, () => {}], useEffect: () => {} }
             : specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx, Fragment: 'fragment' }
             : specifier === './ExerciseCard' ? { ExerciseInteraction: () => null, mediaUrl: path => path }
+            : specifier === './AdminExerciseSketch' ? { AdminExerciseSketch: 'AdminExerciseSketch' }
             : { apiPost: () => {}, apiGet: () => {}, ApiError: class extends Error {} };
         return new vm.SyntheticModule(Object.keys(dependency), function () {
             for (const [key, value] of Object.entries(dependency)) this.setExport(key, value);
@@ -76,4 +77,29 @@ test('word builders derive the missing letter and create distinct repeated-lette
     value={...api.newExercise('ordenar'),config:{presentation:'tiles',word_target:''}};tree=api.ExerciseEditor({value,onChange:next=>{value=next;}});
     nodes(tree).find(n=>n.type==='input'&&n.props.maxLength===50).props.onChange({target:{value:'SISA'}});
     assert.equal(new Set(value.elements.map(e=>e.id)).size,4);assert.equal(value.elements.filter(e=>e.texto==='S').length,2);
+});
+
+test('creation shows format examples and a live publication sketch', async () => {
+    const api = await editor();
+    let value = api.newExercise();
+    let tree = api.ExerciseEditor({ value, onChange: next => { value = next; } });
+    const sketches = nodes(tree).filter(node => node.type === 'AdminExerciseSketch');
+    assert.equal(sketches.length, 2);
+    assert.equal(sketches[0].props.exercise.type, 'seleccion_multiple');
+    assert.equal(sketches[1].props.exercise, value);
+    nodes(tree).find(node => node.type === 'button' && node.props['aria-pressed'] === false && node.props.children[0].props.children === 'Relacionar palabras o imágenes').props.onClick();
+    assert.equal(value.type, 'relacionar');
+    tree = api.ExerciseEditor({ value, onChange: next => { value = next; } });
+    assert.equal(nodes(tree).filter(node => node.type === 'AdminExerciseSketch')[0].props.exercise.type, 'relacionar');
+});
+
+test('editing a published exercise keeps its saved sketch separate from the draft preview', async () => {
+    const api = await editor();
+    const published = { ...api.newExercise(), id: 18, published: true, prompt: 'Versión publicada' };
+    const draft = { ...published, prompt: 'Cambio sin guardar' };
+    const tree = api.ExerciseEditor({ value: draft, publishedExercise: published, onChange: () => {} });
+    const sketches = nodes(tree).filter(node => node.type === 'AdminExerciseSketch');
+    assert.equal(sketches.length, 3);
+    assert.equal(sketches[0].props.exercise.prompt, 'Versión publicada');
+    assert.equal(sketches[2].props.exercise.prompt, 'Cambio sin guardar');
 });

@@ -1,10 +1,10 @@
 import '../../css/success-confetti.css';
 
-const colors = ['#8b5cf6', '#f7b84b', '#4ac6a7', '#f26b8a', '#5c9de8'];
-const pieces = Array.from({ length: 42 }, (_, index) => ({
-    left: `${(index * 37 + 11) % 100}%`,
-    delay: `${(index * 67) % 430}ms`,
-    duration: `${1400 + (index * 53) % 550}ms`,
+const colors = ['#8b5cf6', '#f7b84b', '#4ac6a7', '#f26b8a', '#5c9de8', '#ff8c42', '#e879f9', '#facc15', '#22d3ee'];
+const pieces = Array.from({ length: 420 }, (_, index) => ({
+    left: `${(index * 37.7 + 11) % 100}%`,
+    delay: `${(index * 67) % 900}ms`,
+    duration: `${3000 + (index * 53) % 1200}ms`,
     color: colors[index % colors.length],
 }));
 

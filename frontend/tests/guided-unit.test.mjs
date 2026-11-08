@@ -22,6 +22,7 @@ async function screen({ completed = false, post, exercises = [choice, matching],
     const dependencies = { useExerciseViewport: { useExerciseViewport: () => {} }, VerbalPractice: { VerbalPractice: 'VerbalPractice' }, TimeMorphemePractice: { TimeMorphemePractice: 'TimeMorphemePractice' },
         MorphemePractice: { MorphemePractice: 'MorphemePractice', MorphemeListeningPanel: 'MorphemeListeningPanel' },
         MatchingLines: { MatchingLines: 'MatchingLines' },
+        TopicVisual: { TopicWordVisual: 'TopicWordVisual' },
         AdvancedMorphemesIntroduction: { AdvancedMorphemesIntroduction: 'AdvancedMorphemesIntroduction' },
         TimeMorphemesIntroduction: { TimeMorphemesIntroduction: 'TimeMorphemesIntroduction' },
         VerbalAnalysisIntroduction: { VerbalAnalysisIntroduction: 'VerbalAnalysisIntroduction' },
@@ -551,6 +552,18 @@ for (const lesson of ['pronouns', 'numbers', 'calendar', 'animals-colors', 'body
         assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === '2 de 2 ejercicios correctos'));
     });
 }
+
+test('new nature exercises use varied controls without answer images', async () => {
+    const choice = { id: 35, type: 'seleccion_multiple', prompt: 'Elige el sol', elements: ['inti', 'killa'].map((texto, index) => ({ id: `option-${index + 1}`, texto })), zones: [], config: { title: 'Encuentra el sol', topic_practice: true, presentation: 'buttons', max_selections: 1 } };
+    const cards = await screen({ config: { learning_mode: 'guided', guided_lesson: 'nature' }, exercises: [choice] });
+    click(cards, 'Continuar');
+    assert.ok(nodes(cards.render()).some(node => typeof node.type === 'function' && node.props.exercise?.id === 35));
+    assert.equal(nodes(cards.render()).filter(node => node.type === 'img').length, 0);
+
+    const matches = await screen({ config: { learning_mode: 'guided', guided_lesson: 'nature' }, exercises: [matching] });
+    click(matches, 'Continuar');
+    assert.equal(nodes(matches.render()).filter(node => node.type === 'TopicWordVisual').length, 0);
+});
 
 for (const lesson of ['numbers', 'calendar']) {
     test(`${lesson} sends tile, choice and written answers through the guided flow`, async () => {

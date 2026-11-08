@@ -82,8 +82,6 @@ export default function Home() {
                 </div>
             </section>
 
-            <TestimonialsSection language={language} />
-
             <section id="cultura" className="culture-section" aria-labelledby="culture-title">
                 <div className="culture-panel glass-panel">
                     <div className="culture-copy">
@@ -114,6 +112,8 @@ export default function Home() {
                     </div>
                 </div>
             </section>
+
+            <TestimonialsSection language={language} />
         </PublicLayout>
     );
 }

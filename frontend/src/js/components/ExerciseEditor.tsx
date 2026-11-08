@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { apiPost, apiGet, ApiError } from '../services/api';
 import { ExerciseInteraction, mediaUrl } from './ExerciseCard';
+import { AdminExerciseSketch } from './AdminExerciseSketch';
 import type { Exercise, ExerciseElement, ExerciseSolution, ExerciseZone, ExerciseAnswer, ExerciseConfig } from '../types';
 
 export interface EditableExercise extends Exercise { solution: ExerciseSolution; score?: number | string; }
@@ -16,13 +17,29 @@ export function newExercise(type: Exercise['type'] = 'seleccion_multiple'): Edit
     return { id: 0, config: {managed: true, reviewed: false, max_selections: 1}, published: false, type, prompt: '', elements, zones: [], resource: null, sort_order: 1,
         solution: type === 'ordenar' ? {orden: []} : type === 'seleccion_multiple' ? { seleccion: [] } : type === 'completar' ? { textos: { e1: [''] } } : { pares: [] } };
 }
-export function ExerciseEditor({ value, onChange, errors = {}, onBusyChange }: { value: EditableExercise; onChange: (value: EditableExercise) => void; errors?: Record<string, string[]>; onBusyChange?: (busy: boolean)=>void }) {
+const formatExamples: Record<Exercise['type'], Exercise> = {
+    seleccion_multiple: { id: -1, type: 'seleccion_multiple', prompt: 'Elige la palabra en kichwa que significa agua.', elements: [{ id: 'a', texto: 'Yaku' }, { id: 'b', texto: 'Inti' }], zones: [], sort_order: 1, config: { max_selections: 1 } },
+    completar: { id: -2, type: 'completar', prompt: 'Completa la palabra que falta.', elements: [{ id: 'a', texto: '¿Cómo se dice agua en kichwa?' }], zones: [], sort_order: 1 },
+    relacionar: { id: -3, type: 'relacionar', prompt: 'Relaciona cada palabra con su significado.', elements: [{ id: 'a', texto: 'Yaku', grupo: 'origen' }, { id: 'b', texto: 'Inti', grupo: 'origen' }, { id: 'c', texto: 'Agua', grupo: 'destino' }, { id: 'd', texto: 'Sol', grupo: 'destino' }], zones: [], sort_order: 1 },
+    arrastrar: { id: -4, type: 'arrastrar', prompt: 'Coloca cada etiqueta en su zona.', elements: [{ id: 'a', texto: 'Yaku' }, { id: 'b', texto: 'Inti' }], zones: [{ id: 'c', texto: 'Agua', x: .25, y: .5 }, { id: 'd', texto: 'Sol', x: .75, y: .5 }], sort_order: 1 },
+    ordenar: { id: -5, type: 'ordenar', prompt: 'Toca las fichas para formar una palabra.', elements: [{ id: 'a', texto: 'S' }, { id: 'b', texto: 'I' }, { id: 'c', texto: 'S' }, { id: 'd', texto: 'A' }], zones: [], sort_order: 1, config: { presentation: 'tiles' } },
+};
+export function ExerciseEditor({ value, onChange, errors = {}, onBusyChange, publishedExercise, lesson }: {
+    value: EditableExercise; onChange: (value: EditableExercise) => void; errors?: Record<string, string[]>;
+    onBusyChange?: (busy: boolean)=>void; publishedExercise?: Exercise | null; lesson?: 'numbers' | 'calendar';
+}) {
     const [previewFeedback, setPreviewFeedback] = useState('');
     const [library, setLibrary] = useState<{kind: 'imagen' | 'audio'; items: Array<{path: string; name: string}>; page: number; last: number; choose: (path: string) => void} | null>(null);
     const [error, setError] = useState('');
     const [uploading, setUploading] = useState(false);
     const [previewAnswer, setPreviewAnswer] = useState<ExerciseAnswer>({});
-    const [preview, setPreview] = useState(false);
+    useEffect(() => { setPreviewAnswer({}); setPreviewFeedback(''); }, [value.type, value.elements, value.zones, value.config?.presentation]);
+    function chooseType(nextType: Exercise['type']) {
+        if (nextType === value.type) return;
+        if ((value.elements.some(item => item.texto || item.imagen) || value.zones.length) && !confirm('Cambiar el tipo reemplazará las opciones y respuestas actuales. Se conservarán la instrucción y el audio. ¿Continuar?')) return;
+        onChange({ ...newExercise(nextType), id: value.id, prompt: value.prompt, resource: value.resource, sort_order: value.sort_order });
+        setPreviewAnswer({}); setPreviewFeedback('');
+    }
     async function browse(kind: 'imagen' | 'audio', choose: (path: string) => void, page = 1) {
         try { const result = await apiGet<{data: Array<{path: string; name: string}>; last_page: number}>(`/admin/media?kind=${kind}&page=${page}`); setLibrary({kind, choose, items: result.data, page, last: result.last_page}); }
         catch { setError('No se pudo abrir la biblioteca.'); }
@@ -126,19 +143,24 @@ export function ExerciseEditor({ value, onChange, errors = {}, onBusyChange }: {
         </fieldset>;
     }
     return <fieldset disabled={uploading} className="min-w-0 space-y-5">
+        {publishedExercise && <section className={blockClass} aria-label="Versión publicada actualmente">
+            <h4 className="text-lg font-bold text-forest">Así está publicado actualmente</h4>
+            <p className="text-sm text-muted">Esta vista conserva la versión guardada mientras editas. Los cambios aparecerán en la vista previa de publicación más abajo.</p>
+            <AdminExerciseSketch key={`published-${publishedExercise.id}`} exercise={publishedExercise} lesson={lesson} />
+        </section>}
         <section className={blockClass}>
             <h4 className="text-lg font-bold text-forest">1. Elige qué hará el estudiante</h4>
-            <label className="grid gap-2 text-sm font-semibold">Tipo de actividad<select className="field" value={value.type} onChange={event => {
-                const nextType = event.target.value as Exercise['type'];
-                if (nextType === value.type) return;
-                if ((value.elements.some(item => item.texto || item.imagen) || value.zones.length) && !confirm('Cambiar el tipo reemplazará las opciones y respuestas actuales. Se conservarán la instrucción y el audio. ¿Continuar?')) return;
-                onChange({ ...newExercise(nextType), id: value.id, prompt: value.prompt, resource: value.resource, sort_order: value.sort_order });
-                setPreview(false); setPreviewAnswer({});
-            }}>{Object.entries(guides).map(([type, info]) => <option key={type} value={type}>{info.label}</option>)}</select></label>
-            <p className="rounded-xl bg-positive-soft p-3 text-sm leading-6 text-muted">{guide.help}</p>
+            <p className="text-sm text-muted">Selecciona un formato para ver un ejemplo antes de preparar tu propio ejercicio.</p>
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" role="group" aria-label="Formatos de ejercicio disponibles">
+                {(Object.entries(guides) as Array<[Exercise['type'], typeof guide]>).map(([type, info]) => <button key={type} type="button" className={`rounded-xl border p-4 text-left transition-colors ${value.type === type ? 'border-forest bg-positive-soft' : 'border-line bg-card hover:border-forest'}`} aria-pressed={value.type === type} onClick={() => chooseType(type)}>
+                    <strong className="block text-ink">{info.label}</strong><span className="mt-2 block text-sm leading-5 text-muted">{info.help}</span>
+                </button>)}
+            </div>
+            <details className="rounded-xl border border-line p-3" open><summary className="cursor-pointer font-semibold text-forest">Boceto de {guide.label.toLowerCase()}</summary><div className="mt-3"><AdminExerciseSketch key={`example-${value.type}`} exercise={formatExamples[value.type]} statusLabel="Ejemplo de formato" /></div></details>
+            <p className="rounded-xl bg-positive-soft p-3 text-sm leading-6 text-muted">Formato elegido: <strong>{guide.label}</strong>. {guide.help}</p>
             {['seleccion_multiple','completar','ordenar'].includes(value.type) && <label className="grid gap-2 text-sm font-semibold">Presentación<select className="field" value={value.config?.presentation ?? ''} onChange={event=>{const config={...value.config};if(event.target.value)config.presentation=event.target.value as ExerciseConfig['presentation'];else delete config.presentation;if(config.presentation==='visual')config.requires_images=true;if(config.presentation==='letter'){config.word_target ??= '';config.missing_index ??= 0;}onChange({...value,config});}}><option value="">Interacción habitual</option>{(value.type==='seleccion_multiple' ? [['buttons','Botones de selección'],['visual','Tarjetas de imágenes sin respuestas visibles']] : value.type==='completar' ? [['letter','Letra que falta'],['writing','Respuesta escrita sin alternativas']] : [['tiles','Fichas de letras con espacios y deshacer']]).map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label>}
             {(value.config?.presentation==='letter' || value.config?.presentation==='tiles') && <div className="grid gap-3 sm:grid-cols-2"><label className="grid gap-2 text-sm">Palabra objetivo<input className="field" maxLength={50} value={value.config.word_target ?? ''} onChange={e=>configureWord(e.target.value,value.config?.missing_index ?? 0)}/></label>{value.config.presentation==='letter' && <label className="grid gap-2 text-sm">Posición de la letra que falta (desde 1)<input className="field" type="number" min={1} max={Array.from(value.config.word_target ?? '').length || 1} value={(value.config.missing_index ?? 0)+1} onChange={e=>configureWord(value.config?.word_target ?? '',Number(e.target.value)-1)}/></label>}<p className="text-sm text-muted sm:col-span-2">El sistema construye las fichas o deriva la letra correcta. Completa las opciones y revisa la respuesta antes de publicar.</p></div>}
-            <label className="grid gap-2 text-sm font-semibold">Plantilla de interacción<select className="field" defaultValue="" onChange={event => {
+            <details className="rounded-xl border border-line p-3"><summary className="cursor-pointer font-semibold text-forest">Usar una plantilla preparada (opcional)</summary><p className="my-3 text-sm text-muted">La plantilla sustituye las opciones actuales y prepara la interacción.</p><label className="grid gap-2 text-sm font-semibold">Plantilla de interacción<select className="field" defaultValue="" onChange={event => {
                 const preset = event.target.value;
                 if (!preset) return;
                 if (value.elements.some(e => e.texto || e.imagen) && !confirm('La plantilla reemplazará las opciones actuales. ¿Continuar?')) return;
@@ -146,8 +168,8 @@ export function ExerciseEditor({ value, onChange, errors = {}, onBusyChange }: {
                 const draft = newExercise(type);
                 draft.config = {...draft.config, max_selections: preset === 'multiple' || preset === 'consonantes' ? 3 : 1, exact_selections: preset === 'multiple' || preset === 'consonantes', requires_audio: preset === 'audio', requires_images: preset === 'imagenes'};
                 if (preset === 'opciones') draft.elements[0].opciones = [''];
-                onChange({...draft,id:value.id,prompt:value.prompt,resource:value.resource,sort_order:value.sort_order}); setPreview(false);setPreviewAnswer({});setPreviewFeedback('');
-            }}><option value="">Elegir plantilla</option>{[['simple','Selección simple'],['multiple','Selección múltiple'],['consonantes','Seleccionar consonantes'],['opciones','Completar con opciones'],['escritura','Escritura breve'],['parejas','Relacionar parejas'],['letras','Ordenar letras'],['zonas','Arrastrar a zonas'],['imagenes','Selección con imágenes'],['audio','Escuchar y seleccionar']].map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label>
+                onChange({...draft,id:value.id,prompt:value.prompt,resource:value.resource,sort_order:value.sort_order});setPreviewAnswer({});setPreviewFeedback('');
+            }}><option value="">Elegir plantilla</option>{[['simple','Selección simple'],['multiple','Selección múltiple'],['consonantes','Seleccionar consonantes'],['opciones','Completar con opciones'],['escritura','Escritura breve'],['parejas','Relacionar parejas'],['letras','Ordenar letras'],['zonas','Arrastrar a zonas'],['imagenes','Selección con imágenes'],['audio','Escuchar y seleccionar']].map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label></details>
         </section>
         <section className={blockClass}>
             <h4 className="text-lg font-bold text-forest">2. Escribe la instrucción</h4>
@@ -195,20 +217,23 @@ export function ExerciseEditor({ value, onChange, errors = {}, onBusyChange }: {
             {!origins.length || !destinations.length ? <p className="rounded-xl bg-caution-soft text-caution p-3 text-sm">Primero añade {value.type === 'arrastrar' ? 'etiquetas y zonas' : 'palabras y respuestas'} en los pasos anteriores.</p> : <div className="grid gap-4 md:grid-cols-2">{origins.map((entry, index) => <label key={entry.id} className="grid gap-2 rounded-xl bg-positive-soft p-3 text-sm font-semibold">{entry.texto || `Palabra ${index + 1} (sin texto)`}<select className="field" value={value.solution.pares?.find(p => p.origen === entry.id)?.destino ?? ''} onChange={event => setPair(entry.id, event.target.value)}><option value="">Elige {value.type === 'arrastrar' ? 'la zona' : 'la respuesta'} correcta</option>{destinations.map((destination, position) => <option key={destination.id} value={destination.id}>{destination.texto || `Respuesta ${position + 1} (sin texto)`}</option>)}</select></label>)}</div>}
         </section>}
         {value.type === 'ordenar' && <section className={blockClass}><h4 className="font-bold">Secuencia correcta</h4><ExerciseInteraction exercise={value} answer={{orden: value.solution.orden ?? []}} onChange={answer => onChange({...value, solution: {orden: answer.orden ?? []}})} name="solution-order" /></section>}
-        <section className={blockClass}><h4 className="font-bold">Revisión y publicación</h4>{(['context_text','context_meaning','reveal_highlight'] as const).map((key,i)=><label className="grid gap-2 text-sm" key={key}>{['Palabra de apoyo (opcional)','Significado de apoyo (opcional)','Letras que se resaltan solo después de comprobar'][i]}<input className="field" maxLength={key==='reveal_highlight'?50:500} value={value.config?.[key] ?? ''} onChange={e=>onChange({...value,config:{...value.config,[key]:e.target.value}})}/></label>)}<label className="grid gap-2">Título breve<input className="field" value={value.config?.title ?? ''} onChange={e => onChange({...value,config:{...value.config,title:e.target.value}})}/></label>
-        {(['reviewed','requires_audio','requires_images','ignore_accents'] as const).map((key,i)=><label key={key} className="flex items-center gap-3"><input type="checkbox" checked={value.config?.[key] ?? false} onChange={e=>onChange({...value,config:{...value.config,managed:true,[key]:e.target.checked}})}/>{['Contenido revisado por docente','Requiere audio obligatorio','Requiere imágenes en todas las opciones','Aceptar vocales con o sin tilde (conserva Ñ)'][i]}</label>)}
+        <section className={blockClass}><h4 className="font-bold">4. Revisar antes de guardar</h4><p className="text-sm text-muted">Comprueba la vista previa de abajo y marca el contenido como revisado cuando esté listo.</p><label className="grid gap-2">Título breve<input className="field" value={value.config?.title ?? ''} onChange={e => onChange({...value,config:{...value.config,title:e.target.value}})}/></label>
+        <label className="flex items-center gap-3"><input type="checkbox" checked={value.config?.reviewed ?? false} onChange={e=>onChange({...value,config:{...value.config,managed:true,reviewed:e.target.checked}})}/>Contenido revisado por docente</label>
+        <details className="rounded-xl border border-line p-3"><summary className="cursor-pointer font-semibold text-forest">Opciones avanzadas de publicación</summary><div className="mt-4 space-y-4">{(['context_text','context_meaning','reveal_highlight'] as const).map((key,i)=><label className="grid gap-2 text-sm" key={key}>{['Palabra de apoyo (opcional)','Significado de apoyo (opcional)','Letras que se resaltan solo después de comprobar'][i]}<input className="field" maxLength={key==='reveal_highlight'?50:500} value={value.config?.[key] ?? ''} onChange={e=>onChange({...value,config:{...value.config,[key]:e.target.value}})}/></label>)}
+        {(['requires_audio','requires_images','ignore_accents'] as const).map((key,i)=><label key={key} className="flex items-center gap-3"><input type="checkbox" checked={value.config?.[key] ?? false} onChange={e=>onChange({...value,config:{...value.config,managed:true,[key]:e.target.checked}})}/>{['Requiere audio obligatorio','Requiere imágenes en todas las opciones','Aceptar vocales con o sin tilde (conserva Ñ)'][i]}</label>)}
         {value.type === 'seleccion_multiple' && <><label className="flex gap-3"><input type="checkbox" checked={value.config?.exact_selections ?? false} onChange={e=>onChange({...value,config:{...value.config,exact_selections:e.target.checked}})}/>Exigir exactamente la cantidad indicada</label><label className="grid gap-2">Máximo de selecciones (1 para selección simple)<input className="field" type="number" min={1} max={50} value={value.config?.max_selections ?? 50} onChange={e=>onChange({...value,config:{...value.config,max_selections:Number(e.target.value)}})}/></label></>}
         <label className="grid gap-2">Explicación después de responder<textarea className="field" value={value.config?.explanation ?? ''} onChange={e=>onChange({...value,config:{...value.config,explanation:e.target.value}})}/></label>
-        <label className="grid gap-2">Dificultad<select className="field" value={value.config?.difficulty ?? 'inicial'} onChange={e=>onChange({...value,config:{...value.config,difficulty:e.target.value}})}><option value="inicial">Inicial</option><option value="medio">Media</option><option value="avanzado">Avanzada</option></select></label><p>Recompensa: 10 XP por el primer acierto elegible. Los borradores y la vista previa no conceden XP.</p></section>
+        <label className="grid gap-2">Dificultad<select className="field" value={value.config?.difficulty ?? 'inicial'} onChange={e=>onChange({...value,config:{...value.config,difficulty:e.target.value}})}><option value="inicial">Inicial</option><option value="medio">Media</option><option value="avanzado">Avanzada</option></select></label><p className="text-sm text-muted">Recompensa: 10 XP por el primer acierto elegible. Los borradores y la vista previa no conceden XP.</p></div></details></section>
         {library && <section className={blockClass} aria-label="Biblioteca multimedia"><h4 className="font-bold">Recursos guardados</h4><div className="grid gap-3 sm:grid-cols-3">{library.items.map(item=><div className="space-y-2" key={item.path}>{library.kind === 'imagen' ? <img src={mediaUrl(item.path)} alt="Recurso de la biblioteca" className="h-24 w-full object-contain"/> : <audio controls src={mediaUrl(item.path)} className="w-full"/>}<button type="button" className="secondary-button" onClick={()=>{library.choose(item.path);setLibrary(null);}}>Usar recurso</button></div>)}</div>{!library.items.length && <p>No hay recursos guardados.</p>}<div className="flex gap-2"><button type="button" disabled={library.page<=1} onClick={()=>void browse(library.kind,library.choose,library.page-1)}>Anterior</button><button type="button" disabled={library.page>=library.last} onClick={()=>void browse(library.kind,library.choose,library.page+1)}>Siguiente</button><button type="button" className="secondary-button" onClick={()=>setLibrary(null)}>Cerrar biblioteca</button></div></section>}
         {error && <p className="form-error" role="alert">{error}</p>}
         {uploading && <p className="rounded-xl bg-positive-soft p-3 text-sm" role="status">Subiendo y validando archivo…</p>}
-        <section className={blockClass}><div className="grid gap-3 md:grid-cols-2">{(['correct_feedback','incorrect_feedback'] as const).map(key=><label className="grid gap-2 text-sm" key={key}>{key === 'correct_feedback' ? 'Mensaje al acertar' : 'Mensaje al equivocarse'}<textarea className="field" maxLength={2000} value={value.config?.[key] ?? ''} onChange={event=>onChange({...value,config:{...value.config,[key]:event.target.value}})} /></label>)}</div></section>
-        <section className={blockClass}>
-            <div className="flex flex-wrap items-center justify-between gap-3"><div><h4 className="text-lg font-bold text-forest">Revisa antes de guardar</h4><p className="mt-1 text-sm text-muted">Prueba la actividad como la verá el estudiante.</p></div>
-                <button className="secondary-button" type="button" aria-expanded={preview} onClick={() => { setPreview(!preview); setPreviewAnswer({}); setPreviewFeedback(''); }}>{preview ? 'Cerrar vista previa' : 'Probar actividad'}</button>
-            </div>
-            {preview && <section className="space-y-4 rounded-xl border border-line bg-card p-4"><p className="eyebrow">Vista del estudiante · prueba sin guardar</p><h5 className="whitespace-pre-line font-bold">{value.prompt || 'La instrucción aparecerá aquí.'}</h5><ExerciseInteraction key={value.type} exercise={value} answer={previewAnswer} onChange={setPreviewAnswer} name="admin-preview" /><button type="button" className="primary-button" onClick={() => void checkPreview()}>Comprobar sin guardar progreso</button><p role="status">{previewFeedback}</p></section>}
+        <details className={blockClass}><summary className="cursor-pointer font-semibold text-forest">Mensajes personalizados al responder (opcional)</summary><div className="mt-4 grid gap-3 md:grid-cols-2">{(['correct_feedback','incorrect_feedback'] as const).map(key=><label className="grid gap-2 text-sm" key={key}>{key === 'correct_feedback' ? 'Mensaje al acertar' : 'Mensaje al equivocarse'}<textarea className="field" maxLength={2000} value={value.config?.[key] ?? ''} onChange={event=>onChange({...value,config:{...value.config,[key]:event.target.value}})} /></label>)}</div></details>
+        <section className={blockClass} aria-label="Vista previa de publicación">
+            <h4 className="text-lg font-bold text-forest">Así se verá al publicar</h4>
+            <p className="text-sm text-muted">La vista cambia al editar la instrucción, las opciones y la presentación. Completa los campos vacíos antes de publicar.</p>
+            <AdminExerciseSketch key={`draft-${value.id}-${value.type}`} exercise={value} lesson={lesson} answer={previewAnswer} onAnswerChange={setPreviewAnswer} statusLabel="Vista previa de publicación" />
+            <div className="flex flex-wrap items-center gap-3"><button type="button" className="primary-button" onClick={() => void checkPreview()}>Comprobar sin guardar progreso</button><button type="button" className="secondary-button" onClick={() => { setPreviewAnswer({}); setPreviewFeedback(''); }}>Reiniciar boceto</button></div>
+            {previewFeedback && <p role="status">{previewFeedback}</p>}
         </section>
     </fieldset>;
 }

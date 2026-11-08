@@ -28,6 +28,9 @@ const calendarSectionAudio = [
     undefined,
     { clip: 'calendar-seasons', label: 'las estaciones del año' },
 ] as const;
+const natureSectionAudio = [
+    { clip: 'nature-landscape', label: 'el paisaje' },
+] as const;
 const animalPictures: Record<string, string> = {
     allku: '🐕', misi: '🐈', kuy: '🐹', llama: '🐑', wakra: '🐄', kuchi: '🐖', atalpa: '🐔', kunu: '🐇',
     apiw: '🐎', chantasu: '🫏', taruka: '🦌', ukucha: '🐁', urpi: '🕊️', hampatu: '🐸', pilpintu: '🦋', kinti: '🐦',
@@ -71,7 +74,7 @@ export function TopicIntroduction({ lesson }: { lesson: string }) {
         <LessonNote>{topic.note}</LessonNote>
         <LessonCardGrid>
             {topic.sections.map((section, index) => {
-                const sectionAudio = topic.key === 'numbers' ? numberSectionAudio[index] : topic.key === 'calendar' ? calendarSectionAudio[index] : undefined;
+                const sectionAudio = topic.key === 'numbers' ? numberSectionAudio[index] : topic.key === 'calendar' ? calendarSectionAudio[index] : topic.key === 'nature' ? natureSectionAudio[index] : undefined;
                 return <section className={`cometa-lesson-card topic-section-${index}`} key={section.title} aria-labelledby={`${topic.key}-section-${index}`}>
                 <div className="cometa-card-heading">
                     <span className="cometa-card-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>

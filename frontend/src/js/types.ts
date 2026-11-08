@@ -47,3 +47,4 @@ export interface LearningReport { summary: {completed_activities: number; total_
 export interface Mastery { learning_report?: LearningReport; xp: number; medals: string[]; mastered_topics: number[]; completed_units: number[]; lessons: Array<{topic_id: number; unit_id: number; name: string; attempt_count: number; best_score: number; latest_score: number | null; stars: number}>; }
 
 export interface ExerciseConfig { dialogue_practice?: number; dialogue_name?: string; dialogue_hint?: string; dialogue_expressions?: string[]; dialogue_turns?: Array<{ speaker: string; text?: string; blank?: string }>; }
+export interface ExerciseConfig { topic_practice?: boolean; }

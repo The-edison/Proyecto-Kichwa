@@ -57,18 +57,18 @@
   ],
   [
     1,
-    "Quieres nombrar a una madrastra y a un hijastro. Elige las DOS palabras.",
+    "Quieres decir «madrastra» y «padrastro». Elige las DOS palabras.",
     [
       "Lamama",
+      "Mama",
       "Layaya",
-      "Lachuri",
-      "Laushushi"
+      "Yaya"
     ],
     [
       0,
       2
     ],
-    "Lamama significa madrastra y lachuri significa entenado o hijastro."
+    "La- aparece al inicio de estos términos de parentesco: lamama es madrastra y layaya es padrastro."
   ],
   [
     2,
@@ -88,29 +88,29 @@
     2,
     "¿Qué oración expresa una acción de ayer?",
     [
-      "Kaya ñuka sirasha.",
-      "Kayna pay urmarka.",
+      "Kaya ñuka purisha.",
+      "Kayna ñuka purirkani.",
       "Ñuka purini.",
-      "Kaya pay purinka."
+      "Kaya ñuka llankasha."
     ],
     [
       1
     ],
-    "Kayna sitúa la acción ayer y -rka indica pasado: pay urmarka significa él o ella cayó."
+    "Kayna significa ayer y purirkani significa yo caminé."
   ],
   [
     2,
     "¿Qué oración expresa algo que tú harás mañana?",
     [
-      "Kayna pay samarirka.",
-      "Kaya ñuka sirasha.",
+      "Kayna ñuka purirkani.",
+      "Kaya ñuka llankasha.",
       "Ñuka purini.",
-      "Pay wakarka."
+      "Pay chayarka."
     ],
     [
       1
     ],
-    "Kaya indica mañana. Con ñuka, sirasha expresa una acción futura de yo: coseré."
+    "Kaya indica mañana y ñuka llankasha significa yo trabajaré."
   ],
   [
     2,
@@ -128,7 +128,7 @@
   ],
   [
     2,
-    "Completa para hablar del futuro de otra persona: «Kaya pay llanka___».",
+    "Completa el plan «Mañana yo trabajaré»: «Kaya ñuka llanka___».",
     [
       "-sha",
       "-rka",
@@ -136,23 +136,23 @@
       "-ni"
     ],
     [
-      2
+      0
     ],
-    "Con pay, el futuro usa -nka. La oración completa es Kaya pay llankanka."
+    "Con ñuka, llankasha expresa yo trabajaré."
   ],
   [
     3,
-    "¿Qué puede expresar -ku según la palabra en que aparece?",
+    "En «mikukuni» (estoy comiendo), ¿qué expresa -ku?",
     [
-      "Pasado en un verbo y orden en un número.",
-      "Cariño en un nombre o acción en curso en un verbo.",
-      "Una profesión en un nombre y destino en un verbo.",
-      "Siempre una petición dirigida a varias personas."
+      "Una acción en curso.",
+      "Una acción pasada.",
+      "Un destino.",
+      "Un parentesco."
     ],
     [
-      1
+      0
     ],
-    "Con nombres, -ku puede expresar cariño. En un verbo, puede indicar que una acción está en curso."
+    "-ku indica que la acción de comer está en curso."
   ],
   [
     3,
@@ -184,28 +184,28 @@
   ],
   [
     3,
-    "¿Qué expresión usarías para pedir que alguien se siente con amabilidad?",
+    "¿Qué palabra significa «ven, por favor»?",
     [
-      "Shamuychi",
-      "Mikunayan",
-      "Tiyaripay",
-      "Armachina"
+      "Mikuchina",
+      "Mikukuni",
+      "Shamupay",
+      "Killkanayani"
     ],
     [
       2
     ],
-    "Tiyaripay significa siéntate, por favor. -pay aporta cortesía a esta petición."
+    "Shamupay es una petición amable; -pay aporta cortesía."
   ],
   [
     3,
     "Elige las CUATRO relaciones correctas entre morfema y función.",
     [
-      "-pi: lugar.",
-      "-pak: beneficiario.",
-      "-nkapak: finalidad.",
-      "-mi: afirmación.",
-      "-naya: pasado.",
-      "-rka: cariño."
+      "-ku: acción en curso.",
+      "-chi: hacer que alguien realice una acción.",
+      "-naya: deseo.",
+      "-pay: petición amable.",
+      "-rka: deseo.",
+      "-niki: acción en curso."
     ],
     [
       0,
@@ -213,7 +213,7 @@
       2,
       3
     ],
-    "-pi indica lugar; -pak, para quién es algo; -nkapak, para qué se realiza una acción; -mi aporta afirmación."
+    "-ku indica acción en curso; -chi, causación; -naya, deseo; -pay, cortesía."
   ],
   [
     4,
@@ -231,58 +231,58 @@
   ],
   [
     4,
-    "¿Qué pregunta haces para saber adónde va una persona?",
+    "¿Qué pregunta haces para saber dónde está una persona?",
     [
       "Imanalla?",
       "Mayman rinki?",
       "Imata ruran?",
-      "Maypi?"
+      "Maypi kan?"
     ],
     [
-      1
+      3
     ],
-    "Mayman rinki? pregunta adónde vas. La respuesta debe indicar un destino."
+    "Maypi pregunta dónde está alguien; -pi indica ubicación."
   ],
   [
     4,
-    "Te dicen «Kaya kama». ¿Qué respuesta cierra el diálogo?",
+    "Alguien pregunta «Imata ruran?» (¿Qué hace?). ¿Qué respuesta corresponde?",
     [
-      "Kaya kama.",
-      "Imata ruran?",
-      "Mayman rinki?",
-      "Ñuka wasiman rini."
+      "Allillami kani.",
+      "Ñuka yayaka wasipi kan.",
+      "Pay mikukun.",
+      "Kaya ñuka wasiman risha."
+    ],
+    [
+      2
+    ],
+    "Pay mikukun expresa la acción de esa persona: está comiendo."
+  ],
+  [
+    4,
+    "Lee: «Kaya ñuka wasiman risha. Wasipi samarisha». ¿Cuál es el plan?",
+    [
+      "Mañana iré a la casa y descansaré allí.",
+      "Ayer fui a la casa y descansé allí.",
+      "Mañana iré a la escuela y trabajaré.",
+      "Hoy estoy en la casa."
     ],
     [
       0
     ],
-    "Kaya kama es una despedida. Responder con la misma expresión permite cerrar el diálogo."
+    "Kaya indica mañana; -sha señala futuro; wasiman es hacia la casa y wasipi, en la casa."
   ],
   [
     4,
-    "Lee: «Kaya ñuka Kitoman risha. Kitopi purisha». ¿Cuál es el tema del texto?",
+    "Lee: «Kaya ñuka wasiman risha. Wasipi samarisha». ¿Dónde descansaré?",
     [
-      "Un viaje y una caminata planeados para mañana.",
-      "Un paseo que terminó ayer.",
-      "La presentación de una familia.",
-      "La descripción de una receta."
+      "En la casa.",
+      "En la escuela.",
+      "Antes de ir a casa.",
+      "En otro lugar."
     ],
     [
       0
     ],
-    "Las dos oraciones comparten un plan futuro: iré a Quito y caminaré allí."
-  ],
-  [
-    4,
-    "¿Qué expresa «Ñukapish wasimanmi rikuni»?",
-    [
-      "Yo también voy a casa.",
-      "Tú estás en casa.",
-      "Él fue a trabajar.",
-      "Mañana iré a estudiar."
-    ],
-    [
-      0
-    ],
-    "Ñukapish significa «yo también» y wasiman indica el destino: a casa."
+    "Wasipi significa en la casa. La segunda oración continúa el plan de ir allí."
   ]
 ]

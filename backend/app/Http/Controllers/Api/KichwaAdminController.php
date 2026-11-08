@@ -128,6 +128,10 @@ class KichwaAdminController extends Controller
             $data['question_count'] = DB::table('preguntas')->where('id_evaluacion', $record->id_evaluacion)->count();
         }
         if ($resource === 'contents') {
+            $onlyPublishedTopic = $record->publicado && Tema::where('id_unidad', $record->id_unidad)->where('publicado', true)->count() === 1;
+            $data['exercise_count'] = DB::table('actividades')->where('id_unidad', $record->id_unidad)
+                ->where(fn ($exercises) => $exercises->where('id_tema', $record->id_tema)
+                    ->when($onlyPublishedTopic, fn ($exercises) => $exercises->orWhereNull('id_tema')))->count();
             $questions = Pregunta::whereIn('id_evaluacion', DB::table('evaluaciones')->where('id_tema', $record->id_tema)->select('id_evaluacion'))->get();
             $data['question_count'] = $questions->count();
             $data['eligible_count'] = $questions->filter(fn ($q) => $q->publicado && EstadoContenido::errors(KichwaResource::present('questions', $q, true)) === [])->count();
@@ -213,7 +217,7 @@ class KichwaAdminController extends Controller
     public function index(Request $request): JsonResponse
     {
         $resource = $this->resource($request);
-        $request->validate(['per_page' => ['sometimes', 'integer', 'between:1,200'], 'parent_id' => ['sometimes', 'integer', 'min:1']]);
+        $request->validate(['per_page' => ['sometimes', 'integer', 'between:1,200'], 'parent_id' => ['sometimes', 'integer', 'min:1'], 'order' => ['sometimes', 'in:publication'], 'include_topics' => ['sometimes', 'boolean'], 'include_unit_exercises' => ['sometimes', 'boolean']]);
         $model = KichwaResource::MODELS[$resource];
         if ($resource === 'levels' && ! $request->has('page')) {
             return response()->json(PublicacionContenido::remember('admin-levels', fn () => $model::query()->select('niveles.*')->selectSub(DB::table('modulos')->selectRaw('count(*)')->whereColumn('modulos.id_nivel', 'niveles.id_nivel'), 'children_count')->orderBy('orden_nivel')->get()->map(fn ($r) => KichwaResource::present($resource, $r, true) + ['children_count' => (int) $r->children_count])->all()));
@@ -240,8 +244,12 @@ class KichwaAdminController extends Controller
         }
         if ($resource === 'exercises' && $request->filled('topic_id')) {
             $request->validate(['topic_id' => ['integer', 'exists:temas,id_tema']]);
-            $query->where('id_tema', $request->integer('topic_id'));
-        } elseif ($resource === 'exercises' && $request->filled('parent_id')) {
+            $includeUnitExercises = $request->boolean('include_unit_exercises') && $request->filled('parent_id')
+                && Tema::where('id_unidad', $request->integer('parent_id'))->where('publicado', true)->count() === 1
+                && Tema::where('id_unidad', $request->integer('parent_id'))->where('publicado', true)->whereKey($request->integer('topic_id'))->exists();
+            $query->where(fn ($exercises) => $exercises->where('id_tema', $request->integer('topic_id'))
+                ->when($includeUnitExercises, fn ($exercises) => $exercises->orWhereNull('id_tema')));
+        } elseif ($resource === 'exercises' && $request->filled('parent_id') && ! $request->boolean('include_topics')) {
             $query->whereNull('id_tema');
         }
         $columns = array_values(array_diff(KichwaResource::FIELDS[$resource], ['contenido_tema', 'elementos_actividad', 'zonas_actividad', 'solucion_actividad', 'elementos_pregunta', 'zonas_pregunta', 'solucion_pregunta']));
@@ -265,7 +273,12 @@ class KichwaAdminController extends Controller
         }
         $query->select(array_unique($columns));
         $order = KichwaResource::FIELDS[$resource]['sort_order'] ?? (new $model)->getKeyName();
-        $page = $query->orderBy($order)->orderBy((new $model)->getKeyName())->paginate($request->integer('per_page', 20));
+        if ($resource === 'exercises' && $request->input('order') === 'publication') {
+            $query->orderByDesc('publicado')->orderByDesc((new $model)->getKeyName());
+        } else {
+            $query->orderBy($order)->orderBy((new $model)->getKeyName());
+        }
+        $page = $query->paginate($request->integer('per_page', 20));
         $page->through(fn ($record) => $this->present($resource, $record));
 
         return response()->json($page);

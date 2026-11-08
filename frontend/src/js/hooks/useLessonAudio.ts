@@ -86,7 +86,10 @@ const calendarAudios = {
     'calendar-months': { description: 'los meses del año', file: 'meses-del-ano' },
     'calendar-seasons': { description: 'las estaciones del año', file: 'estaciones-del-ano' },
 };
-export type LessonAudioClip = 'a' | 'i' | 'u' | 'consonantes' | 'audio1' | 'audio2' | 'audio3' | keyof typeof numberAudios | keyof typeof calendarAudios | keyof typeof greetingAudios | keyof typeof questionAudios | keyof typeof sentenceAudios | keyof typeof expressionAudios | keyof typeof pronounAudios | keyof typeof pronounWordAudios | keyof typeof animalColorAudios | keyof typeof bodyAudios;
+const natureAudios = {
+    'nature-landscape': { description: 'el paisaje', file: 'en-el-paisaje.ogg' },
+};
+export type LessonAudioClip = 'a' | 'i' | 'u' | 'consonantes' | 'audio1' | 'audio2' | 'audio3' | keyof typeof numberAudios | keyof typeof calendarAudios | keyof typeof natureAudios | keyof typeof greetingAudios | keyof typeof questionAudios | keyof typeof sentenceAudios | keyof typeof expressionAudios | keyof typeof pronounAudios | keyof typeof pronounWordAudios | keyof typeof animalColorAudios | keyof typeof bodyAudios;
 type Clip = LessonAudioClip;
 const wordAudios = { audio1: 'shunku', audio2: 'purina', audio3: 'llama' };
 type PlaybackState = { clip: Clip | null; phase: 'idle' | 'loading' | 'playing' | 'error'; message: string };
@@ -119,16 +122,17 @@ export function useLessonAudio() {
         const body = clip in bodyAudios ? bodyAudios[clip as keyof typeof bodyAudios] : null;
         const numberAudio = clip in numberAudios ? numberAudios[clip as keyof typeof numberAudios] : null;
         const calendarAudio = clip in calendarAudios ? calendarAudios[clip as keyof typeof calendarAudios] : null;
-        const description = body ? `«${body.word}»` : animalColor ? `«${animalColor.word}»` : pronounWord ? `«${pronounWord.word}»` : pronoun ? `la oración ${clip.slice(-1)}` : expression ? `«${expression.word}»` : sentence ?? (question ? question.toLowerCase() : greeting ? `«${greeting}»` : isWordAudio ? `el audio ${clip.slice(-1)}` : numberAudio ? numberAudio.description : calendarAudio ? calendarAudio.description : clip === 'consonantes' ? 'las consonantes' : `la vocal ${clip}`);
+        const natureAudio = clip in natureAudios ? natureAudios[clip as keyof typeof natureAudios] : null;
+        const description = body ? `«${body.word}»` : animalColor ? `«${animalColor.word}»` : pronounWord ? `«${pronounWord.word}»` : pronoun ? `la oración ${clip.slice(-1)}` : expression ? `«${expression.word}»` : sentence ?? (question ? question.toLowerCase() : greeting ? `«${greeting}»` : isWordAudio ? `el audio ${clip.slice(-1)}` : numberAudio ? numberAudio.description : calendarAudio ? calendarAudio.description : natureAudio ? natureAudio.description : clip === 'consonantes' ? 'las consonantes' : `la vocal ${clip}`);
         setState({ clip, phase: 'loading', message: `Cargando ${description}.` });
         const path = expression ? `unidad-2/${expression.path}.mp3` : sentence ? `unidad-2/completar-saludos/${clip}.mp3` : question ? `unidad-2/preguntas-respuestas/${clip}.mp3` : greeting ? `saludos/${clip}.mp3` : isWordAudio ? `vocal-que-falta/${wordAudios[clip]}.mp3` : numberAudio ? `unidad-4/numeros/${numberAudio.file}.mp3` : calendarAudio ? `unidad-5/calendario/${calendarAudio.file}.mp3` : clip === 'consonantes' ? 'consonantes/consonantes.mp3' : `vocales/${clip}.mp3`;
-        const audio = new Audio(`${import.meta.env.BASE_URL}audios/${body ? `modulo-2/unidad-2/${clip === 'body-example' ? 'ejemplos' : clip.startsWith('body-sentence-') ? 'oraciones' : 'partes'}/${body.file}.mp3` : animalColor ? `modulo-2/unidad-1/${animalColor.path}.mp3` : pronounWord ? `unidad-3/pronombres/${pronounWord.file}.mp3` : pronoun ? `unidad-3/pronombres/${pronoun}.mp3` : path}`);
+        const audio = new Audio(`${import.meta.env.BASE_URL}audios/${natureAudio ? `modulo-2/unidad-3/${natureAudio.file}` : body ? `modulo-2/unidad-2/${clip === 'body-example' ? 'ejemplos' : clip.startsWith('body-sentence-') ? 'oraciones' : 'partes'}/${body.file}.mp3` : animalColor ? `modulo-2/unidad-1/${animalColor.path}.mp3` : pronounWord ? `unidad-3/pronombres/${pronounWord.file}.mp3` : pronoun ? `unidad-3/pronombres/${pronoun}.mp3` : path}`);
         audioRef.current = audio;
 
         const fail = () => {
             if (audioRef.current !== audio) return;
             stop();
-            const subject = body ? `«${body.word}»` : animalColor ? `«${animalColor.word}»` : pronounWord ? `«${pronounWord.word}»` : expression ? `«${expression.word}»` : greeting ? `«${greeting}»` : numberAudio ? numberAudio.description : calendarAudio ? calendarAudio.description : clip === 'consonantes' ? 'las consonantes' : `«${clip}»`;
+            const subject = body ? `«${body.word}»` : animalColor ? `«${animalColor.word}»` : pronounWord ? `«${pronounWord.word}»` : expression ? `«${expression.word}»` : greeting ? `«${greeting}»` : numberAudio ? numberAudio.description : calendarAudio ? calendarAudio.description : natureAudio ? `«${natureAudio.description}»` : clip === 'consonantes' ? 'las consonantes' : `«${clip}»`;
             setState({ clip, phase: 'error', message: pronoun ? `No se pudo reproducir ${description}. Inténtalo de nuevo.` : sentence ? `No se pudo reproducir ${sentence}. Inténtalo de nuevo.` : question ? `No se pudo reproducir el ${description}. Inténtalo de nuevo.` : isWordAudio ? `No se pudo reproducir el audio ${clip.slice(-1)}. Inténtalo de nuevo.` : `No se pudo reproducir el audio de ${subject}. Inténtalo de nuevo.` });
         };
         audio.onplaying = () => {

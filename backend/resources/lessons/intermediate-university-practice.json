@@ -5,7 +5,7 @@
       {
         "key": "meaning-contrast",
         "type": "relacionar",
-        "prompt": "En una ficha de análisis lingüístico, relaciona cada forma con su función y significado. Distingue especialmente -kamak de -kama.",
+        "prompt": "Une cada palabra en kichwa con su significado. Recuerda: -kamak nombra a quien cuida algo; -kama indica «hasta».",
         "elements": [
           {
             "id": "k1",
@@ -76,7 +76,7 @@
       {
         "key": "field-report",
         "type": "completar",
-        "prompt": "Completa las notas de un trabajo de campo con la forma precisa en kichwa.",
+        "prompt": "Elige una opción para cada espacio. Fíjate si la frase habla de una persona, un límite, una posición o un parentesco.",
         "elements": [
           {
             "id": "guardian",
@@ -135,6 +135,159 @@
           "title": "Informe de campo: forma precisa"
         },
         "topic": "relaciones"
+      },
+      {
+        "key": "segmentacion-funcional",
+        "type": "completar",
+        "prompt": "Completa cada análisis con el segmento que expresa la función indicada.",
+        "elements": [
+          {
+            "id": "agent",
+            "texto": "En wasi-kamak, la persona encargada se indica con _____.",
+            "opciones": [
+              "-kamak",
+              "-kama",
+              "-niki"
+            ]
+          },
+          {
+            "id": "limit",
+            "texto": "En wasi-kama, el límite del trayecto se indica con _____.",
+            "opciones": [
+              "-kama",
+              "-kamak",
+              "la-"
+            ]
+          },
+          {
+            "id": "base",
+            "texto": "En punku-kamak, la base que significa «puerta» es _____.",
+            "opciones": [
+              "punku",
+              "wasi",
+              "kamak"
+            ]
+          }
+        ],
+        "solution": {
+          "textos": {
+            "agent": [
+              "-kamak"
+            ],
+            "limit": [
+              "-kama"
+            ],
+            "base": [
+              "punku"
+            ]
+          }
+        },
+        "config": {
+          "title": "Base y morfema en contexto"
+        },
+        "topic": "derivacion"
+      },
+      {
+        "key": "ordinal-explicacion",
+        "type": "seleccion_multiple",
+        "prompt": "Una persona llegó en tercer lugar. ¿Qué análisis explica kimsaniki?",
+        "elements": [
+          {
+            "id": "quantity",
+            "texto": "Kimsa expresa tres y -niki convierte el número en posición ordinal."
+          },
+          {
+            "id": "limit",
+            "texto": "Kimsa nombra la casa y -kama marca el límite."
+          },
+          {
+            "id": "agent",
+            "texto": "-kamak indica que la persona cuida a tres participantes."
+          }
+        ],
+        "solution": {
+          "seleccion": [
+            "quantity"
+          ]
+        },
+        "config": {
+          "title": "Justificación de un ordinal",
+          "presentation": "buttons",
+          "max_selections": 1,
+          "exact_selections": true
+        },
+        "topic": "relaciones"
+      },
+      {
+        "key": "parentesco-y-secuencia",
+        "type": "relacionar",
+        "prompt": "Relaciona cada forma con la función que aporta el morfema añadido.",
+        "elements": [
+          {
+            "id": "o1",
+            "texto": "shukniki",
+            "grupo": "origen"
+          },
+          {
+            "id": "o2",
+            "texto": "kimsaniki",
+            "grupo": "origen"
+          },
+          {
+            "id": "o3",
+            "texto": "layaya",
+            "grupo": "origen"
+          },
+          {
+            "id": "o4",
+            "texto": "lamama",
+            "grupo": "origen"
+          },
+          {
+            "id": "d1",
+            "texto": "primera posición en una secuencia",
+            "grupo": "destino"
+          },
+          {
+            "id": "d2",
+            "texto": "tercera posición en una secuencia",
+            "grupo": "destino"
+          },
+          {
+            "id": "d3",
+            "texto": "relación de parentesco: padrastro",
+            "grupo": "destino"
+          },
+          {
+            "id": "d4",
+            "texto": "relación de parentesco: madrastra",
+            "grupo": "destino"
+          }
+        ],
+        "solution": {
+          "pares": [
+            {
+              "origen": "o1",
+              "destino": "d1"
+            },
+            {
+              "origen": "o2",
+              "destino": "d2"
+            },
+            {
+              "origen": "o3",
+              "destino": "d3"
+            },
+            {
+              "origen": "o4",
+              "destino": "d4"
+            }
+          ]
+        },
+        "config": {
+          "title": "Secuencia y parentesco"
+        },
+        "topic": "relaciones"
       }
     ],
     "title": "Morfología derivativa y relaciones semánticas",
@@ -158,7 +311,7 @@
       {
         "key": "timeline",
         "type": "ordenar",
-        "prompt": "Ordena las tres formas de caminar desde una acción concluida hasta una que aún no ocurre.",
+        "prompt": "Ordena las formas de «caminar» así: primero pasado, después presente y al final futuro. La traducción aparece junto a cada forma.",
         "elements": [
           {
             "id": "future",
@@ -188,19 +341,34 @@
       {
         "key": "tense-analysis",
         "type": "completar",
-        "prompt": "Escribe la forma verbal que corresponde a cada situación. Conserva la marca de tiempo y persona.",
+        "prompt": "Elige el verbo completo que corresponde a cada frase. Usa «ayer» para el pasado y «mañana» para el futuro.",
         "elements": [
           {
             "id": "arrived",
-            "texto": "En el registro de ayer, él o ella llegó: Pay _____."
+            "texto": "En el registro de ayer, él o ella llegó: Pay _____.",
+            "opciones": [
+              "chayarka",
+              "chayanka",
+              "chayani"
+            ]
           },
           {
             "id": "will-work",
-            "texto": "En el plan de mañana, yo trabajaré: Ñuka _____."
+            "texto": "En el plan de mañana, yo trabajaré: Ñuka _____.",
+            "opciones": [
+              "llankasha",
+              "llankani",
+              "llankarkani"
+            ]
           },
           {
             "id": "walked",
-            "texto": "En la memoria de la visita, yo caminé: Ñuka _____."
+            "texto": "En la memoria de la visita, yo caminé: Ñuka _____.",
+            "opciones": [
+              "purirkani",
+              "purini",
+              "purisha"
+            ]
           }
         ],
         "solution": {
@@ -217,8 +385,160 @@
           }
         },
         "config": {
-          "title": "Redacción de formas temporales",
-          "presentation": "writing"
+          "title": "Redacción de formas temporales"
+        },
+        "topic": "concordancia"
+      },
+      {
+        "key": "tiempo-y-persona",
+        "type": "relacionar",
+        "prompt": "Relaciona cada forma completa con su tiempo y persona.",
+        "elements": [
+          {
+            "id": "o1",
+            "texto": "purirkani",
+            "grupo": "origen"
+          },
+          {
+            "id": "o2",
+            "texto": "purini",
+            "grupo": "origen"
+          },
+          {
+            "id": "o3",
+            "texto": "purisha",
+            "grupo": "origen"
+          },
+          {
+            "id": "o4",
+            "texto": "chayarka",
+            "grupo": "origen"
+          },
+          {
+            "id": "d1",
+            "texto": "pasado: yo caminé",
+            "grupo": "destino"
+          },
+          {
+            "id": "d2",
+            "texto": "presente: yo camino",
+            "grupo": "destino"
+          },
+          {
+            "id": "d3",
+            "texto": "futuro: yo caminaré",
+            "grupo": "destino"
+          },
+          {
+            "id": "d4",
+            "texto": "pasado: él o ella llegó",
+            "grupo": "destino"
+          }
+        ],
+        "solution": {
+          "pares": [
+            {
+              "origen": "o1",
+              "destino": "d1"
+            },
+            {
+              "origen": "o2",
+              "destino": "d2"
+            },
+            {
+              "origen": "o3",
+              "destino": "d3"
+            },
+            {
+              "origen": "o4",
+              "destino": "d4"
+            }
+          ]
+        },
+        "config": {
+          "title": "Tiempo y persona verbal"
+        },
+        "topic": "referencia-temporal"
+      },
+      {
+        "key": "raiz-y-marca-temporal",
+        "type": "completar",
+        "prompt": "Completa las formas a partir de la raíz y el tiempo indicado.",
+        "elements": [
+          {
+            "id": "walk-past",
+            "texto": "puri + _____ = purirkani · yo caminé",
+            "opciones": [
+              "rkani",
+              "ni",
+              "sha"
+            ]
+          },
+          {
+            "id": "walk-present",
+            "texto": "puri + _____ = purini · yo camino",
+            "opciones": [
+              "ni",
+              "rkani",
+              "sha"
+            ]
+          },
+          {
+            "id": "walk-future",
+            "texto": "puri + _____ = purisha · yo caminaré",
+            "opciones": [
+              "sha",
+              "ni",
+              "rkani"
+            ]
+          }
+        ],
+        "solution": {
+          "textos": {
+            "walk-past": [
+              "rkani"
+            ],
+            "walk-present": [
+              "ni"
+            ],
+            "walk-future": [
+              "sha"
+            ]
+          }
+        },
+        "config": {
+          "title": "Raíz y referencia temporal"
+        },
+        "topic": "concordancia"
+      },
+      {
+        "key": "cronica-y-plan",
+        "type": "seleccion_multiple",
+        "prompt": "Una crónica dice «Ayer yo trabajé» y un plan dice «Mañana yo trabajaré». ¿Qué pareja respeta ese orden?",
+        "elements": [
+          {
+            "id": "correct",
+            "texto": "Ñuka llankarkani; ñuka llankasha."
+          },
+          {
+            "id": "reversed",
+            "texto": "Ñuka llankasha; ñuka llankarkani."
+          },
+          {
+            "id": "present",
+            "texto": "Ñuka llankani; ñuka llankani."
+          }
+        ],
+        "solution": {
+          "seleccion": [
+            "correct"
+          ]
+        },
+        "config": {
+          "title": "Contraste entre crónica y plan",
+          "presentation": "buttons",
+          "max_selections": 1,
+          "exact_selections": true
         },
         "topic": "concordancia"
       }
@@ -244,7 +564,7 @@
       {
         "key": "verbal-functions",
         "type": "relacionar",
-        "prompt": "Relaciona cada expresión con el cambio de significado que aporta su morfema.",
+        "prompt": "Une cada palabra con lo que significa. Busca -ku (acción en curso), -chi (hacer que ocurra), -naya (deseo) y -pay (petición amable).",
         "elements": [
           {
             "id": "k1",
@@ -315,7 +635,7 @@
       {
         "key": "morpheme-segmentation",
         "type": "completar",
-        "prompt": "Reconstruye cada palabra a partir de su raíz, su función y su terminación.",
+        "prompt": "Elige el morfema que falta en cada palabra. El significado al lado de la palabra te sirve de pista.",
         "elements": [
           {
             "id": "ongoing",
@@ -378,6 +698,159 @@
           "title": "Segmentación y reconstrucción"
         },
         "topic": "composicion"
+      },
+      {
+        "key": "causacion-frente-a-deseo",
+        "type": "seleccion_multiple",
+        "prompt": "Si alguien hace comer a otra persona, ¿qué forma corresponde a esa función?",
+        "elements": [
+          {
+            "id": "cause",
+            "texto": "mikuchina · hacer comer"
+          },
+          {
+            "id": "desire",
+            "texto": "mikunayani · quiero comer"
+          },
+          {
+            "id": "ongoing",
+            "texto": "mikukuni · estoy comiendo"
+          }
+        ],
+        "solution": {
+          "seleccion": [
+            "cause"
+          ]
+        },
+        "config": {
+          "title": "Causación frente a deseo",
+          "presentation": "buttons",
+          "max_selections": 1,
+          "exact_selections": true
+        },
+        "topic": "funciones"
+      },
+      {
+        "key": "formas-derivadas",
+        "type": "completar",
+        "prompt": "Elige la forma completa que mantiene la raíz y expresa la función solicitada.",
+        "elements": [
+          {
+            "id": "writing-desire",
+            "texto": "Quiero escribir: _____.",
+            "opciones": [
+              "killkanayani",
+              "killkana",
+              "mikunayani"
+            ]
+          },
+          {
+            "id": "eating-ongoing",
+            "texto": "Estoy comiendo: _____.",
+            "opciones": [
+              "mikukuni",
+              "mikuchina",
+              "mikunayani"
+            ]
+          },
+          {
+            "id": "come-polite",
+            "texto": "Ven, por favor: _____.",
+            "opciones": [
+              "shamupay",
+              "shamuni",
+              "mikuchina"
+            ]
+          }
+        ],
+        "solution": {
+          "textos": {
+            "writing-desire": [
+              "killkanayani"
+            ],
+            "eating-ongoing": [
+              "mikukuni"
+            ],
+            "come-polite": [
+              "shamupay"
+            ]
+          }
+        },
+        "config": {
+          "title": "Reconstrucción de formas derivadas"
+        },
+        "topic": "composicion"
+      },
+      {
+        "key": "morfemas-derivativos",
+        "type": "relacionar",
+        "prompt": "Relaciona el morfema con el cambio que produce en los ejemplos de la unidad.",
+        "elements": [
+          {
+            "id": "o1",
+            "texto": "-ku",
+            "grupo": "origen"
+          },
+          {
+            "id": "o2",
+            "texto": "-chi",
+            "grupo": "origen"
+          },
+          {
+            "id": "o3",
+            "texto": "-naya",
+            "grupo": "origen"
+          },
+          {
+            "id": "o4",
+            "texto": "-pay",
+            "grupo": "origen"
+          },
+          {
+            "id": "d1",
+            "texto": "acción en curso",
+            "grupo": "destino"
+          },
+          {
+            "id": "d2",
+            "texto": "hacer que ocurra una acción",
+            "grupo": "destino"
+          },
+          {
+            "id": "d3",
+            "texto": "deseo de realizar una acción",
+            "grupo": "destino"
+          },
+          {
+            "id": "d4",
+            "texto": "petición cortés",
+            "grupo": "destino"
+          }
+        ],
+        "solution": {
+          "pares": [
+            {
+              "origen": "o1",
+              "destino": "d1"
+            },
+            {
+              "origen": "o2",
+              "destino": "d2"
+            },
+            {
+              "origen": "o3",
+              "destino": "d3"
+            },
+            {
+              "origen": "o4",
+              "destino": "d4"
+            }
+          ]
+        },
+        "config": {
+          "title": "Función de cada morfema"
+        },
+        "topic": "funciones"
       }
     ],
     "title": "Procesos de derivación verbal",
@@ -401,7 +874,7 @@
       {
         "key": "dialogue-response",
         "type": "relacionar",
-        "prompt": "Reconstruye tres intercambios del diálogo: relaciona cada pregunta con una respuesta coherente.",
+        "prompt": "Une cada pregunta con la respuesta que tiene sentido. Lee primero qué pregunta cada expresión.",
         "elements": [
           {
             "id": "q1",
@@ -458,7 +931,7 @@
       {
         "key": "future-sentence",
         "type": "ordenar",
-        "prompt": "Ordena las palabras para escribir el plan «Mañana yo iré a la casa» en kichwa.",
+        "prompt": "Ordena las cuatro palabras para decir «Mañana yo iré a la casa». Empieza por «Kaya» y termina con «risha».",
         "elements": [
           {
             "id": "destination",
@@ -493,7 +966,7 @@
       {
         "key": "destination-and-place",
         "type": "completar",
-        "prompt": "Completa el diálogo y distingue destino, lugar y tiempo verbal.",
+        "prompt": "Elige la terminación correcta en cada frase: -man indica destino, -pi indica lugar y -sha indica futuro.",
         "elements": [
           {
             "id": "to-school",
@@ -544,7 +1017,7 @@
       {
         "key": "paragraph-interpretation",
         "type": "seleccion_multiple",
-        "prompt": "Interpreta las dos oraciones como un solo plan: «Kaya ñuka wasiman risha. Wasipi samarisha.»",
+        "prompt": "Lee las dos frases y elige la opción que cuenta el mismo plan. «Kaya» significa mañana, «wasiman» a la casa y «wasipi» en la casa.",
         "elements": [
           {
             "id": "past",
@@ -569,6 +1042,77 @@
           "presentation": "buttons",
           "max_selections": 1,
           "exact_selections": true
+        },
+        "topic": "cohesion"
+      },
+      {
+        "key": "enlaces-del-relato",
+        "type": "relacionar",
+        "prompt": "Relaciona cada expresión con la información que aporta al relato.",
+        "elements": [
+          {
+            "id": "o1",
+            "texto": "Kaya",
+            "grupo": "origen"
+          },
+          {
+            "id": "o2",
+            "texto": "wasiman",
+            "grupo": "origen"
+          },
+          {
+            "id": "o3",
+            "texto": "wasipi",
+            "grupo": "origen"
+          },
+          {
+            "id": "o4",
+            "texto": "samarisha",
+            "grupo": "origen"
+          },
+          {
+            "id": "d1",
+            "texto": "sitúa el relato en mañana",
+            "grupo": "destino"
+          },
+          {
+            "id": "d2",
+            "texto": "indica movimiento hacia la casa",
+            "grupo": "destino"
+          },
+          {
+            "id": "d3",
+            "texto": "indica ubicación en la casa",
+            "grupo": "destino"
+          },
+          {
+            "id": "d4",
+            "texto": "expresa que descansaré en el futuro",
+            "grupo": "destino"
+          }
+        ],
+        "solution": {
+          "pares": [
+            {
+              "origen": "o1",
+              "destino": "d1"
+            },
+            {
+              "origen": "o2",
+              "destino": "d2"
+            },
+            {
+              "origen": "o3",
+              "destino": "d3"
+            },
+            {
+              "origen": "o4",
+              "destino": "d4"
+            }
+          ]
+        },
+        "config": {
+          "title": "Destino, lugar y tiempo en un relato"
         },
         "topic": "cohesion"
       }

@@ -72,7 +72,7 @@ test('portrait-only results leave the grade and XP to the result panel', () => {
 async function card(post) {
     let cursor = 0;
     const states = [], requests = [];
-    const module = await load(cardCode, specifier => specifier.endsWith('/MatchingLines') ? { MatchingLines: 'MatchingLines' } : specifier.endsWith('/useAnswerSound') ? { useAnswerSound: () => () => {} } : specifier === 'react' ? {
+    const module = await load(cardCode, specifier => specifier.endsWith('/TopicVisual') ? { TopicWordVisual: 'TopicWordVisual' } : specifier.endsWith('/MatchingLines') ? { MatchingLines: 'MatchingLines' } : specifier.endsWith('/useAnswerSound') ? { useAnswerSound: () => () => {} } : specifier === 'react' ? {
         useState(initial) { const index = cursor++; if (!(index in states)) states[index] = initial; return [states[index], value => { states[index] = typeof value === 'function' ? value(states[index]) : value; }]; },
         useRef(initial) { const index = cursor++; return states[index] ??= { current: initial }; },
     } : specifier.endsWith('/LearningCompanion') ? { LearningCompanion: 'LearningCompanion' } : specifier.endsWith('/SuccessConfetti') ? { SuccessConfetti: 'SuccessConfetti' } : {

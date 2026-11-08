@@ -201,3 +201,18 @@ test('body lesson plays sixteen parts and its example with safe filenames, compl
     assert.equal(view.audios.at(-2).paused, true);
     view.unmount(); assert.equal(view.audios.at(-1).paused, true);
 });
+
+test('nature lesson plays the supplied landscape recording in its first section', async () => {
+    const view = await screen([]);
+    const button = nodes(view.topic('nature')).find(node => node.props['aria-label'] === 'Escuchar el paisaje');
+    assert.ok(button);
+    assert.equal(nodes(view.topic('nature')).filter(node => node.type === 'button').length, 1);
+    button.props.onClick();
+    assert.equal(view.audios[0].src, '/yachay/audios/modulo-2/unidad-3/en-el-paisaje.ogg');
+    view.audios[0].onplaying();
+    assert.ok(text(view.topic('nature')).includes('Sonando'));
+    view.audios[0].reject(Error('file missing'));
+    await new Promise(resolve => setImmediate(resolve));
+    assert.ok(text(view.topic('nature')).includes('No se pudo reproducir el audio de «el paisaje»'));
+    view.unmount();
+});

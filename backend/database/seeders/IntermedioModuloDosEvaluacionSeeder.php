@@ -21,7 +21,7 @@ class IntermedioModuloDosEvaluacionSeeder extends Seeder
             DB::select('SELECT pg_advisory_xact_lock(20261112)');
             $level = Nivel::where('orden_nivel', 2)->firstOrFail();
             $module = Modulo::where('id_nivel', $level->id_nivel)->where('orden_modulo', 2)->firstOrFail();
-            if (EvaluacionKichwa::where('id_modulo', $module->id_modulo)->where('configuracion->bank_key', 'intermedio-modulo2-final-v5')->exists()) {
+            if (EvaluacionKichwa::where('id_modulo', $module->id_modulo)->where('configuracion->bank_key', 'intermedio-modulo2-final-v6')->exists()) {
                 return;
             }
             $units = Unidad::where('id_modulo', $module->id_modulo)->whereBetween('orden_unidad', [1, 4])->orderBy('orden_unidad')->get();
@@ -31,7 +31,7 @@ class IntermedioModuloDosEvaluacionSeeder extends Seeder
             $evaluation = EvaluacionKichwa::create(['id_modulo' => $module->id_modulo, 'id_unidad' => null, 'id_tema' => null,
                 'titulo_evaluacion' => 'Prueba final del módulo 2 · Nivel intermedio', 'tipo_evaluacion' => 'modulo', 'publicado' => false,
                 'configuracion' => ['managed' => true, 'final' => true, 'question_count' => 20, 'pass_percentage' => 80,
-                    'bank_key' => 'intermedio-modulo2-final-v5', 'prerequisite_units' => $units->modelKeys()]]);
+                    'bank_key' => 'intermedio-modulo2-final-v6', 'prerequisite_units' => $units->modelKeys()]]);
             foreach ($this->questions() as $index => [$unit, $prompt, $options, $correct, $explanation]) {
                 $choices = [];
                 foreach ($options as $position => $option) {
@@ -45,13 +45,13 @@ class IntermedioModuloDosEvaluacionSeeder extends Seeder
                 EstadoContenido::assertReady($data);
                 $question = new Pregunta(KichwaResource::attributes('questions', $data));
                 $question->id_evaluacion = $evaluation->id_evaluacion;
-                $question->origen_reactivo = 'intermedio-modulo2-final-v5-'.($index + 1);
+                $question->origen_reactivo = 'intermedio-modulo2-final-v6-'.($index + 1);
                 $question->puntaje_pregunta = 1;
                 $question->orden_pregunta = $index + 1;
                 $question->publicado = true;
                 $question->save();
             }
-            EvaluacionKichwa::where('id_modulo', $module->id_modulo)->whereIn('configuracion->bank_key', ['intermedio-modulo2-final-v1', 'intermedio-modulo2-final-v2', 'intermedio-modulo2-final-v3', 'intermedio-modulo2-final-v4'])->update(['publicado' => false]);
+            EvaluacionKichwa::where('id_modulo', $module->id_modulo)->whereIn('configuracion->bank_key', ['intermedio-modulo2-final-v1', 'intermedio-modulo2-final-v2', 'intermedio-modulo2-final-v3', 'intermedio-modulo2-final-v4', 'intermedio-modulo2-final-v5'])->update(['publicado' => false]);
             $evaluation->update(['publicado' => true]);
         });
         PublicacionContenido::invalidate();

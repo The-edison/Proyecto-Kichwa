@@ -81,6 +81,49 @@ class AdminHierarchyTest extends TestCase
         $this->postJson('/api/admin/exercises', $payload)->assertUnprocessable()->assertJsonValidationErrors('topic_id');
     }
 
+    public function test_admin_exercises_show_newly_published_first_across_pages_then_drafts(): void
+    {
+        $this->seed(DemostracionSeeder::class);
+        Sanctum::actingAs(Usuario::factory()->administrador()->create());
+        $moduleId = Unidad::where('titulo_unidad', '[DEMO] Números y vocabulario')->firstOrFail()->id_modulo;
+        $unitId = $this->postJson('/api/admin/units', ['module_id' => $moduleId, 'title' => '[DEMO] Orden de ejercicios', 'description' => 'Prueba de administración'])->assertCreated()->json('id');
+        $payload = [
+            'unit_id' => $unitId,
+            'type' => 'seleccion_multiple',
+            'prompt' => '[DEMO] Selecciona shuk.',
+            'elements' => [['id' => 'a', 'texto' => 'shuk'], ['id' => 'b', 'texto' => 'ishkay']],
+            'zones' => [],
+            'solution' => ['seleccion' => ['a']],
+            'config' => ['managed' => true, 'reviewed' => true],
+            'published' => false,
+        ];
+        $first = $this->postJson('/api/admin/exercises', array_replace($payload, ['published' => true]))->assertCreated()->json('id');
+        $second = $this->postJson('/api/admin/exercises', $payload)->assertCreated()->json('id');
+        $this->patchJson('/api/admin/exercises/'.$second, ['published' => true])->assertOk();
+        $draft = $this->postJson('/api/admin/exercises', $payload)->assertCreated()->json('id');
+
+        $path = '/api/admin/exercises?parent_id='.$unitId.'&order=publication&per_page=1';
+        $this->getJson($path.'&page=1')->assertOk()->assertJsonPath('data.0.id', $second)->assertJsonPath('data.0.published', true);
+        $this->getJson($path.'&page=2')->assertOk()->assertJsonPath('data.0.id', $first)->assertJsonPath('data.0.published', true);
+        $this->getJson($path.'&page=3')->assertOk()->assertJsonPath('data.0.id', $draft)->assertJsonPath('data.0.published', false);
+
+        $topic = $this->postJson('/api/admin/contents', ['unit_id' => $unitId, 'title' => '[DEMO] Saludos', 'body' => 'Saludos', 'kind' => 'culture', 'published' => true])->assertCreated()->json('id');
+        $topicExercise = $this->postJson('/api/admin/exercises', array_replace($payload, ['topic_id' => $topic]))->assertCreated()->json('id');
+        $this->getJson('/api/admin/exercises?parent_id='.$unitId.'&order=publication')->assertOk()->assertJsonCount(3, 'data');
+        $this->getJson('/api/admin/exercises?parent_id='.$unitId.'&order=publication&include_topics=1')->assertOk()
+            ->assertJsonCount(4, 'data')->assertJsonPath('data.2.id', $topicExercise)->assertJsonPath('data.2.topic_id', $topic);
+        $this->getJson('/api/admin/exercises?parent_id='.$unitId.'&topic_id='.$topic.'&order=publication')->assertOk()
+            ->assertJsonCount(1, 'data')->assertJsonPath('data.0.id', $topicExercise);
+        $this->getJson('/api/admin/exercises?parent_id='.$unitId.'&topic_id='.$topic.'&order=publication&include_unit_exercises=1')->assertOk()
+            ->assertJsonCount(4, 'data')->assertJsonPath('data.0.id', $second);
+        $this->getJson('/api/admin/contents?parent_id='.$unitId)->assertOk()->assertJsonPath('data.0.exercise_count', 4);
+
+        $this->postJson('/api/admin/contents', ['unit_id' => $unitId, 'title' => '[DEMO] Segundo tema', 'body' => 'Otro tema', 'kind' => 'culture', 'published' => true])->assertCreated();
+        $this->getJson('/api/admin/exercises?parent_id='.$unitId.'&topic_id='.$topic.'&order=publication&include_unit_exercises=1')->assertOk()
+            ->assertJsonCount(1, 'data')->assertJsonPath('data.0.id', $topicExercise);
+        $this->getJson('/api/admin/contents?parent_id='.$unitId)->assertOk()->assertJsonPath('data.0.exercise_count', 1);
+    }
+
     public function test_used_activity_can_be_reordered_but_its_content_remains_immutable(): void
     {
         $this->seed(DemostracionSeeder::class);
