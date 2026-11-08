@@ -1,5 +1,7 @@
 # Yachay · Plataforma de aprendizaje de Kichwa
 
+Para publicar en Dokploy con el dominio `yachay-kichwa.devs-ueb.tech` y transferir la base local sin estudiantes, sigue la [guía de producción](deployment/PRODUCCION.md).
+
 Aplicación con paneles de estudiante y administrador, diccionario Kichwa–español, actividades, evaluaciones, progreso, XP e insignias. Interfaz adaptable a computadora, tablet y móvil, con temas claro y oscuro y preferencia guardada por navegador.
 
 Esta guía permite **clonar y ejecutar el sistema en otra computadora sin copiar las credenciales ni la base de datos del equipo original**. Backend y frontend se ejecutan como servicios separados.
