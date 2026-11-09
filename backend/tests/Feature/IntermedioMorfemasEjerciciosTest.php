@@ -17,6 +17,42 @@ class IntermedioMorfemasEjerciciosTest extends TestCase
 {
     use UsesPostgreSQL;
 
+    public function test_family_matching_uses_hijastro_and_hijastra_without_changing_pairs_or_losing_previous_answers(): void
+    {
+        $this->seed([IntermedioMorfemasSeeder::class, IntermedioMorfemasEjerciciosSeeder::class]);
+        $exercise = Actividad::where('origen_reactivo', 'intermedio-m2-u1-practica-7-v2')->firstOrFail();
+        $solution = $exercise->solucion_actividad;
+        $elements = $exercise->elementos_actividad;
+        foreach ($elements as &$element) {
+            if ($element['id'] === 'd2') {
+                $element['texto'] = 'Entenado';
+            } elseif ($element['id'] === 'd3') {
+                $element['texto'] = 'Entenada';
+            }
+        }
+        unset($element);
+        $exercise->update(['elementos_actividad' => $elements]);
+        $exercise->origen_reactivo = 'intermedio-m2-u1-practica-7-v1';
+        $exercise->save();
+        Sanctum::actingAs(Usuario::factory()->create());
+        $response = $this->postJson('/api/exercises/'.$exercise->id_actividad.'/answer', ['answer' => $solution, 'practice_attempt_id' => (string) Str::uuid(), 'submission_id' => (string) Str::uuid()])->assertOk()->assertJsonPath('is_correct', true);
+
+        $this->seed(IntermedioMorfemasEjerciciosSeeder::class);
+        $this->seed(IntermedioMorfemasEjerciciosSeeder::class);
+
+        $updated = Actividad::where('origen_reactivo', 'intermedio-m2-u1-practica-7-v2')->firstOrFail();
+        $labels = array_column($updated->elementos_actividad, 'texto', 'id');
+        $this->assertSame('Lachuri', $labels['k2']);
+        $this->assertSame('Hijastro', $labels['d2']);
+        $this->assertSame('Laushushi', $labels['k3']);
+        $this->assertSame('Hijastra', $labels['d3']);
+        $this->assertSame($solution, $updated->solucion_actividad);
+        $this->assertSame(1, Actividad::where('origen_reactivo', $updated->origen_reactivo)->count());
+        $this->assertFalse($exercise->fresh()->publicado);
+        $this->assertSame($elements, $exercise->fresh()->elementos_actividad);
+        $this->assertDatabaseHas('respuestas_actividad', ['id_respuesta_actividad' => $response->json('response_id'), 'id_actividad' => $exercise->id_actividad, 'acierto_actividad' => true]);
+    }
+
     public function test_four_family_recordings_have_spanish_meanings_in_two_panels_and_independent_grading(): void
     {
         $this->seed([IntermedioMorfemasSeeder::class, IntermedioMorfemasEjerciciosSeeder::class]);

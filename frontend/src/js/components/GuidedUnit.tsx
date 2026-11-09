@@ -300,7 +300,7 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
                 <p className="guided-result-note">Cada ejercicio correcto suma <strong>10 XP</strong>.</p>
                 <div className="guided-result-actions">
                     <button type="button" className="secondary-button" onClick={retry}><RotateCcw size={18} aria-hidden="true" />Reintentar</button>
-                    <Link className="primary-button" href={summary.next_unit_id ? `/aprender/unidad/${summary.next_unit_id}` : `/aprender/nivel/${unit.level_id}`}>Continuar <ArrowRight size={18} aria-hidden="true" /></Link>
+                    <Link className="primary-button" href={summary.next_unit_id ? `/aprender/unidad/${summary.next_unit_id}` : moduleHref}>Continuar <ArrowRight size={18} aria-hidden="true" /></Link>
                     <Link className="guided-result-exit" href={moduleHref}><ArrowLeft size={17} aria-hidden="true" />Salir a unidades</Link>
                 </div>
             </section> : <>

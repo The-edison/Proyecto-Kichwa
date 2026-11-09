@@ -21,7 +21,7 @@ class IntermedioMorfemasEjerciciosSeeder extends Seeder
             $unit = Unidad::whereKey($topic->id_unidad)->lockForUpdate()->firstOrFail();
             $order = (int) Actividad::where('id_unidad', $unit->id_unidad)->max('orden_actividad');
             foreach ($this->exercises() as $index => $exercise) {
-                $origin = 'intermedio-m2-u1-practica-'.($index + 1).($index === 4 ? '-v2' : '-v1');
+                $origin = 'intermedio-m2-u1-practica-'.($index + 1).(in_array($index, [4, 6], true) ? '-v2' : '-v1');
                 if (Actividad::where('id_unidad', $unit->id_unidad)->where('origen_reactivo', $origin)->exists()) {
                     continue;
                 }
@@ -31,8 +31,8 @@ class IntermedioMorfemasEjerciciosSeeder extends Seeder
                     'incorrect_feedback' => 'Revisa tus respuestas y vuelve a intentarlo.'];
                 EstadoContenido::assertReady($exercise);
                 $position = ++$order;
-                if ($index === 4) {
-                    $previous = Actividad::where('id_unidad', $unit->id_unidad)->where('origen_reactivo', 'intermedio-m2-u1-practica-5-v1')->first();
+                if (in_array($index, [4, 6], true)) {
+                    $previous = Actividad::where('id_unidad', $unit->id_unidad)->where('origen_reactivo', 'intermedio-m2-u1-practica-'.($index + 1).'-v1')->first();
                     if ($previous) {
                         $position = $previous->orden_actividad;
                         $previous->update(['publicado' => false, 'orden_actividad' => $order]);
@@ -79,7 +79,7 @@ class IntermedioMorfemasEjerciciosSeeder extends Seeder
             2 => ['type' => 'completar', 'prompt' => 'Escribe la palabra completa utilizando el morfema correspondiente.', 'elements' => array_map(fn ($base) => ['id' => $base, 'texto' => ucfirst($base).' + -kamak'], ['wasi', 'llama', 'wakra', 'tanta', 'punku']), 'solution' => ['textos' => ['wasi' => ['wasikamak'], 'llama' => ['llamakamak'], 'wakra' => ['wakrakamak'], 'tanta' => ['tantakamak'], 'punku' => ['punkukamak']]], 'config' => ['title' => 'Actividad 3. Completa la palabra']],
             4 => $this->ordinalExercise(),
             5 => $this->choice('Actividad 6. Escucha e identifica el lugar', 'Escucha la oración y selecciona la posición mencionada.', ['Primero', 'Tercero', 'Noveno'], 0),
-            6 => $this->matching(['Layaya', 'Lamama', 'Lachuri', 'Laushushi'], ['Padrastro', 'Madrastra', 'Entenado', 'Entenada'], 'Actividad 8. Relaciona los parentescos', 'Une cada término en kichwa con su significado.'),
+            6 => $this->matching(['Layaya', 'Lamama', 'Lachuri', 'Laushushi'], ['Padrastro', 'Madrastra', 'Hijastro', 'Hijastra'], 'Actividad 8. Relaciona los parentescos', 'Une cada término en kichwa con su significado.'),
         ];
     }
 
@@ -173,7 +173,7 @@ class IntermedioMorfemasEjerciciosSeeder extends Seeder
             'intermedio-m2-u1-escucha-marilin-v1', 'intermedio-m2-u1-escucha-luis-v1',
             'intermedio-m2-u1-practica-3-v1', 'intermedio-m2-u1-practica-5-v2',
             'intermedio-m2-u1-practica-6-v1', 'intermedio-m2-u1-posicion-tercero-v1',
-            'intermedio-m2-u1-practica-7-v1',
+            'intermedio-m2-u1-practica-7-v2',
             'intermedio-m2-u1-parentesco-escucha-laushushi-v1', 'intermedio-m2-u1-parentesco-escucha-layaya-v1',
             'intermedio-m2-u1-parentesco-escucha-lamama-v1', 'intermedio-m2-u1-parentesco-escucha-lachuri-v1'];
         $records = Actividad::where('id_unidad', $unit->id_unidad)->orderByDesc('publicado')->orderBy('orden_actividad')->get();

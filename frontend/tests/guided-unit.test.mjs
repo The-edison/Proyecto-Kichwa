@@ -744,12 +744,12 @@ test('retry starts a fresh scored run even when the unit was completed previousl
     assert.equal(view.requests.length, 4);
 });
 
-test('continuing after completion falls back to the level when there is no next unit', async () => {
+test('completing the last unit returns to its module panel to continue with the final test', async () => {
     const view = await screen({ post: ({ path }) => path.endsWith('/guided/result') ? { ...perfectScore, next_unit_id: null } : { response_id: path.includes('/11/') ? 201 : 202, is_correct: true, feedback: 'Correcto.' } });
     await complete(view);
     assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === '2 de 2 ejercicios correctos'));
     assert.ok(content(view.render()).includes('Meta alcanzada'));
-    assert.ok(nodes(view.render()).some(node => node.type === 'Link' && content(node).trim() === 'Continuar' && node.props.href === '/aprender/nivel/1'));
+    assert.ok(nodes(view.render()).some(node => node.type === 'Link' && content(node).trim() === 'Continuar' && node.props.href === '/aprender/modulo/8'));
 });
 
 test('a failed score request can be retried without losing or resubmitting the exercise answers', async () => {
