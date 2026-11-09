@@ -18,7 +18,7 @@
                     } catch (_) {}
                 }
                 var key = scope === 'public' ? 'yachay-theme' : 'yachay-theme:' + scope;
-                try { saved = localStorage.getItem(key); } catch (_) {}
+                try { saved = sessionStorage.getItem(key); } catch (_) {}
                 document.documentElement.dataset.theme = saved === 'dark' || saved === 'light'
                     ? saved : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             })();

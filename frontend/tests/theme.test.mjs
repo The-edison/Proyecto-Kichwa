@@ -36,7 +36,7 @@ for (const [name, saved, systemDark, expected] of [
     ['blocked storage falls back to system', 'throw', true, 'dark'],
 ]) test(name, () => {
     const document = { documentElement: { dataset: {} } };
-    vm.runInNewContext(bootstrap, { document, location: { pathname: '/' }, localStorage: { getItem: () => { if (saved === 'throw') throw new Error('blocked'); return saved; } }, matchMedia: () => ({ matches: systemDark }) });
+    vm.runInNewContext(bootstrap, { document, location: { pathname: '/' }, sessionStorage: { getItem: () => { if (saved === 'throw') throw new Error('blocked'); return saved; } }, matchMedia: () => ({ matches: systemDark }) });
     assert.equal(document.documentElement.dataset.theme, expected);
 });
 
@@ -48,19 +48,18 @@ for (const [route, accountScope, expected] of [
 ]) test(`theme before rendering: ${route}, account ${accountScope}`, () => {
     const document = { documentElement: { dataset: {} } };
     const saved = { 'yachay-theme': 'light', 'yachay-theme:admin': 'dark', 'yachay-theme:student': 'light' };
-    vm.runInNewContext(bootstrap, { document, location: { pathname: route }, localStorage: { getItem: key => saved[key] }, sessionStorage: { getItem: () => accountScope }, matchMedia: () => ({ matches: false }) });
+    vm.runInNewContext(bootstrap, { document, location: { pathname: route }, sessionStorage: { getItem: key => key === 'yachay-theme-scope' ? accountScope : saved[key] }, matchMedia: () => ({ matches: false }) });
     assert.equal(document.documentElement.dataset.theme, expected);
 });
 
 const { code: toggleCode } = await transformWithOxc(fs.readFileSync(new URL('../src/js/components/ThemeToggle.tsx', import.meta.url), 'utf8'), 'ThemeToggle.tsx');
 async function themeTab(saved, initialScope, systemDark = false, blocked = false) {
     let hook = 0, scope = initialScope;
-    const states = [], effects = [], listeners = new Map(), systemListeners = new Set(), tabStorage = new Map();
+    const states = [], effects = [], listeners = new Map(), systemListeners = new Set(), tabStorage = new Map(saved);
     const document = { documentElement: { dataset: { theme: 'light' } } };
     const media = { matches: systemDark, addEventListener: (_, cb) => systemListeners.add(cb), removeEventListener: (_, cb) => systemListeners.delete(cb) };
     const context = vm.createContext({ document,
-        localStorage: { getItem: key => { if (blocked) throw Error('blocked'); return saved.get(key) ?? null; }, setItem: (key, value) => { if (blocked) throw Error('blocked'); saved.set(key, value); } },
-        sessionStorage: { setItem: (key, value) => tabStorage.set(key, value) },
+        sessionStorage: { getItem: key => { if (blocked) throw Error('blocked'); return tabStorage.get(key) ?? null; }, setItem: (key, value) => { if (blocked) throw Error('blocked'); tabStorage.set(key, value); } },
         window: { matchMedia: () => media, addEventListener: (event, cb) => { if (!listeners.has(event)) listeners.set(event, new Set()); listeners.get(event).add(cb); }, removeEventListener: (event, cb) => listeners.get(event)?.delete(cb) },
     });
     const jsx = (type, props) => ({ type, props });
@@ -78,39 +77,19 @@ async function themeTab(saved, initialScope, systemDark = false, blocked = false
     return { document, tabStorage, button: render, switchScope: next => { scope = next; render(); }, storage: key => listeners.get('storage')?.forEach(cb => cb({ key })), system: dark => { media.matches = dark; systemListeners.forEach(cb => cb()); } };
 }
 
-test('admin and student toggles persist independently and ignore other-role storage events', async () => {
-    const saved = new Map([['yachay-theme', 'dark']]);
-    const admin = await themeTab(saved, 'admin'), student = await themeTab(saved, 'student');
-    assert.equal(admin.document.documentElement.dataset.theme, 'light');
-    assert.equal(student.document.documentElement.dataset.theme, 'light');
-    admin.button().props.onClick(); student.storage('yachay-theme:admin');
-    assert.equal(saved.get('yachay-theme:admin'), 'dark');
-    assert.equal(student.document.documentElement.dataset.theme, 'light');
-    student.button().props.onClick(); admin.storage('yachay-theme:student');
-    student.button().props.onClick(); admin.storage('yachay-theme:student');
-    assert.equal(saved.get('yachay-theme:student'), 'light');
-    assert.equal(admin.document.documentElement.dataset.theme, 'dark');
-    assert.equal(saved.get('yachay-theme'), 'dark');
-    assert.equal(admin.tabStorage.get('yachay-theme-scope'), 'admin');
-    assert.equal(student.tabStorage.get('yachay-theme-scope'), 'student');
-    assert.equal(admin.button().props['aria-pressed'], true);
-    assert.equal((await themeTab(saved, 'admin')).document.documentElement.dataset.theme, 'dark');
-    assert.equal((await themeTab(saved, 'student')).document.documentElement.dataset.theme, 'light');
-});
-
-test('same-role tabs synchronize while route and account role changes reload the correct preference', async () => {
-    const saved = new Map([['yachay-theme:admin', 'dark'], ['yachay-theme:student', 'light'], ['yachay-theme', 'light']]);
-    const first = await themeTab(saved, 'admin'), second = await themeTab(saved, 'admin');
-    first.button().props.onClick(); second.storage('yachay-theme:admin');
-    assert.equal(second.document.documentElement.dataset.theme, 'light');
-    first.button().props.onClick(); first.switchScope('student');
-    assert.equal(first.document.documentElement.dataset.theme, 'light');
-    first.switchScope('admin');
+test('tabs keep independent themes and restore their own preference', async () => {
+    const initial = new Map([['yachay-theme:student', 'light']]);
+    const first = await themeTab(initial, 'student'), second = await themeTab(initial, 'student');
+    first.button().props.onClick();
+    second.storage('yachay-theme:student');
     assert.equal(first.document.documentElement.dataset.theme, 'dark');
-    first.switchScope('public');
+    assert.equal(second.document.documentElement.dataset.theme, 'light');
+    assert.equal((await themeTab(first.tabStorage, 'student')).document.documentElement.dataset.theme, 'dark');
+    assert.equal((await themeTab(second.tabStorage, 'student')).document.documentElement.dataset.theme, 'light');
+    first.switchScope('admin');
     assert.equal(first.document.documentElement.dataset.theme, 'light');
-    first.storage('yachay-theme:admin');
-    assert.equal(first.document.documentElement.dataset.theme, 'light');
+    first.switchScope('student');
+    assert.equal(first.document.documentElement.dataset.theme, 'dark');
 });
 
 test('system preference is per role until chosen, and blocked storage keeps toggles usable', async () => {

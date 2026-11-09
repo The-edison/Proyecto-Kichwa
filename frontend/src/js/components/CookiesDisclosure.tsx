@@ -12,8 +12,8 @@ const localRecords = [
     ['yachay:guided-attempt:v1:…', 'Guarda respuestas y borradores de actividades durante la pestaña para que puedas volver a ellas.', 'Funcional educativa · sessionStorage'],
     ['yachay-learning-navigation:…', 'Recuerda qué niveles y módulos has desplegado durante la pestaña.', 'Preferencia · sessionStorage'],
     ['yachay-theme-scope', 'Identifica el tema visual de la cuenta en esta pestaña; se elimina al cerrarla.', 'Preferencia · sessionStorage'],
-    ['yachay-theme / yachay-theme:student / yachay-theme:admin', 'Recuerda el tema claro u oscuro que eliges.', 'Preferencia · localStorage'],
-    ['yachay-home-language', 'Recuerda el idioma del inicio cuando lo cambias.', 'Preferencia · localStorage'],
+    ['yachay-theme / yachay-theme:student / yachay-theme:admin', 'Recuerda el tema claro u oscuro que eliges en esta pestaña.', 'Preferencia · sessionStorage'],
+    ['yachay-home-language', 'Recuerda el idioma del inicio en esta pestaña.', 'Preferencia · sessionStorage'],
     ['yachay-sidebar-collapsed', 'Recuerda si contraes el menú lateral.', 'Preferencia · localStorage'],
     ['yachay:catalog-changed', 'Avisa a otras pestañas de una actualización del catálogo realizada por el administrador.', 'Funcional · localStorage'],
 ] as const;
