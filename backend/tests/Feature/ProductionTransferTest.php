@@ -5,7 +5,10 @@ namespace Tests\Feature;
 use App\Models\Usuario;
 use App\Services\ProductionTransfer;
 use Database\Seeders\DatabaseSeeder;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\QueryException;
+use Illuminate\Encryption\Encrypter;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -215,5 +218,100 @@ class ProductionTransferTest extends TestCase
         $this->assertDatabaseCount('usuarios', 0);
         $this->assertDatabaseCount('niveles', $levelCount);
         $this->assertDatabaseCount('modulos', 0);
+    }
+
+    public function test_package_encrypted_for_production_can_be_imported_with_the_production_key(): void
+    {
+        Storage::fake('public');
+        Storage::fake('local');
+        $disk = Storage::disk('local');
+        $admin = Usuario::factory()->administrador()->create();
+        $transfer = app(ProductionTransfer::class);
+        $transfer->export($disk->path('source.zip'));
+        $key = str_repeat('p', 32);
+        $disk->put('production.env', 'APP_KEY=base64:'.base64_encode($key));
+
+        $this->artisan('yachay:encrypt-production', [
+            'source' => $disk->path('source.zip'),
+            'destination' => $disk->path('package.enc'),
+            'environment' => $disk->path('production.env'),
+        ])->assertSuccessful();
+
+        $this->assertStringNotContainsString($admin->correo_usuario, $disk->get('package.enc'));
+        $productionEncrypter = new Encrypter($key, 'AES-256-CBC');
+        $this->assertSame($disk->get('source.zip'), $productionEncrypter->decryptString($disk->get('package.enc')));
+        Crypt::swap($productionEncrypter);
+        DB::table('usuarios')->delete();
+
+        $this->artisan('yachay:import-production', [
+            'source' => $disk->path('package.enc'), '--encrypted' => true, '--confirm-new-database' => true,
+        ])->assertSuccessful();
+
+        $this->assertDatabaseHas('usuarios', ['id_usuario' => $admin->id_usuario, 'rol_usuario' => 'administrador']);
+        $this->assertCount(3, $disk->allFiles());
+    }
+
+    #[DataProvider('encryptedFailures')]
+    public function test_wrong_key_or_tampered_package_does_not_write_data_or_plaintext(string $failure): void
+    {
+        Storage::fake('local');
+        $disk = Storage::disk('local');
+        $payload = (new Encrypter(str_repeat('p', 32), 'AES-256-CBC'))->encryptString('private-package');
+        if ($failure === 'tampered') {
+            $payload = substr($payload, 0, -10).'invalid';
+        }
+        $disk->put('package.enc', $payload);
+        Crypt::swap(new Encrypter(str_repeat($failure === 'wrong_key' ? 'x' : 'p', 32), 'AES-256-CBC'));
+
+        try {
+            app(ProductionTransfer::class)->importEncrypted($disk->path('package.enc'));
+            $this->fail('Una clave incorrecta o un paquete alterado debe rechazarse.');
+        } catch (DecryptException $exception) {
+            $this->assertNotSame('', $exception->getMessage());
+        }
+
+        $this->assertSame(['package.enc'], $disk->allFiles());
+        $this->assertDatabaseCount('usuarios', 0);
+    }
+
+    public static function encryptedFailures(): array
+    {
+        return [['wrong_key'], ['tampered']];
+    }
+
+    public function test_encryption_requires_a_valid_production_key(): void
+    {
+        Storage::fake('local');
+        $disk = Storage::disk('local');
+        $disk->put('production.env', 'APP_KEY=');
+        try {
+            $this->artisan('yachay:encrypt-production', [
+                'source' => $disk->path('source.zip'),
+                'destination' => $disk->path('package.enc'),
+                'environment' => $disk->path('production.env'),
+            ])->run();
+            $this->fail('La clave de producción vacía debía rechazarse.');
+        } catch (RuntimeException $exception) {
+            $this->assertStringContainsString('APP_KEY', $exception->getMessage());
+        }
+        $disk->assertMissing('package.enc');
+    }
+
+    public function test_encryption_preserves_an_existing_destination(): void
+    {
+        Storage::fake('local');
+        $disk = Storage::disk('local');
+        $disk->put('package.enc', 'existing-encrypted-package');
+        try {
+            $this->artisan('yachay:encrypt-production', [
+                'source' => $disk->path('source.zip'),
+                'destination' => $disk->path('package.enc'),
+                'environment' => $disk->path('production.env'),
+            ])->run();
+            $this->fail('El paquete existente debía conservarse.');
+        } catch (RuntimeException $exception) {
+            $this->assertStringContainsString('ya existe', $exception->getMessage());
+        }
+        $this->assertSame('existing-encrypted-package', $disk->get('package.enc'));
     }
 }

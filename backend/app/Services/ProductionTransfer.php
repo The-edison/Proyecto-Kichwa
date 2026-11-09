@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use RuntimeException;
 use ZipArchive;
 
@@ -176,6 +178,23 @@ class ProductionTransfer
             return [...array_map(count(...), $tables), 'media_files' => count($media)];
         } finally {
             $archive->close();
+        }
+    }
+
+    /** @return array<string, int> */
+    public function importEncrypted(string $source): array
+    {
+        $bytes = Crypt::decryptString(file_get_contents($source));
+        $disk = Storage::disk('local');
+        $temporary = 'production-transfer-'.Str::uuid().'.zip';
+        try {
+            if (! $disk->put($temporary, $bytes)) {
+                throw new RuntimeException('No se pudo preparar el paquete en el almacenamiento privado.');
+            }
+
+            return $this->import($disk->path($temporary));
+        } finally {
+            $disk->delete($temporary);
         }
     }
 

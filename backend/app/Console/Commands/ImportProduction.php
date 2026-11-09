@@ -7,7 +7,7 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
-#[Signature('yachay:import-production {source : Ruta del ZIP privado} {--confirm-new-database : Confirma la instalación en una base nueva}')]
+#[Signature('yachay:import-production {source : Ruta del paquete privado o cifrado} {--encrypted : Descifra con la APP_KEY de producción} {--confirm-new-database : Confirma la instalación en una base nueva}')]
 #[Description('Importa contenido y administradores exclusivamente en una instalación nueva')]
 class ImportProduction extends Command
 {
@@ -21,7 +21,9 @@ class ImportProduction extends Command
 
             return self::FAILURE;
         }
-        $counts = $transfer->import($this->argument('source'));
+        $counts = $this->option('encrypted')
+            ? $transfer->importEncrypted($this->argument('source'))
+            : $transfer->import($this->argument('source'));
         $this->table(['Elemento', 'Cantidad'], collect($counts)->map(fn (int $count, string $name): array => [$name, $count])->all());
         $this->info('Contenido y administradores importados. No se importaron estudiantes ni historial.');
 
