@@ -8,6 +8,7 @@ const { code } = await transformWithOxc(await readFile(new URL('../src/js/compon
 const data = [{ id: 1, name: 'Basico', available: true, modules: [{ id: 4, title: 'Primeros contactos', units: [{ id: 7, title: 'Conociendo el Kichwa' }, { id: 8, title: 'Saludos' }] }] }, { id: 2, name: 'Intermedio', available: true, modules: [{ id: 10, title: 'Conversaciones', units: [{ id: 12, title: 'En comunidad' }] }] }];
 async function screen({ pathname = '/aprender', loading = false, error = null, catalog = data, blockedStorage = false } = {}) {
     let cursor = 0, expanded = 0, navigated = 0, refreshed = 0;
+    const locks = [];
     const states = [], dependencies = [], effects = [], storage = new Map();
     const context = vm.createContext({ sessionStorage: { getItem(key) { if (blockedStorage) throw Error(); return storage.get(key) ?? null; }, setItem(key, value) { if (blockedStorage) throw Error(); storage.set(key, value); } } });
     const jsx = (type, props) => ({ type, props });
@@ -17,7 +18,8 @@ async function screen({ pathname = '/aprender', loading = false, error = null, c
             useState(initial) { const index = cursor++; if (!(index in states)) states[index] = typeof initial === 'function' ? initial() : initial; return [states[index], value => { states[index] = typeof value === 'function' ? value(states[index]) : value; }]; },
             useEffect(callback, deps) { const index = cursor++; if (!dependencies[index] || deps.some((value, i) => value !== dependencies[index][i])) { dependencies[index] = deps; effects.push(callback); } },
         } : specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx, Fragment: 'fragment' } : specifier === 'react-router-dom' ? { useLocation: () => ({ pathname }) }
-            : specifier === 'lucide-react' ? { BookOpen: 'BookOpen', ChevronDown: 'ChevronDown', GraduationCap: 'GraduationCap' }
+            : specifier === 'lucide-react' ? { BookOpen: 'BookOpen', ChevronDown: 'ChevronDown', GraduationCap: 'GraduationCap', LockKeyhole: 'LockKeyhole' }
+            : specifier.endsWith('/moduleAccess') ? { showModuleLock: lock => locks.push(lock) }
             : specifier.endsWith('/useApi') ? { useApi: () => ({ data: catalog, loading, error, refresh: () => refreshed++ }) }
             : specifier.endsWith('/AuthContext') ? { useAuth: () => ({ user: { id: 3 } }) }
             : specifier.endsWith('/navigation') ? { Link: 'Link' } : {};
@@ -26,11 +28,25 @@ async function screen({ pathname = '/aprender', loading = false, error = null, c
     await module.evaluate();
     const render = () => { cursor = 0; const tree = module.namespace.StudentLearningNav({ onExpand: () => expanded++, onNavigate: () => navigated++ }); effects.splice(0).forEach(callback => callback()); return tree; };
     render();
-    return { render, navigate: value => { pathname = value; render(); }, expanded: () => expanded, navigated: () => navigated, refreshed: () => refreshed, storage };
+    return { render, navigate: value => { pathname = value; render(); }, expanded: () => expanded, navigated: () => navigated, refreshed: () => refreshed, storage, locks };
 }
 function nodes(tree) { if (Array.isArray(tree)) return tree.flatMap(nodes); return tree?.props ? [tree, ...nodes(tree.props.children)] : []; }
 const button = (view, label) => nodes(view.render()).find(node => node.type === 'button' && node.props['aria-label']?.startsWith(label));
 const links = view => nodes(view.render()).filter(node => node.type === 'Link');
+
+test('locked modules show a lock notice and never expand into unit links', async () => {
+    const lock = { module_id: 10, prerequisite: { id: 4 }, message: 'Termina primero el módulo anterior.' };
+    const catalog = [{ ...data[1], modules: [{ ...data[1].modules[0], unlocked: false, lock }] }];
+    const view = await screen({ catalog });
+    button(view, 'Nivel Intermedio').props.onClick();
+    const module = button(view, 'Módulo 1: Conversaciones');
+    assert.equal(module.props['aria-expanded'], false);
+    module.props.onClick();
+    assert.equal(view.locks.length, 1);
+    assert.equal(view.locks[0], lock);
+    assert.equal(links(view).some(link => link.props.href === '/aprender/unidad/12'), false);
+    assert.equal(button(view, 'Módulo 1: Conversaciones').props['aria-expanded'], false);
+});
 
 test('both levels expand into their modules and functional unit destinations', async () => {
     const view = await screen();

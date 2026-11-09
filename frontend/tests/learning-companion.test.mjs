@@ -115,7 +115,7 @@ test('a correct activity locks its answer and keeps its graded feedback', async 
     assert.equal(nodes(view.render()).find(n => n.type === 'fieldset').props.disabled, true);
 });
 
-test('standalone exercises celebrate a correct submission and clear confetti for a new attempt', async () => {
+test('standalone exercises keep feedback without confetti after correct answers and retries', async () => {
     let correct = false;
     const view = await card(() => ({ response_id: correct ? 2 : 1, is_correct: correct, feedback: 'Revisado.' }));
     const celebrates = () => nodes(view.render()).some(node => node.type === 'SuccessConfetti');
@@ -123,7 +123,7 @@ test('standalone exercises celebrate a correct submission and clear confetti for
     assert.equal(celebrates(), false);
     correct = true;
     await check(view);
-    assert.equal(celebrates(), true);
+    assert.equal(celebrates(), false);
     nodes(view.render()).find(node => node.type === 'button' && node.props.children === 'Nuevo intento').props.onClick();
     assert.equal(celebrates(), false);
 });

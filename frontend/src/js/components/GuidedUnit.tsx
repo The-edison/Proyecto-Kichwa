@@ -17,7 +17,6 @@ import { ApiError, apiPost, withProgressBatch } from '../services/api';
 import { answerComplete, ExerciseInteraction, feedbackMessage, mediaUrl } from './ExerciseCard';
 import { ErrorState, LoadingState } from './States';
 import { LearningCompanion } from './LearningCompanion';
-import { SuccessConfetti } from './SuccessConfetti';
 import { GuidedIntroduction } from './GuidedIntroduction';
 import { GreetingsIntroduction } from './GreetingsIntroduction';
 import { TopicIntroduction } from './TopicIntroduction';
@@ -61,7 +60,6 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
     const pagedLesson = unit.config?.guided_lesson === 'advanced-morphemes' || unit.config?.guided_lesson === 'time-morphemes' || unit.config?.guided_lesson === 'verbal-analysis' || unit.config?.guided_lesson === 'short-dialogues';
     const lessonPageCount = unit.config?.guided_lesson === 'verbal-analysis' ? 5 : 4;
     const [error, setError] = useState('');
-    const [celebration, setCelebration] = useState(0);
     const sending = useRef(false);
     const heading = useRef<HTMLHeadingElement>(null);
     const main = useRef<HTMLElement>(null);
@@ -216,12 +214,12 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
         const saved = readGuidedAttempt(draftKey);
         if (next > saved.step && exercises.slice(0, next - 1).some(exercise => saved.feedback[exercise.id]?.is_correct !== true)) return;
         turnDirection.current = next < saved.step ? 'backward' : 'forward';
-        setStep(next); setSelectedOrigin(''); setError(''); setCelebration(0);
+        setStep(next); setSelectedOrigin(''); setError('');
     }
     function retry() {
         turnDirection.current = 'forward';
         writeGuidedAttempt(draftKey, emptyGuidedAttempt(catalog ?? ''));
-        setError(''); setCelebration(0);
+        setError('');
     }
     async function finish() {
         const saved = readGuidedAttempt(draftKey);
@@ -265,11 +263,6 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
             const graded = outcomes.flatMap(outcome => outcome.status === 'fulfilled' && outcome.value ? [outcome.value] : []);
             if (graded.length) {
                 playAnswerSound(graded.every(response => response.is_correct === true));
-                const latest = readGuidedAttempt(draftKey);
-                const panel = isGrouped ? groupedChoices : current ? [current] : [];
-                if (panel.length && panel.every(exercise => latest.feedback[exercise.id]?.is_correct === true)) {
-                    setCelebration(previous => previous + 1);
-                }
             }
         } catch (reason) {
             setError(reason instanceof ApiError ? Object.values(reason.errors).flat().join(' ') || reason.message : 'No se pudo guardar tu respuesta. Se conserva tu selección; vuelve a intentarlo.');
@@ -279,7 +272,6 @@ export function GuidedUnit({ unit }: { unit: GuidedUnitData }) {
     const destinations = current?.elements.filter(item => item.grupo === 'destino') ?? [];
 
     return <div className={`guided-unit-shell${current?.config?.verbal_practice === 5 ? ' is-verbal-sentences' : ''}${verbalListeningPanel ? ' is-verbal-listening' : ''}${current?.config?.time_practice === 7 && step < screenCount ? ' is-time-comparison' : ''}${(unit.config?.guided_lesson === 'advanced-morphemes' || (unit.config?.guided_lesson === 'time-morphemes' || unit.config?.guided_lesson === 'verbal-analysis' || unit.config?.guided_lesson === 'short-dialogues') && step > 0) ? ' is-morphemes' : ''}${unit.config?.guided_lesson === 'pronouns' ? ' is-pronouns' : ''}${unit.config?.guided_lesson === 'greetings' ? ' is-greetings' : ''}${unit.config?.guided_lesson === 'numbers' ? ' is-numbers' : ''}${unit.config?.guided_lesson === 'animals-colors' ? ' is-animals' : ''}${unit.config?.guided_lesson === 'calendar' ? ' is-calendar' : ''}${unit.config?.guided_lesson === 'body' ? ' is-body' : ''}${step > 0 && step < screenCount ? ' is-activity' : ''}${summary && step === screenCount ? ' is-result' : ''}`}>
-        {celebration > 0 && <SuccessConfetti key={celebration} onDone={() => setCelebration(current => current === celebration ? 0 : current)} />}
         <Head title={`${unit.title} · Actividades`} />
         <header className="guided-unit-header">
             <Link href={moduleHref} className="guided-unit-brand"><BookOpen size={24} aria-hidden="true" /><span>KICHWA</span></Link>

@@ -18,6 +18,7 @@ class ModuloDosNaturalezaVerbosTest extends TestCase
     public function test_units_have_five_varied_exercises_without_answer_images(): void
     {
         $this->seed(UnidadesTematicasGuiadasSeeder::class);
+        $this->publishOnlyModule(Unidad::where('configuracion->guided_lesson', 'animals-colors')->value('id_modulo'));
         $units = Unidad::whereIn('configuracion->guided_lesson', ['nature', 'verbs'])->orderBy('orden_unidad')->get();
         $this->assertCount(2, $units);
         $originals = $units->mapWithKeys(fn (Unidad $unit): array => [$unit->id_unidad => Actividad::where('id_unidad', $unit->id_unidad)

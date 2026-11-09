@@ -21,7 +21,7 @@ export default function Module({ moduleId }: { moduleId: number }) {
             <Link href="/aprender">Mi aprendizaje</Link>
             {module.data && <><ChevronRight size={14} aria-hidden="true" /><Link href={'/aprender/nivel/' + module.data.level_id}>{module.data.level_name}</Link><ChevronRight size={14} aria-hidden="true" /><span aria-current="page">{module.data.title}</span></>}
         </nav>
-        {module.loading || units.loading ? <LoadingState /> : module.error || units.error ? <ErrorState message={module.error || units.error || ''} /> : <>
+        {module.loading || units.loading ? <LoadingState /> : module.error || units.error ? <ErrorState message={module.error || units.error || ''} lock={module.lock || units.lock} /> : <>
             {module.data?.description && <section className="module-introduction" aria-labelledby="module-objective-title">
                 <span className="module-introduction-icon" aria-hidden="true"><Target size={24} strokeWidth={1.7} /></span>
                 <div><h2 id="module-objective-title">Objetivo del módulo</h2>

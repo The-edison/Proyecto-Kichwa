@@ -806,7 +806,7 @@ test('guided companion shows checked XP, clears stale feedback and sums only ear
     assert.equal(companion().xpEarned, 0);
 });
 
-test('confetti appears only after a fresh correct check and clears on navigation or reload', async () => {
+test('guided checks retain feedback without confetti after correct answers, navigation and reload', async () => {
     let correct = false;
     const view = await screen({ post: () => ({ response_id: correct ? 2 : 1, is_correct: correct, feedback: 'Revisado.' }) });
     const celebrates = () => nodes(view.render()).some(node => node.type === 'SuccessConfetti');
@@ -816,7 +816,7 @@ test('confetti appears only after a fresh correct check and clears on navigation
     assert.equal(celebrates(), false);
     correct = true;
     choose(view, 'wasi'); await check(view);
-    assert.equal(celebrates(), true);
+    assert.equal(celebrates(), false);
     view.remount();
     assert.equal(celebrates(), false);
     click(view, 'Continuar');

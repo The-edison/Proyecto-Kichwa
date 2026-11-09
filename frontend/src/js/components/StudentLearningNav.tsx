@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { BookOpen, ChevronDown, GraduationCap } from 'lucide-react';
+import { BookOpen, ChevronDown, GraduationCap, LockKeyhole } from 'lucide-react';
 import { Link } from '../navigation';
 import { useApi } from '../hooks/useApi';
 import { useAuth } from '../context/AuthContext';
+import { showModuleLock } from '../services/moduleAccess';
+import type { ModuleLock } from '../types';
 import '../../css/student-learning-nav.css';
 
 type NavigationUnit = { id: number; title: string };
-type NavigationModule = { id: number; title: string; units: NavigationUnit[] };
+type NavigationModule = { id: number; title: string; units: NavigationUnit[]; unlocked?: boolean; lock?: ModuleLock | null };
 type NavigationLevel = { id: number; name: string; available: boolean; modules: NavigationModule[] };
 
 export function StudentLearningNav({ onExpand, onNavigate }: { onExpand: () => void; onNavigate: () => void }) {
@@ -54,10 +56,11 @@ export function StudentLearningNav({ onExpand, onNavigate }: { onExpand: () => v
                     {destination(`/aprender/nivel/${level.id}`, 'Ver nivel', 'learning-nav-overview')}
                     {!level.modules.length && <span className="learning-nav-message">Aún no hay módulos publicados.</span>}
                     {level.modules.map((module, index) => {
-                        const moduleOpen = expanded[`module:${module.id}`] ?? currentModule?.id === module.id;
-                        return <div className={`learning-nav-module ${moduleOpen ? 'is-expanded' : ''}`} key={module.id}>
-                            <button className={`learning-nav-toggle learning-nav-module-toggle ${currentModule?.id === module.id ? 'is-current' : ''}`} type="button" title={module.title} aria-label={`Módulo ${index + 1}: ${module.title}`} aria-expanded={moduleOpen} aria-controls={`learning-module-${module.id}`} onClick={() => toggle(`module:${module.id}`, currentModule?.id === module.id)}>
-                                <BookOpen size={16} aria-hidden="true"/><span><small>Módulo {String(index + 1).padStart(2, '0')}</small><span>{module.title.replace(/^M[óo]dulo\s+\d+\s*[:·.—-]?\s*/iu, '')}</span></span><ChevronDown size={13} className={`learning-nav-chevron ${moduleOpen ? 'is-open' : ''}`} aria-hidden="true"/>
+                        const locked = module.unlocked === false;
+                        const moduleOpen = !locked && (expanded[`module:${module.id}`] ?? currentModule?.id === module.id);
+                        return <div className={`learning-nav-module ${moduleOpen ? 'is-expanded' : ''}${locked ? ' is-locked' : ''}`} key={module.id}>
+                            <button className={`learning-nav-toggle learning-nav-module-toggle ${currentModule?.id === module.id ? 'is-current' : ''}`} type="button" title={module.title} aria-label={`Módulo ${index + 1}: ${module.title}${locked ? ' · Bloqueado' : ''}`} aria-expanded={moduleOpen} aria-controls={!locked ? `learning-module-${module.id}` : undefined} onClick={() => { if (locked && module.lock) { onNavigate(); showModuleLock(module.lock); } else if (!locked) toggle(`module:${module.id}`, currentModule?.id === module.id); }}>
+                                {locked ? <LockKeyhole size={16} aria-hidden="true"/> : <BookOpen size={16} aria-hidden="true"/>}<span><small>Módulo {String(index + 1).padStart(2, '0')}{locked ? ' · Bloqueado' : ''}</small><span>{module.title.replace(/^M[óo]dulo\s+\d+\s*[:·.—-]?\s*/iu, '')}</span></span><ChevronDown size={13} className={`learning-nav-chevron ${moduleOpen ? 'is-open' : ''}`} aria-hidden="true"/>
                             </button>
                             {moduleOpen && <div id={`learning-module-${module.id}`} className="learning-nav-units">
                                 {destination(`/aprender/modulo/${module.id}`, 'Ver módulo', 'learning-nav-overview')}

@@ -19,6 +19,7 @@ class ModuloDosColoresTest extends TestCase
     private function unit(): Unidad
     {
         $this->seed(UnidadesTematicasGuiadasSeeder::class);
+        $this->publishOnlyModule(Unidad::where('configuracion->guided_lesson', 'animals-colors')->value('id_modulo'));
 
         return Unidad::where('configuracion->guided_lesson', 'animals-colors')->firstOrFail();
     }
@@ -41,6 +42,7 @@ class ModuloDosColoresTest extends TestCase
         $this->assertSame('Ñuka muchikuka _____ kan', $colors[5]['elements'][0]['texto']);
         $ids = array_column($data, 'id');
         $this->seed(UnidadesTematicasGuiadasSeeder::class);
+        $this->publishOnlyModule(Unidad::where('configuracion->guided_lesson', 'animals-colors')->value('id_modulo'));
         $this->assertSame($ids, Actividad::where('id_unidad', $unit->id_unidad)->where('publicado', true)->orderBy('orden_actividad')->pluck('id_actividad')->all());
     }
 

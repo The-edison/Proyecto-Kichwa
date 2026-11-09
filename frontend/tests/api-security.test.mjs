@@ -6,16 +6,17 @@ import vm from 'node:vm';
 
 const source = stripTypeScriptTypes(await readFile(new URL('../src/js/services/api.ts', import.meta.url), 'utf8'), { mode: 'transform' });
 
-async function client(status = 200) {
+async function client(status = 200, payload = { message: 'Respuesta' }) {
     const requests = [], invalidations = [], events = [], notifications = [];
     const context = vm.createContext({ document: { cookie: 'XSRF-TOKEN=csrf' }, FormData, Event,
         window: { dispatchEvent: event => events.push(event.type) }, crypto: { randomUUID: () => 'revision' },
         localStorage: { setItem: (...args) => notifications.push(args) },
-        fetch: async (url, options) => { requests.push({ url, options }); return { status, ok: status < 400, json: async () => ({ message: 'Respuesta' }) }; } });
+        fetch: async (url, options) => { requests.push({ url, options }); return { status, ok: status < 400, json: async () => payload }; } });
     const api = new vm.SourceTextModule(source, { context, initializeImportMeta: meta => { meta.env = {}; } });
     await api.link(specifier => {
         const dependency = specifier === './queryClient'
             ? { queryClient: { invalidateQueries: async (...args) => invalidations.push(args) } }
+            : specifier === './moduleAccess' ? { showModuleLock: lock => events.push({ type: 'module-locked', lock }) }
             : { tabSessionToken: async () => 'a'.repeat(64) };
         return new vm.SyntheticModule(Object.keys(dependency), function () {
             for (const [key, value] of Object.entries(dependency)) this.setExport(key, value);
@@ -50,6 +51,15 @@ test('private requests send the tab credential and bypass browser caches', async
     assert.equal(request.cache, 'no-store');
 });
 
+test('a module lock opens the progress notice and preserves its details in the API error', async () => {
+    const lock = { module_id: 2, prerequisite: { id: 1 }, message: 'Termina el módulo anterior.' };
+    const browser = await client(403, { code: 'module_locked', message: lock.message, module_lock: lock });
+    await assert.rejects(browser.api.apiGet('/modules/2'), error => error.status === 403 && error.moduleLock === lock);
+    assert.equal(browser.events.length, 1);
+    assert.equal(browser.events[0].type, 'module-locked');
+    assert.equal(browser.events[0].lock, lock);
+});
+
 test('checking guided answers marks their catalog stale without refetching it while progress and classic units still update', async () => {
     const browser = await client();
     await browser.api.apiPost('/exercises/11/answer', { answer: { seleccion: ['nuka'] } });
@@ -62,6 +72,7 @@ test('checking guided answers marks their catalog stale without refetching it wh
     assert.equal(active.predicate(guided), false);
     assert.equal(active.predicate(classic), true);
     assert.equal(active.predicate({ queryKey: ['api', '/progress'] }), true);
+    assert.equal(active.predicate({ queryKey: ['api', '/learning-navigation'] }), true);
     assert.equal(active.predicate({ queryKey: ['api', '/modules/8/units?page=1'] }), true);
     assert.equal(active.predicate({ queryKey: ['api', '/modules/8'] }), true);
 });

@@ -15,6 +15,7 @@ use App\Models\Tema;
 use App\Models\Unidad;
 use App\Models\UsuarioNivel;
 use App\Models\VistaIntento;
+use App\Services\AccesoModulos;
 use App\Services\DominioLecciones;
 use App\Services\EstadoContenido;
 use App\Services\EvaluacionModulo;
@@ -78,9 +79,9 @@ class KichwaCatalogController extends Controller
         return response()->json(PublicacionContenido::remember('student-levels', fn () => Nivel::where('publicado', true)->addSelect(['has_published_modules' => Modulo::selectRaw('count(*) > 0')->whereColumn('modulos.id_nivel', 'niveles.id_nivel')->where('publicado', true)])->orderBy('orden_nivel')->get()->map(fn ($r) => KichwaResource::present('levels', $r))->all()));
     }
 
-    public function navigation(): JsonResponse
+    public function navigation(Request $request): JsonResponse
     {
-        return response()->json(PublicacionContenido::remember('student-navigation:v1', function (): array {
+        $data = PublicacionContenido::remember('student-navigation:v1', function (): array {
             $levels = Nivel::where('publicado', true)->orderBy('orden_nivel')->orderBy('id_nivel')->get(['id_nivel', 'nombre_nivel', 'orden_nivel']);
             $modules = Modulo::where('publicado', true)->whereIn('id_nivel', $levels->modelKeys())->orderBy('orden_modulo')->orderBy('id_modulo')->get(['id_modulo', 'id_nivel', 'nombre_modulo']);
             $units = Unidad::where('publicado', true)->whereIn('id_modulo', $modules->modelKeys())->orderBy('orden_unidad')->orderBy('id_unidad')->get(['id_unidad', 'id_modulo', 'titulo_unidad'])->groupBy('id_modulo');
@@ -96,7 +97,17 @@ class KichwaCatalogController extends Controller
                     'units' => $units->get($module->id_modulo, collect())->map(fn ($unit) => ['id' => $unit->id_unidad, 'title' => $unit->titulo_unidad])->values()->all(),
                 ])->values()->all(),
             ])->all();
-        }));
+        });
+        $access = AccesoModulos::forUser($request->user()->id_usuario);
+        foreach ($data as &$level) {
+            foreach ($level['modules'] as &$module) {
+                $module += $access->get($module['id'], ['unlocked' => false, 'lock' => null, 'completed' => false]);
+            }
+            unset($module);
+        }
+        unset($level);
+
+        return response()->json($data);
     }
 
     public function modules(Request $request, int $level): JsonResponse
@@ -106,6 +117,8 @@ class KichwaCatalogController extends Controller
         $data = $this->paginate($request, 'modules:'.$level, fn () => Modulo::where('id_nivel', $level)->where('publicado', true)->orderBy('orden_modulo'));
         $progress = DB::table('v_progreso_modulos')->where('id_usuario', $request->user()->id_usuario)->whereIn('id_modulo', array_column($data['data'], 'id_modulo'))->pluck('porcentaje_progreso_modulo', 'id_modulo');
         $data['data'] = array_map(fn ($r) => KichwaResource::present('modules', (new Modulo)->newFromBuilder($r)) + ['percentage' => (float) ($progress[$r['id_modulo']] ?? 0)], $data['data']);
+        $access = AccesoModulos::forUser($request->user()->id_usuario);
+        $data['data'] = array_map(fn (array $module): array => $module + $access->get($module['id'], []), $data['data']);
 
         return response()->json($data);
     }

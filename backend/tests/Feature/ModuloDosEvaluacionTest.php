@@ -22,6 +22,7 @@ class ModuloDosEvaluacionTest extends TestCase
     {
         $this->seed([UnidadesTematicasGuiadasSeeder::class, ModuloDosEvaluacionSeeder::class]);
         $exam = EvaluacionKichwa::where('configuracion->bank_key', 'basico-modulo2-final-v1')->firstOrFail();
+        $this->publishOnlyModule($exam->id_modulo);
         $this->assertSame(16, Pregunta::where('id_evaluacion', $exam->id_evaluacion)->count());
         $this->assertSame(4, Unidad::where('id_modulo', $exam->id_modulo)->count());
         $titles = Pregunta::where('id_evaluacion', $exam->id_evaluacion)->orderBy('orden_pregunta')->get()
