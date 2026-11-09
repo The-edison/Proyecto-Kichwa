@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { BookOpen, ChevronDown, GraduationCap, LockKeyhole } from 'lucide-react';
+import { BookOpen, ChevronDown, GraduationCap } from 'lucide-react';
 import { Link } from '../navigation';
 import { useApi } from '../hooks/useApi';
 import { useAuth } from '../context/AuthContext';
-import { showModuleLock } from '../services/moduleAccess';
-import type { ModuleLock } from '../types';
 import '../../css/student-learning-nav.css';
 
 type NavigationUnit = { id: number; title: string };
-type NavigationModule = { id: number; title: string; units: NavigationUnit[]; unlocked?: boolean; lock?: ModuleLock | null };
+type NavigationModule = { id: number; title: string; units: NavigationUnit[] };
 type NavigationLevel = { id: number; name: string; available: boolean; modules: NavigationModule[] };
 
 export function StudentLearningNav({ onExpand, onNavigate }: { onExpand: () => void; onNavigate: () => void }) {
@@ -38,9 +36,7 @@ export function StudentLearningNav({ onExpand, onNavigate }: { onExpand: () => v
         onExpand();
         setExpanded(previous => ({ ...previous, [key]: !(previous[key] ?? fallback) }));
     };
-    const destination = (href: string, label: string, className = '', position?: number) => <Link href={href} title={label} className={`learning-nav-link ${className} ${pathname === href ? 'is-active' : ''}`} aria-label={position !== undefined ? `Unidad ${position + 1}: ${label}` : undefined} aria-current={pathname === href ? 'page' : undefined} onClick={onNavigate}>
-        {position !== undefined ? <><span className="learning-nav-unit-number" aria-hidden="true">{String(position + 1).padStart(2, '0')}</span><span className="learning-nav-unit-title">{label}</span></> : <><span>{label}</span><ChevronDown size={13} aria-hidden="true" /></>}
-    </Link>;
+    const destination = (href: string, label: string, className = '') => <Link href={href} className={`learning-nav-link ${className} ${pathname === href ? 'is-active' : ''}`} aria-current={pathname === href ? 'page' : undefined} onClick={onNavigate}>{label}</Link>;
 
     return <section className="sidebar-nav-group student-learning-nav" aria-label="Niveles de aprendizaje">
         <span className="sidebar-caption">NIVELES</span>
@@ -48,7 +44,7 @@ export function StudentLearningNav({ onExpand, onNavigate }: { onExpand: () => v
         {catalog.error && <div className="learning-nav-message" role="alert">No se pudieron cargar los niveles.<button type="button" onClick={() => catalog.refresh()}>Reintentar</button></div>}
         {catalog.data?.map(level => {
             const open = expanded[`level:${level.id}`] ?? currentLevel?.id === level.id;
-            return <div className={`learning-nav-level ${open && level.available ? 'is-expanded' : ''}`} key={level.id}>
+            return <div className="learning-nav-level" key={level.id}>
                 <button className={`learning-nav-toggle learning-nav-level-toggle ${currentLevel?.id === level.id ? 'is-current' : ''}`} type="button" aria-label={`Nivel ${level.name}`} aria-expanded={open} aria-controls={`learning-level-${level.id}`} title={level.name} disabled={!level.available} onClick={() => toggle(`level:${level.id}`, currentLevel?.id === level.id)}>
                     <GraduationCap size={20} aria-hidden="true"/><span className="learning-nav-label">{level.name}{!level.available && <small>Próximamente</small>}</span><ChevronDown className={`learning-nav-chevron ${open ? 'is-open' : ''}`} size={15} aria-hidden="true"/>
                 </button>
@@ -56,15 +52,14 @@ export function StudentLearningNav({ onExpand, onNavigate }: { onExpand: () => v
                     {destination(`/aprender/nivel/${level.id}`, 'Ver nivel', 'learning-nav-overview')}
                     {!level.modules.length && <span className="learning-nav-message">Aún no hay módulos publicados.</span>}
                     {level.modules.map((module, index) => {
-                        const locked = module.unlocked === false;
-                        const moduleOpen = !locked && (expanded[`module:${module.id}`] ?? currentModule?.id === module.id);
-                        return <div className={`learning-nav-module ${moduleOpen ? 'is-expanded' : ''}${locked ? ' is-locked' : ''}`} key={module.id}>
-                            <button className={`learning-nav-toggle learning-nav-module-toggle ${currentModule?.id === module.id ? 'is-current' : ''}`} type="button" title={module.title} aria-label={`Módulo ${index + 1}: ${module.title}${locked ? ' · Bloqueado' : ''}`} aria-expanded={moduleOpen} aria-controls={!locked ? `learning-module-${module.id}` : undefined} onClick={() => { if (locked && module.lock) { onNavigate(); showModuleLock(module.lock); } else if (!locked) toggle(`module:${module.id}`, currentModule?.id === module.id); }}>
-                                {locked ? <LockKeyhole size={16} aria-hidden="true"/> : <BookOpen size={16} aria-hidden="true"/>}<span><small>Módulo {String(index + 1).padStart(2, '0')}{locked ? ' · Bloqueado' : ''}</small><span>{module.title.replace(/^M[óo]dulo\s+\d+\s*[:·.—-]?\s*/iu, '')}</span></span><ChevronDown size={13} className={`learning-nav-chevron ${moduleOpen ? 'is-open' : ''}`} aria-hidden="true"/>
+                        const moduleOpen = expanded[`module:${module.id}`] ?? currentModule?.id === module.id;
+                        return <div key={module.id}>
+                            <button className={`learning-nav-toggle learning-nav-module-toggle ${currentModule?.id === module.id ? 'is-current' : ''}`} type="button" aria-label={`Módulo ${index + 1}: ${module.title}`} aria-expanded={moduleOpen} aria-controls={`learning-module-${module.id}`} onClick={() => toggle(`module:${module.id}`, currentModule?.id === module.id)}>
+                                <BookOpen size={15} aria-hidden="true"/><span>{module.title}</span><ChevronDown size={13} className={`learning-nav-chevron ${moduleOpen ? 'is-open' : ''}`} aria-hidden="true"/>
                             </button>
                             {moduleOpen && <div id={`learning-module-${module.id}`} className="learning-nav-units">
                                 {destination(`/aprender/modulo/${module.id}`, 'Ver módulo', 'learning-nav-overview')}
-                                {module.units.map((unit, position) => <div key={unit.id}>{destination(`/aprender/unidad/${unit.id}`, unit.title, 'learning-nav-unit', position)}</div>)}
+                                {module.units.map((unit, position) => <div key={unit.id}>{destination(`/aprender/unidad/${unit.id}`, `${String(position + 1).padStart(2, '0')} · ${unit.title}`)}</div>)}
                                 {!module.units.length && <span className="learning-nav-message">Aún no hay unidades publicadas.</span>}
                             </div>}
                         </div>;

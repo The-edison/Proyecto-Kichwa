@@ -40,7 +40,7 @@ const copy = {
 export default function Home() {
     const [slideIndex, setSlideIndex] = useState(0);
     const [language, setLanguage] = useState<HomeLanguage>(() => {
-        try { return sessionStorage.getItem(homeLanguageKey) === 'qu' ? 'qu' : 'es'; } catch { return 'es'; }
+        try { return localStorage.getItem(homeLanguageKey) === 'qu' ? 'qu' : 'es'; } catch { return 'es'; }
     });
     useEffect(() => {
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -54,7 +54,7 @@ export default function Home() {
     const t = copy[language];
 
     return (
-        <PublicLayout language={language} onLanguageChange={() => { const next = language === 'es' ? 'qu' : 'es'; setLanguage(next); try { sessionStorage.setItem(homeLanguageKey, next); } catch {} }}>
+        <PublicLayout language={language} onLanguageChange={() => { const next = language === 'es' ? 'qu' : 'es'; setLanguage(next); try { localStorage.setItem(homeLanguageKey, next); } catch {} }}>
             <Head title={t.title} />
 
             <section className="home-hero" aria-labelledby="home-title">
@@ -81,6 +81,8 @@ export default function Home() {
                     </div>
                 </div>
             </section>
+
+            <TestimonialsSection language={language} />
 
             <section id="cultura" className="culture-section" aria-labelledby="culture-title">
                 <div className="culture-panel glass-panel">
@@ -112,8 +114,6 @@ export default function Home() {
                     </div>
                 </div>
             </section>
-
-            <TestimonialsSection language={language} />
         </PublicLayout>
     );
 }

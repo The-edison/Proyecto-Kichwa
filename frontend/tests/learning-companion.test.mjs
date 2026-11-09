@@ -72,7 +72,7 @@ test('portrait-only results leave the grade and XP to the result panel', () => {
 async function card(post) {
     let cursor = 0;
     const states = [], requests = [];
-    const module = await load(cardCode, specifier => specifier.endsWith('/TopicVisual') ? { TopicWordVisual: 'TopicWordVisual' } : specifier.endsWith('/MatchingLines') ? { MatchingLines: 'MatchingLines' } : specifier.endsWith('/useAnswerSound') ? { useAnswerSound: () => () => {} } : specifier === 'react' ? {
+    const module = await load(cardCode, specifier => specifier.endsWith('/MatchingLines') ? { MatchingLines: 'MatchingLines' } : specifier.endsWith('/useAnswerSound') ? { useAnswerSound: () => () => {} } : specifier === 'react' ? {
         useState(initial) { const index = cursor++; if (!(index in states)) states[index] = initial; return [states[index], value => { states[index] = typeof value === 'function' ? value(states[index]) : value; }]; },
         useRef(initial) { const index = cursor++; return states[index] ??= { current: initial }; },
     } : specifier.endsWith('/LearningCompanion') ? { LearningCompanion: 'LearningCompanion' } : specifier.endsWith('/SuccessConfetti') ? { SuccessConfetti: 'SuccessConfetti' } : {
@@ -115,7 +115,7 @@ test('a correct activity locks its answer and keeps its graded feedback', async 
     assert.equal(nodes(view.render()).find(n => n.type === 'fieldset').props.disabled, true);
 });
 
-test('standalone exercises keep feedback without confetti after correct answers and retries', async () => {
+test('standalone exercises celebrate a correct submission and clear confetti for a new attempt', async () => {
     let correct = false;
     const view = await card(() => ({ response_id: correct ? 2 : 1, is_correct: correct, feedback: 'Revisado.' }));
     const celebrates = () => nodes(view.render()).some(node => node.type === 'SuccessConfetti');
@@ -123,7 +123,7 @@ test('standalone exercises keep feedback without confetti after correct answers 
     assert.equal(celebrates(), false);
     correct = true;
     await check(view);
-    assert.equal(celebrates(), false);
+    assert.equal(celebrates(), true);
     nodes(view.render()).find(node => node.type === 'button' && node.props.children === 'Nuevo intento').props.onClick();
     assert.equal(celebrates(), false);
 });

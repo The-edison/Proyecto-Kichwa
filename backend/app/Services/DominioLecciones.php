@@ -98,30 +98,23 @@ class DominioLecciones
             }
         }
 
-        return ['attempt_id' => $attempt->id_intento, 'evaluation_id' => $attempt->id_evaluacion, 'numero_intento' => $attempt->numero_intento,
+        return ['attempt_id' => $attempt->id_intento, 'numero_intento' => $attempt->numero_intento,
             'state' => $attempt->estado_intento, 'answers' => (object) $answers, 'confirmed_pairs' => (object) $confirmed, 'result' => self::result($attempt),
             'questions' => $questions->map(fn ($q) => KichwaResource::present('questions', $q))->values()];
     }
 
     public static function result(IntentoEvaluacion $attempt): ?array
     {
+        if ($attempt->resultado !== null) {
+            return $attempt->resultado;
+        }
         if ($attempt->estado_intento !== 'finalizado') {
             return null;
-        }
-        if ($attempt->resultado !== null) {
-            $result = $attempt->resultado;
-            $questions = self::selected($attempt)->keyBy('id_pregunta');
-            foreach ($result['results'] as &$outcome) {
-                $outcome['correct_answer'] = $questions[$outcome['question_id']]->solucion_pregunta;
-            }
-
-            return $result;
         }
         $view = VistaIntento::findOrFail($attempt->id_intento);
         $questions = self::selected($attempt)->keyBy('id_pregunta');
         $results = RespuestaEvaluacion::where('id_intento', $attempt->id_intento)->orderBy('id_pregunta')->get()->map(fn ($answer) => [
             'question_id' => $answer->id_pregunta, 'is_correct' => (float) $answer->puntaje_respuesta_evaluacion === (float) $questions[$answer->id_pregunta]->puntaje_pregunta,
-            'correct_answer' => $questions[$answer->id_pregunta]->solucion_pregunta,
             'feedback' => 'Puntaje histórico registrado: '.$answer->puntaje_respuesta_evaluacion.'.']);
 
         return ['attempt_id' => $attempt->id_intento, 'score' => (float) $view->porcentaje_calificacion, 'puntaje_obtenido' => (float) $view->puntaje_obtenido,

@@ -12,8 +12,8 @@ const localRecords = [
     ['yachay:guided-attempt:v1:…', 'Guarda respuestas y borradores de actividades durante la pestaña para que puedas volver a ellas.', 'Funcional educativa · sessionStorage'],
     ['yachay-learning-navigation:…', 'Recuerda qué niveles y módulos has desplegado durante la pestaña.', 'Preferencia · sessionStorage'],
     ['yachay-theme-scope', 'Identifica el tema visual de la cuenta en esta pestaña; se elimina al cerrarla.', 'Preferencia · sessionStorage'],
-    ['yachay-theme / yachay-theme:student / yachay-theme:admin', 'Recuerda el tema claro u oscuro que eliges en esta pestaña.', 'Preferencia · sessionStorage'],
-    ['yachay-home-language', 'Recuerda el idioma del inicio en esta pestaña.', 'Preferencia · sessionStorage'],
+    ['yachay-theme / yachay-theme:student / yachay-theme:admin', 'Recuerda el tema claro u oscuro que eliges.', 'Preferencia · localStorage'],
+    ['yachay-home-language', 'Recuerda el idioma del inicio cuando lo cambias.', 'Preferencia · localStorage'],
     ['yachay-sidebar-collapsed', 'Recuerda si contraes el menú lateral.', 'Preferencia · localStorage'],
     ['yachay:catalog-changed', 'Avisa a otras pestañas de una actualización del catálogo realizada por el administrador.', 'Funcional · localStorage'],
 ] as const;
@@ -27,7 +27,7 @@ export function CookiesDisclosure({ information }: { information?: PrivacyInform
             <div><dt>XSRF-TOKEN</dt><dd>Yachay · Necesaria. Permite verificar las solicitudes que modifican datos. Duración: {information.session.lifetime_minutes} minutos desde su emisión, renovable con la actividad. El navegador la lee para enviar la protección CSRF.</dd></div>
         </dl>}
         <details className="privacy-storage-details"><summary>Ver el almacenamiento funcional y de preferencias</summary><p>Todos los registros siguientes pertenecen a Yachay. sessionStorage dura durante la pestaña; localStorage no tiene una caducidad programada y permanece hasta que lo cambies o borres desde el navegador.</p><dl className="privacy-storage-list">{localRecords.map(([name, purpose, category]) => <div key={name}><dt>{name}</dt><dd><strong>{category}.</strong> {purpose}</dd></div>)}</dl></details>
-        <h3>Video de YouTube</h3><p>La página de inicio incluye un reproductor de YouTube, de Google, mediante youtube-nocookie.com. Se carga de forma diferida al acercarte a esa sección. Esto conecta tu navegador con Google. El proveedor recibe datos de conexión y puede usar almacenamiento según tu navegador, tu cuenta y la interacción con el reproductor. Puedes consultar la <a href="https://policies.google.com/technologies/cookies?hl=es" target="_blank" rel="noreferrer">información de cookies de Google</a>.</p>
+        <h3>Video de YouTube</h3><p>El inicio incluye un reproductor de YouTube, de Google, mediante youtube-nocookie.com. Se carga de forma diferida al acercarte a la sección del video y conecta tu navegador con Google. El proveedor recibe datos de conexión y puede usar almacenamiento según tu navegador, tu cuenta y la interacción con el reproductor. Puedes consultar la <a href="https://policies.google.com/technologies/cookies?hl=es" target="_blank" rel="noreferrer">información de cookies de Google</a>.</p>
         <h3>Cómo gestionarlo</h3><p>Para gestionar permisos, bloquear contenido externo o borrar cookies y datos guardados por Yachay o Google, usa la configuración de sitios de tu navegador. Borrar la sesión puede cerrar tu acceso; borrar los borradores puede perder respuestas aún no enviadas.</p>
     </section>;
 }

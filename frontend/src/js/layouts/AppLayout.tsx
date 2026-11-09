@@ -33,7 +33,7 @@ function initialCollapsed(): boolean {
     }
 }
 
-function Shell({ title, subtitle, children, immersive = false, focused = false }: { title: string; subtitle?: string; children: ReactNode; immersive?: boolean; focused?: boolean }) {
+function Shell({ title, subtitle, children, immersive = false }: { title: string; subtitle?: string; children: ReactNode; immersive?: boolean }) {
     const { user, logout } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
@@ -107,10 +107,6 @@ function Shell({ title, subtitle, children, immersive = false, focused = false }
         }
     }, [collapsed]);
 
-    if (focused) {
-        return <div className="evaluation-focus-shell"><main id="main-content" tabIndex={-1} aria-label={title}>{children}</main></div>;
-    }
-
     return (
         <div className={`app-shell ${collapsed ? 'is-collapsed' : ''} ${immersive ? 'is-learning' : ''}`}>
             <div className="aurora aurora-one" />
@@ -175,6 +171,6 @@ function Shell({ title, subtitle, children, immersive = false, focused = false }
     );
 }
 
-export function AppLayout(props: { title: string; subtitle?: string; children: ReactNode; immersive?: boolean; focused?: boolean }) {
+export function AppLayout(props: { title: string; subtitle?: string; children: ReactNode; immersive?: boolean }) {
     return <Shell {...props} />;
 }

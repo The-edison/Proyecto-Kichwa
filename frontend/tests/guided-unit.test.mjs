@@ -19,10 +19,9 @@ async function screen({ completed = false, post, exercises = [choice, matching],
     const context = vm.createContext({ crypto: { randomUUID }, Image: class { constructor() { preloads.push(this); } decode() { return Promise.resolve(); } }, window: { scrollTo() {}, sessionStorage: { getItem(key) { if (blockedStorage) throw Error('blocked'); return storage.get(key) ?? null; }, setItem(key, value) { if (blockedStorage) throw Error('blocked'); storage.set(key, value); } } } });
     const jsx = (type, props) => ({ type, props });
     class ApiError extends Error { constructor(message) { super(message); this.errors = {}; } }
-    const dependencies = { useExerciseViewport: { useExerciseViewport: () => {} }, VerbalPractice: { VerbalPractice: 'VerbalPractice' }, TimeMorphemePractice: { TimeMorphemePractice: 'TimeMorphemePractice' },
+    const dependencies = { DialoguePractice: { DialoguePractice: 'DialoguePractice' }, useExerciseViewport: { useExerciseViewport: () => {} }, VerbalPractice: { VerbalPractice: 'VerbalPractice' }, TimeMorphemePractice: { TimeMorphemePractice: 'TimeMorphemePractice' },
         MorphemePractice: { MorphemePractice: 'MorphemePractice', MorphemeListeningPanel: 'MorphemeListeningPanel' },
         MatchingLines: { MatchingLines: 'MatchingLines' },
-        TopicVisual: { TopicWordVisual: 'TopicWordVisual' },
         AdvancedMorphemesIntroduction: { AdvancedMorphemesIntroduction: 'AdvancedMorphemesIntroduction' },
         TimeMorphemesIntroduction: { TimeMorphemesIntroduction: 'TimeMorphemesIntroduction' },
         VerbalAnalysisIntroduction: { VerbalAnalysisIntroduction: 'VerbalAnalysisIntroduction' },
@@ -59,7 +58,6 @@ async function screen({ completed = false, post, exercises = [choice, matching],
         AnimalsPracticePanel: { AnimalsPracticePanel: 'AnimalsPracticePanel' },
         ColorsPracticePanel: { ColorsPracticePanel: 'ColorsPracticePanel' },
         BodyPracticePanel: { BodyPracticePanel: 'BodyPracticePanel' },
-        DialoguePractice: { DialoguePractice: 'DialoguePractice' },
         States: { ErrorState: 'ErrorState', LoadingState: 'LoadingState' },
         AuthContext: { useAuth: () => ({ user: { id: userId } }) },
     };
@@ -117,22 +115,6 @@ test('the intermediate lesson can lead to future practice after its four explana
     click(view, 'Continuar');
     assert.ok(button(view, 'Comprobar'));
     assert.equal(nodes(view.render()).some(node => node.type === 'AdvancedMorphemesIntroduction'), false);
-});
-
-test('university practice uses the shared interaction for an ordering exercise', async () => {
-    const exercise = { id: 310, type: 'ordenar', prompt: 'Ordena el plan.',
-        elements: [{ id: 'destination', texto: 'wasiman' }, { id: 'time', texto: 'Kaya' }, { id: 'verb', texto: 'risha' }, { id: 'speaker', texto: 'ñuka' }],
-        zones: [], config: { title: 'Construye un plan', university_practice: true } };
-    const view = await screen({ exercises: [exercise], config: { guided_lesson: 'short-dialogues' } });
-    nodes(view.render()).find(node => node.type === 'ShortDialoguesIntroduction').props.onSelectPage(3);
-    click(view, 'Continuar');
-    const interaction = nodes(view.render()).find(node => node.type?.name === 'ExerciseInteraction');
-    assert.ok(interaction);
-    assert.equal(interaction.props.exercise.id, 310);
-    interaction.props.onChange({ orden: ['time', 'speaker', 'destination', 'verb'] });
-    assert.equal(button(view, 'Comprobar').props.disabled, false);
-    await check(view);
-    assert.equal(view.requests[0].path, '/exercises/310/answer');
 });
 
 test('four morpheme listening exercises form two panels, preserve correct answers and finish with four response ids', async () => {
@@ -346,6 +328,21 @@ test('verbal analysis keeps all five lesson parts reachable and finishes only af
     assert.equal(view.requests.length, 0);
 });
 
+test('short dialogues open their interactive practice after the lesson and preserve the selected answer', async () => {
+    const exercises = [{ ...choice, config: { title: 'Comprende la conversación', dialogue_practice: 1 } }];
+    const view = await screen({ exercises, config: { guided_lesson: 'short-dialogues' } });
+    for (let page = 0; page < 3; page++) click(view, 'Siguiente');
+    click(view, 'Continuar');
+    const practice = () => nodes(view.render()).find(node => node.type === 'DialoguePractice');
+    assert.equal(practice().props.exercise.id, choice.id);
+    assert.equal(button(view, 'Comprobar').props.disabled, true);
+    practice().props.onChange({ seleccion: ['wasi'] });
+    assert.equal(practice().props.answer.seleccion[0], 'wasi');
+    assert.equal(button(view, 'Comprobar').props.disabled, false);
+    await check(view);
+    assert.equal(view.requests[0].payload.answer.seleccion[0], 'wasi');
+});
+
 test('verbal analysis practice follows five lesson pages and checks blocks only when every segment is present', async () => {
     const exercises=[{id:201,type:'completar',prompt:'Forma la palabra.',config:{title:'Actividad 2. Forma y separa la palabra',verbal_practice:2},elements:[{id:'miku-build',texto:'mikukuni',opciones:['ni','miku','ku']}]},{id:202,type:'completar',prompt:'Clasifica.',config:{title:'Actividad 7. Clasifica el morfema',verbal_practice:7},elements:[{id:'warmi',texto:'Warmiku',opciones:['ku','chi','naya','pay']}]}];
     const view=await screen({exercises,config:{guided_lesson:'verbal-analysis'}});
@@ -552,18 +549,6 @@ for (const lesson of ['pronouns', 'numbers', 'calendar', 'animals-colors', 'body
         assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === '2 de 2 ejercicios correctos'));
     });
 }
-
-test('new nature exercises use varied controls without answer images', async () => {
-    const choice = { id: 35, type: 'seleccion_multiple', prompt: 'Elige el sol', elements: ['inti', 'killa'].map((texto, index) => ({ id: `option-${index + 1}`, texto })), zones: [], config: { title: 'Encuentra el sol', topic_practice: true, presentation: 'buttons', max_selections: 1 } };
-    const cards = await screen({ config: { learning_mode: 'guided', guided_lesson: 'nature' }, exercises: [choice] });
-    click(cards, 'Continuar');
-    assert.ok(nodes(cards.render()).some(node => typeof node.type === 'function' && node.props.exercise?.id === 35));
-    assert.equal(nodes(cards.render()).filter(node => node.type === 'img').length, 0);
-
-    const matches = await screen({ config: { learning_mode: 'guided', guided_lesson: 'nature' }, exercises: [matching] });
-    click(matches, 'Continuar');
-    assert.equal(nodes(matches.render()).filter(node => node.type === 'TopicWordVisual').length, 0);
-});
 
 for (const lesson of ['numbers', 'calendar']) {
     test(`${lesson} sends tile, choice and written answers through the guided flow`, async () => {
@@ -806,7 +791,7 @@ test('guided companion shows checked XP, clears stale feedback and sums only ear
     assert.equal(companion().xpEarned, 0);
 });
 
-test('guided checks retain feedback without confetti after correct answers, navigation and reload', async () => {
+test('confetti appears only after a fresh correct check and clears on navigation or reload', async () => {
     let correct = false;
     const view = await screen({ post: () => ({ response_id: correct ? 2 : 1, is_correct: correct, feedback: 'Revisado.' }) });
     const celebrates = () => nodes(view.render()).some(node => node.type === 'SuccessConfetti');
@@ -816,7 +801,7 @@ test('guided checks retain feedback without confetti after correct answers, navi
     assert.equal(celebrates(), false);
     correct = true;
     choose(view, 'wasi'); await check(view);
-    assert.equal(celebrates(), false);
+    assert.equal(celebrates(), true);
     view.remount();
     assert.equal(celebrates(), false);
     click(view, 'Continuar');

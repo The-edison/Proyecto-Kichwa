@@ -7,9 +7,8 @@ import { AuthProvider } from './context/AuthContext';
 import { AppRouter } from './router';
 import { ScrollRestoration } from './navigation';
 import { ToastProvider } from './components/Toast';
-import { ModuleAccessDialog } from './components/ModuleAccessDialog';
 createRoot(document.getElementById('root')!).render(
     <BrowserRouter><QueryClientProvider client={queryClient}><ToastProvider><AuthProvider>
-        <ScrollRestoration /><ModuleAccessDialog /><AppRouter />
+        <ScrollRestoration /><AppRouter />
     </AuthProvider></ToastProvider></QueryClientProvider></BrowserRouter>,
 );

@@ -15,14 +15,12 @@ use App\Models\Tema;
 use App\Models\Unidad;
 use App\Models\UsuarioNivel;
 use App\Models\VistaIntento;
-use App\Services\AccesoModulos;
 use App\Services\DominioLecciones;
 use App\Services\EstadoContenido;
 use App\Services\EvaluacionModulo;
 use App\Services\KichwaResource;
 use App\Services\PublicacionContenido;
 use App\Services\SecuenciaUnidad;
-use App\Services\VersionesEvaluacion;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -51,14 +49,6 @@ class KichwaCatalogController extends Controller
         }
     }
 
-    public static function publishedAttemptEvaluation(EvaluacionKichwa $evaluation): EvaluacionKichwa
-    {
-        $current = $evaluation->publicado ? $evaluation : VersionesEvaluacion::related($evaluation)->where('publicado', true)->orderByDesc('id_evaluacion')->firstOrFail();
-        self::publishedEvaluation($current);
-
-        return $current;
-    }
-
     private function publishedLevel(int $id): Nivel
     {
         $level = Nivel::where('publicado', true)->findOrFail($id);
@@ -79,9 +69,9 @@ class KichwaCatalogController extends Controller
         return response()->json(PublicacionContenido::remember('student-levels', fn () => Nivel::where('publicado', true)->addSelect(['has_published_modules' => Modulo::selectRaw('count(*) > 0')->whereColumn('modulos.id_nivel', 'niveles.id_nivel')->where('publicado', true)])->orderBy('orden_nivel')->get()->map(fn ($r) => KichwaResource::present('levels', $r))->all()));
     }
 
-    public function navigation(Request $request): JsonResponse
+    public function navigation(): JsonResponse
     {
-        $data = PublicacionContenido::remember('student-navigation:v1', function (): array {
+        return response()->json(PublicacionContenido::remember('student-navigation:v1', function (): array {
             $levels = Nivel::where('publicado', true)->orderBy('orden_nivel')->orderBy('id_nivel')->get(['id_nivel', 'nombre_nivel', 'orden_nivel']);
             $modules = Modulo::where('publicado', true)->whereIn('id_nivel', $levels->modelKeys())->orderBy('orden_modulo')->orderBy('id_modulo')->get(['id_modulo', 'id_nivel', 'nombre_modulo']);
             $units = Unidad::where('publicado', true)->whereIn('id_modulo', $modules->modelKeys())->orderBy('orden_unidad')->orderBy('id_unidad')->get(['id_unidad', 'id_modulo', 'titulo_unidad'])->groupBy('id_modulo');
@@ -97,17 +87,7 @@ class KichwaCatalogController extends Controller
                     'units' => $units->get($module->id_modulo, collect())->map(fn ($unit) => ['id' => $unit->id_unidad, 'title' => $unit->titulo_unidad])->values()->all(),
                 ])->values()->all(),
             ])->all();
-        });
-        $access = AccesoModulos::forUser($request->user()->id_usuario);
-        foreach ($data as &$level) {
-            foreach ($level['modules'] as &$module) {
-                $module += $access->get($module['id'], ['unlocked' => false, 'lock' => null, 'completed' => false]);
-            }
-            unset($module);
-        }
-        unset($level);
-
-        return response()->json($data);
+        }));
     }
 
     public function modules(Request $request, int $level): JsonResponse
@@ -117,8 +97,6 @@ class KichwaCatalogController extends Controller
         $data = $this->paginate($request, 'modules:'.$level, fn () => Modulo::where('id_nivel', $level)->where('publicado', true)->orderBy('orden_modulo'));
         $progress = DB::table('v_progreso_modulos')->where('id_usuario', $request->user()->id_usuario)->whereIn('id_modulo', array_column($data['data'], 'id_modulo'))->pluck('porcentaje_progreso_modulo', 'id_modulo');
         $data['data'] = array_map(fn ($r) => KichwaResource::present('modules', (new Modulo)->newFromBuilder($r)) + ['percentage' => (float) ($progress[$r['id_modulo']] ?? 0)], $data['data']);
-        $access = AccesoModulos::forUser($request->user()->id_usuario);
-        $data['data'] = array_map(fn (array $module): array => $module + $access->get($module['id'], []), $data['data']);
 
         return response()->json($data);
     }
@@ -179,12 +157,6 @@ class KichwaCatalogController extends Controller
         abort_unless(($record->configuracion['learning_mode'] ?? '') === 'guided', 404);
         $exercises = collect(PublicacionContenido::remember('guided:'.$unit, fn () => PublicacionContenido::exercises($unit)->orderBy('orden_actividad')->get()
             ->map(fn (Actividad $exercise): array => ['origin' => SecuenciaUnidad::origin($exercise), 'exercise' => KichwaResource::present('exercises', $exercise)])->all()));
-        $seed = $request->user()->id_usuario.':'.$unit;
-        $university = $exercises->filter(fn (array $entry): bool => (bool) ($entry['exercise']['config']['university_practice'] ?? false))
-            ->sortBy(fn (array $entry): string => hash('sha256', $seed.':order:'.$entry['origin']))
-            ->map(fn (array $entry): array => array_replace($entry, ['exercise' => $this->shuffleUniversityExercise($entry['exercise'], $seed)]));
-        $exercises = $exercises->reject(fn (array $entry): bool => (bool) ($entry['exercise']['config']['university_practice'] ?? false))
-            ->concat($university)->values();
         $completed = DB::table('respuestas_actividad as r')->join('actividades as a', 'a.id_actividad', '=', 'r.id_actividad')
             ->where('r.id_usuario', $request->user()->id_usuario)->where('a.id_unidad', $unit)->where('r.acierto_actividad', true)
             ->whereIn(DB::raw('COALESCE(a.origen_reactivo,a.id_actividad::text)'), $exercises->pluck('origin'))
@@ -195,36 +167,6 @@ class KichwaCatalogController extends Controller
             'completed_count' => $completed->count(),
             'total' => $exercises->count(),
         ]);
-    }
-
-    private function shuffleUniversityExercise(array $exercise, string $seed): array
-    {
-        $salt = $seed.':'.$exercise['id'];
-        if ($exercise['type'] === 'relacionar') {
-            $origins = array_values(array_filter($exercise['elements'], fn (array $element): bool => ($element['grupo'] ?? '') === 'origen'));
-            $destinations = array_values(array_filter($exercise['elements'], fn (array $element): bool => ($element['grupo'] ?? '') === 'destino'));
-            $exercise['elements'] = array_merge($this->shuffledItems($origins, $salt.':origins'), $this->shuffledItems($destinations, $salt.':destinations'));
-        } else {
-            $exercise['elements'] = $this->shuffledItems($exercise['elements'], $salt.':elements');
-        }
-        foreach ($exercise['elements'] as &$element) {
-            if (isset($element['opciones'])) {
-                $element['opciones'] = $this->shuffledItems($element['opciones'], $salt.':'.$element['id'].':options');
-            }
-        }
-        unset($element);
-
-        return $exercise;
-    }
-
-    private function shuffledItems(array $items, string $salt): array
-    {
-        usort($items, fn (mixed $left, mixed $right): int => strcmp(
-            hash('sha256', $salt.':'.json_encode($left, JSON_UNESCAPED_UNICODE)),
-            hash('sha256', $salt.':'.json_encode($right, JSON_UNESCAPED_UNICODE)),
-        ));
-
-        return $items;
     }
 
     public function contents(Request $request, int $unit): JsonResponse
@@ -286,15 +228,7 @@ class KichwaCatalogController extends Controller
             $query->whereNull('id_tema');
         }
 
-        $seed = $request->user()->id_usuario.':'.$unit;
-
-        return response()->json($query->select(array_values(array_diff(KichwaResource::FIELDS['exercises'], ['solucion_actividad'])) + [])->addSelect('id_tema', 'configuracion', 'publicado')->orderBy('orden_actividad')->paginate(20)->through(function ($record) use ($seed): array {
-            $exercise = KichwaResource::present('exercises', $record);
-
-            return ($exercise['config']['university_practice'] ?? false)
-                ? $this->shuffleUniversityExercise($exercise, $seed)
-                : $exercise;
-        }));
+        return response()->json($query->select(array_values(array_diff(KichwaResource::FIELDS['exercises'], ['solucion_actividad'])) + [])->addSelect('id_tema', 'configuracion', 'publicado')->orderBy('orden_actividad')->paginate(20)->through(fn ($r) => KichwaResource::present('exercises', $r)));
     }
 
     public function evaluations(Request $request, int $level): JsonResponse
@@ -330,12 +264,9 @@ class KichwaCatalogController extends Controller
         $level = $record->tipo_evaluacion === 'modulo' ? Modulo::findOrFail($record->id_modulo)->id_nivel
             : ($record->id_unidad !== null ? self::publishedUnit($record->id_unidad)->id_nivel : Nivel::where('orden_nivel', 1)->firstOrFail()->id_nivel);
 
-        $resource = KichwaResource::present('evaluations', $record);
-        $resource['module_id'] = $record->id_modulo ?? ($record->id_unidad !== null ? Unidad::findOrFail($record->id_unidad)->id_modulo : null);
-
-        return response()->json($resource + ['level_id' => $level, 'description' => 'Evaluación del nivel.',
-            'history' => IntentoEvaluacion::where('id_usuario', $request->user()->id_usuario)->whereIn('id_evaluacion', VersionesEvaluacion::related($record)->select('id_evaluacion'))->orderByDesc('id_intento')->limit(1)->get()->map(fn ($attempt) => [
-                'id' => $attempt->id_intento, 'evaluation_id' => $attempt->id_evaluacion, 'number' => $attempt->numero_intento, 'state' => $attempt->estado_intento, 'result' => DominioLecciones::result($attempt)]),
+        return response()->json(KichwaResource::present('evaluations', $record) + ['level_id' => $level, 'description' => 'Evaluación del nivel.',
+            'history' => IntentoEvaluacion::where('id_usuario', $request->user()->id_usuario)->where('id_evaluacion', $evaluation)->orderByDesc('numero_intento')->limit(10)->get()->map(fn ($attempt) => [
+                'id' => $attempt->id_intento, 'number' => $attempt->numero_intento, 'state' => $attempt->estado_intento, 'result' => DominioLecciones::result($attempt)]),
             'module_final' => $record->tipo_evaluacion === 'modulo' ? EvaluacionModulo::status($record, $request->user()->id_usuario) : null,
             'questions' => ($record->configuracion['managed'] ?? false) ? [] : EstadoContenido::eligible($evaluation)->map(fn ($r) => KichwaResource::present('questions', $r))]);
     }

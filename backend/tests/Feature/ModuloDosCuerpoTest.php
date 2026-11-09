@@ -20,7 +20,6 @@ class ModuloDosCuerpoTest extends TestCase
     private function unit(): Unidad
     {
         $this->seed(UnidadesTematicasGuiadasSeeder::class);
-        $this->publishOnlyModule(Unidad::where('configuracion->guided_lesson', 'animals-colors')->value('id_modulo'));
 
         return Unidad::where('configuracion->guided_lesson', 'body')->firstOrFail();
     }
@@ -76,7 +75,6 @@ class ModuloDosCuerpoTest extends TestCase
         $this->assertContains($unit->id_unidad, $mastery['completed_units']);
         $ids = $activities->modelKeys();
         $this->seed(UnidadesTematicasGuiadasSeeder::class);
-        $this->publishOnlyModule(Unidad::where('configuracion->guided_lesson', 'animals-colors')->value('id_modulo'));
         $this->assertSame($ids, Actividad::where('id_unidad', $unit->id_unidad)->where('publicado', true)->orderBy('orden_actividad')->pluck('id_actividad')->all());
         $this->getJson('/api/units/'.$unit->id_unidad.'/guided')->assertOk()->assertJsonPath('completed_count', 6);
         Sanctum::actingAs(Usuario::factory()->administrador()->create());

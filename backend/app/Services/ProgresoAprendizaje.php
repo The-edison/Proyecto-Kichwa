@@ -34,8 +34,7 @@ class ProgresoAprendizaje
         $modules = Modulo::where('publicado', true)->whereIn('id_nivel', $levels->modelKeys())->orderBy('orden_modulo')->orderBy('id_modulo')->get();
         $units = Unidad::where('publicado', true)->whereIn('id_modulo', $modules->modelKeys())->orderBy('orden_unidad')->orderBy('id_unidad')->get();
         $finals = EvaluacionKichwa::where('publicado', true)->where('tipo_evaluacion', 'modulo')->whereIn('id_modulo', $modules->modelKeys())->get()->keyBy('id_modulo');
-        $finalVersions = EvaluacionKichwa::where('tipo_evaluacion', 'modulo')->whereIn('id_modulo', $finals->pluck('id_modulo'))->get(['id_evaluacion', 'id_modulo'])->keyBy('id_evaluacion');
-        $attempts = IntentoEvaluacion::where('id_usuario', $user)->whereIn('id_evaluacion', $finalVersions->modelKeys())->orderByDesc('id_intento')->get()->groupBy(fn ($attempt) => $finalVersions[$attempt->id_evaluacion]->id_modulo);
+        $attempts = IntentoEvaluacion::where('id_usuario', $user)->whereIn('id_evaluacion', $finals->modelKeys())->orderByDesc('id_intento')->get()->groupBy('id_evaluacion');
         $unitFinals = EvaluacionKichwa::where('publicado', true)->where('tipo_evaluacion', 'unidad')->whereIn('id_unidad', $units->modelKeys())
             ->where(fn ($query) => $query->whereNull('id_tema')->orWhere('configuracion->final', true))->pluck('id_unidad');
         $unitReports = $units->map(function (Unidad $unit) use ($activityCounts, $completedUnits, $unitFinals): array {
@@ -55,13 +54,12 @@ class ProgresoAprendizaje
             $exam = $finals->get($module->id_modulo);
             $final = $exam ? EvaluacionModulo::status($exam, $user, $activityCounts) : null;
             if ($final) {
-                $history = $attempts->get($module->id_modulo, collect());
+                $history = $attempts->get($exam->id_evaluacion, collect());
                 $finished = $history->where('estado_intento', 'finalizado');
                 $final += ['attempt_count' => $finished->count(), 'latest_score' => $finished->first()?->resultado['score'] ?? null,
                     'in_progress' => $history->contains('estado_intento', 'en_curso')];
             }
-            $completed = $children->isNotEmpty() && $children->every(fn ($unit): bool => $unit['completed'] && $unit['total_activities'] > 0 && $unit['completed_activities'] === $unit['total_activities'])
-                && $final !== null && $final['passed'];
+            $completed = $children->isNotEmpty() && $children->every(fn ($unit): bool => $unit['completed']) && (! $final || $final['passed']);
 
             return ['id' => $module->id_modulo, 'level_id' => $module->id_nivel, 'title' => $module->nombre_modulo,
                 'completed_activities' => $children->sum('completed_activities'), 'total_activities' => $children->sum('total_activities'),
@@ -69,29 +67,6 @@ class ProgresoAprendizaje
                 'completed_units' => $children->where('completed', true)->count(), 'total_units' => $children->count(),
                 'units' => $children->all(), 'final_evaluation' => $final];
         });
-        $blockedBy = null;
-        $moduleReports = $levels->flatMap(fn (Nivel $level) => $moduleReports->where('level_id', $level->id_nivel)->values())
-            ->map(function (array $module) use (&$blockedBy): array {
-                $lock = null;
-                if ($blockedBy !== null) {
-                    $pendingUnit = collect($blockedBy['units'])->first(fn (array $unit): bool => ! $unit['completed'] || $unit['completed_activities'] !== $unit['total_activities']);
-                    $final = $blockedBy['final_evaluation'];
-                    $lock = [
-                        'module_id' => $module['id'], 'module_title' => $module['title'],
-                        'prerequisite' => ['id' => $blockedBy['id'], 'title' => $blockedBy['title'], 'level_id' => $blockedBy['level_id']],
-                        'completed_units' => $blockedBy['completed_units'], 'total_units' => $blockedBy['total_units'],
-                        'final_passed' => (bool) ($final['passed'] ?? false), 'final_ready' => $final !== null,
-                        'resume' => $pendingUnit ? ['kind' => 'unit', 'id' => $pendingUnit['id']]
-                            : ($final ? ['kind' => 'module_final', 'id' => $final['id']] : ['kind' => 'module', 'id' => $blockedBy['id']]),
-                        'message' => 'Completa todas las unidades y aprueba la prueba final de «'.$blockedBy['title'].'» para desbloquear este módulo.',
-                    ];
-                }
-                if ($blockedBy === null && ! $module['completed']) {
-                    $blockedBy = $module;
-                }
-
-                return $module + ['unlocked' => $lock === null, 'lock' => $lock];
-            });
         $levelReports = $levels->map(function (Nivel $level) use ($moduleReports): array {
             $children = $moduleReports->where('level_id', $level->id_nivel)->values();
 
@@ -102,9 +77,6 @@ class ProgresoAprendizaje
         });
         $next = null;
         foreach ($levelReports->flatMap(fn ($level) => $level['modules']) as $module) {
-            if (! $module['unlocked']) {
-                continue;
-            }
             foreach ($module['units'] as $unit) {
                 if (! $unit['completed'] && $unit['total_activities'] > 0) {
                     $next = ['kind' => 'unit', 'id' => $unit['id'], 'title' => $unit['title'], 'level_id' => $module['level_id']];

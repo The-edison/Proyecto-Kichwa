@@ -10,7 +10,6 @@ use App\Http\Controllers\Api\KichwaSubmissionController;
 use App\Http\Controllers\Api\PrivacyController;
 use App\Http\Controllers\Api\TestimonialController;
 use App\Http\Controllers\Web\GoogleAuthController;
-use App\Http\Middleware\EnsureModuleAccess;
 use App\Services\DominioLecciones;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -38,7 +37,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function (): void {
     Route::post('/auth/google/link-prepare', [GoogleAuthController::class, 'prepare'])->defaults('intent', 'link')->middleware('throttle:10,1');
     Route::post('/auth/change-password', [AuthController::class, 'changePassword'])->middleware('throttle:5,1');
     Route::post('/auth/verification-notification', [AuthController::class, 'resendVerification'])->middleware('throttle:3,1');
-    Route::middleware(['role:student', EnsureModuleAccess::class])->group(function (): void {
+    Route::middleware('role:student')->group(function (): void {
         Route::get('/levels', [KichwaCatalogController::class, 'levels']);
         Route::get('/learning-navigation', [KichwaCatalogController::class, 'navigation']);
         Route::get('/levels/{level}/modules', [KichwaCatalogController::class, 'modules']);

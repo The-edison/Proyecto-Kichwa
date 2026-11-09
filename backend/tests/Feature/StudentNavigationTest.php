@@ -45,12 +45,7 @@ class StudentNavigationTest extends TestCase
         foreach ($data as $item) {
             $this->getJson('/api/levels/'.$item['id'].'/modules')->assertOk();
             foreach ($item['modules'] as $entry) {
-                $response = $this->getJson('/api/modules/'.$entry['id']);
-                if ($entry['unlocked']) {
-                    $response->assertOk();
-                } else {
-                    $response->assertForbidden()->assertJsonPath('code', 'module_locked');
-                }
+                $this->getJson('/api/modules/'.$entry['id'])->assertOk();
             }
         }
     }

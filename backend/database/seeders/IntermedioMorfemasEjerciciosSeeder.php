@@ -180,7 +180,8 @@ class IntermedioMorfemasEjerciciosSeeder extends Seeder
         $ordered = [];
         foreach ($origins as $origin) {
             $record = $records->firstWhere('origen_reactivo', $origin);
-            if ($record && $record->publicado) {
+            if ($record) {
+                $record->update(['publicado' => true]);
                 $ordered[$record->id_actividad] = $record;
             }
         }

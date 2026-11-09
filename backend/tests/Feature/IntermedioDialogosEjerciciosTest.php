@@ -92,7 +92,7 @@ class IntermedioDialogosEjerciciosTest extends TestCase
         $this->assertFalse($previous->fresh()->publicado);
         $this->assertCount(2, $previous->fresh()->configuracion['dialogue_turns']);
         $replacement = Actividad::where('origen_reactivo', 'intermedio-m2-u4-actividad-5-v4')->firstOrFail();
-        $this->assertSame(1, $replacement->orden_actividad);
+        $this->assertSame(4, $replacement->orden_actividad);
         $this->assertCount(15, $replacement->configuracion['dialogue_turns']);
         $this->assertSame(6, Actividad::where('id_unidad', $topic->id_unidad)->where('publicado', true)->count());
         $this->assertDatabaseHas('respuestas_actividad', ['id_respuesta_actividad' => $response->json('response_id'), 'id_actividad' => $previous->id_actividad, 'acierto_actividad' => true]);

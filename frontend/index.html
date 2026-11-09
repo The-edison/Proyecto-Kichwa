@@ -4,7 +4,6 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="color-scheme" content="light dark" />
-        <link rel="icon" type="image/png" href="/src/images/yachay-favicon.png" />
         <script>
             // Apply before the stylesheet and React to avoid a flash of the wrong theme.
             (function () {
@@ -18,7 +17,7 @@
                     } catch (_) {}
                 }
                 var key = scope === 'public' ? 'yachay-theme' : 'yachay-theme:' + scope;
-                try { saved = sessionStorage.getItem(key); } catch (_) {}
+                try { saved = localStorage.getItem(key); } catch (_) {}
                 document.documentElement.dataset.theme = saved === 'dark' || saved === 'light'
                     ? saved : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             })();

@@ -31,9 +31,6 @@ $settings = Get-Content -LiteralPath $envPath
 if (-not ($settings | Where-Object { $_ -match '^DB_CONNECTION=pgsql\s*$' })) { throw 'Yachay requiere DB_CONNECTION=pgsql; SQLite no está soportado.' }
 if (-not ($settings | Where-Object { $_ -match '^APP_ENV=local\s*$' })) { throw 'Este lanzador sólo se usa con APP_ENV=local.' }
 if ($env:DB_CONNECTION -and $env:DB_CONNECTION -ne 'pgsql') { throw 'Quita la variable DB_CONNECTION de la terminal o configúrala como pgsql.' }
-$appUrl = $settings | Where-Object { $_ -match '^APP_URL=' } | Select-Object -First 1
-if ($appUrl -notmatch '^APP_URL=http://127\.0\.0\.1:(\d+)/?$') { throw 'APP_URL debe usar http://127.0.0.1 con un puerto local.' }
-$apiPort = [int]$Matches[1]
 function Test-LocalPort([int]$port) {
     $client = [Net.Sockets.TcpClient]::new()
     try { $result = $client.BeginConnect('127.0.0.1', $port, $null, $null); return $result.AsyncWaitHandle.WaitOne(500) -and $client.Connected }
@@ -42,7 +39,7 @@ function Test-LocalPort([int]$port) {
 }
 if ($Reiniciar) {
     $ownedServices = @()
-    foreach ($servicePort in @($apiPort, 5173)) {
+    foreach ($servicePort in @(8000, 5173)) {
         $listeners = Get-NetTCPConnection -LocalPort $servicePort -State Listen -ErrorAction SilentlyContinue
         foreach ($listenerId in ($listeners.OwningProcess | Select-Object -Unique)) {
             $serviceProcess = Get-CimInstance Win32_Process -Filter "ProcessId = $listenerId"
@@ -53,15 +50,6 @@ if ($Reiniciar) {
         }
     }
     foreach ($ownedService in ($ownedServices | Select-Object -Unique)) { Stop-Process -Id $ownedService -Force }
-}
-foreach ($servicePort in @($apiPort, 5173)) {
-    $listeners = Get-NetTCPConnection -LocalPort $servicePort -State Listen -ErrorAction SilentlyContinue
-    foreach ($listenerId in ($listeners.OwningProcess | Select-Object -Unique)) {
-        $serviceProcess = Get-CimInstance Win32_Process -Filter "ProcessId = $listenerId"
-        if ($serviceProcess.Name -notin @('php.exe', 'node.exe') -or -not $serviceProcess.CommandLine.Contains($projectRoot)) {
-            throw "El puerto $servicePort pertenece a otro proyecto. Configura un puerto libre antes de iniciar Yachay."
-        }
-    }
 }
 Push-Location $backend
 try {
@@ -76,7 +64,7 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'No se pudo crear storage:link. Comprueba permisos de enlaces de Windows.' }
     }
 } finally { Pop-Location }
-if (-not (Test-LocalPort $apiPort)) {
+if (-not (Test-LocalPort 8000)) {
     $serverPhpArguments = @('-c', ('"' + $phpIni + '"'), '-d', ('"extension_dir=' + $extensionDirectory + '"'))
     $localCaBundle = Join-Path $backend 'storage\app\private\cacert.pem'
     if (Test-Path -LiteralPath $localCaBundle) {
@@ -86,18 +74,18 @@ if (-not (Test-LocalPort $apiPort)) {
     if (Test-Path -LiteralPath $opcacheExtension) {
         $serverPhpArguments += @('-d', ('"zend_extension=' + $opcacheExtension + '"'), '-d', 'opcache.enable_cli=1', '-d', 'opcache.validate_timestamps=1', '-d', 'opcache.revalidate_freq=0', '-d', 'opcache.memory_consumption=128', '-d', 'opcache.max_accelerated_files=20000')
     }
-    $serverPhpArguments += @('-S', "127.0.0.1:$apiPort", '-t', '.', ('"' + $router + '"'))
+    $serverPhpArguments += @('-S', '127.0.0.1:8000', '-t', '.', ('"' + $router + '"'))
     Start-Process -FilePath $phpExe -ArgumentList $serverPhpArguments -WorkingDirectory (Join-Path $backend 'public') -WindowStyle Hidden -RedirectStandardOutput (Join-Path $backend 'storage\logs\local-server.log') -RedirectStandardError (Join-Path $backend 'storage\logs\local-server-errors.log') | Out-Null
 }
 if (-not (Test-LocalPort 5173)) {
     Start-Process -FilePath $nodeExe -ArgumentList @(('"' + $viteEntry + '"'), '--host', '127.0.0.1', '--port', '5173', '--strictPort') -WorkingDirectory $frontend -WindowStyle Hidden -RedirectStandardOutput (Join-Path $backend 'storage\logs\vite.log') -RedirectStandardError (Join-Path $backend 'storage\logs\vite-errors.log') | Out-Null
 }
 for ($attempt = 0; $attempt -lt 20; $attempt++) {
-    if ((Test-LocalPort $apiPort) -and (Test-LocalPort 5173)) { break }
+    if ((Test-LocalPort 8000) -and (Test-LocalPort 5173)) { break }
     Start-Sleep -Milliseconds 250
 }
-if (-not (Test-LocalPort $apiPort) -or -not (Test-LocalPort 5173)) { throw 'No se iniciaron los servicios. Revisa backend/storage/logs/*server* y vite-errors.log.' }
+if (-not (Test-LocalPort 8000) -or -not (Test-LocalPort 5173)) { throw 'No se iniciaron los servicios. Revisa backend/storage/logs/*server* y vite-errors.log.' }
 Write-Host 'Yachay usa PostgreSQL configurado en backend/.env.'
 Write-Host 'Frontend: http://127.0.0.1:5173/'
-Write-Host "API: http://127.0.0.1:$apiPort/"
+Write-Host 'API: http://127.0.0.1:8000/'
 Write-Host 'El administrador debe cambiar su contraseña inicial en Mi cuenta.'

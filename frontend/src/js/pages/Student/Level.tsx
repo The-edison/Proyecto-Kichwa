@@ -1,12 +1,11 @@
-import { useState } from 'react';
-import { ArrowRight, BookOpen, Check, ChevronRight, ClipboardCheck, Sparkles, LockKeyhole } from 'lucide-react';
+﻿import { useState } from 'react';
+import { ArrowRight, BookOpen, Check, ChevronRight, ClipboardCheck, Sparkles } from 'lucide-react';
 import { Head, Link } from '../../navigation';
 import { AppLayout } from '../../layouts/AppLayout';
 import { EmptyState, ErrorState, LoadingState } from '../../components/States';
 import { Pagination } from '../../components/Pagination';
 import { LearningProgress, LearningProgressRing, progressValue } from '../../components/LearningProgress';
 import { useApi } from '../../hooks/useApi';
-import { showModuleLock } from '../../services/moduleAccess';
 import type { LearningModule, Paginated, Evaluation, ProgressSummary } from '../../types';
 import indigenousLanguagesImage from '../../../images/indigenous-languages.jpg';
 import culturalDiversityImage from '../../../images/cultural-diversity.jpg';
@@ -23,6 +22,7 @@ export default function Level({ level }: { level: { id: number; name: string; co
         : level.code === 'intermediate'
         ? { src: culturalDiversityImage, alt: 'Ilustración de diversidad cultural y pueblos indígenas' }
         : null;
+
     return <AppLayout title={'Nivel ' + level.name} subtitle="Tu recorrido de aprendizaje, módulo a módulo.">
         <Head title={level.name} />
         <nav aria-label="Migas de pan" className="learning-breadcrumb">
@@ -35,14 +35,13 @@ export default function Level({ level }: { level: { id: number; name: string; co
                 {modules.data.data.map((module, index) => {
                     const percentage = progressValue(module.percentage);
                     const number = module.sort_order || (page - 1) * modules.data!.per_page + index + 1;
-                    const completed = module.completed === true;
-                    const locked = module.unlocked === false;
-                    return <li key={module.id}><Link href={'/aprender/modulo/' + module.id} className={`learning-module-card glass-panel card-hover${locked ? ' is-locked' : ''}`} aria-label={locked ? `${module.title} · Bloqueado` : undefined} onClick={event => { if (locked) { event.preventDefault(); if (module.lock) showModuleLock(module.lock); } }}>
+                    const completed = percentage === 100;
+                    return <li key={module.id}><Link href={'/aprender/modulo/' + module.id} className="learning-module-card glass-panel card-hover">
                         <div className={`learning-module-cover tone-${index % 2}${cover ? ' has-image' : ''}`}>
                             {cover ? <img src={cover.src} alt={cover.alt} loading="lazy" /> : <span className="learning-cover-icon" aria-hidden="true">{completed ? <Check size={40} strokeWidth={1.6} /> : index % 2 ? <Sparkles size={40} strokeWidth={1.6} /> : <BookOpen size={40} strokeWidth={1.6} />}</span>}
-                            <span className="learning-cover-number" aria-hidden="true">{String(number).padStart(2, '0')}</span><span className={`badge ${completed ? 'success' : 'neutral'}`}>{locked ? <><LockKeyhole size={14} aria-hidden="true" /> Bloqueado</> : completed ? '✓ Completado' : percentage > 0 ? 'En curso' : 'Por explorar'}</span>
+                            <span className="learning-cover-number" aria-hidden="true">{String(number).padStart(2, '0')}</span><span className={`badge ${completed ? 'success' : 'neutral'}`}>{completed ? '✓ Completado' : percentage > 0 ? 'En curso' : 'Por explorar'}</span>
                         </div>
-                        <div className="learning-module-body"><span className="eyebrow">MÓDULO {number}</span><h3>{module.title.replace(/^Módulo\s+\d+\s*/iu, '')}</h3><p>{module.description.replace(/^Objetivo del módulo:\s*/i, '')}</p><div className="learning-module-bottom"><LearningProgress value={percentage} label="Progreso del módulo" /><span className={`learning-card-action ${percentage > 0 && !completed ? 'is-primary' : ''}`}>{locked ? 'Ver cómo desbloquear' : completed ? 'Repasar contenidos' : percentage > 0 ? 'Continuar módulo' : 'Explorar módulo'}<ArrowRight size={18} aria-hidden="true" /></span></div></div>
+                        <div className="learning-module-body"><span className="eyebrow">MÓDULO {number}</span><h3>{module.title.replace(/^Módulo\s+\d+\s*/iu, '')}</h3><p>{module.description.replace(/^Objetivo del módulo:\s*/i, '')}</p><div className="learning-module-bottom"><LearningProgress value={percentage} label="Progreso del módulo" /><span className={`learning-card-action ${percentage > 0 && !completed ? 'is-primary' : ''}`}>{completed ? 'Repasar contenidos' : percentage > 0 ? 'Continuar módulo' : 'Explorar módulo'}<ArrowRight size={18} aria-hidden="true" /></span></div></div>
                     </Link></li>;
                 })}
             </ol>}

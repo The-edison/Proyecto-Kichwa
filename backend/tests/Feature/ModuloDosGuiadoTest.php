@@ -32,7 +32,6 @@ class ModuloDosGuiadoTest extends TestCase
         Sanctum::actingAs($student);
 
         $this->seed(UnidadesTematicasGuiadasSeeder::class);
-        $this->publishOnlyModule(Unidad::where('configuracion->guided_lesson', 'animals-colors')->value('id_modulo'));
 
         $this->getJson('/api/modules/'.$module->id_modulo.'/units')->assertOk()->assertJsonPath('total', 4);
         $activityIds = [];
@@ -63,7 +62,6 @@ class ModuloDosGuiadoTest extends TestCase
         }
 
         $this->seed(UnidadesTematicasGuiadasSeeder::class);
-        $this->publishOnlyModule(Unidad::where('configuracion->guided_lesson', 'animals-colors')->value('id_modulo'));
 
         $this->assertSame($activityIds, Actividad::whereIn('id_unidad', $units->pluck('id_unidad'))->where('publicado', true)->orderBy('id_unidad')->orderBy('orden_actividad')->pluck('id_actividad')->all());
         foreach ($units as $index => $unit) {
@@ -88,7 +86,6 @@ class ModuloDosGuiadoTest extends TestCase
             'objetivo_unidad' => 'Estudiar morfemas.', 'orden_unidad' => 1, 'publicado' => false]);
 
         $this->seed(UnidadesTematicasGuiadasSeeder::class);
-        $this->publishOnlyModule(Unidad::where('configuracion->guided_lesson', 'animals-colors')->value('id_modulo'));
 
         $basic = Nivel::where('orden_nivel', 1)->firstOrFail();
         $module = Modulo::where('id_nivel', $basic->id_nivel)->where('orden_modulo', 2)->firstOrFail();

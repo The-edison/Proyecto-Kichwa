@@ -1,14 +1,11 @@
 import { AlertCircle, BookOpen } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { ModuleLockNotice } from './ModuleLockNotice';
-import type { ModuleLock } from '../types';
 
 export function LoadingState({ label = 'Cargando...' }: { label?: string }) {
     return <div className="glass-panel space-y-3 p-6" role="status"><span>{label}</span><div aria-hidden className="motion-safe:animate-pulse space-y-3"><div className="h-4 w-3/4 rounded bg-positive-soft" /><div className="h-4 w-full rounded bg-positive-soft" /><div className="h-4 w-1/2 rounded bg-positive-soft" /></div></div>;
 }
 
-export function ErrorState({ message, action, lock }: { message: string; action?: ReactNode; lock?: ModuleLock | null }) {
-    if (lock) return <div className="glass-panel"><ModuleLockNotice lock={lock} /></div>;
+export function ErrorState({ message, action }: { message: string; action?: ReactNode }) {
     return <div className="glass-panel state-panel text-negative" role="alert"><AlertCircle size={24} /><span>{message}</span>{action}</div>;
 }
 

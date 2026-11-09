@@ -38,6 +38,7 @@ class IntermedioDialogosEjerciciosSeeder extends Seeder
                 $existing = Actividad::where('id_unidad', $unit->id_unidad)->where('origen_reactivo', $origin)->first();
                 if ($existing) {
                     $attributes = KichwaResource::attributes('exercises', $exercise);
+                    $attributes['publicado'] = true;
                     $attributes['configuracion'] = array_replace($existing->configuracion ?? [], $attributes['configuracion']);
                     $existing->update($attributes);
 
@@ -56,6 +57,28 @@ class IntermedioDialogosEjerciciosSeeder extends Seeder
                 }
                 $record->publicado = true;
                 $record->save();
+            }
+
+            $records = Actividad::where('id_unidad', $unit->id_unidad)->orderBy('orden_actividad')->get();
+            $origins = ['intermedio-m2-u4-actividad-1-v1', 'intermedio-m2-u4-actividad-2-v1',
+                'intermedio-m2-u4-actividad-4-v1', 'intermedio-m2-u4-actividad-5-v4',
+                'intermedio-m2-u4-actividad-6-v4', 'intermedio-m2-u4-actividad-8-v2'];
+            $ordered = [];
+            foreach ($origins as $origin) {
+                $record = $records->firstWhere('origen_reactivo', $origin);
+                if ($record) {
+                    $ordered[$record->id_actividad] = $record;
+                }
+            }
+            foreach ($records as $record) {
+                $ordered[$record->id_actividad] ??= $record;
+            }
+            $position = 1 + (int) $records->max('orden_actividad');
+            foreach ($ordered as $record) {
+                $record->update(['orden_actividad' => $position++]);
+            }
+            foreach (array_values($ordered) as $index => $record) {
+                $record->update(['orden_actividad' => $index + 1]);
             }
         });
         PublicacionContenido::invalidate();

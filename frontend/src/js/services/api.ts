@@ -1,13 +1,10 @@
 import { queryClient } from './queryClient';
 import { tabSessionToken } from './tabSession';
-import { showModuleLock } from './moduleAccess';
-import type { ModuleLock } from '../types';
 export class ApiError extends Error {
     constructor(
         message: string,
         public readonly status: number,
         public readonly errors: Record<string, string[]> = {},
-        public readonly moduleLock: ModuleLock | null = null,
     ) {
         super(message);
         this.name = 'ApiError';
@@ -27,7 +24,7 @@ function refreshProgress() {
     void queryClient.invalidateQueries({ refetchType: 'active', predicate: query => {
         const key = query.queryKey[1];
         return query.queryKey[0] === 'api' && typeof key === 'string' && !guidedUnitDetail(query)
-            && (key === '/mastery' || key === '/learning-navigation' || /^\/admin\/learning-results\//.test(key) || /^\/evaluations\/\d+(\?|$)/.test(key) || /^\/progress(\/|\?|$)/.test(key) || /^\/levels\/\d+\/modules/.test(key) || /^\/modules\/\d+(\/(units|contents)|\?|$)/.test(key) || /^\/units\/\d+(\/sequence|\/contents|\?|$)/.test(key));
+            && (key === '/mastery' || /^\/admin\/learning-results\//.test(key) || /^\/evaluations\/\d+(\?|$)/.test(key) || /^\/progress(\/|\?|$)/.test(key) || /^\/levels\/\d+\/modules/.test(key) || /^\/modules\/\d+(\/(units|contents)|\?|$)/.test(key) || /^\/units\/\d+(\/sequence|\/contents|\?|$)/.test(key));
     } });
 }
 export async function withProgressBatch<T>(work: () => Promise<T>): Promise<T> {
@@ -78,8 +75,6 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
     if (response.status === 204) return undefined as T;
     const payload = await response.json().catch(() => null);
     if (!response.ok) {
-        const moduleLock = response.status === 403 && payload?.code === 'module_locked' ? payload.module_lock as ModuleLock : null;
-        if (moduleLock) showModuleLock(moduleLock);
         if (response.status === 401 && !/^\/auth\/(login|register|google\/prepare)$/.test(path)) {
             window.dispatchEvent(new Event('yachay:session-expired'));
         }
@@ -87,7 +82,6 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
             payload?.message ?? 'No se pudo completar la solicitud.',
             response.status,
             payload?.errors ?? {},
-            moduleLock,
         );
     }
     if (method !== 'GET') {

@@ -21,7 +21,7 @@ async function interaction(exercise, initial = {}, checkPair, initialLockedPairs
     const jsx = (type, props) => ({ type, props });
     const module = new vm.SourceTextModule(code, { context });
     await module.link(specifier => {
-        const dependency = specifier.endsWith('/TopicVisual') ? { TopicWordVisual: 'TopicWordVisual' } : specifier.endsWith('/MatchingLines') ? { MatchingLines: 'MatchingLines' } : specifier.endsWith('/useAnswerSound') ? { useAnswerSound: () => () => {} } : specifier === 'react' ? {
+        const dependency = specifier.endsWith('/MatchingLines') ? { MatchingLines: 'MatchingLines' } : specifier.endsWith('/useAnswerSound') ? { useAnswerSound: () => () => {} } : specifier === 'react' ? {
             useState: value => { const index = cursor++; if (!(index in states)) states[index] = value; return [states[index], value => { states[index] = typeof value === 'function' ? value(states[index]) : value; }]; },
             useRef: value => ({ current: value }),
         } : specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx, Fragment: 'fragment' }
@@ -41,6 +41,7 @@ test('ordering cannot be checked with empty places, duplicates or unknown words'
     }
     assert.equal((await interaction(exercise, { orden: ['one', 'two', 'three'] })).complete(), true);
 });
+
 test('checked choices and text answers use individual grades while the entire exercise reflects any error', async () => {
     const exercise = { type: 'seleccion_multiple', elements: ['a', 'b', 'c'].map(id => ({ id, texto: id })), zones: [], config: { presentation: 'buttons', max_selections: 2 } };
     const feedback = { is_correct: false, item_results: { a: true, b: false } };
