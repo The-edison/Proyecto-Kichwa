@@ -4,3 +4,4 @@ Dockerfile text eol=lf
 *.ini text eol=lf
 *.htaccess text eol=lf
 *.yml text eol=lf
+*.enc -text

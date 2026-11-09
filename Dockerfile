@@ -32,6 +32,7 @@ COPY deployment/apache.conf /etc/apache2/sites-available/000-default.conf
 COPY deployment/public.htaccess /var/www/backend/public/.htaccess
 COPY deployment/php-production.ini /usr/local/etc/php/conf.d/zz-yachay.ini
 COPY deployment/entrypoint.sh /usr/local/bin/yachay-entrypoint
+COPY --chown=www-data:www-data deployment/initial-content.enc /var/www/production-transfer/initial-content.enc
 RUN chmod +x /usr/local/bin/yachay-entrypoint
 EXPOSE 80
 ENTRYPOINT ["yachay-entrypoint"]

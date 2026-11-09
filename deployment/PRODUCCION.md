@@ -17,7 +17,7 @@ Los ZIP incluyen hashes de contraseñas de administradores: son archivos privado
 
 ## 1. Comprobar los accesos y el dominio
 
-Necesitas acceso al proyecto de Dokploy, capacidad para desplegar Compose, acceso al repositorio y acceso SSH al servidor para copiar el ZIP privado. Si solo dispones del panel, pide al administrador del servidor que realice el paso de copia e importación.
+Necesitas acceso al proyecto de Dokploy, capacidad para desplegar Compose y acceso al repositorio. Para transferir los datos puedes usar SSH (paso 5) o el paquete cifrado y la terminal del contenedor de Dokploy (paso 5A), sin acceso SSH al servidor.
 
 En DNS, el registro **A** de `yachay-kichwa.devs-ueb.tech` debe apuntar a la IP pública del servidor donde se despliega Dokploy. Si existe un registro AAAA, también debe llegar a ese servidor. Comprueba desde PowerShell:
 
@@ -53,12 +53,12 @@ git diff
 Si todo corresponde a esta preparación, registra los archivos indicados y súbelos:
 
 ```powershell
-git add .gitignore .gitattributes .dockerignore Dockerfile compose.production.yml deployment README.md backend/composer.lock backend/config/trustedproxy.php backend/app/Services/ProductionTransfer.php backend/app/Console/Commands/ExportProduction.php backend/app/Console/Commands/ImportProduction.php backend/tests/Feature/ProductionTransferTest.php
+git add .gitignore .gitattributes .dockerignore Dockerfile compose.production.yml deployment README.md backend/composer.lock backend/config/trustedproxy.php backend/app/Services/ProductionTransfer.php backend/app/Console/Commands/ExportProduction.php backend/app/Console/Commands/EncryptProduction.php backend/app/Console/Commands/ImportProduction.php backend/tests/Feature/ProductionTransferTest.php
 git commit -m "Prepara despliegue en Dokploy y transferencia sin estudiantes"
 git push origin main
 ```
 
-No agregues los ZIP, `.env`, `dokploy.env`, `vendor`, `node_modules`, bases completas ni logs. El Dockerfile instala dependencias con los lockfiles y compila React en el servidor. No hay que subir `frontend/dist`.
+No agregues los ZIP, `.env`, `dokploy.env`, `vendor`, `node_modules`, bases completas ni logs. `deployment/initial-content.enc` es el paquete cifrado con la clave de producción: puede acompañar al código, sin incluir la clave. El Dockerfile instala dependencias con los lockfiles, compila React y coloca ese archivo cifrado fuera del directorio público. No hay que subir `frontend/dist`.
 
 ## 4. Crear el servicio en el panel de la captura
 
@@ -115,6 +115,39 @@ rm -f "$HOME/yachay-production.zip"
 ```
 
 Si falla, revisa el error y los logs del contenedor; no uses `migrate:fresh`, `db:wipe` ni elimines volúmenes. Para una primera importación fallida se puede corregir la causa y reintentar cuando la base continúe vacía. No vuelvas a importar sobre una aplicación que ya está en uso.
+
+## 5A. Importar sin SSH, usando el paquete cifrado
+
+Esta alternativa sirve cuando solo dispones de la terminal del contenedor en Dokploy. El paquete `deployment/initial-content.enc` se preparó con el cifrado autenticado de Laravel y la APP_KEY de `.production-transfer/dokploy.env`. El código y la imagen solo contienen el paquete cifrado; la clave permanece en el archivo privado y en Environment de Dokploy. No agregues esa clave a Git ni al Dockerfile.
+
+El comando usado para prepararlo en tu computadora, desde `backend`, es:
+
+```powershell
+php artisan yachay:encrypt-production ../.production-transfer/yachay-production.zip ../deployment/initial-content.enc ../.production-transfer/dokploy.env --no-interaction
+```
+
+El comando rechaza sobrescribir un destino existente. Ya está ejecutado para el paquete inicial; no es necesario repetirlo. Para un traslado posterior con otro contenido, conserva una copia del archivo cifrado anterior antes de crear su reemplazo. Nunca uses este proceso para sobrescribir una instalación en uso.
+
+Sube el paquete cifrado y los cambios de código con Git y vuelve a desplegar el mismo servicio. Mantén **la misma APP_KEY** que pegaste anteriormente en Dokploy; de lo contrario no se podrá abrir el paquete.
+
+Cuando `app` esté saludable, abre **Containers → fila app → … → Terminal**. En esa terminal Linux, ejecuta:
+
+```bash
+cd /var/www/backend
+php artisan down --retry=60
+php artisan yachay:import-production /var/www/production-transfer/initial-content.enc --encrypted --confirm-new-database --no-interaction
+```
+
+Comprueba que la importación terminó correctamente y mostró las cantidades esperadas. El ZIP descifrado se crea temporalmente en el almacenamiento privado y se elimina al terminar, también si la importación falla. Una clave incorrecta o un paquete alterado se rechazan antes de importar datos.
+
+**Solo si la importación terminó correctamente**, ejecuta:
+
+```bash
+chown -R www-data:www-data storage/app/public storage/app/private
+php artisan up
+```
+
+El ajuste de permisos permite que Apache siga subiendo y administrando multimedia cuando la terminal utiliza `root`. Si la terminal indica permisos insuficientes, pide al administrador del panel que ejecute el ajuste; no cambies los permisos a `777`. Si falla la importación, conserva la web en mantenimiento y revisa el error antes de continuar. No ejecutes además la importación por SSH: ambas alternativas cargan el mismo contenido y se realiza solo una.
 
 ## 6. Configurar correo y Google
 
