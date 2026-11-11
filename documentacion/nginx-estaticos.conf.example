@@ -12,6 +12,9 @@ location /assets/ {
 }
 location = /index.html {
     add_header Cache-Control "no-cache";
+    # Copiar dist/csp-report-only.nginx.conf de ESTA compilacion a esta ruta.
+    # Conservar las demas cabeceras del servidor real (incluida su herencia).
+    include /etc/nginx/snippets/yachay-csp-report-only.conf;
 }
 location / {
     try_files $uri $uri/ /index.html;

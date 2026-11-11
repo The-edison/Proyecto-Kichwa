@@ -1,0 +1,650 @@
+{
+  "herramienta": "Node.js fetch + scripts de aserción de la colección (NO Postman Runner)",
+  "inicio_o_generacion_utc": "2026-11-09T23:06:02.578Z",
+  "origen": "https://yachay-kichwa.devs-ueb.tech",
+  "alcance": "Solo carpetas 01 y 02; GET público/anónimo; sin cookies, tokens o cuerpos de respuesta guardados",
+  "total": 23,
+  "aprobadas": 23,
+  "fallidas": 0,
+  "omitidas": 0,
+  "resultados": [
+    {
+      "id": "PI-01",
+      "metodo": "GET",
+      "http": 200,
+      "duracion_ms": 638,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-01 · HTTP 200",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-01 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-01 · Criterio de aceptación",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-01 · Cabeceras de seguridad",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-02",
+      "metodo": "GET",
+      "http": 200,
+      "duracion_ms": 200,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-02 · HTTP 200",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-02 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-02 · Criterio de aceptación",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-02 · Cabeceras de seguridad",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-03",
+      "metodo": "GET",
+      "http": 200,
+      "duracion_ms": 219,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-03 · HTTP 200",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-03 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-03 · Criterio de aceptación",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-03 · Cabeceras de seguridad",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-04",
+      "metodo": "GET",
+      "http": 200,
+      "duracion_ms": 230,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-04 · HTTP 200",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-04 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-04 · Criterio de aceptación",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-04 · Cabeceras de seguridad",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-05",
+      "metodo": "GET",
+      "http": 200,
+      "duracion_ms": 222,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-05 · HTTP 200",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-05 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-05 · Criterio de aceptación",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-05 · Cabeceras de seguridad",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-06",
+      "metodo": "GET",
+      "http": 200,
+      "duracion_ms": 238,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-06 · HTTP 200",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-06 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-06 · Criterio de aceptación",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-06 · Cabeceras de seguridad",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-07",
+      "metodo": "GET",
+      "http": 200,
+      "duracion_ms": 223,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-07 · HTTP 200",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-07 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-07 · Criterio de aceptación",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-07 · Cabeceras de seguridad",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-08",
+      "metodo": "GET",
+      "http": 200,
+      "duracion_ms": 228,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-08 · HTTP 200",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-08 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-08 · Criterio de aceptación",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-08 · Cabeceras de seguridad",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-09",
+      "metodo": "GET",
+      "http": 422,
+      "duracion_ms": 202,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-09 · HTTP 422",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-09 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-09 · Criterio de aceptación",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-10",
+      "metodo": "GET",
+      "http": 422,
+      "duracion_ms": 203,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-10 · HTTP 422",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-10 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-10 · Criterio de aceptación",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-11",
+      "metodo": "GET",
+      "http": 422,
+      "duracion_ms": 202,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-11 · HTTP 422",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-11 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-11 · Criterio de aceptación",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-12",
+      "metodo": "GET",
+      "http": 422,
+      "duracion_ms": 202,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-12 · HTTP 422",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-12 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-12 · Criterio de aceptación",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-13",
+      "metodo": "GET",
+      "http": 200,
+      "duracion_ms": 219,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-13 · HTTP 200",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-13 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-13 · Criterio de aceptación",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-13 · Cabeceras de seguridad",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-14",
+      "metodo": "GET",
+      "http": 200,
+      "duracion_ms": 215,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-14 · HTTP 200",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-14 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-14 · Criterio de aceptación",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-14 · Cabeceras de seguridad",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-15",
+      "metodo": "GET",
+      "http": 404,
+      "duracion_ms": 200,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-cache, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-15 · HTTP 404",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-15 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-15 · Criterio de aceptación",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-16",
+      "metodo": "GET",
+      "http": 404,
+      "duracion_ms": 206,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-16 · HTTP 404",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-16 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-16 · Criterio de aceptación",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-17",
+      "metodo": "GET",
+      "http": 401,
+      "duracion_ms": 205,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-17 · HTTP 401",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-17 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-17 · Criterio de aceptación",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-18",
+      "metodo": "GET",
+      "http": 401,
+      "duracion_ms": 201,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-18 · HTTP 401",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-18 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-18 · Criterio de aceptación",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-19",
+      "metodo": "GET",
+      "http": 401,
+      "duracion_ms": 209,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-19 · HTTP 401",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-19 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-19 · Criterio de aceptación",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-20",
+      "metodo": "GET",
+      "http": 401,
+      "duracion_ms": 216,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-20 · HTTP 401",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-20 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-20 · Criterio de aceptación",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-21",
+      "metodo": "GET",
+      "http": 401,
+      "duracion_ms": 213,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-21 · HTTP 401",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-21 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-21 · Criterio de aceptación",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-22",
+      "metodo": "GET",
+      "http": 401,
+      "duracion_ms": 204,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-22 · HTTP 401",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-22 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-22 · Criterio de aceptación",
+          "correcto": true
+        }
+      ]
+    },
+    {
+      "id": "PI-23",
+      "metodo": "GET",
+      "http": 401,
+      "duracion_ms": 201,
+      "cabeceras": {
+        "content_type": "application/json",
+        "nosniff": "nosniff, nosniff",
+        "cache_control": "no-store, private"
+      },
+      "estado": "aprobada",
+      "verificaciones": [
+        {
+          "nombre": "PI-23 · HTTP 401",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-23 · Formato JSON",
+          "correcto": true
+        },
+        {
+          "nombre": "PI-23 · Criterio de aceptación",
+          "correcto": true
+        }
+      ]
+    }
+  ]
+}

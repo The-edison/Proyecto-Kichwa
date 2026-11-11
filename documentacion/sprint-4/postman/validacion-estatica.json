@@ -1,0 +1,11 @@
+{
+  "tipo": "validación estática; no equivale a ejecución de la API",
+  "commitAnalizado": "b2af8c632208cba553938d3a972f3ac1e3002353",
+  "casos": 156,
+  "rutasVerificadas": 156,
+  "scriptsCompilados": 312,
+  "verificacionesDeBloqueo": 504,
+  "metodosYRutasLaravel": 116,
+  "metodosYRutasConCasos": 96,
+  "resultado": "correcto"
+}

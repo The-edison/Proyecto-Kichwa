@@ -1,0 +1,1562 @@
+[
+  {
+    "id": "PI-01",
+    "funcionalidad": "Configuración pública",
+    "metodo": "GET",
+    "ruta": "/api/config",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "200; google.enabled booleano; no expone client_id ni client_secret.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-02",
+    "funcionalidad": "Privacidad y configuración de sesión",
+    "metodo": "GET",
+    "ruta": "/api/privacy",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "200; contacto y metadatos públicos de sesión; tipos definidos por PrivacyController.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-03",
+    "funcionalidad": "Diccionario paginado",
+    "metodo": "GET",
+    "ruta": "/api/diccionario?page=1",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "HTTP 200; JSON válido; paginación data/current_page/last_page/per_page/total; entradas id/kichwa/español.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-04",
+    "funcionalidad": "Filtro tradicional por término existente",
+    "metodo": "GET",
+    "ruta": "/api/diccionario?q={{pi_term_encoded}}",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "HTTP 200; JSON válido; paginación data/current_page/last_page/per_page/total; entradas id/kichwa/español.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-05",
+    "funcionalidad": "Búsqueda kichwa a español",
+    "metodo": "GET",
+    "ruta": "/api/diccionario/buscar?direccion=kichwa-es&q={{pi_term_encoded}}",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "HTTP 200; JSON válido; paginación data/current_page/last_page/per_page/total; entradas id/kichwa/español.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-06",
+    "funcionalidad": "Búsqueda español a kichwa",
+    "metodo": "GET",
+    "ruta": "/api/diccionario/buscar?direccion=es-kichwa&q={{pi_spanish_encoded}}",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "HTTP 200; JSON válido; paginación data/current_page/last_page/per_page/total; entradas id/kichwa/español.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-07",
+    "funcionalidad": "Búsqueda inicial limitada a cinco entradas",
+    "metodo": "GET",
+    "ruta": "/api/diccionario/buscar?direccion=kichwa-es",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "HTTP 200; JSON válido; paginación data/current_page/last_page/per_page/total; entradas id/kichwa/español.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-08",
+    "funcionalidad": "Búsqueda sin coincidencias",
+    "metodo": "GET",
+    "ruta": "/api/diccionario/buscar?direccion=kichwa-es&q=zzzzPI{{pi_run_id}}",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "HTTP 200; JSON válido; paginación data/current_page/last_page/per_page/total.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-09",
+    "funcionalidad": "Dirección inválida rechazada",
+    "metodo": "GET",
+    "ruta": "/api/diccionario/buscar?direccion=invalida&q=wasi",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "HTTP 422; JSON válido; errors para direccion.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-10",
+    "funcionalidad": "Página inválida rechazada",
+    "metodo": "GET",
+    "ruta": "/api/diccionario/buscar?direccion=kichwa-es&page=0",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "HTTP 422; JSON válido; errors para page.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-11",
+    "funcionalidad": "Consulta excesivamente larga rechazada",
+    "metodo": "GET",
+    "ruta": "/api/diccionario/buscar?direccion=kichwa-es&q=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "HTTP 422; JSON válido; errors para q.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-12",
+    "funcionalidad": "Consulta con tipo incorrecto rechazada",
+    "metodo": "GET",
+    "ruta": "/api/diccionario?q[]=wasi",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "HTTP 422; JSON válido; errors para q.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-13",
+    "funcionalidad": "Opiniones públicas: es",
+    "metodo": "GET",
+    "ruta": "/api/testimonials?language=es",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "HTTP 200; JSON válido; campos: id,name,body,language,created_at.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-14",
+    "funcionalidad": "Opiniones públicas: qu",
+    "metodo": "GET",
+    "ruta": "/api/testimonials?language=qu",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "HTTP 200; JSON válido; campos: id,name,body,language,created_at.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-15",
+    "funcionalidad": "Ruta de archivo no permitida",
+    "metodo": "GET",
+    "ruta": "/api/media/archivo-no-permitido.txt",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "HTTP 404; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-16",
+    "funcionalidad": "Nombre de avatar no permitido",
+    "metodo": "GET",
+    "ruta": "/api/avatars/no-valido.txt",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "HTTP 404; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-17",
+    "funcionalidad": "Perfil privado sin sesión",
+    "metodo": "GET",
+    "ruta": "/api/auth/me",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "401 y JSON con message; sin cookies ni bearer. No debe redirigir al formulario de acceso.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-18",
+    "funcionalidad": "Niveles de estudiante sin sesión",
+    "metodo": "GET",
+    "ruta": "/api/levels",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "401 y JSON con message; sin cookies ni bearer. No debe redirigir al formulario de acceso.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-19",
+    "funcionalidad": "Navegación privada sin sesión",
+    "metodo": "GET",
+    "ruta": "/api/learning-navigation",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "401 y JSON con message; sin cookies ni bearer. No debe redirigir al formulario de acceso.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-20",
+    "funcionalidad": "Contenidos protegidos sin sesión",
+    "metodo": "GET",
+    "ruta": "/api/units/1/contents",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "401 y JSON con message; sin cookies ni bearer. No debe redirigir al formulario de acceso.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-21",
+    "funcionalidad": "Panel de administración sin sesión",
+    "metodo": "GET",
+    "ruta": "/api/admin/overview",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "401 y JSON con message; sin cookies ni bearer. No debe redirigir al formulario de acceso.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-22",
+    "funcionalidad": "Catálogo administrativo sin sesión",
+    "metodo": "GET",
+    "ruta": "/api/admin/levels",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "401 y JSON con message; sin cookies ni bearer. No debe redirigir al formulario de acceso.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-23",
+    "funcionalidad": "Informe de dominio sin sesión",
+    "metodo": "GET",
+    "ruta": "/api/mastery",
+    "entorno": "producción: lectura",
+    "sesion": "anónima",
+    "criterio": "401 y JSON con message; sin cookies ni bearer. No debe redirigir al formulario de acceso.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-24",
+    "funcionalidad": "Perfil de estudiante",
+    "metodo": "GET",
+    "ruta": "/api/auth/me",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-25",
+    "funcionalidad": "Niveles publicados",
+    "metodo": "GET",
+    "ruta": "/api/levels",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: id,name,code,available,published; published=true.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-26",
+    "funcionalidad": "Descubrir jerarquía publicada sin inscripciones",
+    "metodo": "GET",
+    "ruta": "/api/learning-navigation",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: id,name,available,modules; id,title,units.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-27",
+    "funcionalidad": "Detalle de módulo publicado",
+    "metodo": "GET",
+    "ruta": "/api/modules/{{pi_module_id}}",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: id,level_id,title,published,final_evaluation; id,title,unlocked; published=true.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-28",
+    "funcionalidad": "Unidades publicadas del módulo",
+    "metodo": "GET",
+    "ruta": "/api/modules/{{pi_module_id}}/units?page=1",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: id,module_id,title,percentage; paginación data/current_page/last_page/per_page/total; published=true.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-29",
+    "funcionalidad": "Contenidos publicados del módulo",
+    "metodo": "GET",
+    "ruta": "/api/modules/{{pi_module_id}}/contents?page=1",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: id,unit_id,kind,title,lesson_key,unit_title; paginación data/current_page/last_page/per_page/total; published=true.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-30",
+    "funcionalidad": "Detalle de unidad publicada",
+    "metodo": "GET",
+    "ruta": "/api/units/{{pi_unit_id}}",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: id,module_id,title,config,level_id,percentage; published=true.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-31",
+    "funcionalidad": "Lección publicada con cuerpo",
+    "metodo": "GET",
+    "ruta": "/api/units/{{pi_topic_unit_id}}/topics/{{pi_topic_id}}",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: id,unit_id,title,body,kind; published=true.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-32",
+    "funcionalidad": "Ejercicios públicos sin soluciones",
+    "metodo": "GET",
+    "ruta": "/api/units/{{pi_unit_id}}/exercises?page=1",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; paginación data/current_page/last_page/per_page/total; published=true; ejercicios sin solution ni pistas privadas.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-33",
+    "funcionalidad": "Secuencia guiada sin soluciones",
+    "metodo": "GET",
+    "ruta": "/api/units/{{pi_guided_id}}/guided",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: exercises,total,completed_count; ejercicios sin solution ni pistas privadas.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-34",
+    "funcionalidad": "Secuencia de unidad configurada para sequence",
+    "metodo": "GET",
+    "ruta": "/api/units/{{pi_sequence_id}}/sequence",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: exercises,total,completed_count,unlocked; ejercicios sin solution ni pistas privadas.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-35",
+    "funcionalidad": "Evaluaciones publicadas del nivel",
+    "metodo": "GET",
+    "ruta": "/api/levels/{{pi_level_id}}/evaluations",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: id,title,type; paginación data/current_page/last_page/per_page/total; published=true.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-36",
+    "funcionalidad": "Detalle de evaluación sin respuestas",
+    "metodo": "GET",
+    "ruta": "/api/evaluations/{{pi_evaluation_id}}",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: id,title,history,questions,module_final; ejercicios sin solution ni pistas privadas.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-37",
+    "funcionalidad": "Dominio y progreso calculado sin inscripción",
+    "metodo": "GET",
+    "ruta": "/api/mastery",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: learning_report,lessons,xp,medals,mastered_topics,completed_units.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-38",
+    "funcionalidad": "Elegibilidad de opiniones",
+    "metodo": "GET",
+    "ruta": "/api/testimonials/eligibility",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: has_commented,can_comment,testimonial.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-39",
+    "funcionalidad": "Estudiante no puede consultar administración",
+    "metodo": "GET",
+    "ruta": "/api/admin/overview",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 403; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-40",
+    "funcionalidad": "Unidad inexistente",
+    "metodo": "GET",
+    "ruta": "/api/units/999999999999999999",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 404; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-41",
+    "funcionalidad": "Identificador no numérico",
+    "metodo": "GET",
+    "ruta": "/api/units/no-numerico",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 404; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-42",
+    "funcionalidad": "Página negativa de ejercicios",
+    "metodo": "GET",
+    "ruta": "/api/units/{{pi_unit_id}}/exercises?page=-1",
+    "entorno": "producción: lectura",
+    "sesion": "student",
+    "criterio": "HTTP 422; JSON válido; errors para page.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-43",
+    "funcionalidad": "Perfil de administrador",
+    "metodo": "GET",
+    "ruta": "/api/auth/me",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-44",
+    "funcionalidad": "Resumen administrativo",
+    "metodo": "GET",
+    "ruta": "/api/admin/overview",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: students,contents,exercises,diccionario.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-45",
+    "funcionalidad": "Listado administrativo de levels",
+    "metodo": "GET",
+    "ruta": "/api/admin/levels?page=1&per_page=1",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; paginación data/current_page/last_page/per_page/total.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-46",
+    "funcionalidad": "Detalle administrativo de levels",
+    "metodo": "GET",
+    "ruta": "/api/admin/levels/{{pi_admin_levels_id}}",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-47",
+    "funcionalidad": "Dependencias de levels",
+    "metodo": "GET",
+    "ruta": "/api/admin/levels/{{pi_admin_levels_id}}/dependencies",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: dependencies.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-48",
+    "funcionalidad": "Listado administrativo de modules",
+    "metodo": "GET",
+    "ruta": "/api/admin/modules?page=1&per_page=1",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; paginación data/current_page/last_page/per_page/total.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-49",
+    "funcionalidad": "Detalle administrativo de modules",
+    "metodo": "GET",
+    "ruta": "/api/admin/modules/{{pi_admin_modules_id}}",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-50",
+    "funcionalidad": "Dependencias de modules",
+    "metodo": "GET",
+    "ruta": "/api/admin/modules/{{pi_admin_modules_id}}/dependencies",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: dependencies.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-51",
+    "funcionalidad": "Listado administrativo de units",
+    "metodo": "GET",
+    "ruta": "/api/admin/units?page=1&per_page=1",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; paginación data/current_page/last_page/per_page/total.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-52",
+    "funcionalidad": "Detalle administrativo de units",
+    "metodo": "GET",
+    "ruta": "/api/admin/units/{{pi_admin_units_id}}",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-53",
+    "funcionalidad": "Dependencias de units",
+    "metodo": "GET",
+    "ruta": "/api/admin/units/{{pi_admin_units_id}}/dependencies",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: dependencies.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-54",
+    "funcionalidad": "Listado administrativo de contents",
+    "metodo": "GET",
+    "ruta": "/api/admin/contents?page=1&per_page=1",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; paginación data/current_page/last_page/per_page/total.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-55",
+    "funcionalidad": "Detalle administrativo de contents",
+    "metodo": "GET",
+    "ruta": "/api/admin/contents/{{pi_admin_contents_id}}",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-56",
+    "funcionalidad": "Dependencias de contents",
+    "metodo": "GET",
+    "ruta": "/api/admin/contents/{{pi_admin_contents_id}}/dependencies",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: dependencies.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-57",
+    "funcionalidad": "Listado administrativo de exercises",
+    "metodo": "GET",
+    "ruta": "/api/admin/exercises?page=1&per_page=1",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; paginación data/current_page/last_page/per_page/total.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-58",
+    "funcionalidad": "Detalle administrativo de exercises",
+    "metodo": "GET",
+    "ruta": "/api/admin/exercises/{{pi_admin_exercises_id}}",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-59",
+    "funcionalidad": "Dependencias de exercises",
+    "metodo": "GET",
+    "ruta": "/api/admin/exercises/{{pi_admin_exercises_id}}/dependencies",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: dependencies.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-60",
+    "funcionalidad": "Listado administrativo de evaluations",
+    "metodo": "GET",
+    "ruta": "/api/admin/evaluations?page=1&per_page=1",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; paginación data/current_page/last_page/per_page/total.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-61",
+    "funcionalidad": "Detalle administrativo de evaluations",
+    "metodo": "GET",
+    "ruta": "/api/admin/evaluations/{{pi_admin_evaluations_id}}",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-62",
+    "funcionalidad": "Dependencias de evaluations",
+    "metodo": "GET",
+    "ruta": "/api/admin/evaluations/{{pi_admin_evaluations_id}}/dependencies",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: dependencies.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-63",
+    "funcionalidad": "Listado administrativo de questions",
+    "metodo": "GET",
+    "ruta": "/api/admin/questions?page=1&per_page=1",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; paginación data/current_page/last_page/per_page/total.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-64",
+    "funcionalidad": "Detalle administrativo de questions",
+    "metodo": "GET",
+    "ruta": "/api/admin/questions/{{pi_admin_questions_id}}",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-65",
+    "funcionalidad": "Dependencias de questions",
+    "metodo": "GET",
+    "ruta": "/api/admin/questions/{{pi_admin_questions_id}}/dependencies",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: dependencies.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-66",
+    "funcionalidad": "Listado administrativo de diccionario",
+    "metodo": "GET",
+    "ruta": "/api/admin/diccionario?page=1&per_page=1",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; paginación data/current_page/last_page/per_page/total.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-67",
+    "funcionalidad": "Detalle administrativo de diccionario",
+    "metodo": "GET",
+    "ruta": "/api/admin/diccionario/{{pi_admin_diccionario_id}}",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-68",
+    "funcionalidad": "Catálogo de imágenes",
+    "metodo": "GET",
+    "ruta": "/api/admin/media?kind=imagen",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: data,current_page,last_page; path,name.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-69",
+    "funcionalidad": "Administrador no puede acceder como estudiante",
+    "metodo": "GET",
+    "ruta": "/api/levels",
+    "entorno": "producción: lectura",
+    "sesion": "admin",
+    "criterio": "HTTP 403; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-70",
+    "funcionalidad": "Inicio de sesión válido de cuenta dedicada: student",
+    "metodo": "POST",
+    "ruta": "/api/auth/login",
+    "entorno": "solo testing",
+    "sesion": "anónima",
+    "criterio": "HTTP 200; JSON válido; campos: user,token.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-71",
+    "funcionalidad": "Inicio de sesión válido de cuenta dedicada: admin",
+    "metodo": "POST",
+    "ruta": "/api/auth/login",
+    "entorno": "solo testing",
+    "sesion": "anónima",
+    "criterio": "HTTP 200; JSON válido; campos: user,token.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-72",
+    "funcionalidad": "Acceso sin datos",
+    "metodo": "POST",
+    "ruta": "/api/auth/login",
+    "entorno": "solo testing",
+    "sesion": "anónima",
+    "criterio": "HTTP 422; JSON válido; errors para identifier, password.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-73",
+    "funcionalidad": "Registro incompleto",
+    "metodo": "POST",
+    "ruta": "/api/auth/register",
+    "entorno": "solo testing",
+    "sesion": "anónima",
+    "criterio": "HTTP 422; JSON válido; errors para first_name, last_name, email, password.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-74",
+    "funcionalidad": "Recuperación sin correo",
+    "metodo": "POST",
+    "ruta": "/api/auth/forgot-password",
+    "entorno": "solo testing",
+    "sesion": "anónima",
+    "criterio": "HTTP 422; JSON válido; errors para email.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-75",
+    "funcionalidad": "Restablecimiento incompleto",
+    "metodo": "POST",
+    "ruta": "/api/auth/reset-password",
+    "entorno": "solo testing",
+    "sesion": "anónima",
+    "criterio": "HTTP 422; JSON válido; errors para email, token, password.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-76",
+    "funcionalidad": "Cambio de contraseña incompleto",
+    "metodo": "POST",
+    "ruta": "/api/auth/change-password",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 422; JSON válido; errors para current_password, password.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-77",
+    "funcionalidad": "Avatar inválido",
+    "metodo": "POST",
+    "ruta": "/api/auth/avatar",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 422; JSON válido; errors para preset.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-78",
+    "funcionalidad": "Opinión vacía",
+    "metodo": "POST",
+    "ruta": "/api/testimonials",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 422; JSON válido; errors para body.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-79",
+    "funcionalidad": "Carga sin archivo",
+    "metodo": "POST",
+    "ruta": "/api/admin/uploads",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 422; JSON válido; errors para kind, file.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-80",
+    "funcionalidad": "Importación CSV sin archivo",
+    "metodo": "POST",
+    "ruta": "/api/admin/diccionario/import",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 422; JSON válido; errors para file.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-81",
+    "funcionalidad": "Vista previa sin ejercicio",
+    "metodo": "POST",
+    "ruta": "/api/admin/preview",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 422; JSON válido; errors para exercise, answer.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-82",
+    "funcionalidad": "Escritura administrativa sin sesión",
+    "metodo": "POST",
+    "ruta": "/api/admin/levels",
+    "entorno": "solo testing",
+    "sesion": "anónima",
+    "criterio": "HTTP 401; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-83",
+    "funcionalidad": "Estudiante no puede crear niveles",
+    "metodo": "POST",
+    "ruta": "/api/admin/levels",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 403; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-84",
+    "funcionalidad": "Validación de creación: levels",
+    "metodo": "POST",
+    "ruta": "/api/admin/levels",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 422; JSON válido; campos: errors.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-85",
+    "funcionalidad": "Validación de creación: modules",
+    "metodo": "POST",
+    "ruta": "/api/admin/modules",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 422; JSON válido; campos: errors.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-86",
+    "funcionalidad": "Validación de creación: units",
+    "metodo": "POST",
+    "ruta": "/api/admin/units",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 422; JSON válido; campos: errors.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-87",
+    "funcionalidad": "Validación de creación: contents",
+    "metodo": "POST",
+    "ruta": "/api/admin/contents",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 422; JSON válido; campos: errors.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-88",
+    "funcionalidad": "Validación de creación: exercises",
+    "metodo": "POST",
+    "ruta": "/api/admin/exercises",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 422; JSON válido; campos: errors.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-89",
+    "funcionalidad": "Validación de creación: evaluations",
+    "metodo": "POST",
+    "ruta": "/api/admin/evaluations",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 422; JSON válido; campos: errors.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-90",
+    "funcionalidad": "Validación de creación: questions",
+    "metodo": "POST",
+    "ruta": "/api/admin/questions",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 422; JSON válido; campos: errors.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-91",
+    "funcionalidad": "Validación de creación: diccionario",
+    "metodo": "POST",
+    "ruta": "/api/admin/diccionario",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 422; JSON válido; campos: errors.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-92",
+    "funcionalidad": "Crear fixture de levels",
+    "metodo": "POST",
+    "ruta": "/api/admin/levels",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 201; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-93",
+    "funcionalidad": "Leer fixture de levels",
+    "metodo": "GET",
+    "ruta": "/api/admin/levels/{{pi_fixture_levels}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-94",
+    "funcionalidad": "Actualizar fixture de levels",
+    "metodo": "PATCH",
+    "ruta": "/api/admin/levels/{{pi_fixture_levels}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-95",
+    "funcionalidad": "Crear fixture de modules",
+    "metodo": "POST",
+    "ruta": "/api/admin/modules",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 201; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-96",
+    "funcionalidad": "Leer fixture de modules",
+    "metodo": "GET",
+    "ruta": "/api/admin/modules/{{pi_fixture_modules}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-97",
+    "funcionalidad": "Actualizar fixture de modules",
+    "metodo": "PATCH",
+    "ruta": "/api/admin/modules/{{pi_fixture_modules}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-98",
+    "funcionalidad": "Mover hacia arriba fixture de modules",
+    "metodo": "PATCH",
+    "ruta": "/api/admin/modules/{{pi_fixture_modules}}/move",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: data.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-99",
+    "funcionalidad": "Crear fixture de units",
+    "metodo": "POST",
+    "ruta": "/api/admin/units",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 201; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-100",
+    "funcionalidad": "Leer fixture de units",
+    "metodo": "GET",
+    "ruta": "/api/admin/units/{{pi_fixture_units}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-101",
+    "funcionalidad": "Actualizar fixture de units",
+    "metodo": "PATCH",
+    "ruta": "/api/admin/units/{{pi_fixture_units}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-102",
+    "funcionalidad": "Mover hacia arriba fixture de units",
+    "metodo": "PATCH",
+    "ruta": "/api/admin/units/{{pi_fixture_units}}/move",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: data.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-103",
+    "funcionalidad": "Crear fixture de contents",
+    "metodo": "POST",
+    "ruta": "/api/admin/contents",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 201; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-104",
+    "funcionalidad": "Leer fixture de contents",
+    "metodo": "GET",
+    "ruta": "/api/admin/contents/{{pi_fixture_contents}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-105",
+    "funcionalidad": "Actualizar fixture de contents",
+    "metodo": "PATCH",
+    "ruta": "/api/admin/contents/{{pi_fixture_contents}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-106",
+    "funcionalidad": "Mover hacia arriba fixture de contents",
+    "metodo": "PATCH",
+    "ruta": "/api/admin/contents/{{pi_fixture_contents}}/move",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: data.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-107",
+    "funcionalidad": "Crear fixture de exercises",
+    "metodo": "POST",
+    "ruta": "/api/admin/exercises",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 201; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-108",
+    "funcionalidad": "Leer fixture de exercises",
+    "metodo": "GET",
+    "ruta": "/api/admin/exercises/{{pi_fixture_exercises}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-109",
+    "funcionalidad": "Actualizar fixture de exercises",
+    "metodo": "PATCH",
+    "ruta": "/api/admin/exercises/{{pi_fixture_exercises}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-110",
+    "funcionalidad": "Mover hacia arriba fixture de exercises",
+    "metodo": "PATCH",
+    "ruta": "/api/admin/exercises/{{pi_fixture_exercises}}/move",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: data.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-111",
+    "funcionalidad": "Crear fixture de evaluations",
+    "metodo": "POST",
+    "ruta": "/api/admin/evaluations",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 201; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-112",
+    "funcionalidad": "Leer fixture de evaluations",
+    "metodo": "GET",
+    "ruta": "/api/admin/evaluations/{{pi_fixture_evaluations}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-113",
+    "funcionalidad": "Actualizar fixture de evaluations",
+    "metodo": "PATCH",
+    "ruta": "/api/admin/evaluations/{{pi_fixture_evaluations}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-114",
+    "funcionalidad": "Crear fixture de questions",
+    "metodo": "POST",
+    "ruta": "/api/admin/questions",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 201; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-115",
+    "funcionalidad": "Leer fixture de questions",
+    "metodo": "GET",
+    "ruta": "/api/admin/questions/{{pi_fixture_questions}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-116",
+    "funcionalidad": "Actualizar fixture de questions",
+    "metodo": "PATCH",
+    "ruta": "/api/admin/questions/{{pi_fixture_questions}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-117",
+    "funcionalidad": "Mover hacia arriba fixture de questions",
+    "metodo": "PATCH",
+    "ruta": "/api/admin/questions/{{pi_fixture_questions}}/move",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: data.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-118",
+    "funcionalidad": "Rechazar eliminación de nivel con dependencias",
+    "metodo": "DELETE",
+    "ruta": "/api/admin/levels/{{pi_fixture_levels}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 409; JSON válido; campos: dependencies.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-119",
+    "funcionalidad": "Rechazar contenido de otro padre",
+    "metodo": "GET",
+    "ruta": "/api/units/{{pi_fixture_units}}/topics/{{pi_topic_id}}",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 404; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-120",
+    "funcionalidad": "Inscripción implícita al consultar módulos",
+    "metodo": "GET",
+    "ruta": "/api/levels/{{pi_fixture_levels}}/modules",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; paginación data/current_page/last_page/per_page/total.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-121",
+    "funcionalidad": "Progreso implícito al consultar temas",
+    "metodo": "GET",
+    "ruta": "/api/units/{{pi_fixture_units}}/contents",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; paginación data/current_page/last_page/per_page/total.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-122",
+    "funcionalidad": "Progreso global (puede crear matrículas)",
+    "metodo": "GET",
+    "ruta": "/api/progress",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: level,completed_activities,total_activities,percentage,evaluation_results.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-123",
+    "funcionalidad": "Progreso del nivel (puede crear matrícula)",
+    "metodo": "GET",
+    "ruta": "/api/progress/levels/{{pi_fixture_levels}}",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: level,percentage,evaluation_results.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-124",
+    "funcionalidad": "Resultado guiado incompleto rechazado",
+    "metodo": "POST",
+    "ruta": "/api/units/{{pi_fixture_units}}/guided/result",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 422; JSON válido; errors para response_ids.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-125",
+    "funcionalidad": "Respuesta incorrecta controlada",
+    "metodo": "POST",
+    "ruta": "/api/exercises/{{pi_fixture_exercises}}/answer",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: response_id,is_correct,feedback.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-126",
+    "funcionalidad": "Respuesta correcta controlada",
+    "metodo": "POST",
+    "ruta": "/api/exercises/{{pi_fixture_exercises}}/answer",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: response_id,is_correct,xp_earned,xp_total.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-127",
+    "funcionalidad": "Reenvío idempotente de respuesta",
+    "metodo": "POST",
+    "ruta": "/api/exercises/{{pi_fixture_exercises}}/answer",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-128",
+    "funcionalidad": "Reenvío con contenido distinto rechazado",
+    "metodo": "POST",
+    "ruta": "/api/exercises/{{pi_fixture_exercises}}/answer",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 409; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-129",
+    "funcionalidad": "Resultado final de unidad guiada",
+    "metodo": "POST",
+    "ruta": "/api/units/{{pi_fixture_units}}/guided/result",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: score,max_score,correct_count,total_items,next_unit_id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-130",
+    "funcionalidad": "Publicar evaluación completa",
+    "metodo": "PATCH",
+    "ruta": "/api/admin/evaluations/{{pi_fixture_evaluations}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; published=true.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-131",
+    "funcionalidad": "Vista previa administrativa de evaluación",
+    "metodo": "GET",
+    "ruta": "/api/admin/evaluations/{{pi_fixture_evaluations}}/preview",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: questions; ejercicios sin solution ni pistas privadas.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-132",
+    "funcionalidad": "Corregir vista previa sin crear intento",
+    "metodo": "POST",
+    "ruta": "/api/admin/evaluations/{{pi_fixture_evaluations}}/preview",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: score,results.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-133",
+    "funcionalidad": "Iniciar intento aislado",
+    "metodo": "POST",
+    "ruta": "/api/evaluations/{{pi_fixture_evaluations}}/attempts",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: attempt_id,state,questions,answers,result; ejercicios sin solution ni pistas privadas.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-134",
+    "funcionalidad": "Reanudar intento propio",
+    "metodo": "GET",
+    "ruta": "/api/attempts/{{pi_attempt_id}}",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: attempt_id,state,questions,answers.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-135",
+    "funcionalidad": "Guardar borrador del intento",
+    "metodo": "PATCH",
+    "ruta": "/api/attempts/{{pi_attempt_id}}",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-136",
+    "funcionalidad": "Pareja de tipo no compatible rechazada",
+    "metodo": "POST",
+    "ruta": "/api/attempts/{{pi_attempt_id}}/pair",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 422; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-137",
+    "funcionalidad": "Finalizar evaluación controlada",
+    "metodo": "POST",
+    "ruta": "/api/evaluations/{{pi_fixture_evaluations}}/submit",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido; campos: score,correct_count,total_questions,results.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-138",
+    "funcionalidad": "Otro estudiante no accede al intento",
+    "metodo": "GET",
+    "ruta": "/api/attempts/{{pi_attempt_id}}",
+    "entorno": "solo testing",
+    "sesion": "other_student",
+    "criterio": "HTTP 404; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-139",
+    "funcionalidad": "Intento finalizado no admite borrador",
+    "metodo": "PATCH",
+    "ruta": "/api/attempts/{{pi_attempt_id}}",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 409; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-140",
+    "funcionalidad": "Nueva versión de ejercicio con historial",
+    "metodo": "POST",
+    "ruta": "/api/admin/exercises/{{pi_fixture_exercises}}/version",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 201; JSON válido; campos: id,published.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-141",
+    "funcionalidad": "Eliminar versión sin respuestas",
+    "metodo": "DELETE",
+    "ruta": "/api/admin/exercises/{{pi_disposable_version}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 204; cuerpo vacío.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-142",
+    "funcionalidad": "Ejercicio con historial no puede borrarse",
+    "metodo": "DELETE",
+    "ruta": "/api/admin/exercises/{{pi_fixture_exercises}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 409; JSON válido; campos: dependencies.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-143",
+    "funcionalidad": "Iniciar segundo intento para abandonarlo",
+    "metodo": "POST",
+    "ruta": "/api/evaluations/{{pi_fixture_evaluations}}/attempts",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 200; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-144",
+    "funcionalidad": "Abandonar intento propio",
+    "metodo": "DELETE",
+    "ruta": "/api/attempts/{{pi_abandon_id}}",
+    "entorno": "solo testing",
+    "sesion": "student",
+    "criterio": "HTTP 204; cuerpo vacío.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-145",
+    "funcionalidad": "Revisar banco con historial rechazado",
+    "metodo": "POST",
+    "ruta": "/api/admin/evaluations/{{pi_fixture_evaluations}}/review-bank",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 409; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-146",
+    "funcionalidad": "Sincronización de evaluación no final rechazada",
+    "metodo": "POST",
+    "ruta": "/api/admin/evaluations/{{pi_fixture_evaluations}}/synchronize-bank",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 422; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-147",
+    "funcionalidad": "Vista previa de selección correcta",
+    "metodo": "POST",
+    "ruta": "/api/admin/preview",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: is_correct,feedback.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-148",
+    "funcionalidad": "Vista previa de selección incorrecta",
+    "metodo": "POST",
+    "ruta": "/api/admin/preview",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-149",
+    "funcionalidad": "Ocultar fixture de evaluations al finalizar",
+    "metodo": "PATCH",
+    "ruta": "/api/admin/evaluations/{{pi_fixture_evaluations}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-150",
+    "funcionalidad": "Ocultar fixture de units al finalizar",
+    "metodo": "PATCH",
+    "ruta": "/api/admin/units/{{pi_fixture_units}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-151",
+    "funcionalidad": "Ocultar fixture de modules al finalizar",
+    "metodo": "PATCH",
+    "ruta": "/api/admin/modules/{{pi_fixture_modules}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-152",
+    "funcionalidad": "Ocultar fixture de levels al finalizar",
+    "metodo": "PATCH",
+    "ruta": "/api/admin/levels/{{pi_fixture_levels}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-153",
+    "funcionalidad": "Crear nivel desechable",
+    "metodo": "POST",
+    "ruta": "/api/admin/levels",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 201; JSON válido; campos: id.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-154",
+    "funcionalidad": "Dependencias vacías del nivel desechable",
+    "metodo": "GET",
+    "ruta": "/api/admin/levels/{{pi_delete_level}}/dependencies",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 200; JSON válido; campos: dependencies.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-155",
+    "funcionalidad": "Eliminar exclusivamente el nivel recién creado",
+    "metodo": "DELETE",
+    "ruta": "/api/admin/levels/{{pi_delete_level}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 204; cuerpo vacío.",
+    "fuente": "backend/routes/api.php"
+  },
+  {
+    "id": "PI-156",
+    "funcionalidad": "Confirmar eliminación del nivel desechable",
+    "metodo": "GET",
+    "ruta": "/api/admin/levels/{{pi_delete_level}}",
+    "entorno": "solo testing",
+    "sesion": "admin",
+    "criterio": "HTTP 404; JSON válido.",
+    "fuente": "backend/routes/api.php"
+  }
+]
