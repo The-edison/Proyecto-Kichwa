@@ -63,9 +63,17 @@ servidor de producción.
 
 ## Aplicación manual en Dokploy: elegir UNA alternativa
 
-No se dispone del Dockerfile/configuración real del servidor. Los artefactos no
-se activan por copiarlos a `dist`: requieren integración explícita y autorizada.
-No aplicar ambos ni sustituir la configuración completa por los ejemplos.
+El registro de Dokploy confirmó que el servicio es Docker Compose y busca
+`./compose.production.yml`. El historial anterior a `4b37c34` contiene el
+Dockerfile y la configuración Apache usados por ese despliegue; fueron recuperados
+tras el error `Compose file not found`. El contenedor sirve React y Laravel con
+Apache/PHP 8.4, servicio `app`, puerto 80. El ejemplo Nginx no es su configuración.
+
+Los artefactos CSP no se activan por copiarlos a `dist`: requieren integración
+explícita. No aplicar ambos ni sustituir la configuración completa por ejemplos.
+El fragmento Nginx no debe incluirse en Apache. Para una integración posterior en
+Apache se debe generar la directiva equivalente desde el HTML de esa compilación;
+la recuperación del despliegue no activa CSP ni modifica sus cabeceras anteriores.
 
 ### Servidor Nginx exclusivo de la aplicación
 
@@ -88,8 +96,10 @@ No aplicar ambos ni sustituir la configuración completa por los ejemplos.
 
 ### Middleware exclusivo en Traefik
 
-1. Utilizar el YAML generado en la configuración dinámica de **Yachay**, si las
-   opciones y permisos de la instalación permiten hacerlo.
+1. El YAML generado corresponde al proveedor de archivos de Traefik. El servicio
+   real es Compose, cuyos dominios Dokploy gestiona mediante etiquetas Docker:
+   no pegarlo como reemplazo del Compose. Antes de usar esta alternativa identificar
+   las etiquetas efectivas de Yachay y la disponibilidad del proveedor de archivos.
 2. Añadir `yachay-csp-report-only@file` a la lista de middlewares del router HTTPS
    existente de `yachay-kichwa.devs-ueb.tech`. Conservar todos los demás middlewares.
 3. No crear routers, cambiar reglas/servicios, reemplazar archivos compartidos ni
@@ -134,6 +144,26 @@ Anti-Clickjacking, `nosniff` y HSTS. No se ha confirmado una cookie de sesión
 insegura, un CORS inseguro ni exposición de una versión concreta del servidor.
 No se alteran esas configuraciones sin evidencia. Los timestamps requieren
 identificar el dato y su sensibilidad; no se eliminan fechas legítimas del API.
+
+## Recuperación del error `Compose file not found`
+
+Se recuperaron del historial `compose.production.yml`, `Dockerfile`, `.dockerignore`
+y `deployment/apache.conf`, `public.htaccess`, `php-production.ini`, `entrypoint.sh`.
+Se mantienen los servicios `app`/`db` y volúmenes `postgres_data`, `media` y
+`app_private`. El único cambio al Dockerfile histórico retira la copia del paquete
+antiguo `initial-content.enc`, que ya no existe y no es necesario para actualizar
+una instalación con base de datos persistente. No se restauran importadores ni datos.
+
+En el mismo servicio Compose de Dokploy `puninaaucatoma-yachaykichwa-htageu`,
+conservar `./compose.production.yml`, los dominios actuales, variables y volúmenes.
+Después de actualizar el repositorio se puede reintentar el despliegue autorizado.
+No crear otro servicio/proyecto, regenerar APP_KEY o credenciales, ni eliminar
+volúmenes. El arranque recuperado ejecuta migraciones incrementales y cachés;
+no importa datos ni ejecuta seeders.
+
+Compose validado localmente con valores ficticios solo en el proceso de validación,
+sin escribir archivos de entorno; sintaxis shell del entrypoint aprobada. No se
+construyó la imagen completa porque Docker Engine no está iniciado localmente.
 
 ## Resultados de esta entrega
 
