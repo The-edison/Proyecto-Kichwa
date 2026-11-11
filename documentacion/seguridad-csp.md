@@ -158,8 +158,15 @@ En el mismo servicio Compose de Dokploy `puninaaucatoma-yachaykichwa-htageu`,
 conservar `./compose.production.yml`, los dominios actuales, variables y volúmenes.
 Después de actualizar el repositorio se puede reintentar el despliegue autorizado.
 No crear otro servicio/proyecto, regenerar APP_KEY o credenciales, ni eliminar
-volúmenes. El arranque recuperado ejecuta migraciones incrementales y cachés;
-no importa datos ni ejecuta seeders.
+volúmenes. El arranque ejecuta migraciones incrementales, sincroniza únicamente
+`IntermedioModuloDosEjerciciosSeeder` y prepara cachés. Esta carga dirigida incorpora
+las cuatro unidades y 46 ejercicios guiados del módulo 2 de Intermedio; no ejecuta
+`DatabaseSeeder`, ni importa la base local ni restablece cuentas. El seeder conserva
+las lecciones existentes y los identificadores de ejercicios, y actualiza el catálogo.
+Una prueba repite el comando tras responder los 46 ejercicios y comprueba que
+respuestas, recompensas y cuenta se conservan. Al terminar el arranque se devuelve
+la propiedad de los archivos de caché a `www-data`, para que Apache pueda invalidar
+y actualizar el catálogo creado por el seeder.
 
 Compose validado localmente con valores ficticios solo en el proceso de validación,
 sin escribir archivos de entorno; sintaxis shell del entrypoint aprobada. No se

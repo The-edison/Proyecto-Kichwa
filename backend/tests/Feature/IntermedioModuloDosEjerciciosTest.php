@@ -3,10 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\Actividad;
+use App\Models\RespuestaActividad;
 use App\Models\Tema;
 use App\Models\Unidad;
 use App\Models\Usuario;
 use Database\Seeders\IntermedioModuloDosEjerciciosSeeder;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 use Tests\UsesPostgreSQL;
@@ -51,5 +53,35 @@ class IntermedioModuloDosEjerciciosTest extends TestCase
             $this->assertTrue($unit->configuracion['custom_setting']);
         }
         $this->assertSame(46, Actividad::whereIn('id_unidad', $units)->where('publicado', true)->count());
+    }
+
+    public function test_production_seed_command_preserves_all_answered_exercises_rewards_and_accounts_on_restart(): void
+    {
+        $this->artisan('db:seed', ['--class' => IntermedioModuloDosEjerciciosSeeder::class, '--force' => true, '--no-interaction' => true])->assertExitCode(0);
+        $student = Usuario::factory()->create();
+        Sanctum::actingAs($student);
+        $units = Unidad::whereIn('configuracion->guided_lesson', ['advanced-morphemes', 'time-morphemes', 'verbal-analysis', 'short-dialogues'])->pluck('id_unidad');
+        $exercises = Actividad::whereIn('id_unidad', $units)->where('publicado', true)->orderBy('id_actividad')->get();
+        $this->assertCount(46, $exercises);
+        foreach ($exercises as $exercise) {
+            $answer = $exercise->solucion_actividad;
+            if ($exercise->tipo_actividad === 'completar') {
+                $answer['textos'] = array_map(fn (array $variants): string => $variants[0], $answer['textos']);
+            }
+            $this->postJson('/api/exercises/'.$exercise->id_actividad.'/answer', ['answer' => $answer])
+                ->assertOk()->assertJsonPath('is_correct', true);
+        }
+        $answers = RespuestaActividad::where('id_usuario', $student->id_usuario)->orderBy('id_respuesta_actividad')->get()->toArray();
+        $rewards = DB::table('recompensas')->where('id_usuario', $student->id_usuario)->orderBy('clave')->get()->toJson();
+        $account = $student->fresh()->getAttributes();
+
+        $this->artisan('db:seed', ['--class' => IntermedioModuloDosEjerciciosSeeder::class, '--force' => true, '--no-interaction' => true])->assertExitCode(0);
+        $this->artisan('db:seed', ['--class' => IntermedioModuloDosEjerciciosSeeder::class, '--force' => true, '--no-interaction' => true])->assertExitCode(0);
+
+        $this->assertSame($exercises->modelKeys(), Actividad::whereIn('id_unidad', $units)->where('publicado', true)->orderBy('id_actividad')->pluck('id_actividad')->all());
+        $this->assertSame($answers, RespuestaActividad::where('id_usuario', $student->id_usuario)->orderBy('id_respuesta_actividad')->get()->toArray());
+        $this->assertSame($rewards, DB::table('recompensas')->where('id_usuario', $student->id_usuario)->orderBy('clave')->get()->toJson());
+        $this->assertSame($account, $student->fresh()->getAttributes());
+        $this->assertDatabaseCount('usuarios', 1);
     }
 }
