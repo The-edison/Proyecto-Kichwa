@@ -10,6 +10,13 @@ use Illuminate\Validation\ValidationException;
 
 class EstadoContenido
 {
+    public static function previewAvailable(EvaluacionKichwa $evaluation): bool
+    {
+        return app()->environment(['local', 'testing'])
+            && (bool) config('kichwa.evaluation_preview', false)
+            && $evaluation->publicado;
+    }
+
     public static function sources(EvaluacionKichwa $final): Collection
     {
         return EvaluacionKichwa::where('id_unidad', $final->id_unidad)->where('publicado', true)->where('id_tema', '<>', $final->id_tema)

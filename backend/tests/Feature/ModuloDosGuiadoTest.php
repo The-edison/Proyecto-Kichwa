@@ -9,6 +9,7 @@ use App\Models\Unidad;
 use App\Models\Usuario;
 use Database\Seeders\UnidadDosGuiadaSeeder;
 use Database\Seeders\UnidadesTematicasGuiadasSeeder;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -37,12 +38,32 @@ class ModuloDosGuiadoTest extends TestCase
         $activityIds = [];
         foreach ($units as $index => $unit) {
             $mode = ['animals-colors', 'body', 'nature', 'verbs'][$index];
-            $count = [15, 6, 3, 4][$index];
+            $count = [15, 6, 10, 10][$index];
             $this->getJson('/api/units/'.$unit->id_unidad)->assertOk()->assertJsonPath('title', $titles[$index])
                 ->assertJsonPath('module_id', $module->id_modulo)->assertJsonPath('sort_order', $index + 1)
                 ->assertJsonPath('config.learning_mode', 'guided')->assertJsonPath('config.guided_lesson', $mode);
             $this->getJson('/api/units/'.$unit->id_unidad.'/contents')->assertOk()->assertJsonPath('total', 1)->assertJsonPath('data.0.title', $titles[$index]);
             $exercises = $this->getJson('/api/units/'.$unit->id_unidad.'/guided')->assertOk()->assertJsonPath('total', $count)->json('exercises');
+            if ($index >= 2) {
+                $this->assertCount(10, array_unique(array_column(array_column($exercises, 'config'), 'visual_word')));
+                $this->assertSame(['seleccion_multiple', 'completar'], array_values(array_unique(array_column($exercises, 'type'))));
+                $this->assertCount(10, array_unique(array_column(array_column($exercises, 'config'), 'prompt_image')));
+                foreach ($exercises as $visualExercise) {
+                    $this->assertTrue(Storage::disk('public')->exists($visualExercise['config']['prompt_image']));
+                    $this->assertNotEmpty($visualExercise['config']['prompt_image_alt']);
+                }
+            }
+            if ($index === 3) {
+                $this->assertNotContains('La raíz de purina', array_column(array_column($exercises, 'config'), 'title'));
+                $this->assertNotContains('La raíz de tarpuna', array_column(array_column($exercises, 'config'), 'title'));
+                $fillExercises = array_values(array_filter($exercises, fn (array $exercise): bool => $exercise['config']['verb_fill'] ?? false));
+                $this->assertCount(4, $fillExercises);
+                $this->assertCount(4, array_unique(array_column(array_column($fillExercises, 'config'), 'prompt_image')));
+                foreach ($fillExercises as $fillExercise) {
+                    $this->assertCount(6, $fillExercise['elements'][0]['opciones']);
+                    $this->assertTrue(Storage::disk('public')->exists($fillExercise['config']['prompt_image']));
+                }
+            }
             $session = (string) Str::uuid();
             $responses = [];
             foreach ($exercises as $exercise) {
@@ -65,7 +86,7 @@ class ModuloDosGuiadoTest extends TestCase
 
         $this->assertSame($activityIds, Actividad::whereIn('id_unidad', $units->pluck('id_unidad'))->where('publicado', true)->orderBy('id_unidad')->orderBy('orden_actividad')->pluck('id_actividad')->all());
         foreach ($units as $index => $unit) {
-            $this->getJson('/api/units/'.$unit->id_unidad.'/guided')->assertOk()->assertJsonPath('completed_count', [15, 6, 3, 4][$index]);
+            $this->getJson('/api/units/'.$unit->id_unidad.'/guided')->assertOk()->assertJsonPath('completed_count', [15, 6, 10, 10][$index]);
         }
         Sanctum::actingAs(Usuario::factory()->administrador()->create());
         foreach ($units as $unit) {

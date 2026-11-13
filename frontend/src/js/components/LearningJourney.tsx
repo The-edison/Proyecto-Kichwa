@@ -24,6 +24,7 @@ export function LearningJourney({ report, admin = false }: { report: LearningRep
                 {module.final_evaluation.best_score !== null ? <p>Mejor nota: <strong>{module.final_evaluation.best_score}%</strong> · Última nota: {module.final_evaluation.latest_score ?? '—'}% · {module.final_evaluation.attempt_count} {module.final_evaluation.attempt_count === 1 ? 'intento finalizado' : 'intentos finalizados'}.</p> : <p>Sin intentos finalizados. Se aprueba con {module.final_evaluation.pass_percentage}%.</p>}
                 {!module.final_evaluation.unlocked && <p><LockKeyhole size={14} aria-hidden="true" /> Se habilita al completar correctamente todas las actividades del módulo.</p>}
                 {!admin && module.final_evaluation.unlocked && <Link className="text-link" href={'/aprender/evaluacion/' + module.final_evaluation.id}>{module.final_evaluation.passed ? 'Ver prueba' : module.final_evaluation.in_progress ? 'Retomar prueba' : 'Abrir prueba'}<ArrowRight size={16} aria-hidden="true" /></Link>}
+                {!admin && module.final_evaluation.preview_available && <Link className="text-link" href={'/aprender/evaluacion/' + module.final_evaluation.id + '?preview=1'}>Ver contenido<ArrowRight size={16} aria-hidden="true" /></Link>}
             </div></div>}
         </article>)}
     </section>)}</div>;

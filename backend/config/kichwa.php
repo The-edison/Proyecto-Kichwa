@@ -6,6 +6,7 @@ return [
     'admin_password' => env('KICHWA_ADMIN_PASSWORD'),
     'check_dns' => env('KICHWA_CHECK_EMAIL_DNS', true),
     'check_breached_passwords' => env('KICHWA_CHECK_BREACHED_PASSWORDS', true),
+    'evaluation_preview' => env('KICHWA_EVALUATION_PREVIEW', false),
     'privacy' => [
         'email' => env('YACHAY_PRIVACY_EMAIL', 'kichwa.soporte@gmail.com'),
         'responsible_name' => env('YACHAY_PRIVACY_RESPONSIBLE'),

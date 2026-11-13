@@ -53,6 +53,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function (): void {
         Route::get('/units/{unit}/exercises', [KichwaCatalogController::class, 'exercises']);
         Route::get('/levels/{level}/evaluations', [KichwaCatalogController::class, 'evaluations']);
         Route::get('/evaluations/{evaluation}', [KichwaCatalogController::class, 'evaluation']);
+        Route::get('/evaluations/{evaluation}/preview-questions', [KichwaCatalogController::class, 'previewQuestions']);
         Route::post('/exercises/{exercise}/answer', [KichwaSubmissionController::class, 'activity'])->middleware('throttle:60,1,practice');
         Route::post('/evaluations/{evaluation}/attempts', [KichwaSubmissionController::class, 'start'])->middleware('throttle:10,1,evaluation-start');
         Route::post('/evaluations/{evaluation}/submit', [KichwaSubmissionController::class, 'submit'])->middleware('throttle:10,1,evaluation-submit');

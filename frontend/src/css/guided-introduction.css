@@ -86,6 +86,7 @@
 
 /* A quiet, open heading keeps the lesson content in focus. */
 .lesson-overview { display: grid; grid-template-columns: minmax(0, 1fr) 132px; align-items: center; gap: 40px; padding: 8px 0 26px; border-bottom: 1px solid var(--lesson-border); }
+.lesson-overview.lesson-overview-without-guide { grid-template-columns: minmax(0, 1fr); }
 .lesson-overview-copy .lesson-overview-meta { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; color: var(--color-text-secondary); font-size: 10px; font-weight: 600; letter-spacing: .12em; }
 .lesson-overview-meta > span:first-child { color: var(--lesson-accent); }
 .lesson-overview-meta > span:nth-child(2) { opacity: .5; }

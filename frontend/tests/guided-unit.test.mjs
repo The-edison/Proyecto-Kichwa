@@ -23,6 +23,7 @@ async function screen({ completed = false, post, exercises = [choice, matching],
         MorphemePractice: { MorphemePractice: 'MorphemePractice', MorphemeListeningPanel: 'MorphemeListeningPanel' },
         MatchingLines: { MatchingLines: 'MatchingLines' },
         AdvancedMorphemesIntroduction: { AdvancedMorphemesIntroduction: 'AdvancedMorphemesIntroduction' },
+        IntermedioModuloUnoIntroduction: { IntermedioModuloUnoIntroduction: 'IntermedioModuloUnoIntroduction', intermedioModuloUnoPageCount: () => 4 },
         TimeMorphemesIntroduction: { TimeMorphemesIntroduction: 'TimeMorphemesIntroduction' },
         VerbalAnalysisIntroduction: { VerbalAnalysisIntroduction: 'VerbalAnalysisIntroduction' },
         ShortDialoguesIntroduction: { ShortDialoguesIntroduction: 'ShortDialoguesIntroduction' },
@@ -45,6 +46,8 @@ async function screen({ completed = false, post, exercises = [choice, matching],
         GuidedIntroduction: { GuidedIntroduction: 'GuidedIntroduction' },
         GreetingsIntroduction: { GreetingsIntroduction: 'GreetingsIntroduction' },
         TopicIntroduction: { TopicIntroduction: 'TopicIntroduction' },
+        TopicVisual: { TopicExerciseVisual: 'TopicExerciseVisual' },
+        VerbFillPractice: { VerbFillPractice: 'VerbFillPractice' },
         MissingVowelExercise: { MissingVowelExercise: 'MissingVowelExercise' },
         AudioMatchingExercise: { AudioMatchingExercise: 'AudioMatchingExercise' },
         ListeningGreetingsExercise: { ListeningGreetingsExercise: 'ListeningGreetingsExercise' },
@@ -93,6 +96,19 @@ async function check(view) { click(view, 'Comprobar'); await new Promise(resolve
 async function finish(view) { click(view, 'Ver mi puntaje'); await new Promise(resolve => setImmediate(resolve)); }
 function pair(view, spanish, kichwa) { click(view, spanish); click(view, kichwa); }
 
+test('unanswered exercises cannot be skipped', async () => {
+    const storage = new Map();
+    const view = await screen({ storage });
+    click(view, 'Continuar');
+    assert.equal(button(view, 'Siguiente sin responder'), undefined);
+    assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Ejercicio 1 de 2'));
+    assert.equal(view.requests.length, 0);
+    assert.ok(content(view.render()).includes('0 XP en este intento'));
+    view.remount();
+    assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Ejercicio 1 de 2'));
+    assert.ok(button(view, 'Comprobar'));
+});
+
 test('intermediate lesson opens without exercises, teaches four parts and finishes at its module without inventing progress', async () => {
     const view = await screen({ exercises: [], config: { guided_lesson: 'advanced-morphemes' } });
     const lesson = () => nodes(view.render()).find(node => node.type === 'AdvancedMorphemesIntroduction');
@@ -115,6 +131,47 @@ test('the intermediate lesson can lead to future practice after its four explana
     click(view, 'Continuar');
     assert.ok(button(view, 'Comprobar'));
     assert.equal(nodes(view.render()).some(node => node.type === 'AdvancedMorphemesIntroduction'), false);
+});
+
+test('rirkani and rikurka share one panel and each answer is checked separately', async () => {
+    const exercises = [
+        { id: 91, prompt: '¿Qué significa «rirkani»?', image: 'kichwa/imagenes/intermediom1rirkani.png' },
+        { id: 92, prompt: '¿Qué significa «rikurka»?', image: 'kichwa/imagenes/intermediom1ejercicio11.png' },
+    ].map(item => ({ id: item.id, type: 'seleccion_multiple', prompt: item.prompt,
+        elements: [{ id: 'o0', texto: 'fui' }, { id: 'o1', texto: 'vio' }, { id: 'o2', texto: 'iré' }], zones: [],
+        config: { title: 'Interpreta la expresión', prompt_image: item.image, max_selections: 1 } }));
+    const view = await screen({ exercises, config: { guided_lesson: 'intermediate-module-one' } });
+    nodes(view.render()).find(node => node.type === 'IntermedioModuloUnoIntroduction').props.onSelectPage(3);
+    click(view, 'Continuar');
+    assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Interpreta dos expresiones'));
+    assert.ok(content(view.render()).includes('¿Qué significa «rirkani»?'));
+    assert.ok(content(view.render()).includes('¿Qué significa «rikurka»?'));
+    assert.equal(button(view, 'Comprobar').props.disabled, true);
+    choose(view, 'o0', 91);
+    assert.equal(button(view, 'Comprobar').props.disabled, true);
+    choose(view, 'o1', 92);
+    await check(view);
+    assert.deepEqual(view.requests.map(item => item.path), ['/exercises/91/answer', '/exercises/92/answer']);
+    assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Ejercicios 1 y 2 de 2'));
+});
+
+test('past and future expressions share one illustrated panel', async () => {
+    const exercises = [
+        { id: 93, prompt: '¿Qué significa «yallishka pacha»?', image: 'kichwa/imagenes/intermediom1ejercicio09.png' },
+        { id: 94, prompt: '¿Qué significa «shamuk pacha»?', image: 'kichwa/imagenes/intermediom1ejercicio10.png' },
+    ].map(item => ({ id: item.id, type: 'seleccion_multiple', prompt: item.prompt,
+        elements: [{ id: 'o0', texto: 'tiempo pasado' }, { id: 'o1', texto: 'tiempo futuro' }, { id: 'o2', texto: 'hoy' }], zones: [],
+        config: { title: 'Interpreta la expresión', prompt_image: item.image, max_selections: 1 } }));
+    const view = await screen({ exercises, config: { guided_lesson: 'intermediate-module-one' } });
+    nodes(view.render()).find(node => node.type === 'IntermedioModuloUnoIntroduction').props.onSelectPage(3);
+    click(view, 'Continuar');
+    assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Interpreta dos expresiones'));
+    assert.ok(content(view.render()).includes('¿Qué significa «yallishka pacha»?'));
+    assert.ok(content(view.render()).includes('¿Qué significa «shamuk pacha»?'));
+    choose(view, 'o0', 93);
+    choose(view, 'o1', 94);
+    await check(view);
+    assert.deepEqual(view.requests.map(item => item.path), ['/exercises/93/answer', '/exercises/94/answer']);
 });
 
 test('four morpheme listening exercises form two panels, preserve correct answers and finish with four response ids', async () => {

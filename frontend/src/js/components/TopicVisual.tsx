@@ -26,6 +26,15 @@ const natureIcons: Record<string, LucideIcon> = {
     inti: Sun, killa: Moon, yaku: Droplets, allpa: Sprout, wayra: Wind, urku: Mountain,
     tamya: CloudRain, wasi: House, yura: TreeDeciduous, punku: DoorOpen, tuku: PanelsTopLeft,
 };
+
+export function TopicExerciseVisual({ lesson, word }: { lesson: 'nature' | 'verbs'; word: string }) {
+    const Icon = word === 'calendar' ? CalendarDays : lesson === 'nature' ? natureIcons[word] : actionIcons[word];
+    if (!Icon) return null;
+    const meaning: Record<string, string> = { inti: 'sol', killa: 'luna', yaku: 'agua', urku: 'montaña', tamya: 'lluvia', calendar: 'calendario', wasi: 'casa', yura: 'árbol', punku: 'puerta', tuku: 'ventana', mikuna: 'comer', upyana: 'beber', puñuna: 'dormir', purina: 'caminar', killkana: 'escribir', pichana: 'limpiar', yachana: 'aprender', llamkana: 'trabajar', yanuna: 'cocinar', tarpuna: 'sembrar' };
+    return <figure className="mx-auto mb-8 flex h-48 max-w-md items-center justify-center rounded-3xl border border-line bg-positive-soft" aria-label={`Ilustración de ${meaning[word] ?? 'la actividad'}`}>
+        <Icon size={112} strokeWidth={1.2} aria-hidden="true" />
+    </figure>;
+}
 const actionIcons: Record<string, LucideIcon> = {
     mikuna: Utensils, upyana: CupSoda, puñuna: Bed, purina: Footprints, killkana: PenLine,
     pichana: BrushCleaning, yachana: BookOpen, llamkana: BriefcaseBusiness, yanuna: CookingPot,

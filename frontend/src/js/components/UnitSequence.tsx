@@ -5,7 +5,7 @@ import {ExerciseCard} from './ExerciseCard';
 import {ErrorState,LoadingState} from './States';
 import {useApi} from '../hooks/useApi';
 import type {Exercise,EvaluationResult,Unit} from '../types';
-interface Sequence {exercises:Array<Exercise & {completed:boolean}>; completed_count:number; total:number; unlocked:boolean; evaluation_id:number|null; first_score:number|null; best_score:number|null; passed:boolean; result:EvaluationResult|null;}
+interface Sequence {exercises:Array<Exercise & {completed:boolean}>; completed_count:number; total:number; unlocked:boolean; evaluation_id:number|null; preview_available?:boolean; first_score:number|null; best_score:number|null; passed:boolean; result:EvaluationResult|null;}
 export function UnitSequence({unit}:{unit:Unit}) {
     const sequence=useApi<Sequence>('/units/'+unit.id+'/sequence');
     const contents=useApi<{data:Array<{id:number}>}>('/units/'+unit.id+'/contents');
@@ -13,17 +13,24 @@ export function UnitSequence({unit}:{unit:Unit}) {
     const introduction=useApi<{body:string}>(introId?'/units/'+unit.id+'/topics/'+introId:null);
     const [active,setActive]=useState(0);const [initialized,setInitialized]=useState(false);
     const [turnDirection,setTurnDirection]=useState<'forward'|'backward'>('forward');
-    function showActivity(index:number) { setTurnDirection(index<active?'backward':'forward'); setActive(index); }
-    useEffect(()=>{if(sequence.data && !initialized){const next=sequence.data.exercises.findIndex(e=>!e.completed);setActive(next<0?6:next);setInitialized(true);}},[sequence.data,initialized]);
+    const exercises=sequence.data?.exercises ?? [];
+    const firstPending=exercises.findIndex(exercise=>!exercise.completed);
+    const furthest=firstPending<0?exercises.length-1:firstPending;
+    function showActivity(index:number) {
+        if(index<0 || index>furthest) return;
+        setTurnDirection(index<active?'backward':'forward'); setActive(index);
+    }
+    useEffect(()=>{if(sequence.data && !initialized){const next=sequence.data.exercises.findIndex(e=>!e.completed);setActive(next<0?Math.max(0,sequence.data.exercises.length-1):next);setInitialized(true);}},[sequence.data,initialized]);
     const current=sequence.data?.exercises[active];
     return <AppLayout title={unit.title} subtitle="Siete actividades para reconocer, relacionar y escribir tus primeras palabras."><Head title={unit.title}/>
         <Link className="font-bold text-forest" href={'/aprender/modulo/'+unit.module_id}>← Volver al módulo</Link>
         <div className="mt-5 space-y-5"><section className="glass-panel p-5 sm:p-7"><h2 className="font-serif text-2xl">Antes de practicar</h2>{contents.loading || introduction.loading ? <LoadingState/> : contents.error || introduction.error ? <ErrorState message={contents.error || introduction.error || ''}/> : <p className="mt-4 whitespace-pre-line leading-7 text-muted">{introduction.data?.body ?? unit.description}</p>}</section>
         {sequence.loading ? <LoadingState/> : sequence.error ? <ErrorState message={sequence.error}/> : sequence.data && <>
-            <section className="glass-panel space-y-4 p-5"><p role="status" className="font-bold">{sequence.data.completed_count} de {sequence.data.total} actividades acertadas</p><div className="progress-track"><div className="progress-fill" style={{width:sequence.data.completed_count/sequence.data.total*100+'%'}}/></div><nav className="flex flex-wrap gap-2" aria-label="Actividades de la unidad">{sequence.data.exercises.map((exercise,index)=><button type="button" key={exercise.id} aria-current={active===index?'step':undefined} className={active===index?'primary-button':'secondary-button'} onClick={()=>showActivity(index)} aria-label={'Actividad '+(index+1)+': '+exercise.config?.title}>{index+1}{exercise.completed?' ✓':''}</button>)}</nav></section>
+            <section className="glass-panel space-y-4 p-5"><p role="status" className="font-bold">{sequence.data.completed_count} de {sequence.data.total} actividades acertadas</p><div className="progress-track"><div className="progress-fill" style={{width:sequence.data.completed_count/sequence.data.total*100+'%'}}/></div><nav className="flex flex-wrap gap-2" aria-label="Actividades de la unidad">{sequence.data.exercises.map((exercise,index)=><button type="button" key={exercise.id} aria-current={active===index?'step':undefined} className={active===index?'primary-button':'secondary-button'} disabled={index>furthest} onClick={()=>showActivity(index)} aria-label={'Actividad '+(index+1)+': '+exercise.config?.title}>{index+1}{exercise.completed?' ✓':''}</button>)}</nav></section>
+            {sequence.data.preview_available && sequence.data.evaluation_id && <Link className="secondary-button inline-flex" href={'/aprender/evaluacion/' + sequence.data.evaluation_id + '?preview=1'}>Ver contenido de la prueba</Link>}
             {current ? <div key={current.id} className={`exercise-page-turn${turnDirection==='backward'?' is-turning-back':''}`}><ExerciseCard exercise={current} index={active} onFeedback={()=>void sequence.refresh()}/></div> : <p className="glass-panel p-5">El administrador está preparando los recursos de esta actividad.</p>}
-            <div className="flex flex-wrap justify-between gap-3"><button type="button" className="secondary-button" disabled={active===0} onClick={()=>showActivity(active-1)}>Actividad anterior</button>{active<6 && <button type="button" className="primary-button" disabled={!current?.completed} onClick={()=>showActivity(active+1)}>Siguiente actividad →</button>}</div>
-            {active===6 && (sequence.data.unlocked && sequence.data.evaluation_id ? <section className="glass-panel space-y-4 border-2 border-forest p-6"><h2 className="font-serif text-2xl">Prueba de la Unidad 1</h2><p>Seis preguntas · Un punto por pregunta · Apruebas con cinco aciertos · 3–5 minutos.</p><Link className="primary-button inline-block" href={'/aprender/evaluacion/'+sequence.data.evaluation_id}>{sequence.data.result?'Reintentar la prueba':'Iniciar la prueba'}</Link>{sequence.data.result && <p>Primer resultado: {sequence.data.first_score}% · Mejor resultado: {sequence.data.best_score}% · {sequence.data.passed?'Unidad aprobada':'Puedes practicar y reintentar.'}</p>}</section> : <p className="glass-panel p-5">La prueba aparecerá cuando hayas acertado las siete actividades y esté publicada.</p>)}
+            <div className="flex flex-wrap justify-between gap-3"><button type="button" className="secondary-button" disabled={active===0} onClick={()=>showActivity(active-1)}>Actividad anterior</button>{active<sequence.data.exercises.length-1 && <button type="button" className="primary-button" disabled={!current?.completed} onClick={()=>showActivity(active+1)}>Siguiente actividad →</button>}</div>
+            {active===sequence.data.exercises.length-1 && (sequence.data.unlocked && sequence.data.evaluation_id ? <section className="glass-panel space-y-4 border-2 border-forest p-6"><h2 className="font-serif text-2xl">Prueba de la Unidad 1</h2><p>Seis preguntas · Un punto por pregunta · Apruebas con cinco aciertos · 3–5 minutos.</p><Link className="primary-button inline-block" href={'/aprender/evaluacion/'+sequence.data.evaluation_id}>{sequence.data.result?'Reintentar la prueba':'Iniciar la prueba'}</Link>{sequence.data.result && <p>Primer resultado: {sequence.data.first_score}% · Mejor resultado: {sequence.data.best_score}% · {sequence.data.passed?'Unidad aprobada':'Puedes practicar y reintentar.'}</p>}</section> : <p className="glass-panel p-5">La prueba aparecerá cuando hayas acertado las siete actividades y esté publicada.</p>)}
         </>}</div>
     </AppLayout>;
 }

@@ -6,6 +6,7 @@ use App\Models\Actividad;
 use App\Models\EvaluacionKichwa;
 use App\Models\IntentoEvaluacion;
 use App\Models\Modulo;
+use App\Models\Nivel;
 use App\Models\Pregunta;
 use App\Models\RespuestaActividad;
 use App\Models\Unidad;
@@ -58,6 +59,44 @@ class ModuloUnoEvaluacionTest extends TestCase
 
             return ['question_id' => $record->id_pregunta, 'answer' => $answer];
         }, $questions, array_keys($questions));
+    }
+
+    public function test_local_preview_shows_all_published_evaluation_types_without_starting_attempts(): void
+    {
+        $firstExam = $this->exam();
+        config()->set('kichwa.evaluation_preview', true);
+        $module = Modulo::where('id_nivel', Nivel::where('orden_nivel', 1)->firstOrFail()->id_nivel)
+            ->where('orden_modulo', 2)->firstOrFail();
+        $secondExam = EvaluacionKichwa::create(['id_modulo' => $module->id_modulo, 'titulo_evaluacion' => 'Lección final',
+            'tipo_evaluacion' => 'modulo', 'publicado' => true,
+            'configuracion' => ['managed' => true, 'final' => true, 'question_count' => 1, 'pass_percentage' => 80]]);
+        $unitExam = EvaluacionKichwa::create(['id_unidad' => Unidad::where('id_modulo', $module->id_modulo)->firstOrFail()->id_unidad,
+            'titulo_evaluacion' => 'Prueba de unidad', 'tipo_evaluacion' => 'unidad', 'publicado' => true,
+            'configuracion' => ['managed' => true, 'question_count' => 1]]);
+        $diagnostic = EvaluacionKichwa::create(['titulo_evaluacion' => 'Diagnóstico', 'tipo_evaluacion' => 'diagnostica',
+            'publicado' => true, 'configuracion' => ['managed' => true, 'question_count' => 1]]);
+        $source = Pregunta::where('id_evaluacion', $firstExam->id_evaluacion)->firstOrFail();
+        foreach ([$secondExam, $unitExam, $diagnostic] as $evaluation) {
+            $question = $source->replicate();
+            $question->id_evaluacion = $evaluation->id_evaluacion;
+            $question->save();
+        }
+        $this->getJson('/api/evaluations/'.$firstExam->id_evaluacion.'/preview-questions')->assertUnauthorized();
+        Sanctum::actingAs(Usuario::factory()->create());
+
+        $this->getJson('/api/evaluations/'.$secondExam->id_evaluacion)->assertOk()
+            ->assertJsonPath('module_final.unlocked', false)->assertJsonPath('module_final.preview_available', true);
+        foreach ([$firstExam, $secondExam, $unitExam, $diagnostic] as $evaluation) {
+            $this->getJson('/api/evaluations/'.$evaluation->id_evaluacion)->assertOk()->assertJsonPath('preview_available', true);
+            $this->getJson('/api/evaluations/'.$evaluation->id_evaluacion.'/preview-questions')->assertOk()
+                ->assertJsonCount($evaluation === $firstExam ? 15 : 1, 'questions')
+                ->assertDontSee('solution')->assertDontSee('correct_feedback');
+        }
+        $this->postJson('/api/evaluations/'.$secondExam->id_evaluacion.'/attempts')->assertForbidden();
+        $this->assertDatabaseCount('intentos_evaluacion', 0);
+
+        config()->set('kichwa.evaluation_preview', false);
+        $this->getJson('/api/evaluations/'.$diagnostic->id_evaluacion.'/preview-questions')->assertNotFound();
     }
 
     public function test_final_is_locked_until_every_current_activity_in_all_five_units_is_correct(): void

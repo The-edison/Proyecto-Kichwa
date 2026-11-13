@@ -37,7 +37,7 @@ class SaveKichwaContentRequest extends FormRequest
         if ($resource === 'units') {
             $rules['config'] = ['sometimes', 'array:learning_mode,guided_lesson'];
             $rules['config.learning_mode'] = ['sometimes', 'in:classic,sequence,guided'];
-            $rules['config.guided_lesson'] = ['sometimes', 'in:writing,greetings,pronouns,numbers,calendar,animals-colors,body,nature,verbs,advanced-morphemes,time-morphemes,verbal-analysis,short-dialogues'];
+            $rules['config.guided_lesson'] = ['sometimes', 'in:writing,greetings,pronouns,numbers,calendar,animals-colors,body,nature,verbs,advanced-morphemes,time-morphemes,verbal-analysis,short-dialogues,intermediate-module-one'];
         }
         if (in_array($resource, ['exercises', 'questions', 'evaluations'], true)) {
             $rules['config'] = ['sometimes', 'array:body_activity,body_panel,color_activity,color_panel,animal_group,animal_activity,pronouns_activity,sentence_order,scene_choice,conversation_group,conversation_pairs,listening_greetings,listening_questions,managed,reviewed,requires_audio,requires_images,max_selections,exact_selections,ignore_accents,explanation,correct_feedback,incorrect_feedback,title,difficulty,question_count,pass_percentage,final,presentation,word_target,missing_index,context_text,context_meaning,prompt_image,prompt_image_alt,reveal_highlight,sequence_mode,fixed_order,required_correct,prerequisite_activities'];

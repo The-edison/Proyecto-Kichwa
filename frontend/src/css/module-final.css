@@ -13,6 +13,16 @@
 .module-final-units a { display: flex; gap: .5rem; align-items: center; font-size: .95rem; text-decoration: underline; text-underline-offset: 3px; }
 .module-final-units a > span { margin-left: auto; white-space: nowrap; }
 .module-final-locked { display: flex; align-items: center; gap: .5rem; font-weight: 700; padding: .6rem; }
+.module-final-locked-actions { display: grid; justify-items: start; gap: .75rem; }
+.module-final-preview-heading { display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem; margin-block: 1.25rem; }
+.module-final-preview-heading h2 { margin-top: 0; }
+.module-final-preview-list { display: grid; gap: 1rem; }
+.module-final-preview-list .module-final-question { margin: 0; }
+.module-final-preview-topic { color: var(--color-secondary); font-weight: 800; }
+.module-final-preview-image { max-width: 100%; max-height: 300px; object-fit: contain; margin: 1rem auto; border-radius: .75rem; }
+.module-final-preview-options { display: grid; gap: .65rem; margin-top: 1rem; }
+.module-final-preview-options li { display: flex; align-items: center; gap: .75rem; padding: .8rem 1rem; border: 1px solid var(--color-control-border); border-radius: .75rem; }
+.module-final-preview-options img { width: 64px; height: 64px; object-fit: contain; }
 .module-final-intro, .module-final-question, .module-final-result, .module-final-history { padding: clamp(1.2rem, 4vw, 2.5rem); margin-block: 1.25rem; }
 .module-final-intro > ul { list-style: disc; padding-left: 1.4rem; margin-block: 1.2rem 1.6rem; }
 .module-final-intro li { margin-block: .6rem; }

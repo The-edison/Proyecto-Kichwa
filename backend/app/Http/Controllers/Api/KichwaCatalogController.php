@@ -251,7 +251,9 @@ class KichwaCatalogController extends Controller
             $query->where('id_unidad', $request->integer('unit_id'));
         }
 
-        return response()->json($query->orderBy('id_evaluacion')->paginate(20)->through(fn ($r) => KichwaResource::present('evaluations', $r) + ['level_id' => $level, 'prerequisite_topic_ids' => ($r->configuracion['final'] ?? false) ? DominioLecciones::prerequisites($r)->all() : []]));
+        return response()->json($query->orderBy('id_evaluacion')->paginate(20)->through(fn ($r) => KichwaResource::present('evaluations', $r) + ['level_id' => $level,
+            'preview_available' => EstadoContenido::previewAvailable($r),
+            'prerequisite_topic_ids' => ($r->configuracion['final'] ?? false) ? DominioLecciones::prerequisites($r)->all() : []]));
     }
 
     public function evaluation(Request $request, int $evaluation): JsonResponse
@@ -265,10 +267,24 @@ class KichwaCatalogController extends Controller
             : ($record->id_unidad !== null ? self::publishedUnit($record->id_unidad)->id_nivel : Nivel::where('orden_nivel', 1)->firstOrFail()->id_nivel);
 
         return response()->json(KichwaResource::present('evaluations', $record) + ['level_id' => $level, 'description' => 'Evaluación del nivel.',
+            'preview_available' => EstadoContenido::previewAvailable($record),
             'history' => IntentoEvaluacion::where('id_usuario', $request->user()->id_usuario)->where('id_evaluacion', $evaluation)->orderByDesc('numero_intento')->limit(10)->get()->map(fn ($attempt) => [
                 'id' => $attempt->id_intento, 'number' => $attempt->numero_intento, 'state' => $attempt->estado_intento, 'result' => DominioLecciones::result($attempt)]),
             'module_final' => $record->tipo_evaluacion === 'modulo' ? EvaluacionModulo::status($record, $request->user()->id_usuario) : null,
             'questions' => ($record->configuracion['managed'] ?? false) ? [] : EstadoContenido::eligible($evaluation)->map(fn ($r) => KichwaResource::present('questions', $r))]);
+    }
+
+    public function previewQuestions(int $evaluation): JsonResponse
+    {
+        $record = EvaluacionKichwa::findOrFail($evaluation);
+        self::publishedEvaluation($record);
+        abort_unless(EstadoContenido::previewAvailable($record), 404);
+
+        $count = (int) ($record->configuracion['question_count'] ?? 15);
+        $questions = EstadoContenido::eligible($evaluation)->take($count)
+            ->map(fn ($question) => KichwaResource::present('questions', $question))->values();
+
+        return response()->json(['questions' => $questions]);
     }
 
     public function diccionario(Request $request): JsonResponse

@@ -95,6 +95,7 @@ class SecuenciaUnidad
         return ['exercises' => $practices->map(fn ($record) => KichwaResource::present('exercises', $record) + ['completed' => $completed->contains(self::origin($record))])->values(),
             'completed_count' => $completed->count(), 'total' => 7, 'unlocked' => $evaluation->publicado && $ready && $completed->count() === 7,
             'evaluation_id' => $evaluation->publicado && $ready ? $evaluation->id_evaluacion : null, 'result' => $latest?->resultado,
+            'preview_available' => EstadoContenido::previewAvailable($evaluation) && $ready,
             'first_score' => $stats->first_score === null ? null : (float) $stats->first_score, 'best_score' => $stats->best_score === null ? null : (float) $stats->best_score, 'passed' => (bool) $stats->passed];
     }
 }

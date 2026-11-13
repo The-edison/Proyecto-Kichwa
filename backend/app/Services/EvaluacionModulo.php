@@ -28,6 +28,7 @@ class EvaluacionModulo
         return ['id' => $evaluation->id_evaluacion, 'title' => $evaluation->titulo_evaluacion,
             'question_count' => $evaluation->configuracion['question_count'] ?? 15, 'pass_percentage' => $evaluation->configuracion['pass_percentage'] ?? 80,
             'unlocked' => $coverage && $requirements->isNotEmpty() && $requirements->every(fn (array $unit): bool => $unit['completed']),
+            'preview_available' => EstadoContenido::previewAvailable($evaluation),
             'completed_units' => $requirements->where('completed', true)->count(), 'total_units' => $requirements->count(),
             'units' => $requirements->all(), 'best_score' => $results->max('resultado.score'), 'passed' => $results->contains(fn ($attempt): bool => (bool) ($attempt->resultado['passed'] ?? false))];
     }

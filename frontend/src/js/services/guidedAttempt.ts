@@ -1,5 +1,8 @@
 import type { ExerciseAnswer, ExerciseFeedback } from '../types';
 
+// Require a correct answer before advancing to the next exercise.
+export const allowExerciseReviewNavigation = false;
+
 export interface GuidedResult { xp_earned?: number; xp_total?: number; score: number; max_score: number; correct_count: number; total_items: number; passed: boolean; next_unit_id: number | null; details: Array<{ exercise_id: number; title: string; correct: number; total: number }>; }
 export interface GuidedAttempt {
     step: number;

@@ -101,6 +101,7 @@ export default function ModuleFinalEvaluation({ evaluation }: { evaluation: Eval
                     <p><strong>{status?.question_count ?? 15} preguntas</strong> de escritura, saludos, pronombres, números y calendario.</p>
                     <ul><li>Lee cada situación y elige una respuesta. Algunas preguntas piden <strong>dos opciones</strong>.</li><li>Puedes volver a las preguntas y cambiar tus respuestas.</li><li>Apruebas con <strong>{required} aciertos ({status?.pass_percentage ?? 80}%)</strong>. Verás las explicaciones al finalizar.</li><li>Sin límite de tiempo. Tus respuestas se guardan para continuar después.</li></ul>
                     <button className="primary-button" disabled={busy} onClick={() => void open()}>Iniciar o continuar prueba<ArrowRight size={18} aria-hidden="true" /></button>
+                    {status?.preview_available && <Link className="secondary-button" href={'/aprender/evaluacion/' + evaluation.id + '?preview=1'}>Ver contenido de la prueba</Link>}
                 </section>}
             </>}
             {attempt && <>

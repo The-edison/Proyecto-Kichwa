@@ -78,6 +78,7 @@
 .guided-unit-shell.is-activity { height: 100dvh; min-height: 0; overflow: hidden; }
 .is-activity .guided-unit-header { flex: none; padding-block: 10px; }
 .is-activity .guided-unit-main { display: flex; flex-direction: column; min-height: 0; overflow: hidden; padding-block: 16px 12px; }
+.is-activity.is-sentence-images .guided-unit-main { overflow-y: auto; }
 .is-activity .exercise-companion-header { gap: 12px; margin-bottom: 12px; }
 .is-activity .guided-exercise-heading { font-size: clamp(22px,2.5vw,30px); }
 .is-activity .guided-unit-description { max-width: 66ch; margin: 8px 0 0; font-size: 15px; line-height: 1.5; }
@@ -547,4 +548,37 @@
     .guided-listening-audio button > span { white-space: nowrap; }
     .guided-listening-audio .guided-listening-repeat { width: 26px; padding-inline: 3px; }
     .guided-listening-audio svg { width: 15px; height: 15px; }
+}
+
+.guided-unit-shell.is-activity .exercise-companion-header > p.guided-unit-description {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: min(100%, 940px);
+    max-width: none;
+    margin: 0 0 4px;
+    padding: 12px 20px;
+    border: 1px solid var(--color-border);
+    border-left: 5px solid var(--color-primary);
+    border-radius: 14px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+    color: var(--color-text);
+    font-size: clamp(20px, 2vw, 26px);
+    font-weight: 750;
+    line-height: 1.4;
+    text-align: center;
+}
+
+@media (max-width: 700px) {
+    .guided-unit-shell.is-activity .exercise-companion-header > p.guided-unit-description {
+        padding: 10px 14px;
+        font-size: clamp(18px, 5vw, 22px);
+    }
+}
+
+@media (max-height: 480px) {
+    .guided-unit-shell.is-activity .exercise-companion-header > p.guided-unit-description {
+        padding-block: 6px;
+        font-size: 18px;
+    }
 }

@@ -11,6 +11,9 @@ export function ModuleFinalCard({ status }: { status: ModuleFinalStatus }) {
             <p>{status.passed ? `¡Prueba aprobada! Mejor nota: ${status.best_score}%.` : status.unlocked ? 'Ya puedes demostrar lo que aprendiste.' : `Completa correctamente todas las actividades para habilitarla: ${status.completed_units} de ${status.total_units} unidades listas.`}</p>
             <ul className="module-final-units">{status.units.map(unit => <li key={unit.id}><Link href={'/aprender/unidad/' + unit.id}>{unit.completed ? <CheckCircle2 size={16} aria-hidden="true" /> : <LockKeyhole size={16} aria-hidden="true" />}{unit.title}<span>{unit.correct}/{unit.total}</span></Link></li>)}</ul>
         </div>
-        {status.unlocked ? <Link className="primary-button" href={'/aprender/evaluacion/' + status.id}>{status.passed ? 'Volver a practicar' : 'Abrir prueba'}<ArrowRight size={18} aria-hidden="true" /></Link> : <span className="module-final-locked"><LockKeyhole size={16} aria-hidden="true" />Prueba bloqueada</span>}
+        <div className="module-final-locked-actions">
+            {status.unlocked ? <Link className="primary-button" href={'/aprender/evaluacion/' + status.id}>{status.passed ? 'Volver a practicar' : 'Abrir prueba'}<ArrowRight size={18} aria-hidden="true" /></Link> : <span className="module-final-locked"><LockKeyhole size={16} aria-hidden="true" />Prueba bloqueada</span>}
+            {status.preview_available && <Link className="secondary-button" href={'/aprender/evaluacion/' + status.id + '?preview=1'}>Ver contenido<ArrowRight size={18} aria-hidden="true" /></Link>}
+        </div>
     </section>;
 }
