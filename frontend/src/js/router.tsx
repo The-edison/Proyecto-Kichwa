@@ -23,6 +23,7 @@ const AdminDashboard = lazy(() => import('./pages/Admin/Dashboard'));
 const AdminStudents = lazy(() => import('./pages/Admin/Students'));
 const AdminContentManager = lazy(() => import('./pages/Admin/ContentManager'));
 const AdminDictionary = lazy(() => import('./pages/Admin/Dictionary'));
+const AdminGroups = lazy(() => import('./pages/Admin/Groups'));
 function Protected({ role }: { role?: 'admin' | 'student' }) {
     const { user } = useAuth();
     if (!user) return <Navigate to="/iniciar-sesion" replace />;
@@ -59,6 +60,7 @@ export function AppRouter() {
         <Route element={<Protected role="admin" />}>
             <Route path="/admin" element={<AdminDashboard />} /><Route path="/admin/estudiantes" element={<AdminStudents />} />
             <Route path="/admin/contenidos/*" element={<AdminContentManager />} />
+            <Route path="/admin/contenidos/grupos" element={<AdminGroups />} />
             <Route path="/admin/diccionario" element={<AdminDictionary />} />
             <Route path="/admin/contenidos/diccionario/*" element={<Navigate to="/admin/diccionario" replace />} />
         </Route>

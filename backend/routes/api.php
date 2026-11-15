@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\ArchivoController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AvatarController;
 use App\Http\Controllers\Api\DiccionarioController;
+use App\Http\Controllers\Api\GrupoController;
 use App\Http\Controllers\Api\KichwaAdminController;
 use App\Http\Controllers\Api\KichwaCatalogController;
 use App\Http\Controllers\Api\KichwaSubmissionController;
@@ -26,6 +27,7 @@ Route::post('/auth/google/prepare', [GoogleAuthController::class, 'prepare'])->m
 Route::get('/diccionario', [KichwaCatalogController::class, 'diccionario']);
 Route::get('/diccionario/buscar', [DiccionarioController::class, 'search'])->middleware('throttle:120,1');
 Route::get('/testimonials', [TestimonialController::class, 'index']);
+Route::get('/comentarios/destacados', [TestimonialController::class, 'destacados']);
 Route::get('/privacy', [PrivacyController::class, 'show']);
 Route::get('/media/{path}', [ArchivoController::class, 'show'])->where('path', '.*');
 Route::get('/avatars/{filename}', [AvatarController::class, 'show'])->where('filename', '[a-f0-9]{40}\.webp');
@@ -38,6 +40,9 @@ Route::middleware(['auth:sanctum', 'active'])->group(function (): void {
     Route::post('/auth/change-password', [AuthController::class, 'changePassword'])->middleware('throttle:5,1');
     Route::post('/auth/verification-notification', [AuthController::class, 'resendVerification'])->middleware('throttle:3,1');
     Route::middleware('role:student')->group(function (): void {
+        Route::get('/mi-grupo', [GrupoController::class, 'membership']);
+        Route::post('/mi-grupo', [GrupoController::class, 'join'])->middleware('throttle:5,1,group-join');
+        Route::delete('/mi-grupo', [GrupoController::class, 'leave']);
         Route::get('/levels', [KichwaCatalogController::class, 'levels']);
         Route::get('/learning-navigation', [KichwaCatalogController::class, 'navigation']);
         Route::get('/levels/{level}/modules', [KichwaCatalogController::class, 'modules']);
@@ -68,7 +73,11 @@ Route::middleware(['auth:sanctum', 'active'])->group(function (): void {
         Route::post('/testimonials', [TestimonialController::class, 'store'])->middleware('throttle:5,1');
     });
     Route::prefix('admin')->middleware('role:admin')->group(function (): void {
+        Route::get('/grupos', [GrupoController::class, 'index']);
+        Route::post('/grupos', [GrupoController::class, 'store'])->middleware('throttle:20,1,group-create');
+        Route::patch('/grupos/{id}', [GrupoController::class, 'update']);
         Route::get('/overview', [KichwaAdminController::class, 'overview']);
+        Route::get('/usage-monthly', [KichwaAdminController::class, 'monthlyUsage']);
         Route::post('/evaluations/{id}/review-bank', [KichwaAdminController::class, 'reviewBank']);
         Route::get('/evaluations/{id}/preview', [KichwaAdminController::class, 'previewEvaluation']);
         Route::post('/evaluations/{id}/preview', [KichwaAdminController::class, 'previewEvaluation']);

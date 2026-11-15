@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FilterAdminGroupRequest;
+use App\Http\Requests\ListStudentsRequest;
 use App\Http\Requests\SaveKichwaContentRequest;
 use App\Models\EvaluacionKichwa;
+use App\Models\Grupo;
 use App\Models\Pregunta;
 use App\Models\Tema;
 use App\Models\Usuario;
@@ -13,6 +16,7 @@ use App\Services\EstadoContenido;
 use App\Services\KichwaResource;
 use App\Services\OrdenContenido;
 use App\Services\PublicacionContenido;
+use App\Services\ResumenUsoMensual;
 use App\Services\SecuenciaUnidad;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
@@ -192,10 +196,23 @@ class KichwaAdminController extends Controller
         return response()->json(KichwaResource::present($resource, $copy, true), 201);
     }
 
-    public function overview(): JsonResponse
+    public function monthlyUsage(FilterAdminGroupRequest $request, ResumenUsoMensual $usage): JsonResponse
     {
+        return response()->json($usage->data($request->groupId()));
+    }
+
+    public function overview(FilterAdminGroupRequest $request): JsonResponse
+    {
+        $groupId = $request->groupId();
+        $students = Usuario::where('rol_usuario', 'estudiante');
+        if ($groupId === 'sin_grupo') {
+            $students->whereNull('grupo_id');
+        } elseif ($groupId !== null) {
+            $students->where('grupo_id', $groupId);
+        }
+
         return response()->json([
-            'students' => Usuario::where('rol_usuario', 'estudiante')->count(),
+            'students' => $students->count(),
             'contents' => Tema::where('publicado', true)->whereIn('id_unidad', PublicacionContenido::unitIds())->count(),
             'exercises' => PublicacionContenido::exercises()->count(),
             'diccionario' => DB::table('diccionario')->count(),
@@ -475,10 +492,16 @@ class KichwaAdminController extends Controller
         return response()->json(['data' => $changed]);
     }
 
-    public function students(Request $request): JsonResponse
+    public function students(ListStudentsRequest $request): JsonResponse
     {
-        $data = $request->validate(['q' => ['nullable', 'string', 'max:100'], 'page' => ['sometimes', 'integer', 'min:1']]);
+        $data = $request->validated();
         $query = Usuario::where('rol_usuario', 'estudiante');
+        if (($data['grupo_id'] ?? null) === 'sin_grupo') {
+            $query->whereNull('grupo_id');
+        } elseif (isset($data['grupo_id'])) {
+            $group = Grupo::where('admin_id', $request->user()->id_usuario)->findOrFail($data['grupo_id']);
+            $query->where('grupo_id', $group->id);
+        }
         $search = trim($data['q'] ?? '');
         if ($search !== '') {
             $needle = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search).'%';

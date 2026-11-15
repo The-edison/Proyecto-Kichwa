@@ -163,7 +163,7 @@ test('three listening sentences use separate recordings, preserve all choices an
         option.props.onChange();
     }
     assert.deepEqual(JSON.parse(JSON.stringify(view.sentenceAnswer())), { textos: { 'alli-puncha-churi': 'puncha', 'alli-chishi-kusa': 'chishi', 'alli-tuta-tayta': 'tuta' } });
-    nodes(view.sentences()).find(node => node.props['aria-label'] === 'Repetir la oración 3').props.onClick();
+    nodes(view.sentences()).find(node => node.props['aria-label'] === 'Escuchar la oración 3').props.onClick();
     assert.equal(view.audios.at(-2).paused, true);
     const disabled = view.sentences(true);
     assert.ok(nodes(disabled).filter(node => node.type === 'fieldset').every(node => node.props.disabled));
@@ -185,8 +185,9 @@ test('question audios use the unit folder, select on playback and repeat without
         assert.equal(view.audios.at(-1).src, `/kichwa/audios/unidad-2/preguntas-respuestas/${file}.mp3`);
         assert.equal(selections.at(-1), file);
         const count = selections.length;
-        nodes(view.audioMatching(props)).find(node => node.props['aria-label'] === `Repetir el audio ${index + 1}`).props.onClick();
-        assert.equal(selections.length, count);
+        nodes(view.audioMatching(props)).find(node => node.props['aria-label'] === `Escuchar y seleccionar el audio ${index + 1}`).props.onClick();
+        assert.equal(selections.length, count + 1);
+        assert.equal(selections.at(-1), file);
         assert.equal(view.audios.at(-2).paused, true);
     }
     const count = selections.length;
@@ -357,13 +358,25 @@ test('consonant playback can restart, finish, recover from errors and stop on le
     assert.equal(view.audios[3].onplaying, null);
 });
 
-test('listening rows map each audio and repeat button to the right recording without overlap', async () => {
+test('audio tiles have one playback control and no redundant replay icon', async () => {
+    const view = await screen();
+    for (const tree of [view.sentences(), view.missing(), view.audioMatching()]) {
+        const tiles = nodes(tree).filter(node => node.props.className?.startsWith('guided-listening-audio') || node.props.className?.startsWith('guided-audio-tile'));
+        assert.equal(tiles.length, 3);
+        for (const tile of tiles) {
+            assert.equal(nodes(tile).filter(node => node.type === 'button').length, 1);
+            assert.equal(nodes(tile).some(node => node.type === 'RotateCcw'), false);
+        }
+    }
+});
+
+test('listening rows replay the correct recording from the same button without overlap', async () => {
     const view = await screen('/kichwa/');
     for (const [index, word] of ['shunku', 'purina', 'llama'].entries()) {
         nodes(view.missing()).find(node => node.props['aria-label'] === `Escuchar el audio ${index + 1}`).props.onClick();
         assert.equal(view.audios.at(-1).src, `/kichwa/audios/vocal-que-falta/${word}.mp3`);
         if (index > 0) assert.equal(view.audios.at(-2).paused, true);
-        nodes(view.missing()).find(node => node.props['aria-label'] === `Repetir el audio ${index + 1}`).props.onClick();
+        nodes(view.missing()).find(node => node.props['aria-label'] === `Escuchar el audio ${index + 1}`).props.onClick();
         assert.equal(view.audios.at(-2).paused, true);
         assert.equal(view.audios.at(-1).src, `/kichwa/audios/vocal-que-falta/${word}.mp3`);
     }
@@ -391,7 +404,7 @@ test('listening inputs save one Kichwa vowel per word, normalize uppercase and l
     assert.ok(nodes(view.missing(true)).filter(node => node.type === 'button').every(node => !node.props.disabled));
 });
 
-test('scene choices play audio on selection, keep speaker replay independent and lock only correct cards', async () => {
+test('scene choices play audio on selection without extra speaker buttons and lock only correct cards', async () => {
     const view = await screen('/kichwa/');
     const changes = [];
     const exercises = [0,1,2].map(i => ({id:101+i,config:{scene_choice:true,conversation_group:'q',context_text:`Spanish ${i}`,prompt_image:`scene-${i}.webp`},elements:[0,1,2].map(n=>({id:`q-${n}`,texto:`Question ${n}`}))}));
@@ -404,24 +417,19 @@ test('scene choices play audio on selection, keep speaker replay independent and
     assert.ok(radios.slice(0,3).every(n=>n.props.disabled));
     assert.ok(radios.slice(3).every(n=>!n.props.disabled));
     const speakers = all.filter(n=>n.type==='button');
-    assert.equal(speakers.length,9);
-    assert.ok(speakers.every(n=>!n.props.disabled));
-    speakers[0].props.onClick();
-    assert.equal(changes.length,0);
-    assert.equal(view.audios.at(-1).src,'/kichwa/audios/unidad-2/escenas/preguntas/imanalla-kanki.mp3');
-    view.audios.at(-1).resolve();
+    assert.equal(speakers.length,0);
     radios[3].props.onClick();
     radios[3].props.onChange();
     assert.equal(changes[0][0].id,102);
     assert.deepEqual(JSON.parse(JSON.stringify(changes[0][1])),{seleccion:['q-0']});
+    assert.equal(view.audios.length,1);
+    assert.equal(view.audios[0].src,'/kichwa/audios/unidad-2/escenas/preguntas/imanalla-kanki.mp3');
+    radios[3].props.onClick();
     assert.equal(view.audios.length,2);
     assert.equal(view.audios[0].paused,true);
-    assert.equal(view.audios[1].src,'/kichwa/audios/unidad-2/escenas/preguntas/imanalla-kanki.mp3');
-    radios[3].props.onClick();
-    assert.equal(view.audios.length,3);
     assert.equal(changes.length,1);
     radios[0].props.onClick();
-    assert.equal(view.audios.length,3);
+    assert.equal(view.audios.length,2);
     view.unmount();
     assert.ok(view.audios.at(-1).paused);
 });
@@ -433,7 +441,7 @@ test('farewell scene cards retain the existing audio folder and support two-card
     assert.ok(tree.props.className.includes('is-pair'));
     assert.equal(nodes(tree).filter(n=>n.type==='article').length,2);
     for(const [i,path]of['ashtak-kaman','chisikaman'].entries()){
-        nodes(view.scenes(props)).filter(n=>n.type==='button')[i].props.onClick();
+        nodes(view.scenes(props)).filter(n=>n.type==='input')[i].props.onClick();
         assert.equal(view.audios.at(-1).src,`/kichwa/audios/unidad-2/despedidas/${path}.mp3`);
         view.audios.at(-1).resolve();
     }

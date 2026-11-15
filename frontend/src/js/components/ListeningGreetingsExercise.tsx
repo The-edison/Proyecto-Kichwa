@@ -1,4 +1,4 @@
-import { RotateCcw, Volume2 } from 'lucide-react';
+import { Volume2 } from 'lucide-react';
 import { useLessonAudio, type LessonAudioClip } from '../hooks/useLessonAudio';
 import type { Exercise, ExerciseAnswer, ExerciseFeedback } from '../types';
 import { mediaUrl } from './ExerciseCard';
@@ -32,7 +32,6 @@ export function ListeningGreetingsExercise({ exercise, answer, feedback, disable
                 {questions && <img className="guided-question-image" src={mediaUrl(element.imagen)} alt={scenes[element.id] ?? 'Escena de una pregunta'} width={280} height={210} decoding="async" fetchPriority="high" />}
                 <div className={`guided-listening-audio${active ? ' is-active' : ''}`}>
                     <button type="button" aria-label={`Escuchar ${questions ? 'la pregunta' : 'la oración'} ${index + 1}`} onClick={() => play(clip)}><Volume2 size={21} aria-hidden="true" /><span>Escuchar audio</span></button>
-                    <button type="button" className="guided-listening-repeat" aria-label={`Repetir ${questions ? 'la pregunta' : 'la oración'} ${index + 1}`} onClick={() => play(clip)}><RotateCcw size={18} aria-hidden="true" /></button>
                 </div>
                 {!questions && <p className="guided-sentence-text">{before}<span className="guided-sentence-blank" aria-label={answer.textos?.[element.id] ? `Palabra seleccionada: ${answer.textos[element.id]}` : 'Palabra que falta'}>{answer.textos?.[element.id] || '_____'}</span>{after}</p>}
                 <fieldset className="guided-choice-options" disabled={disabled}>

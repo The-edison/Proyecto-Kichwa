@@ -1,4 +1,5 @@
 import { CalendarDays, Hash, RotateCcw } from 'lucide-react';
+import { wordOrderDrag } from '../services/wordOrderDrag';
 import type { Exercise, ExerciseAnswer, ExerciseFeedback } from '../types';
 import '../../css/interactive-sentence-practice.css';
 
@@ -16,14 +17,15 @@ export function InteractiveSentencePractice({ exercise, answer, feedback, disabl
     if (mode === 'tiles') {
         const order = answer.orden ?? [];
         const words = new Map(exercise.elements.map(element => [element.id, element.texto]));
+        const drag = wordOrderDrag(`interactive:${exercise.id}`, exercise.elements.map(word => word.id), order, disabled, next => onChange({ orden: next }));
         return <fieldset className="interactive-sentence" data-exercise-correct={feedback?.is_correct} disabled={disabled}>
             <legend className="sr-only">Forma la expresión en kichwa</legend>
             <div className="interactive-sentence-cue"><Icon size={34} strokeWidth={1.7} aria-hidden="true" /><div><span>TRADUCE AL KICHWA</span><strong>{exercise.config?.context_meaning}</strong></div></div>
-            <div className="interactive-sentence-answer" aria-label="Expresión formada">
-                {exercise.elements.map((_, index) => order[index] ? <button type="button" key={index} data-answer-correct={feedback?.item_results?.[order[index]] ?? feedback?.is_correct} onClick={() => onChange({ orden: order.filter((_, position) => position !== index) })} aria-label={`Quitar ${words.get(order[index])} de la posición ${index + 1}`}>{words.get(order[index])}</button> : <span className="interactive-sentence-empty" key={index} aria-label={`Espacio ${index + 1}`} />)}
+            <div className="interactive-sentence-answer" aria-label="Expresión formada" {...drag.target()}>
+                {exercise.elements.map((_, index) => order[index] ? <button type="button" key={index} {...drag.target(index)} {...drag.placed(index)} data-answer-correct={feedback?.item_results?.[order[index]] ?? feedback?.is_correct} onClick={() => drag.remove(index)} aria-label={`Quitar ${words.get(order[index])} de la posición ${index + 1}`}>{words.get(order[index])}</button> : <span className="interactive-sentence-empty" key={index} {...drag.target(index)} aria-label={`Espacio ${index + 1}`} />)}
             </div>
-            <p className="interactive-sentence-help">Toca las fichas en orden. Toca una ficha colocada para quitarla.</p>
-            <div className="interactive-sentence-bank" aria-label="Palabras disponibles">{exercise.elements.map(word => <button type="button" key={word.id} disabled={disabled || order.includes(word.id)} onClick={() => onChange({ orden: [...order, word.id] })}>{word.texto}</button>)}</div>
+            <p className="interactive-sentence-help">Arrastra las fichas al recuadro o tócalas en orden. Toca una ficha colocada para quitarla.</p>
+            <div className="interactive-sentence-bank" aria-label="Palabras disponibles">{exercise.elements.map((word, index) => <button type="button" key={word.id} {...drag.source(index)} disabled={disabled || order.includes(word.id)} onClick={() => drag.add(index)}>{word.texto}</button>)}</div>
             <button type="button" className="interactive-sentence-reset" disabled={disabled || order.length === 0} onClick={() => onChange({ orden: [] })}><RotateCcw size={16} aria-hidden="true" />Empezar de nuevo</button>
         </fieldset>;
     }

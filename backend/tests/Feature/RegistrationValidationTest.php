@@ -74,6 +74,39 @@ class RegistrationValidationTest extends TestCase
         ];
     }
 
+    #[DataProvider('whitespacePasswords')]
+    public function test_whitespace_does_not_replace_a_symbol_and_registration_creates_no_account(string $password): void
+    {
+        Notification::fake();
+        $input = array_replace($this->validInput(), ['password' => $password, 'password_confirmation' => $password]);
+
+        $this->postJson('/api/auth/register', $input)->assertUnprocessable()
+            ->assertJsonValidationErrors('password')
+            ->assertJsonPath('errors.password.0', 'Incluye un símbolo en la contraseña; los espacios no cuentan como símbolos.');
+
+        $this->assertDatabaseCount('usuarios', 0);
+        Notification::assertNothingSent();
+    }
+
+    public static function whitespacePasswords(): array
+    {
+        return ['ordinary space' => ['Edgarpuninna 2020'], 'nonbreaking space' => ["Edgarpuninna\u{00A0}2020"],
+            'em space' => ["Edgarpuninna\u{2003}2020"], 'tab' => ["Edgarpuninna\t2020"], 'newline' => ["Edgarpuninna\n2020"]];
+    }
+
+    public function test_a_password_with_spaces_and_a_real_symbol_is_preserved_and_accepted(): void
+    {
+        Notification::fake();
+        $password = 'Edgarpuninna #2020';
+        $input = array_replace($this->validInput(), ['password' => $password, 'password_confirmation' => $password]);
+
+        $this->postJson('/api/auth/register', $input)->assertCreated();
+
+        $user = Usuario::where('correo_usuario', $input['email'])->firstOrFail();
+        $this->assertTrue(Hash::check($password, $user->contrasena_usuario));
+        Notification::assertSentTo($user, VerifyEmail::class);
+    }
+
     #[DataProvider('validCedulas')]
     public function test_registration_accepts_valid_province_consular_and_zero_verifier_numbers(string $cedula): void
     {

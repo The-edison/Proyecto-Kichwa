@@ -1,4 +1,4 @@
-import { CheckCircle2, Volume2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { useLessonAudio, type LessonAudioClip } from '../hooks/useLessonAudio';
 import { feedbackMessage, mediaUrl } from './ExerciseCard';
 import type { Exercise, ExerciseAnswer, ExerciseFeedback } from '../types';
@@ -29,7 +29,6 @@ export function SceneChoicePanel({ exercises, answers, feedback, busy, onChange 
                     <legend>{courtesy ? '¿Qué expresión de cortesía usarías en kichwa?' : farewell ? '¿Cómo te despedirías en kichwa?' : question ? '¿Cómo harías esta pregunta en kichwa?' : '¿Cómo responderías en kichwa?'}</legend>
                     {exercise.elements.map(option => <div data-answer-correct={answer.seleccion?.includes(option.id) ? result?.item_results?.[option.id] ?? result?.is_correct : undefined} className={`scene-choice-option${answer.seleccion?.includes(option.id) ? ' is-selected' : ''}`} key={option.id}>
                         <label><input type="radio" disabled={busy || checked} name={`guided-${exercise.id}`} value={option.id} checked={answer.seleccion?.includes(option.id) ?? false} onClick={() => { if (!busy && !checked) play(option.id as LessonAudioClip); }} onChange={() => { if (!busy && !checked) onChange(exercise, {seleccion:[option.id]}); }} /><span>{option.texto}</span></label>
-                        <button type="button" aria-label={`Escuchar ${option.texto}`} title={`Escuchar ${option.texto}`} className={state.clip === option.id && ['loading','playing'].includes(state.phase) ? 'is-playing' : ''} onClick={() => play(option.id as LessonAudioClip)}><Volume2 size={19} aria-hidden="true" /></button>
                     </div>)}
                 </fieldset>
                 {result && <p className={`guided-feedback ${checked ? 'is-correct' : 'is-incorrect'}`} role="status">{checked && <CheckCircle2 size={18} aria-hidden="true" />}<span>{feedbackMessage(result.feedback)}</span></p>}

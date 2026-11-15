@@ -97,30 +97,65 @@ test('loading and eligibility failures do not expose a publishable form', async 
     assert.ok(nodes(failed.render()).some(node => node.props.role === 'alert'));
 });
 
-test('the Kichwa heading keeps opinion cards and composer in Spanish', async () => {
+async function testimonialsScreen({ language = 'es', data = [], loading = false, error = null } = {}) {
     const source = await readFile(new URL('../src/js/components/TestimonialsSection.tsx', import.meta.url), 'utf8');
     const { code: sectionCode } = await transformWithOxc(source, 'TestimonialsSection.tsx');
     const context = vm.createContext({});
     const jsx = (type, props) => ({ type, props });
     const requested = [];
+    let retries = 0;
     const module = new vm.SourceTextModule(sectionCode, { context });
     await module.link(specifier => {
         const dependency = specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx }
             : specifier === 'lucide-react' ? { MessageCircle: 'MessageCircle' }
             : specifier.endsWith('/navigation') ? { Link: 'Link' }
             : specifier.endsWith('/AuthContext') ? { useAuth: () => ({ user: { role: 'student' } }) }
-            : specifier.endsWith('/useApi') ? { useApi: path => { requested.push(path); return { data: [], loading: false, error: null }; } }
+            : specifier.endsWith('/useApi') ? { useApi: path => { requested.push(path); return { data, loading, error, refresh: () => { retries++; } }; } }
             : { StudentOpinionForm: 'StudentOpinionForm' };
         return new vm.SyntheticModule(Object.keys(dependency), function () { for (const [key, value] of Object.entries(dependency)) this.setExport(key, value); }, { context });
     });
     await module.evaluate();
-    const tree = module.namespace.TestimonialsSection({ language: 'qu' });
-    assert.deepEqual(requested, ['/testimonials?language=es']);
+    return { tree: module.namespace.TestimonialsSection({ language }), requested, retries: () => retries };
+}
+
+test('the Kichwa heading keeps opinion cards and composer in Spanish', async () => {
+    const { tree, requested } = await testimonialsScreen({ language: 'qu' });
+    assert.deepEqual(requested, ['/comentarios/destacados']);
     assert.equal(tree.props.lang, 'es');
     assert.equal(find(tree, 'h2').props.lang, 'qu-EC');
     assert.equal(find(tree, 'h2').props.children, 'Kichwa shimita yachakukkunapa rimaykuna.');
     assert.ok(JSON.stringify(find(tree, 'article').props.children).includes('Las palabras nuevas'));
     assert.equal(nodes(tree).find(node => node.type === 'StudentOpinionForm').props.language, 'es');
+});
+
+for (const count of [0, 1, 2, 3, 5, 6, 8]) {
+    test(`${count} selected opinions use only the necessary sample cards and never exceed six cards`, async () => {
+        const data = Array.from({ length: count }, (_, index) => ({ id: index + 1, name: `Autor ${index}`, body: `Excelente experiencia real ${index}`, language: 'es', created_at: '2026-11-14' }));
+        const { tree } = await testimonialsScreen({ data });
+        const cards = nodes(tree).filter(node => node.type === 'article');
+        const examples = cards.filter(card => JSON.stringify(card).includes('Opinión de ejemplo'));
+        assert.equal(cards.length, Math.min(count + 4, 6));
+        assert.equal(examples.length, Math.min(4, Math.max(0, 6 - count)));
+        for (let index = 0; index < Math.min(count, 6); index++) {
+            assert.ok(JSON.stringify(cards[index]).includes(`Excelente experiencia real ${index}`));
+        }
+    });
+}
+
+test('loading featured opinions exposes a status while keeping the page heading', async () => {
+    const { tree } = await testimonialsScreen({ loading: true });
+    assert.equal(find(tree, 'p').props.className.includes('section-lead'), true);
+    assert.ok(nodes(tree).some(node => node.props.role === 'status'));
+    assert.ok(find(tree, 'h2'));
+    assert.equal(find(tree, 'article'), undefined);
+});
+
+test('a featured opinion error offers a working retry without breaking the composer', async () => {
+    const { tree, retries } = await testimonialsScreen({ error: 'No disponible' });
+    assert.ok(nodes(tree).some(node => node.props.role === 'alert'));
+    find(tree, 'button').props.onClick();
+    assert.equal(retries(), 1);
+    assert.ok(nodes(tree).some(node => node.type === 'StudentOpinionForm'));
 });
 
 async function dashboard(role) {

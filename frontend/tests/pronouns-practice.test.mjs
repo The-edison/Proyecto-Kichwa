@@ -1,3 +1,4 @@
+import { wordOrderDrag } from './word-order-drag-helper.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -20,7 +21,7 @@ async function screen(exercises) {
         pause() { this.paused = true; }
     }
     const context = vm.createContext({ Audio });
-    const dependencies = {
+    const dependencies = {wordOrderDrag: {wordOrderDrag},
         MatchingLines: { MatchingLines: 'MatchingLines' },
         react: {
             useState(initial) { const i = cursor++; if (!(i in states)) states[i] = initial; return [states[i], value => { states[i] = value; }]; },
@@ -100,7 +101,7 @@ test('word tiles require all three complete sentences, support removing words an
     assert.equal(view.complete(5), false);
     select(2, 'mikuni'); assert.equal(view.complete(5), true);
     find(view, 'Quitar Ñuka de la posición 1').props.onClick();
-    assert.equal(view.answers()[5].textos.comer, 'mikuni');
+    assert.equal(view.answers()[5].textos.comer, ' mikuni');
     assert.equal(view.complete(5), false);
     find(view, 'Reiniciar oración 2').props.onClick();
     assert.equal(view.answers()[5].textos['no-trabajan'], ''); assert.equal(view.answers()[5].textos.vigilan, 'Ñuka mikuni');

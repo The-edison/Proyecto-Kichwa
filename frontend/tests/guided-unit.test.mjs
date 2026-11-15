@@ -1,3 +1,4 @@
+import { wordOrderDrag } from './word-order-drag-helper.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -16,10 +17,11 @@ async function screen({ completed = false, post, exercises = [choice, matching],
     let cursor = 0, refreshes = 0;
     const states = [], requests = [], preloads = [], sounds = [];
     const effects = [], effectDeps = [];
-    const context = vm.createContext({ crypto: { randomUUID }, Image: class { constructor() { preloads.push(this); } decode() { return Promise.resolve(); } }, window: { scrollTo() {}, sessionStorage: { getItem(key) { if (blockedStorage) throw Error('blocked'); return storage.get(key) ?? null; }, setItem(key, value) { if (blockedStorage) throw Error('blocked'); storage.set(key, value); } } } });
+    const browserStorage = { getItem(key) { if (blockedStorage) throw Error('blocked'); return storage.get(key) ?? null; }, setItem(key, value) { if (blockedStorage) throw Error('blocked'); storage.set(key, value); } };
+    const context = vm.createContext({ crypto: { randomUUID }, Image: class { constructor() { preloads.push(this); } decode() { return Promise.resolve(); } }, window: { scrollTo() {}, localStorage: browserStorage, sessionStorage: { getItem: () => null, setItem() {} } } });
     const jsx = (type, props) => ({ type, props });
     class ApiError extends Error { constructor(message) { super(message); this.errors = {}; } }
-    const dependencies = { DialoguePractice: { DialoguePractice: 'DialoguePractice' }, useExerciseViewport: { useExerciseViewport: () => {} }, VerbalPractice: { VerbalPractice: 'VerbalPractice' }, TimeMorphemePractice: { TimeMorphemePractice: 'TimeMorphemePractice' },
+    const dependencies = {wordOrderDrag: {wordOrderDrag}, DialoguePractice: { DialoguePractice: 'DialoguePractice' }, useExerciseViewport: { useExerciseViewport: () => {} }, VerbalPractice: { VerbalPractice: 'VerbalPractice' }, TimeMorphemePractice: { TimeMorphemePractice: 'TimeMorphemePractice' },
         MorphemePractice: { MorphemePractice: 'MorphemePractice', MorphemeListeningPanel: 'MorphemeListeningPanel' },
         MatchingLines: { MatchingLines: 'MatchingLines' },
         AdvancedMorphemesIntroduction: { AdvancedMorphemesIntroduction: 'AdvancedMorphemesIntroduction' },
@@ -63,6 +65,7 @@ async function screen({ completed = false, post, exercises = [choice, matching],
         BodyPracticePanel: { BodyPracticePanel: 'BodyPracticePanel' },
         States: { ErrorState: 'ErrorState', LoadingState: 'LoadingState' },
         AuthContext: { useAuth: () => ({ user: { id: userId } }) },
+        ResultUserName: { ResultUserName: 'ResultUserName' },
     };
     const cache = new Map();
     const interaction = new vm.SourceTextModule(interactionCode, { context });
@@ -90,11 +93,43 @@ async function screen({ completed = false, post, exercises = [choice, matching],
 function nodes(tree) { if (Array.isArray(tree)) return tree.flatMap(nodes); if (!tree?.props) return []; return [tree, ...nodes(tree.props.children)]; }
 function content(tree) { if (Array.isArray(tree)) return tree.map(content).join(''); return tree?.props ? content(tree.props.children) : typeof tree === 'string' || typeof tree === 'number' ? String(tree) : ''; }
 const button = (view, label) => nodes(view.render()).find(node => node.type === 'button' && (node.props['aria-label'] === label || content(node).trim() === label || Array.isArray(node.props.children) && content(node.props.children[0]) === label));
+
+test('lesson navigation shows only arrows and retains accessible labels and working navigation', async () => {
+    const view = await screen();
+    const footer = nodes(view.render()).find(node => node.type === 'footer');
+    const back = nodes(footer).find(node => node.type === 'Link');
+    const forward = button(view, 'Continuar');
+    assert.equal(back.props['aria-label'], 'Volver');
+    assert.equal(content(back), '');
+    assert.equal(content(forward), '');
+    assert.ok(nodes(back).some(node => node.type === 'ArrowLeft'));
+    assert.ok(nodes(forward).some(node => node.type === 'ArrowRight'));
+    click(view, 'Continuar');
+    assert.equal(content(button(view, 'Volver')), '');
+    click(view, 'Volver');
+    assert.ok(button(view, 'Continuar'));
+});
 const choose = (view, id, exerciseId) => nodes(view.render()).find(node => node.type === 'input' && node.props.value === id && (!exerciseId || node.props.name === `guided-${exerciseId}`)).props.onChange();
 const click = (view, label) => button(view, label).props.onClick();
 async function check(view) { click(view, 'Comprobar'); await new Promise(resolve => setImmediate(resolve)); }
 async function finish(view) { click(view, 'Ver mi puntaje'); await new Promise(resolve => setImmediate(resolve)); }
 function pair(view, spanish, kichwa) { click(view, spanish); click(view, kichwa); }
+
+test('a new visit restores the selected topic page and the unfinished exercise answers', async () => {
+    const storage = new Map();
+    const config = { guided_lesson: 'advanced-morphemes' };
+    const first = await screen({ storage, config });
+    nodes(first.render()).find(node => node.type === 'AdvancedMorphemesIntroduction').props.onSelectPage(2);
+    const next = await screen({ storage, config });
+    assert.equal(nodes(next.render()).find(node => node.type === 'AdvancedMorphemesIntroduction').props.page, 2);
+    click(next, 'Siguiente');
+    click(next, 'Continuar');
+    choose(next, 'wasi');
+    const resumed = await screen({ storage, config });
+    assert.ok(nodes(resumed.render()).some(node => node.props['aria-label'] === 'Ejercicio 1 de 2'));
+    assert.equal(nodes(resumed.render()).find(node => node.type === 'input' && node.props.value === 'wasi').props.checked, true);
+    assert.equal(resumed.requests.length, 0);
+});
 
 test('unanswered exercises cannot be skipped', async () => {
     const storage = new Map();
@@ -103,7 +138,7 @@ test('unanswered exercises cannot be skipped', async () => {
     assert.equal(button(view, 'Siguiente sin responder'), undefined);
     assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Ejercicio 1 de 2'));
     assert.equal(view.requests.length, 0);
-    assert.ok(content(view.render()).includes('0 XP en este intento'));
+    assert.ok(content(view.render()).includes('0 Score en este intento'));
     view.remount();
     assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Ejercicio 1 de 2'));
     assert.ok(button(view, 'Comprobar'));
@@ -119,7 +154,7 @@ test('intermediate lesson opens without exercises, teaches four parts and finish
     click(view, 'Anterior'); assert.equal(lesson().props.page, 1);
     lesson().props.onSelectPage(3);
     assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Parte 4 de 4'));
-    const finishLesson = nodes(view.render()).find(node => node.type === 'Link' && content(node).includes('Finalizar lección'));
+    const finishLesson = nodes(view.render()).find(node => node.type === 'Link' && node.props['aria-label'] === 'Finalizar lección');
     assert.equal(finishLesson.props.href, '/aprender/modulo/8');
     assert.equal(button(view, 'Comprobar'), undefined);
     assert.equal(view.requests.length, 0);
@@ -290,7 +325,7 @@ test('the time lesson teaches its four parts without exercises and returns to th
     click(view, 'Anterior');
     assert.equal(lesson().props.page, 2);
     lesson().props.onSelectPage(3);
-    const finishLesson = nodes(view.render()).find(node => node.type === 'Link' && content(node).includes('Finalizar lección'));
+    const finishLesson = nodes(view.render()).find(node => node.type === 'Link' && node.props['aria-label'] === 'Finalizar lección');
     assert.equal(finishLesson.props.href, '/aprender/modulo/8');
     assert.equal(view.requests.length, 0);
     assert.equal(button(view, 'Comprobar'), undefined);
@@ -373,12 +408,12 @@ test('verbal analysis keeps all five lesson parts reachable and finishes only af
     const lesson = () => nodes(view.render()).find(node => node.type === 'VerbalAnalysisIntroduction');
     assert.equal(lesson().props.page, 0);
     for (let page = 1; page <= 4; page++) {
-        assert.equal(nodes(view.render()).some(node => node.type === 'Link' && content(node).includes('Finalizar lección')), false);
+        assert.equal(nodes(view.render()).some(node => node.type === 'Link' && node.props['aria-label'] === 'Finalizar lección'), false);
         click(view, 'Siguiente');
         assert.equal(lesson().props.page, page);
     }
     assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Parte 5 de 5'));
-    const finishLesson = nodes(view.render()).find(node => node.type === 'Link' && content(node).includes('Finalizar lección'));
+    const finishLesson = nodes(view.render()).find(node => node.type === 'Link' && node.props['aria-label'] === 'Finalizar lección');
     assert.equal(finishLesson.props.href, '/aprender/modulo/8');
     click(view, 'Anterior'); assert.equal(lesson().props.page, 3);
     lesson().props.onSelectPage(0); assert.equal(lesson().props.page, 0);
@@ -469,12 +504,12 @@ test('the short conversation lesson reaches four parts and returns to its module
     assert.equal(lesson().props.page, 0);
     assert.equal(nodes(view.render()).some(node => node.type === 'ErrorState'), false);
     for (let page = 1; page < 4; page++) {
-        assert.equal(nodes(view.render()).some(node => node.type === 'Link' && content(node).includes('Finalizar lección')), false);
+        assert.equal(nodes(view.render()).some(node => node.type === 'Link' && node.props['aria-label'] === 'Finalizar lección'), false);
         click(view, 'Siguiente');
         assert.equal(lesson().props.page, page);
     }
     assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Parte 4 de 4'));
-    assert.equal(nodes(view.render()).find(node => node.type === 'Link' && content(node).includes('Finalizar lección')).props.href, '/aprender/modulo/8');
+    assert.equal(nodes(view.render()).find(node => node.type === 'Link' && node.props['aria-label'] === 'Finalizar lección').props.href, '/aprender/modulo/8');
     click(view, 'Anterior'); assert.equal(lesson().props.page, 2);
     lesson().props.onSelectPage(0); assert.equal(lesson().props.page, 0);
     assert.equal(button(view, 'Comprobar'), undefined);
@@ -725,7 +760,7 @@ test('three dedicated screens grade both exercises and show the server score wit
     assert.ok(button(view, 'Reintentar'));
     assert.equal(nodes(view.render()).some(node => node.props.className === 'guided-result-details'), false);
     assert.equal(nodes(view.render()).find(node => node.type === 'LearningCompanion').props.portraitOnly, true);
-    assert.ok(content(view.render()).includes('Cada ejercicio correcto suma 10 XP.'));
+    assert.ok(content(view.render()).includes('Cada ejercicio correcto suma 10 Score.'));
     assert.equal(view.refreshes(), 0);
 });
 
@@ -822,7 +857,7 @@ test('a failed score request can be retried without losing or resubmitting the e
     assert.equal(view.requests.filter(request => request.path.endsWith('/answer')).length, 2);
 });
 
-test('guided companion shows checked XP, clears stale feedback and sums only earned XP in the final score', async () => {
+test('guided companion shows checked Score, clears stale feedback and sums only earned Score in the final score', async () => {
     let checks = 0;
     const view = await screen({ post: ({ path }) => path.endsWith('/guided/result') ? perfectScore : {
         response_id: ++checks, is_correct: checks !== 1, feedback: 'Respuesta comprobada.', xp_earned: checks === 2 ? 10 : 0, xp_total: 40,
@@ -949,7 +984,7 @@ test('guided feedback shows the explanation without repeating Inti and keeps num
     assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === 'Ejercicio 1 de 2'));
 });
 
-test('a guided retry starts with zero XP and a new attempt ID while the server keeps the accumulated total', async () => {
+test('a guided retry starts with zero Score and a new attempt ID while the server keeps the accumulated total', async () => {
     const attempts = new Map();
     let total = 0;
     const view = await screen({ post: ({ path, payload }) => {
@@ -973,7 +1008,7 @@ test('a guided retry starts with zero XP and a new attempt ID while the server k
 });
 
 
-test('greetings unit uses its lesson and three images with locked successes, final score and fresh retry XP', async () => {
+test('greetings unit uses its lesson and three images with locked successes, final score and fresh retry Score', async () => {
     const words = ['puncha', 'chishi', 'tuta'];
     const exercises = words.map((word, index) => ({ ...choice, id: 21 + index, elements: words.map(id => ({ id, texto: 'Alli ' + id })), config: { ...choice.config, context_text: ['08:00', '17:30', '21:00'][index], prompt_image: 'kichwa/imagenes/' + word + '.webp' } }));
     const view = await screen({ config: { learning_mode: 'guided', guided_lesson: 'greetings' }, exercises,
@@ -1002,7 +1037,7 @@ test('greetings unit uses its lesson and three images with locked successes, fin
     click(view, 'Reintentar');
     assert.equal(nodes(view.render()).some(node => node.props.className === 'guided-attempt-progress'), false);
     click(view, 'Continuar');
-    assert.ok(content(view.render()).includes('0 XP en este intento'));
+    assert.ok(content(view.render()).includes('0 Score en este intento'));
     words.forEach((word, index) => choose(view, word, exercises[index].id)); await check(view);
     assert.notEqual(view.requests.at(-1).payload.practice_attempt_id, firstAttempt);
 });
@@ -1015,11 +1050,11 @@ test('the three greetings keep correct answers locked and retry only the mistake
     choose(view, 'wasi', 21); choose(view, 'sisa', 22); choose(view, 'wasi', 23);
     await check(view);
     assert.deepEqual(nodes(view.render()).filter(node => node.type === 'fieldset').map(node => node.props.disabled), [true, false, true]);
-    assert.ok(content(view.render()).includes('20 XP en este intento'));
+    assert.ok(content(view.render()).includes('20 Score en este intento'));
     choose(view, 'wasi', 22); await check(view);
     assert.equal(view.requests.length, 4);
     assert.equal(view.requests.at(-1).path, '/exercises/22/answer');
-    assert.ok(content(view.render()).includes('30 XP en este intento'));
+    assert.ok(content(view.render()).includes('30 Score en este intento'));
     assert.ok(button(view, 'Ver mi puntaje'));
 });
 
@@ -1160,7 +1195,7 @@ test('questions and responses are graded independently and only a failed exercis
         assert.equal(view.requests.at(-1).path,'/exercises/'+(group==='q'?31:32)+'/answer');
         if(group==='q'){
             assert.equal(panel().props.disabled,true);
-            assert.ok(content(view.render()).includes('10 XP en este intento'));
+            assert.ok(content(view.render()).includes('10 Score en este intento'));
             click(view,'Continuar');
         }
     }
@@ -1174,7 +1209,7 @@ test('questions and responses are graded independently and only a failed exercis
     assert.equal(view.requests.length,3);
     assert.equal(view.requests.at(-1).path,'/exercises/32/answer');
     assert.equal(panel().props.disabled,true);
-    assert.ok(content(view.render()).includes('20 XP en este intento'));
+    assert.ok(content(view.render()).includes('20 Score en este intento'));
 });
 
 test('three listening sentences follow the greeting images and require all selections before checking', async () => {
@@ -1242,7 +1277,7 @@ test('greetings keep their single image panel before the new three-audio matchin
     assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === '4 de 4 ejercicios correctos'));
 });
 
-test('returning from the dictionary restores the exercise, unfinished pairs, checked answers and attempt XP', async () => {
+test('returning from the dictionary restores the exercise, unfinished pairs, checked answers and attempt Score', async () => {
     const storage = new Map();
     const post = ({ path }) => path.endsWith('/guided/result') ? { ...perfectScore, xp_earned: 20 } : { response_id: path.includes('/11/') ? 101 : 102, is_correct: true, feedback: 'Correcto.', xp_earned: 10 };
     const first = await screen({ storage, post });
@@ -1253,7 +1288,7 @@ test('returning from the dictionary restores the exercise, unfinished pairs, che
     assert.ok(nodes(resumed.render()).some(node => node.props['aria-label'] === 'Ejercicio 2 de 2'));
     assert.ok(content(resumed.render()).includes('1 de 4 parejas seleccionadas'));
     assert.equal(button(resumed, 'Oveja').props['aria-pressed'], true);
-    assert.ok(content(resumed.render()).includes('10 XP en este intento'));
+    assert.ok(content(resumed.render()).includes('10 Score en este intento'));
     click(resumed, 'Volver');
     assert.equal(nodes(resumed.render()).find(node => node.props.value === 'wasi').props.checked, true);
     assert.equal(nodes(resumed.render()).find(node => node.type === 'fieldset').props.disabled, true);
@@ -1269,7 +1304,7 @@ test('returning from the dictionary restores the exercise, unfinished pairs, che
     const fresh = await screen({ storage, post });
     assert.ok(nodes(fresh.render()).some(node => node.type === 'GuidedIntroduction'));
     click(fresh, 'Continuar');
-    assert.ok(content(fresh.render()).includes('0 XP en este intento'));
+    assert.ok(content(fresh.render()).includes('0 Score en este intento'));
     choose(fresh, 'wasi'); await check(fresh);
     assert.notEqual(fresh.requests[0].payload.practice_attempt_id, attemptId);
 });
@@ -1326,7 +1361,7 @@ test('a response received after leaving updates the resumed attempt and cannot o
     resolve({ response_id: 101, is_correct: true, feedback: 'Correcto.', xp_earned: 10 });
     await new Promise(done => setImmediate(done));
     assert.equal(nodes(view.render()).find(node => node.type === 'fieldset').props.disabled, true);
-    assert.ok(content(view.render()).includes('10 XP en este intento'));
+    assert.ok(content(view.render()).includes('10 Score en este intento'));
 
     const changed = await screen({ post: () => new Promise(done => { resolve = done; }) });
     click(changed, 'Continuar'); choose(changed, 'sisa'); click(changed, 'Comprobar');
@@ -1361,7 +1396,7 @@ test('grouped choices keep successful answers and retry only the failed request 
     assert.equal(resumed.requests[0].path, '/exercises/13/answer');
     assert.equal(resumed.requests[0].payload.practice_attempt_id, failed.practice_attempt_id);
     assert.equal(resumed.requests[0].payload.submission_id, failed.submission_id);
-    assert.ok(content(resumed.render()).includes('20 XP en este intento'));
+    assert.ok(content(resumed.render()).includes('20 Score en este intento'));
     click(resumed, 'Continuar');
     assert.ok(nodes(resumed.render()).some(node => node.props['aria-label'] === 'Ejercicio 3 de 3'));
 });
@@ -1385,7 +1420,7 @@ test('an incorrect grouped answer stays editable without changing or rewarding i
     assert.equal(view.requests.filter(request => request.path === '/exercises/13/answer').length, 2);
     assert.equal(view.requests[1].payload.practice_attempt_id, view.requests[2].payload.practice_attempt_id);
     assert.notEqual(view.requests[1].payload.submission_id, view.requests[2].payload.submission_id);
-    assert.ok(content(view.render()).includes('20 XP en este intento'));
+    assert.ok(content(view.render()).includes('20 Score en este intento'));
     assert.ok(button(view, 'Ver mi puntaje'));
 });
 
@@ -1421,7 +1456,7 @@ test('double clicks do not duplicate a batch and changed resumed answers cancel 
     assert.equal(button(view, 'Comprobar').props.disabled, false);
 });
 
-test('both image answers start together and out-of-order responses preserve the authoritative XP total', async () => {
+test('both image answers start together and out-of-order responses preserve the authoritative Score total', async () => {
     const pending = new Map();
     const view = await screen({ exercises: [choice, flowerChoice], post: ({ path }) => new Promise(done => pending.set(path, done)) });
     click(view, 'Continuar'); choose(view, 'wasi', 11); choose(view, 'sisa', 13); click(view, 'Comprobar');
@@ -1433,7 +1468,7 @@ test('both image answers start together and out-of-order responses preserve the 
     assert.equal(button(view, 'Comprobando…').props.disabled, true);
     pending.get('/exercises/11/answer')({ response_id: 101, is_correct: true, xp_earned: 10, xp_attempt: 10 });
     await new Promise(done => setImmediate(done));
-    assert.ok(content(view.render()).includes('20 XP en este intento'));
+    assert.ok(content(view.render()).includes('20 Score en este intento'));
     assert.ok(button(view, 'Ver mi puntaje'));
     const saved = JSON.parse([...view.storage.values()][0]);
     assert.equal(saved.feedback[11].response_id, 101);
@@ -1457,7 +1492,7 @@ test('a fast failed answer does not abandon its slower neighbor and retries only
     assert.equal(view.requests.length, 3);
     assert.equal(view.requests[2].path, '/exercises/11/answer');
     assert.equal(view.requests[0].payload.submission_id, view.requests[2].payload.submission_id);
-    assert.ok(content(view.render()).includes('20 XP en este intento'));
+    assert.ok(content(view.render()).includes('20 Score en este intento'));
 });
 
 test('the lesson preloads at most two image panels across intervening matching exercises without repeated loads', async () => {
@@ -1488,7 +1523,7 @@ test('an image that failed to preload can be requested again on the next screen'
     assert.equal(view.preloads[2].src, view.preloads[0].src);
 });
 
-test('walking and yura share the second panel and all five exercises keep their own results and XP', async () => {
+test('walking and yura share the second panel and all five exercises keep their own results and Score', async () => {
     const walking = { ...choice, id: 14, elements: ['wasi', 'shunku', 'purina', 'sisa'].map(id => ({ id, texto: id })), config: { ...choice.config, prompt_image: 'kichwa/imagenes/purina.webp' } };
     const tree = { ...choice, id: 15, elements: ['sisa', 'yura', 'wasi', 'purina'].map(id => ({ id, texto: id })), config: { ...choice.config, prompt_image: 'kichwa/imagenes/yura.webp', prompt_image_alt: 'Un árbol de copa verde y tronco marrón.' } };
     const exercises = [choice, flowerChoice, walking, tree, matching];
@@ -1511,7 +1546,7 @@ test('walking and yura share the second panel and all five exercises keep their 
     await check(resumed);
     assert.deepEqual(resumed.requests.map(request => request.path), ['/exercises/14/answer', '/exercises/15/answer']);
     assert.ok(content(resumed.render()).includes('Yura significa árbol.'));
-    assert.ok(content(resumed.render()).includes('40 XP en este intento'));
+    assert.ok(content(resumed.render()).includes('40 Score en este intento'));
     assert.equal(button(resumed, 'Ver mi puntaje'), undefined);
     click(resumed, 'Volver');
     assert.ok(nodes(resumed.render()).some(node => node.props['aria-label'] === 'Ejercicios 1 y 2 de 5'));
@@ -1548,7 +1583,7 @@ test('matching progress follows selections without a visible pair summary', asyn
     assert.equal(progress().props.value, 0);
 });
 
-test('final listening panel requires three answers, preserves drafts, awards ten XP and finishes the unit', async () => {
+test('final listening panel requires three answers, preserves drafts, awards ten Score and finishes the unit', async () => {
     const listening = { id: 16, type: 'completar', prompt: 'Escucha y escribe la vocal.', elements: [{ id: 'audio1', texto: 'sh_nku' }, { id: 'audio2', texto: 'p_rina' }, { id: 'audio3', texto: 'll_ma' }], zones: [], config: { title: 'La vocal que falta', presentation: 'writing', listening_vowels: true } };
     const exercises = [matching, listening];
     const storage = new Map();
@@ -1576,7 +1611,7 @@ test('final listening panel requires three answers, preserves drafts, awards ten
     await check(resumed);
     assert.equal(resumed.requests[0].path, '/exercises/16/answer');
     assert.equal(panel(resumed).props.disabled, true);
-    assert.ok(content(resumed.render()).includes('20 XP en este intento'));
+    assert.ok(content(resumed.render()).includes('20 Score en este intento'));
     await finish(resumed);
     assert.deepEqual(Array.from(resumed.requests.at(-1).payload.response_ids), [112, 116]);
     assert.equal(nodes(resumed.render()).find(node => node.type === 'LearningCompanion').props.xpEarned, 20);
@@ -1599,7 +1634,7 @@ test('incorrect matching cannot finish until every pair is correct', async () =>
     assert.ok(nodes(view.render()).some(node => node.props['aria-label'] === '1 de 1 ejercicios correctos'));
 });
 
-test('resuming a legacy draft returns to the first incorrect exercise without losing answers or XP', async () => {
+test('resuming a legacy draft returns to the first incorrect exercise without losing answers or Score', async () => {
     const storage = new Map();
     const view = await screen({ storage });
     view.render();

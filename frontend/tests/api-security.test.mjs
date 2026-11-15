@@ -116,7 +116,19 @@ test('publishing an opinion refreshes the public stories and the student opinion
     assert.equal(filter.predicate({ queryKey: ['api', '/testimonials/eligibility'] }), true);
     assert.equal(filter.predicate({ queryKey: ['api', '/testimonials?language=qu'] }), true);
     assert.equal(filter.predicate({ queryKey: ['api', '/testimonials/eligibility?language=qu'] }), true);
+    assert.equal(filter.predicate({ queryKey: ['api', '/comentarios/destacados'] }), true);
     assert.equal(filter.predicate({ queryKey: ['api', '/levels'] }), false);
+});
+
+test('group membership changes refresh groups and student filters without altering learning queries', async () => {
+    const browser = await client();
+    await browser.api.apiPost('/mi-grupo', { codigo: 'KCH-7F3A9' });
+    const [filter] = browser.invalidations[0];
+    assert.equal(filter.refetchType, 'active');
+    for (const path of ['/mi-grupo', '/admin/grupos', '/admin/students?q=&page=1&grupo_id=7', '/admin/overview?grupo_id=7', '/admin/usage-monthly?grupo_id=7']) {
+        assert.equal(filter.predicate({ queryKey: ['api', path] }), true);
+    }
+    assert.equal(filter.predicate({ queryKey: ['api', '/units/4/guided'] }), false);
 });
 
 test('graded attempts refresh the shared student XP and admin report queries', async () => {

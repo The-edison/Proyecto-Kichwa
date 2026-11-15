@@ -1,3 +1,4 @@
+import { wordOrderDrag } from './word-order-drag-helper.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -21,7 +22,7 @@ async function interaction(exercise, initial = {}, checkPair, initialLockedPairs
     const jsx = (type, props) => ({ type, props });
     const module = new vm.SourceTextModule(code, { context });
     await module.link(specifier => {
-        const dependency = specifier.endsWith('/MatchingLines') ? { MatchingLines: 'MatchingLines' } : specifier.endsWith('/useAnswerSound') ? { useAnswerSound: () => () => {} } : specifier === 'react' ? {
+        const dependency = specifier.endsWith('/wordOrderDrag') ? {wordOrderDrag} : specifier.endsWith('/MatchingLines') ? { MatchingLines: 'MatchingLines' } : specifier.endsWith('/useAnswerSound') ? { useAnswerSound: () => () => {} } : specifier === 'react' ? {
             useState: value => { const index = cursor++; if (!(index in states)) states[index] = value; return [states[index], value => { states[index] = typeof value === 'function' ? value(states[index]) : value; }]; },
             useRef: value => ({ current: value }),
         } : specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx, Fragment: 'fragment' }

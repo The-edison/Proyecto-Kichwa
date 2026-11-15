@@ -13,11 +13,9 @@ const copy = {
             'Me gusta avanzar a mi ritmo y volver a los contenidos que necesito repasar.',
             'Los ejercicios me ayudan a reconocer mis errores y a intentarlo otra vez.',
             'Aprender saludos y expresiones cotidianas hace que el Kichwa se sienta más cercano.',
-            'Ver mi progreso me anima a continuar y a completar cada unidad.',
-            'Compartir lo aprendido con otras personas puede mantener viva nuestra lengua.',
         ],
         exampleName: 'Ejemplo', eyebrow: 'HISTORIAS DE ESTUDIANTES', title: 'Historias de quienes aprenden Kichwa.',
-        intro: 'Experiencias compartidas por nuestra comunidad. Aquí aparecen las seis opiniones más recientes; los espacios marcados como ejemplo son textos de muestra.',
+        intro: 'Experiencias compartidas por nuestra comunidad, seleccionadas automáticamente cada semana. Los espacios marcados como ejemplo son textos de muestra.',
         loading: 'Cargando experiencias…', loadError: 'No se pudieron cargar las opiniones.', retry: 'Volver a intentar',
         exampleOpinion: 'Opinión de ejemplo', student: 'Estudiante de Yachay', exampleText: 'Texto de muestra', shared: 'Experiencia compartida en Yachay',
         write: 'Escribe tu opinión sobre Yachay...', comment: 'Comentar', share: 'Comparte tu experiencia con otros estudiantes.', login: 'Iniciar sesión',
@@ -28,11 +26,9 @@ const copy = {
             'Ñukapa pachaman hina yachakuyta munani; yachashkakunata kutin rikuytapash munani.',
             'Ruraykunaka pantashkakunata rikuchin, kutin kallariyta yanapan.',
             'Napaykunata, punchantin rimaykunatapash yachakushpa kichwa shimita ashtawan riksini.',
-            'Ñukapa ñawpariyta rikushpaka sapa yachayta tukuchinkapak kallpata charini.',
-            'Yachashkata shuk runakunawan rakinaka ñukanchik shimita kawsachin.',
         ],
         exampleName: 'Rikuchiy', eyebrow: 'YACHAKUKKUNAPA RIMAYKUNA', title: 'Kichwa shimita yachakukkunapa rimaykuna.',
-        intro: 'Ñukanchik ayllupa yachakuy rimaykuna. Kaypi sukta mushuk rimaykuna rikurin; rikuchiy nishkakunaka rikuchiy killkakunallami.',
+        intro: 'Ñukanchik ayllupa yachakuy rimaykuna. Rikuchiy nishkakunaka rikuchiy killkakunallami.',
         loading: 'Rimaykunata apamun…', loadError: 'Rimaykunata mana apamuyta usharirkanchu.', retry: 'Kutin ruray',
         exampleOpinion: 'Rikuchiy rimay', student: 'Yachaypi yachakuk', exampleText: 'Rikuchiy killka', shared: 'Yachaypi rakishka rimay',
         write: 'Yachaymanta kampa yuyayta killkay...', comment: 'Killkay', share: 'Yachakukkunawan kampa yachayta rakiy.', login: 'Yaykuy',
@@ -43,7 +39,7 @@ export function TestimonialsSection({ language = 'es' }: { language?: HomeLangua
     const t = copy[language];
     const cardCopy = copy.es;
     const { user } = useAuth();
-    const testimonials = useApi<StudentTestimonial[]>('/testimonials?language=es');
+    const testimonials = useApi<StudentTestimonial[]>('/comentarios/destacados');
     const visibleTestimonials = [
         ...(testimonials.data ?? []).map(testimonial => ({ ...testimonial, isExample: false })),
         ...cardCopy.examples.map((body, index) => ({ id: `example-${index}`, name: `${cardCopy.exampleName} ${String(index + 1).padStart(2, '0')}`, body, isExample: true })),

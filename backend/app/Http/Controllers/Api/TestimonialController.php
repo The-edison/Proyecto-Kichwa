@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\SaveTestimonialRequest;
 use App\Models\Testimonial;
 use App\Models\Usuario;
+use App\Services\ComentariosDestacados;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,11 @@ use Illuminate\Support\Str;
 
 class TestimonialController extends Controller
 {
+    public function destacados(ComentariosDestacados $featured): JsonResponse
+    {
+        return response()->json($featured->selected()->map(fn (Testimonial $testimonial) => $this->present($testimonial)));
+    }
+
     public function index(Request $request): JsonResponse
     {
         $language = in_array($request->query('language'), ['es', 'qu'], true) ? $request->query('language') : 'es';

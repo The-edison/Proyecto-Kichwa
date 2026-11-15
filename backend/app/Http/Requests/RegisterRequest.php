@@ -31,10 +31,15 @@ class RegisterRequest extends FormRequest
 
     public static function passwordRule(): Password
     {
-        $rule = Password::min(12)->max(72)->letters()->mixedCase()->numbers()->symbols()->rules([
+        $rule = Password::min(12)->max(72)->letters()->mixedCase()->numbers()->rules([
             function ($attribute, $value, $fail): void {
                 if (! is_string($value) || strlen($value) > 72 || str_contains($value, "\0")) {
                     $fail('La contraseña debe tener como máximo 72 bytes y no contener caracteres nulos.');
+                }
+            },
+            function ($attribute, $value, $fail): void {
+                if (is_string($value) && ! preg_match('/[\p{S}\p{P}]/u', $value)) {
+                    $fail('Incluye un símbolo en la contraseña; los espacios no cuentan como símbolos.');
                 }
             },
         ]);

@@ -87,6 +87,7 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
     if (method !== 'GET') {
         const dictionaryChanged = path.startsWith('/admin/diccionario');
         const testimonialsChanged = path === '/testimonials';
+        const groupsChanged = path === '/mi-grupo' || /^\/admin\/grupos(\/|$)/.test(path);
         const hierarchyChanged = /^\/admin\/(levels|modules|units|contents|exercises|evaluations|questions)(\/|$)/.test(path);
         const progressChanged = /^\/(exercises\/\d+\/answer|evaluations\/\d+\/submit)$/.test(path);
         if (progressChanged) {
@@ -100,7 +101,8 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
             const key = query.queryKey[1];
             if (query.queryKey[0] !== 'api' || typeof key !== 'string') return false;
             if (dictionaryChanged) return /^\/(?:diccionario|admin\/diccionario|admin\/overview)(?:\/|\?|$)/.test(key);
-            if (testimonialsChanged) return /^\/testimonials(?:\/eligibility)?(?:\?|$)/.test(key);
+            if (testimonialsChanged) return /^\/(?:testimonials(?:\/eligibility)?|comentarios\/destacados)(?:\?|$)/.test(key);
+            if (groupsChanged) return /^\/(?:mi-grupo|admin\/grupos|admin\/students|admin\/overview|admin\/usage-monthly)(\/|\?|$)/.test(key);
             if (hierarchyChanged) return /^\/(admin\/overview|levels|modules|units|evaluations|progress|learning-navigation)(\/|\?|$)/.test(key);
             return false;
         } });

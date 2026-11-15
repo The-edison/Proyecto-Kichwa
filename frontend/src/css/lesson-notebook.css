@@ -20,7 +20,11 @@
     background: radial-gradient(ellipse at 50% 0, #fbf7ee, transparent 75%), var(--color-bg);
 }
 .guided-unit-shell:has(.guided-introduction) .guided-unit-header {
+    --color-sidebar-text: var(--color-text);
+    --color-sidebar-muted: var(--color-control-border);
+    --color-sidebar-hover: var(--color-secondary-soft);
     background: var(--notebook-paper);
+    color: var(--color-text);
     border-bottom: 1px solid var(--color-border);
 }
 .guided-unit-main:has(> .guided-introduction) {

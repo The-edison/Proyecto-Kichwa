@@ -1,3 +1,4 @@
+import { wordOrderDrag } from '../services/wordOrderDrag';
 import { useState, type CSSProperties } from 'react';
 import { CheckCircle2, Paintbrush, RotateCcw, Volume2 } from 'lucide-react';
 import { ColorObjectVisual, practiceColors } from './ColorObjectVisual';
@@ -40,7 +41,8 @@ export function ColorsPracticePanel({ exercises, answers, feedback, busy, onChan
                     const rowResult = result?.item_results?.[element.id] ?? result?.is_correct;
                     const clip = (activity === 'listen' || activity === 'understand' || activity === 'interpret') ? clips[element.id] : undefined;
                     const active = state.clip === clip && ['loading', 'playing'].includes(state.phase);
-                    const words = value.trim() ? value.trim().split(/\s+/) : [];
+                    const words = value ? value.split(' ') : [];
+                    const drag = wordOrderDrag(`colors:${exercise.id}:${element.id}`, element.opciones ?? [], words, disabled, next => fill(element.id, next.join(' ')));
                     return <div data-answer-correct={rowResult} key={element.id} className={`colors-row${rowResult === true ? ' is-correct' : rowResult === false ? ' is-incorrect' : ''}`}>
                         <span className="colors-row-number" aria-hidden="true">{index + 1}</span>
                         {painting ? <button data-answer-control={Boolean(value)} type="button" className={`colors-paint-object${value ? ' is-painted' : ''}`} disabled={disabled || !selectedColor} aria-label={`Pintar objeto ${index + 1} del ejercicio ${numbers[activity]}${selectedColor ? ` con ${practiceColors[selectedColor]?.meaning.toLowerCase()}` : ': elige un color'}`} onClick={() => { if (selectedColor && element.opciones?.includes(selectedColor)) fill(element.id, selectedColor); }}>
@@ -56,8 +58,8 @@ export function ColorsPracticePanel({ exercises, answers, feedback, busy, onChan
                             </label> : activity === 'complete' ? <label className="colors-complete"><span className="sr-only">Color que falta en la oración {index + 1}</span><span lang="qu">{element.texto.split('_____')[0]}</span><span><input type="text" lang="qu" maxLength={40} autoComplete="off" autoCapitalize="none" spellCheck={false} disabled={disabled} aria-label={`Color que falta en la oración ${index + 1}`} value={value} placeholder="Escribe aquí" onChange={event => fill(element.id, event.target.value)}/><span lang="qu">{element.texto.split('_____')[1]}</span></span></label>
                             : activity === 'order' ? <>
                                 <p className="colors-sentence">{element.texto}</p>
-                                <div className="colors-order-slots" role="group" aria-label={`Oración ${index + 1} construida`}>{element.opciones?.map((_, slot) => <button data-answer-control={Boolean(words[slot])} type="button" key={slot} disabled={disabled || !words[slot]} aria-label={words[slot] ? `Quitar ${words[slot]} de la oración ${index + 1}` : `Posición ${slot + 1} vacía de la oración ${index + 1}`} onClick={() => fill(element.id, words.filter((__, position) => position !== slot).join(' '))}>{words[slot] || <span aria-hidden="true">···</span>}</button>)}</div>
-                                <div className="colors-order-bank">{element.opciones?.map(word => <button type="button" key={word} disabled={disabled || words.includes(word)} onClick={() => fill(element.id, [...words, word].join(' '))}>{word}</button>)}<button type="button" className="colors-reset" disabled={disabled || !value} aria-label={`Reiniciar oración ${index + 1}`} onClick={() => fill(element.id, '')}><RotateCcw size={19} aria-hidden="true"/></button></div>
+                                <div className="colors-order-slots" {...drag.target()} role="group" aria-label={`Oración ${index + 1} construida`}>{element.opciones?.map((_, slot) => <button data-answer-control={Boolean(words[slot])} type="button" key={slot} {...drag.target(slot)} {...drag.placed(slot)} disabled={disabled} aria-label={words[slot] ? `Quitar ${words[slot]} de la oración ${index + 1}` : `Posición ${slot + 1} vacía de la oración ${index + 1}`} onClick={() => drag.remove(slot)}>{words[slot] || <span aria-hidden="true">···</span>}</button>)}</div>
+                                <div className="colors-order-bank">{element.opciones?.map((word, wordIndex) => <button type="button" key={wordIndex} {...drag.source(wordIndex)} disabled={!drag.source(wordIndex).draggable} onClick={() => drag.add(wordIndex)}>{word}</button>)}<button type="button" className="colors-reset" disabled={disabled || !value} aria-label={`Reiniciar oración ${index + 1}`} onClick={() => fill(element.id, '')}><RotateCcw size={19} aria-hidden="true"/></button></div>
                             </> : null}
                             {clip && state.clip === clip && state.phase !== 'idle' && <p className={`colors-audio-status${state.phase === 'error' ? ' is-error' : ''}`} role="status">{state.phase === 'error' ? 'No se pudo reproducir el audio. Vuelve a pulsar Escuchar para reintentar.' : state.phase === 'loading' ? 'Cargando audio…' : 'Escuchando…'}</p>}
                         </div>

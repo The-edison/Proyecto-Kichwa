@@ -6,7 +6,7 @@ import '../../css/guided-introduction.css';
 import '../../css/guided-greetings.css';
 
 const greetings = [
-    { time: 'Mañana', word: 'Alli puncha', meaning: 'Buenos días', Icon: Sun, tone: 'morning', clip: 'alli-puncha' },
+    { time: 'Día', word: 'Alli puncha', meaning: 'Buenos días', Icon: Sun, tone: 'morning', clip: 'alli-puncha' },
     { time: 'Tarde', word: 'Alli chishi', meaning: 'Buenas tardes', Icon: Sunset, tone: 'afternoon', clip: 'alli-chishi' },
     { time: 'Noche', word: 'Alli tuta', meaning: 'Buenas noches', Icon: MoonStar, tone: 'night', clip: 'alli-tuta' },
 ] as const;
@@ -52,9 +52,13 @@ export function GreetingsIntroduction() {
                 {status(farewells.map(item => item[2]))}
             </section>
             <section className="cometa-lesson-card greetings-dialogue" aria-labelledby="dialogue-title">
-                <div className="cometa-card-heading"><span className="cometa-card-number" aria-hidden="true">04</span><div><span className="cometa-card-kicker">EJEMPLO EN CONTEXTO</span><h2 id="dialogue-title">Una pequeña conversación</h2></div></div>
-                <div className="greetings-bubble"><span>PERSONA A</span><strong>Imanalla kanki</strong><p>¿Cómo estás?</p></div>
-                <div className="greetings-bubble greetings-reply"><span>PERSONA B</span><strong>Allilla kani.</strong><p>Estoy bien.</p></div>
+                <div className="cometa-card-heading"><span className="cometa-card-number" aria-hidden="true">04</span><div><span className="cometa-card-kicker">EJEMPLO EN CONTEXTO</span><h2 id="dialogue-title">Una conversación</h2></div></div>
+                <div className="greetings-bubble"><span>PERSONA A</span><strong lang="qu">Alli puncha mashi</strong><p>Buenos días, amigo.</p></div>
+                <div className="greetings-bubble greetings-reply"><span>PERSONA B</span><strong lang="qu">Alli puncha</strong><p>Buenos días.</p></div>
+                <div className="greetings-bubble"><span>PERSONA A</span><strong lang="qu">Imanlla kanki</strong><p>¿Cómo estás?</p></div>
+                <div className="greetings-bubble greetings-reply"><span>PERSONA B</span><strong lang="qu">Allillami Kani</strong><p>Estoy bien.</p></div>
+                <div className="greetings-bubble"><span>PERSONA A</span><strong lang="qu">Shinaka Kayakaman</strong><p>Entonces, hasta mañana.</p></div>
+                <div className="greetings-bubble greetings-reply"><span>PERSONA B</span><strong lang="qu">Kayakaman</strong><p>Hasta mañana.</p></div>
                 <p className="greetings-dialogue-note"><strong>Una persona pregunta y otra responde.</strong> Lee cada frase junto a su significado en español.</p>
             </section>
         </LessonCardGrid>

@@ -1,3 +1,4 @@
+import { wordOrderDrag, dragEvent } from './word-order-drag-helper.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -8,7 +9,7 @@ const jsx=(type,props)=>({type,props});
 function nodes(tree){if(Array.isArray(tree))return tree.flatMap(nodes);return tree?.props?[tree,...nodes(tree.props.children)]:[];}
 async function screen(){
  const context=vm.createContext({});const module=new vm.SourceTextModule(code,{context});
- await module.link(specifier=>{const values=specifier.includes('jsx-runtime')?{jsx,jsxs:jsx}:specifier.includes('ExerciseCard')?{mediaUrl:p=>'/api/media/'+p,feedbackMessage:s=>s}:{CheckCircle2:'CheckCircle2',RotateCcw:'RotateCcw'};return new vm.SyntheticModule(Object.keys(values),function(){for(const[k,v]of Object.entries(values))this.setExport(k,v)},{context})});await module.evaluate();
+ await module.link(specifier=>{const values=specifier.endsWith('/wordOrderDrag')?{wordOrderDrag}:specifier.includes('jsx-runtime')?{jsx,jsxs:jsx}:specifier.includes('ExerciseCard')?{mediaUrl:p=>'/api/media/'+p,feedbackMessage:s=>s}:{CheckCircle2:'CheckCircle2',RotateCcw:'RotateCcw'};return new vm.SyntheticModule(Object.keys(values),function(){for(const[k,v]of Object.entries(values))this.setExport(k,v)},{context})});await module.evaluate();
  const exercises=[1,2].map(id=>({id,elements:[{id:'c',texto:'mamita'},{id:'a',texto:'Kishpichiway'},{id:'b',texto:'pacha'}],config:{context_text:'Perdón madre tierra',context_meaning:'Oración '+id,prompt_image:'order.webp'}}));
  const answers={},feedback={};let busy=false;
  return{answers,feedback,exercises,busy(value){busy=value},render(){return module.namespace.SentenceOrderPanel({exercises,answers,feedback,busy,onChange(e,a){answers[e.id]=a;delete feedback[e.id]}})}};
@@ -19,7 +20,7 @@ test('word tiles build independent sentences, can be removed and reset, and lock
  word(0,'Kishpichiway').props.onClick();word(0,'pacha').props.onClick();
  assert.deepEqual(Array.from(view.answers[1].orden),['a','b']);assert.equal(view.answers[2],undefined);
  const remove=nodes(cards()[0]).find(n=>n.props['aria-label']==='Quitar Kishpichiway, posición 1');remove.props.onClick();
- assert.deepEqual(Array.from(view.answers[1].orden),['b']);
+ assert.deepEqual(Array.from(view.answers[1].orden),['','b']);
  nodes(cards()[0]).find(n=>n.props['aria-label']==='Reiniciar Oración 1').props.onClick();assert.equal(view.answers[1].orden.length,0);
  for(const text of ['Kishpichiway','pacha','mamita'])word(0,text).props.onClick();
  view.feedback[1]={is_correct:true,feedback:'Correct'};view.feedback[2]={is_correct:false,feedback:'Try again'};
@@ -29,4 +30,28 @@ test('word tiles build independent sentences, can be removed and reset, and lock
  assert.equal(nodes(view.render()).find(n=>n.type==='progress').props.value,1);
  assert.equal(nodes(view.render()).filter(n=>n.type==='img').length,2);
  view.busy(true);assert.ok(nodes(view.render()).filter(n=>n.type==='fieldset').every(n=>n.props.disabled));
+});
+
+test('dragging a word into a slot updates only that sentence and respects busy and graded states', async () => {
+ const view = await screen();
+ const cards = () => nodes(view.render()).filter(node => node.type === 'article');
+ const source = () => nodes(cards()[0]).find(node => node.type === 'button' && node.props.children === 'Kishpichiway' && node.props.draggable);
+ const drop = card => nodes(cards()[card]).find(node => node.props.className === 'sentence-order-slots');
+ const event = dragEvent();
+ source().props.onDragStart(event);
+ drop(1).props.onDrop(event);
+ assert.equal(view.answers[2], undefined);
+ drop(0).props.onDrop(event);
+ assert.deepEqual(Array.from(view.answers[1].orden), ['a']);
+ drop(0).props.onDrop(event);
+ assert.deepEqual(Array.from(view.answers[1].orden), ['a']);
+ const next = dragEvent();
+ nodes(cards()[0]).find(node => node.type === 'button' && node.props.children === 'pacha' && node.props.draggable).props.onDragStart(next);
+ view.feedback[1] = {is_correct: true};
+ drop(0).props.onDrop(next);
+ assert.deepEqual(Array.from(view.answers[1].orden), ['a']);
+ delete view.feedback[1];
+ view.busy(true);
+ drop(0).props.onDrop(next);
+ assert.deepEqual(Array.from(view.answers[1].orden), ['a']);
 });

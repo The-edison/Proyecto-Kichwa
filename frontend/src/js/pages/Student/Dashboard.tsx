@@ -1,17 +1,17 @@
 ﻿import { Head, Link } from '../../navigation';
-import { ArrowRight, BookOpen, Sparkles, Trophy, LockKeyhole } from 'lucide-react';
+import { ArrowRight, BookOpen, Trophy, LockKeyhole } from 'lucide-react';
 import { EmptyState, ErrorState, LoadingState } from '../../components/States';
 import { useApi } from '../../hooks/useApi';
 import { useAuth } from '../../context/AuthContext';
 import { AppLayout } from '../../layouts/AppLayout';
-import { nextLearningHref } from '../../components/LearningJourney';
+import '../../../css/learning-journey.css';
 import type { Level, ProgressSummary, Mastery } from '../../types';
-import indigenousLanguagesImage from '../../../images/indigenous-languages.jpg';
-import culturalDiversityImage from '../../../images/cultural-diversity.jpg';
+import basicLevelImage from '../../../images/nivel-basico.png';
+import intermediateLevelImage from '../../../images/nivel-intermedio.png';
 
 const courseCovers = [
-    { src: indigenousLanguagesImage, alt: 'Collage de lenguas indígenas, textiles y tradiciones' },
-    { src: culturalDiversityImage, alt: 'Ilustración de diversidad cultural y pueblos indígenas' },
+    { src: basicLevelImage, alt: 'Dos jóvenes con vestimenta andina comparten la lectura de un libro' },
+    { src: intermediateLevelImage, alt: 'Jóvenes y mayores conversan y comparten saberes en una comunidad andina' },
 ];
 
 export default function Dashboard() {
@@ -20,11 +20,9 @@ export default function Dashboard() {
     const progress = useApi<ProgressSummary[]>('/progress');
     const mastery = useApi<Mastery>('/mastery');
     const report = mastery.data?.learning_report;
-    const nextStep = report?.next_step;
-    const next = levels.data?.find(level => level.available && progress.data?.some(item => item.level.id === level.id && item.percentage > 0 && item.percentage < 100)) ?? levels.data?.find(level => level.available);
     return <AppLayout title={`¡Hola, ${user?.name.split(' ')[0] ?? 'estudiante'}!`} subtitle="Un pequeño paso hoy. Una nueva palabra para siempre.">
         <Head title="Mi aprendizaje" />
-        <div className="dashboard-intro"><span className="eyebrow">APRENDE A TU RITMO</span><Link href="/aprender/progreso" className="text-link">Ver mi progreso <ArrowRight size={16} /></Link></div>
+        <div className="dashboard-intro"><span className="eyebrow">APRENDE A TU RITMO</span><Link href="/cuenta#account-group" className="secondary-button">Unirme a un grupo <ArrowRight size={16} aria-hidden="true" /></Link></div>
         <div className="student-dashboard-content"><section className="student-dashboard-levels" aria-labelledby="student-levels-title">
             <div className="section-heading"><div><h2 id="student-levels-title">Tus niveles</h2></div><span className="badge neutral">{levels.data?.length ?? '—'} niveles</span></div>
             {levels.loading ? <LoadingState /> : levels.error ? <ErrorState message={levels.error} /> : !levels.data?.length ? <EmptyState title="Próximamente" description="Todavía no hay niveles publicados." /> : <div className="course-grid">
@@ -32,7 +30,7 @@ export default function Dashboard() {
                     const summary = progress.data?.find(item => item.level.id === level.id);
                     const levelReport = report?.levels.find(item => item.id === level.id);
                     const levelCompleted = levelReport?.completed ?? summary?.percentage === 100;
-                    const cover = courseCovers[index];
+                    const cover = level.code === 'basic' ? courseCovers[0] : level.code === 'intermediate' ? courseCovers[1] : undefined;
                     const content = <><div className={`course-art tone-${index % 3}${cover ? ' has-image' : ''}`}>
                         {cover ? <img src={cover.src} alt={cover.alt} loading="lazy" /> : <BookOpen size={42} strokeWidth={1.5} aria-hidden="true" />}
                         <span>YACHAY / {String(index + 1).padStart(2, '0')}</span>
@@ -40,7 +38,7 @@ export default function Dashboard() {
                     return level.available ? <Link key={level.id} href={`/aprender/nivel/${level.id}`} className="course-card glass-panel card-hover">{content}</Link> : <article key={level.id} className="course-card glass-panel">{content}</article>;
                 })}
             </div>}
-        </section><aside className="student-dashboard-support" aria-label="Logros y recursos de aprendizaje">
+        </section><aside className="student-dashboard-support" aria-label="Logros de aprendizaje">
             <section className="glass-panel achievement-panel" aria-labelledby="student-achievements-title">
                 <div className="student-support-heading"><span className="stat-icon tone-2"><Trophy size={20} aria-hidden="true" /></span><h2 id="student-achievements-title">Pequeños pasos, grandes logros</h2></div>
                 {mastery.loading ? <LoadingState label="Cargando logros…" /> : mastery.error ? <ErrorState message={mastery.error} /> : <>
@@ -52,12 +50,6 @@ export default function Dashboard() {
                     {Boolean(mastery.data?.medals.length) && <ul className="achievement-list">{mastery.data?.medals.map(medal => <li key={medal}><Trophy size={16} aria-hidden="true" />{medal}</li>)}</ul>}
                 </>}
                 <Link href="/aprender/progreso" className="text-link">Explorar mis logros <ArrowRight size={16} aria-hidden="true" /></Link>
-            </section>
-            <section className="glass-panel achievement-panel" aria-labelledby="student-practice-title">
-                <span className="eyebrow">SIGUIENTE PASO</span>
-                <h2 id="student-practice-title">Sigue practicando</h2>
-                <Link href="/aprender/diccionario" className="quick-link"><BookOpen size={20} aria-hidden="true" /><span>Consultar el diccionario</span><ArrowRight size={16} aria-hidden="true" /></Link>
-                {mastery.loading ? <p className="soft-note">Buscando tu siguiente paso…</p> : nextStep ? <Link href={nextLearningHref(nextStep)} className="quick-link"><Sparkles size={20} aria-hidden="true" /><span>{nextStep.title}<small>{nextStep.kind === 'module_final' ? 'Continúa con tu prueba final' : 'Continúa tu aprendizaje'}</small></span><ArrowRight size={16} aria-hidden="true" /></Link> : report ? <p className="soft-note">{report.summary.total_activities ? '¡Has completado todo el contenido disponible! Puedes repasar tus unidades.' : 'El contenido de aprendizaje está en preparación.'}</p> : next && <Link href={`/aprender/nivel/${next.id}`} className="quick-link"><Sparkles size={20} aria-hidden="true" /><span>{next.name}<small>Explorar actividades disponibles</small></span><ArrowRight size={16} aria-hidden="true" /></Link>}
             </section>
         </aside></div>
     </AppLayout>;

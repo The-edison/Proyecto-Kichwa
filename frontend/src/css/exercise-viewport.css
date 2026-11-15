@@ -58,3 +58,15 @@
 .guided-unit-shell.is-activity [data-exercise-fit='desktop'] .time-integrator-challenge > div { width: 100%; flex: none; }
 .guided-unit-shell.is-activity [data-exercise-fit='desktop'] .time-integrator-options.is-sentence { grid-template-columns: minmax(0,1fr); }
 .guided-unit-shell.is-activity [data-exercise-fit='desktop'] > .guided-page-turn > :is(.guided-feedback,.form-error) { flex: none; margin-top: 12px; }
+.guided-unit-shell.is-activity [data-exercise-fit='desktop'] :is(.sentence-order-panel,.scene-choice-panel.is-pair) { width: 100%; max-width: none; }
+.guided-unit-shell.is-activity [data-exercise-fit='desktop'] :is(.animals-practice,.body-practice-panel,.colors-panel,.pronouns-panel,.interactive-sentence) { width: 100%; max-width: none; }
+.guided-unit-shell.is-activity [data-exercise-fit='desktop'] .scene-choice-card { min-width: 0; padding: 14px; }
+.guided-unit-shell.is-activity [data-exercise-fit='desktop'] .scene-choice-figure { margin-bottom: 10px; }
+.guided-unit-shell.is-activity [data-exercise-fit='desktop'] .scene-choice-figure img { height: clamp(90px,calc(var(--exercise-room-height) * .25),180px); aspect-ratio: auto; object-fit: contain; }
+.guided-unit-shell.is-activity [data-exercise-fit='desktop'] .sentence-order-card legend { font-size: 14px; line-height: 1.4; margin-bottom: 6px; }
+.guided-unit-shell.is-activity [data-exercise-fit='desktop'] .sentence-order-progress { width: 100%; margin-bottom: 10px; }
+.guided-unit-shell.is-activity [data-exercise-fit='desktop'] :is(.sentence-order-slots,.sentence-order-words) { gap: 6px; margin-top: 8px; }
+.guided-unit-shell.is-activity [data-exercise-fit='desktop'] .sentence-order-slots { min-height: 48px; padding: 7px; }
+.guided-unit-shell.is-activity [data-exercise-fit='desktop'] :is(.sentence-order-empty,.sentence-order-slots button,.sentence-order-words button) { min-width: 50px; min-height: 38px; padding: 7px 9px; }
+.guided-unit-shell.is-activity [data-exercise-fit='desktop'] [draggable='true'] { cursor: grab; }
+.guided-unit-shell.is-activity [data-exercise-fit='desktop'] [draggable='true']:active { cursor: grabbing; }

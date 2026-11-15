@@ -19,7 +19,7 @@ export function LessonText({ text }: { text: string }) {
 export function LessonOverview({ unit, title, description, showGuide = true }: LessonOverviewProps) {
     return <header className={`lesson-overview${showGuide ? '' : ' lesson-overview-without-guide'}`}>
             <div className="lesson-overview-copy">
-                <p className="lesson-overview-meta"><span>{unit}</span><span aria-hidden="true">/</span> LECCIÓN</p>
+                <p className="lesson-overview-meta"><span>{unit}</span><span aria-hidden="true">/</span> TEMA</p>
                 <h1>{title}</h1>
                 <p><LessonText text={description} /></p>
             </div>

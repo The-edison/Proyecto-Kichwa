@@ -19,7 +19,7 @@ async function screen(overrides={}) {
         'react/jsx-runtime':{jsx,jsxs:jsx,Fragment:'fragment'},
         'lucide-react':Object.fromEntries(['Award','ArrowLeft','ArrowRight','CheckCircle2','Circle','ClipboardCheck','Save'].map(name=>[name,name])),
         navigation:{Head:'Head',Link:'Link'}, AppLayout:{AppLayout:'AppLayout'},ModuleFinalCard:{ModuleFinalCard:'ModuleFinalCard'},
-        'module-final.css':{},
+        'module-final.css':{}, ResultUserName:{ResultUserName:'ResultUserName'},
         api:{ApiError:class extends Error{},async apiGet(path){requests.push({method:'GET',path});return {attempt_id:77,state:'en_curso',questions,answers:{100:{seleccion:['b']}}}},async apiPatch(path,payload){requests.push({method:'PATCH',path,payload});if(failSave)throw Error('offline');return {saved:true}},async apiPost(path,payload){requests.push({method:'POST',path,payload});if(path.endsWith('/attempts')){if(holdStart)await holdStart;return {attempt_id:77,questions,answers:{}}}if(failSubmit)throw Error('offline');return {passed:true,score:80,correct_count:12,total_questions:15,xp_earned:170,xp_total:300,results:questions.map((q,i)=>({question_id:q.id,is_correct:i<12,feedback:i<12?'Bien. Explicación.':'Repasa esta idea.'}))}}},
     };
     const module=new vm.SourceTextModule(source,{context});

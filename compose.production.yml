@@ -1,6 +1,6 @@
 services:
   app:
-    build:
+    build: &app-build
       context: .
       dockerfile: Dockerfile
       args:
@@ -9,7 +9,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    environment:
+    environment: &app-environment
       APP_NAME: Yachay
       APP_ENV: production
       APP_KEY: ${APP_KEY:?Configura APP_KEY en Dokploy}
@@ -56,9 +56,10 @@ services:
       YACHAY_PRIVACY_PHONE: ${YACHAY_PRIVACY_PHONE:-}
       YACHAY_PRIVACY_LEGAL_BASIS: ${YACHAY_PRIVACY_LEGAL_BASIS:-}
       YACHAY_PRIVACY_RETENTION: ${YACHAY_PRIVACY_RETENTION:-}
-    volumes:
+    volumes: &app-volumes
       - media:/var/www/backend/storage/app/public
       - app_private:/var/www/backend/storage/app/private
+      - app_cache:/var/www/backend/storage/framework/cache
     expose:
       - "80"
     healthcheck:
@@ -67,6 +68,24 @@ services:
       timeout: 5s
       retries: 3
       start_period: 120s
+  scheduler:
+    build: *app-build
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      <<: *app-environment
+      YACHAY_SCHEDULER_ONLY: "true"
+    user: www-data
+    volumes: *app-volumes
+    command: ["php", "artisan", "schedule:work", "--no-interaction"]
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(str_contains(@file_get_contents('/proc/1/cmdline') ?: '', 'schedule:work') ? 0 : 1);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
   db:
     image: postgres:16-bookworm
     restart: unless-stopped
@@ -86,3 +105,4 @@ volumes:
   postgres_data:
   media:
   app_private:
+  app_cache:

@@ -14,7 +14,7 @@
 .greetings-phrases > div:last-child { padding-bottom: 0; border-bottom: 0; }
 .greetings-phrases dt { font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
 .greetings-phrases dd { margin: 0; color: var(--color-text-secondary); font-size: 12px; line-height: 1.7; }
-.greetings-dialogue { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; grid-column: 1 / -1; }
+.greetings-dialogue { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; grid-column: 1 / -1; }
 .greetings-dialogue .cometa-card-heading { grid-column: 1 / -1; }
 .greetings-bubble { display: grid; gap: 7px; padding: 20px; border: 1px solid var(--lesson-border); border-radius: 10px 10px 10px 0; background: var(--lesson-fill); }
 .greetings-bubble > span { color: var(--color-text-secondary); font-size: 9px; font-weight: 600; letter-spacing: .09em; }

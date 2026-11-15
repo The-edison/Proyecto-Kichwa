@@ -17,7 +17,7 @@ export function LearningJourney({ report, admin = false }: { report: LearningRep
             <ul className="journey-units">{module.units.map(unit => <li key={unit.id}>
                 <span className={unit.completed ? 'journey-unit-complete' : 'journey-unit-icon'} aria-hidden="true">{unit.completed ? <CheckCircle2 size={20} /> : <BookOpen size={20} />}</span>
                 <div><strong>{unit.title}</strong><span>{unit.completed ? 'Completada' : !unit.total_activities ? 'En preparación' : unit.percentage === 100 ? 'Práctica lista · evaluación pendiente' : unit.completed_activities > 0 ? 'En curso' : 'Sin empezar'} · {unit.completed_activities}/{unit.total_activities} actividades correctas</span></div>
-                {!admin && unit.total_activities > 0 && <Link className="text-link" href={'/aprender/unidad/' + unit.id}>{unit.completed ? 'Repasar' : 'Continuar'}<ArrowRight size={16} aria-hidden="true" /></Link>}
+                {!admin && unit.total_activities > 0 && <Link className="student-unit-action" href={'/aprender/unidad/' + unit.id} aria-label={`Abrir unidad: ${unit.title}`} title={`Abrir unidad: ${unit.title}`}><ArrowRight size={20} aria-hidden="true" /></Link>}
             </li>)}</ul>
             {module.final_evaluation && <div className="journey-final"><ClipboardCheck size={23} aria-hidden="true" /><div><h5>{module.final_evaluation.title}</h5>
                 <strong className={module.final_evaluation.passed ? 'text-forest' : ''}>{module.final_evaluation.passed ? 'Aprobada' : !module.final_evaluation.unlocked ? 'Bloqueada' : module.final_evaluation.in_progress ? 'Intento en curso' : module.final_evaluation.attempt_count > 0 ? 'Pendiente de aprobar' : 'Lista para comenzar'}</strong>

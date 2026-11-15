@@ -36,7 +36,7 @@ async function screen({ component = 'progress', summaries = progress, rewards = 
         if (specifier.endsWith('/LearningProgress')) return learning;
         if (specifier.endsWith('/LearningJourney') || specifier === './LearningJourney') return journey;
         if (!cache.has(specifier)) {
-            const exports = specifier.endsWith('.css') ? {} : specifier.endsWith('.jpg') ? { default: specifier } : dependencies[specifier] ?? dependencies[specifier.split('/').at(-1)];
+            const exports = specifier.endsWith('.css') ? {} : /\.(jpg|png)$/.test(specifier) ? { default: specifier } : dependencies[specifier] ?? dependencies[specifier.split('/').at(-1)];
             assert.ok(exports, specifier);
             cache.set(specifier, new vm.SyntheticModule(Object.keys(exports), function () { for (const [key, value] of Object.entries(exports)) this.setExport(key, value); }, { context }));
         }
@@ -48,7 +48,7 @@ async function screen({ component = 'progress', summaries = progress, rewards = 
     return { tree: component==='admin' ? module.namespace.StudentResults({student:{id:7,name:'Ana',email:'ana@example.test'},data:rewards,loading:masteryLoading,error:masteryError,onClose(){}}) : module.namespace.default(), requests };
 }
 
-test('the four summary cards live in Mi progreso and use the shared activity and XP totals', async () => {
+test('the four summary cards live in Mi progreso and use the shared activity and Score totals', async () => {
     const view = await screen();
     const summary = nodes(view.tree).find(node => node.props['aria-label'] === 'Resumen de aprendizaje');
     const cards = nodes(summary).filter(node => node.type === 'article');
@@ -56,7 +56,7 @@ test('the four summary cards live in Mi progreso and use the shared activity and
     assert.match(content(cards[0]), /Práctica completada43%/);
     assert.match(content(cards[1]), /Actividades correctas37 actividades en total/);
     assert.match(content(cards[2]), /Unidades completadas1/);
-    assert.match(content(cards[3]), /Experiencia ganada270XP acumulados de todos tus intentos/);
+    assert.match(content(cards[3]), /Score270Score acumulado de todos tus intentos/);
     assert.deepEqual(view.requests, ['/progress', '/mastery']);
 });
 
@@ -66,7 +66,7 @@ test('learning home retains courses and progress navigation without duplicating 
     assert.ok(nodes(tree).some(node => node.type === 'Link' && node.props.href === '/aprender/progreso'));
     assert.ok(nodes(tree).some(node => node.type === 'Link' && node.props.href === '/aprender/nivel/1'));
     assert.ok(content(tree).includes('Tus niveles'));
-    assert.ok(!content(tree).includes('Experiencia ganada'));
+    assert.ok(!content(tree).includes('Score'));
 });
 
 test('progress keeps results without badges, repeated curriculum or lesson listings', async () => {
@@ -87,13 +87,13 @@ test('new students see zero progress and useful empty states without invalid per
     assert.equal(content(tree).includes('insignias'), false);
 });
 
-test('loading and failed XP requests never replace the students experience with a false zero', async () => {
+test('loading and failed Score requests never replace the students experience with a false zero', async () => {
     const loading = await screen({ rewards: null, masteryLoading: true });
-    const loadingCard = nodes(loading.tree).find(node => node.type === 'article' && content(node).includes('Experiencia ganada'));
-    assert.match(content(loadingCard), /Experiencia ganada…/);
+    const loadingCard = nodes(loading.tree).find(node => node.type === 'article' && content(node).includes('Score'));
+    assert.match(content(loadingCard), /Score…/);
     const failed = await screen({ rewards: null, masteryError: 'No se pudo cargar la experiencia.' });
     assert.ok(nodes(failed.tree).some(node => node.type === 'ErrorState' && node.props.message === 'No se pudo cargar la experiencia.'));
-    assert.ok(content(failed.tree).includes('Experiencia ganada—'));
+    assert.ok(content(failed.tree).includes('Score—'));
     const pending = await screen({ summaries: null, progressLoading: true });
     assert.equal(nodes(pending.tree).some(node => node.props['aria-label'] === 'Resumen de aprendizaje'), false);
     assert.ok(nodes(pending.tree).some(node => node.type === 'LoadingState'));
@@ -114,7 +114,7 @@ test('guided achievements show completed units and passed finals even with no le
     assert.match(content(counts),/Módulos completados1 \/ 2/);
     assert.match(content(counts),/Pruebas finales aprobadas1 \/ 1/);
     assert.equal(content(tree).includes('lecciones dominadas'),false);
-    assert.ok(nodes(tree).some(node=>node.type==='Link'&&node.props.href==='/aprender/unidad/10'));
+    assert.equal(nodes(tree).some(node=>node.type==='Link'&&node.props.href==='/aprender/unidad/10'),false);
 });
 test('progress shows each final once while admin retains the curriculum detail', async()=>{
     for(const component of ['progress','admin']) {
@@ -133,11 +133,16 @@ test('progress shows each final once while admin retains the curriculum detail',
         assert.equal(unitLinks.length,0);
     }
 });
-test('the next action opens an available final and completed content does not suggest restarting it',async()=>{
+test('the dashboard keeps achievements without the removed next-step card for pending or completed content',async()=>{
     const pending=await screen({component:'dashboard',rewards:{...mastery,learning_report:{...finalReport,next_step:{kind:'module_final',id:9,title:'Prueba final',level_id:1}}}});
-    assert.ok(nodes(pending.tree).some(node=>node.type==='Link'&&node.props.href==='/aprender/evaluacion/9'));
+    assert.equal(nodes(pending.tree).some(node=>node.type==='Link'&&node.props.href==='/aprender/evaluacion/9'),false);
     const done=await screen({component:'dashboard',rewards:{...mastery,learning_report:{...finalReport,next_step:null}}});
-    assert.ok(content(done.tree).includes('Has completado todo el contenido disponible'));
+    for (const {tree} of [pending,done]) {
+        assert.equal(nodes(tree).some(node=>node.props.id==='student-practice-title'),false);
+        assert.equal(nodes(tree).some(node=>node.type==='Link'&&node.props.href==='/aprender/diccionario'),false);
+        assert.ok(content(tree).includes('Pequeños pasos, grandes logros'));
+        assert.ok(nodes(tree).some(node=>node.type==='Link'&&content(node).includes('Explorar mis logros')));
+    }
 });
 test('locked and unfinished finals communicate their state without inventing a score',async()=>{
     const report=structuredClone(finalReport);

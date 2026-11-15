@@ -20,7 +20,7 @@
 .journey-final p > svg { display: inline; vertical-align: middle; }
 .journey-final .text-link { display: inline-flex; margin-top: 12px; }
 .achievement-counts { display: grid; gap: 8px; margin: 12px 0; }
-.student-dashboard-support .achievement-counts { align-self: stretch; }
+.student-dashboard-support .achievement-counts { align-self: stretch; gap: 16px; margin: 24px 0; }
 .achievement-counts > div { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
 .achievement-counts dt { color: var(--color-text-secondary); font-size: 14px; }
 .achievement-counts dd { color: var(--color-primary); font-size: 23px; font-weight: 800; }
@@ -29,5 +29,4 @@
 .student-results-stats { grid-template-columns: repeat(2,minmax(0,1fr)); }
 .student-results-journey { margin-bottom: 24px; }
 .student-results-journey > p { font-size: 14px; color: var(--color-text-secondary); line-height: 1.8; margin-bottom: 18px; }
-@media (min-width: 1281px) { .student-dashboard-support { align-self: start; grid-template-rows: auto auto; contain: none; } .student-dashboard-support .achievement-panel { overflow: visible; } }
 @media (max-width: 600px) { .journey-module { padding: 16px; } .journey-final { padding: 14px; } .journey-units > li > .text-link { margin-left: 50px; } .student-results-stats { grid-template-columns: minmax(0,1fr); } }

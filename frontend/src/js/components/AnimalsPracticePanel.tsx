@@ -1,3 +1,4 @@
+import { wordOrderDrag } from '../services/wordOrderDrag';
 import { useState, type CSSProperties } from 'react';
 import { CheckCircle2, RotateCcw, Volume2 } from 'lucide-react';
 import { useLessonAudio, type LessonAudioClip } from '../hooks/useLessonAudio';
@@ -50,7 +51,8 @@ export function AnimalsPracticePanel({ exercise, answer, feedback, busy, onChang
         <div className="animals-practice-meta"><span>{group === 'domestic' ? 'Animales domésticos' : 'Animales salvajes'} · Actividad {counts[activity ?? '']} de 4</span><strong aria-label={`${correct} de ${exercise.elements.length} respuestas correctas`}>{correct} de {exercise.elements.length}</strong></div>
         <div className="animals-practice-rows">{rows.map((element, index) => {
             const value = values[element.id] ?? '';
-            const parts = value.trim() ? value.trim().split(/\s+/) : [];
+            const parts = value ? value.split(' ') : [];
+            const drag = wordOrderDrag(`animals:${exercise.id}:${element.id}`, element.opciones ?? [], parts, disabled, next => fill(element.id, next.join(' ')));
             const meaningResult = feedback?.item_results?.[element.id] ?? feedback?.is_correct;
             const completion = combined ? exercise.elements[index * 2 + 1] : undefined;
             const completionResult = completion ? feedback?.item_results?.[completion.id] ?? feedback?.is_correct : undefined;
@@ -76,10 +78,10 @@ export function AnimalsPracticePanel({ exercise, answer, feedback, busy, onChang
                         </label>
                     </> : activity === 'order' ? <>
                         <p className="animals-practice-meaning">{element.texto}</p>
-                        <div className="animals-practice-slots" role="group" aria-label={`Tu oración ${index + 1}`}>
-                            {(element.opciones ?? []).map((_, slot) => <span className="animals-practice-slot" key={slot}>{parts[slot] ? <button data-answer-control type="button" disabled={disabled} aria-label={`Quitar ${parts[slot]} de la oración ${index + 1}`} onClick={() => fill(element.id, parts.filter((__, position) => position !== slot).join(' '))}>{parts[slot]}</button> : <span aria-label={`Posición ${slot + 1} vacía`} />}</span>)}
+                        <div className="animals-practice-slots" {...drag.target()} role="group" aria-label={`Tu oración ${index + 1}`}>
+                            {(element.opciones ?? []).map((_, slot) => <span className="animals-practice-slot" key={slot} {...drag.target(slot)}>{parts[slot] ? <button data-answer-control type="button" {...drag.placed(slot)} disabled={disabled} aria-label={`Quitar ${parts[slot]} de la oración ${index + 1}`} onClick={() => drag.remove(slot)}>{parts[slot]}</button> : <span aria-label={`Posición ${slot + 1} vacía`} />}</span>)}
                         </div>
-                        <div className="animals-practice-word-bank">{element.opciones?.map(word => <button type="button" key={word} disabled={disabled || parts.includes(word)} onClick={() => fill(element.id, [...parts, word].join(' '))}>{word}</button>)}<button type="button" disabled={disabled || !value} className="animals-practice-reset" aria-label={`Reiniciar oración ${index + 1}`} onClick={() => fill(element.id, '')}><RotateCcw size={20} aria-hidden="true" /></button></div>
+                        <div className="animals-practice-word-bank">{element.opciones?.map((word, wordIndex) => <button type="button" key={wordIndex} {...drag.source(wordIndex)} disabled={!drag.source(wordIndex).draggable} onClick={() => drag.add(wordIndex)}>{word}</button>)}<button type="button" disabled={disabled || !value} className="animals-practice-reset" aria-label={`Reiniciar oración ${index + 1}`} onClick={() => fill(element.id, '')}><RotateCcw size={20} aria-hidden="true" /></button></div>
                     </> : activity === 'labels' ? <><span className="animals-practice-meaning">{element.texto}</span><button data-answer-control={Boolean(value)} type="button" className={`animals-practice-drop${selectedLabel ? ' is-ready' : ''}`} disabled={disabled} aria-label={`Etiqueta de ${element.texto}: ${value || 'sin colocar'}`} onDragOver={event => { if (!disabled) event.preventDefault(); }} onDrop={event => { event.preventDefault(); place(element.id, event.dataTransfer.getData('text/plain')); }} onClick={() => selectedLabel ? place(element.id, selectedLabel) : fill(element.id, '')}>{value || 'Coloca el nombre aquí'}</button></>
                     : activity === 'write' ? <label className="sr-label"><span className="sr-only">Nombre en kichwa del animal {index + 1}</span><input lang="qu" aria-label={`Nombre en kichwa del animal ${index + 1}`} type="text" autoComplete="off" autoCapitalize="none" spellCheck={false} maxLength={80} disabled={disabled} value={value} placeholder="Escribe aquí" onChange={event => fill(element.id, event.target.value)} /></label>
                     : <label className={`animals-practice-choice${activity === 'complete' ? ' is-sentence' : ''}`}>

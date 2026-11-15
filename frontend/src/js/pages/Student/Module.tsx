@@ -40,7 +40,7 @@ export default function Module({ moduleId }: { moduleId: number }) {
                             const number = unit.sort_order || (page - 1) * units.data!.per_page + index + 1;
                             const objective = unit.description.replace(/^Objetivo(?: de la unidad)?\s*:\s*/iu, '').trim();
                             return <li key={unit.id}>
-                                <Link href={'/aprender/unidad/' + unit.id} className={`student-unit-row${completed ? ' is-completed' : percentage > 0 ? ' is-in-progress' : ''}`}>
+                                <article className={`student-unit-row${completed ? ' is-completed' : percentage > 0 ? ' is-in-progress' : ''}`}>
                                     <div className="student-unit-heading">
                                         <span className="student-unit-number" aria-hidden="true">{String(number).padStart(2, '0')}</span>
                                         <div className="student-unit-copy">
@@ -55,9 +55,9 @@ export default function Module({ moduleId }: { moduleId: number }) {
                                     {objective && <p className="student-unit-objective"><strong>Objetivo:</strong> {objective}</p>}
                                     <div className="student-unit-footer">
                                         <div className="student-unit-progress" role="group" aria-label={`Progreso de la unidad ${number}`}><LearningProgress value={percentage} label="Avance" /></div>
-                                        <span className="student-unit-action">{completed ? 'Repasar' : percentage > 0 ? 'Continuar' : 'Abrir unidad'}<ArrowRight size={18} aria-hidden="true" /></span>
+                                        <Link href={'/aprender/unidad/' + unit.id} className="student-unit-action" aria-label={`Abrir unidad: ${unit.title}`} title={`Abrir unidad: ${unit.title}`}><ArrowRight size={20} aria-hidden="true" /></Link>
                                     </div>
-                                </Link>
+                                </article>
                             </li>;
                         })}
                     </ol>}

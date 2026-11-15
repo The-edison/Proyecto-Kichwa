@@ -63,6 +63,23 @@ test('name and cedula inputs refuse invalid typing and pasting without altering 
     assert.equal(field(view, 'first_name').props['aria-invalid'], true);
 });
 
+test('whitespace does not satisfy the password symbol check or allow registration', async () => {
+    const view = await screen();
+    for (const separator of [' ', '\u00a0', '\u2003', '\t', '\n']) {
+        const password = `Edgarpuninna${separator}2020`;
+        assert.equal(view.validation.passwordChecks(password).symbol, false);
+        assert.ok(view.validation.passwordError(password));
+    }
+    fill(view, { ...valid, password: 'Edgarpuninna 2020', password_confirmation: 'Edgarpuninna 2020' });
+    await submit(view);
+    assert.equal(view.requests.length, 0);
+    const symbolCheck = nodes(view.render()).find(node => node.type === 'li' && JSON.stringify(node.props.children).includes('Al menos un símbolo'));
+    assert.equal(symbolCheck.props.className, '');
+    for (const symbol of ['#', '!', '$', '€', '_']) {
+        assert.equal(view.validation.passwordError(`Edgarpuninna ${symbol}2020`), undefined);
+    }
+});
+
 test('registration sends separate normalized names and prevents duplicate submissions', async () => {
     const view = await screen();
     fill(view, { ...valid, first_name: ' María   José ', email: ' MARIA@EXAMPLE.TEST ' });

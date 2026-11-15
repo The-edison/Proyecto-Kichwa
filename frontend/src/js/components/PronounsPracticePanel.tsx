@@ -1,3 +1,4 @@
+import { wordOrderDrag } from '../services/wordOrderDrag';
 import { CheckCircle2, RotateCcw, Volume2 } from 'lucide-react';
 import { useLessonAudio, type LessonAudioClip } from '../hooks/useLessonAudio';
 import { feedbackMessage, mediaUrl } from './ExerciseCard';
@@ -54,7 +55,8 @@ export function PronounsPracticePanel({ exercises, answers, feedback, busy, star
                     const active = listening && state.clip === clip && (state.phase === 'playing' || state.phase === 'loading');
                     const audioError = listening && state.clip === clip && state.phase === 'error';
                     const [meaning, sentence] = element.texto.split(' · ');
-                    const selected = value.trim() ? value.trim().split(/\s+/) : [];
+                    const selected = value ? value.split(' ') : [];
+                    const drag = wordOrderDrag(`pronouns:${exercise.id}:${element.id}`, element.opciones ?? [], selected, disabled, next => fill(element.id, next.join(' ')));
                     const used = new Map<string, number>();
                     selected.forEach(word => used.set(word, (used.get(word) ?? 0) + 1));
                     return <div data-answer-correct={result?.item_results?.[element.id] ?? result?.is_correct} className={`pronouns-row${listening ? ' is-listening' : ''}${ordering ? ' is-ordering' : ''}${activity === 'complete' ? ' is-completing' : ''}`} key={element.id}>
@@ -66,15 +68,15 @@ export function PronounsPracticePanel({ exercises, answers, feedback, busy, star
                             </div> : <p className="pronouns-meaning">{meaning}</p>}
                             {ordering ? <fieldset className="pronouns-order" disabled={disabled}>
                                 <legend className="sr-only">Construye la oración {row + 1}: {meaning}</legend>
-                                <div className="pronouns-order-answer" aria-label={`Oración ${row + 1} construida`}>
-                                    {Array.from({ length: element.opciones?.length ?? 0 }, (_, position) => <button data-answer-control={Boolean(selected[position])} type="button" key={position} disabled={!selected[position] || disabled} className={selected[position] ? 'is-filled' : ''} aria-label={selected[position] ? `Quitar ${selected[position]} de la posición ${position + 1}` : `Posición ${position + 1} vacía`} onClick={() => fill(element.id, selected.filter((_, i) => i !== position).join(' '))}>{selected[position] || <span aria-hidden="true">···</span>}</button>)}
+                                <div className="pronouns-order-answer" {...drag.target()} aria-label={`Oración ${row + 1} construida`}>
+                                    {Array.from({ length: element.opciones?.length ?? 0 }, (_, position) => <button data-answer-control={Boolean(selected[position])} type="button" key={position} {...drag.target(position)} {...drag.placed(position)} disabled={disabled} className={selected[position] ? 'is-filled' : ''} aria-label={selected[position] ? `Quitar ${selected[position]} de la posición ${position + 1}` : `Posición ${position + 1} vacía`} onClick={() => drag.remove(position)}>{selected[position] || <span aria-hidden="true">···</span>}</button>)}
                                     <button type="button" className="pronouns-reset" disabled={disabled || !selected.length} aria-label={`Reiniciar oración ${row + 1}`} onClick={() => fill(element.id, '')}><RotateCcw size={16} aria-hidden="true" /></button>
                                 </div>
                                 <div className="pronouns-order-bank" aria-label={`Palabras para la oración ${row + 1}`}>
                                     {element.opciones?.map((word, position) => {
                                         const consumed = (used.get(word) ?? 0) > 0;
                                         if (consumed) used.set(word, (used.get(word) ?? 0) - 1);
-                                        return <button type="button" key={position} disabled={disabled || consumed} onClick={() => fill(element.id, [...selected, word].join(' '))}>{word}</button>;
+                                        return <button type="button" key={position} {...drag.source(position)} disabled={disabled || consumed} onClick={() => drag.add(position)}>{word}</button>;
                                     })}
                                 </div>
                             </fieldset> : <label className="pronouns-select-label">

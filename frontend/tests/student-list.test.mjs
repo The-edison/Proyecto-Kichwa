@@ -22,12 +22,13 @@ async function screen(initialSearch = '') {
             useState: initial => { const index = hook++; if (!(index in states)) states[index] = initial; return [states[index], value => { states[index] = value; }]; },
             useEffect: (callback, deps) => { const index = hook++; const previous = effects[index]; if (!previous || deps.some((value, position) => value !== previous.deps[position])) { previous?.cleanup?.(); effects[index] = { deps, cleanup: callback() }; } },
         } : specifier === 'react-router-dom' ? { useSearchParams: () => [new URLSearchParams(initialSearch)] }
-            : specifier === 'lucide-react' ? Object.fromEntries(['Ban', 'ChartNoAxesCombined', 'CheckCircle2', 'Search', 'ShieldCheck', 'UserCheck', 'Users'].map(name => [name, component(name)]))
+            : specifier === 'lucide-react' ? Object.fromEntries(['Ban', 'ChartNoAxesCombined', 'CheckCircle2', 'LoaderCircle', 'Search', 'ShieldCheck'].map(name => [name, component(name)]))
             : specifier.endsWith('/StudentResults') ? { StudentResults: component('StudentResults') }
             : specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx, Fragment: 'fragment' }
             : specifier.endsWith('/ui/pagination') ? pagination
             : specifier.endsWith('/useApi') ? { useApi: path => {
                 if (path === null) return {loading:false,error:null,data:null};
+                if (path === '/admin/grupos') return {loading:false,error:null,data:{data:[{id:7,nombre:'Kichwa A',activo:true}]}};
                 requests.push(path);
                 const params = new URL('http://test' + path).searchParams;
                 const page = Number(params.get('page'));
@@ -94,4 +95,21 @@ test('dashboard search opens the student list with the requested query', async (
     const tree = view.render();
     assert.equal(view.requests.at(-1), '/admin/students?q=Ana%20Paz&page=1');
     assert.equal(nodes(tree).find(node => node.props.id === 'student-search').props.value, 'Ana Paz');
+});
+
+test('group selection filters on the server and resets pagination while preserving search', async () => {
+    const view = await screen('q=Ana');
+    click(nodes(view.render()).find(node => node.props['aria-label'] === 'Ir a la página 3'));
+    nodes(view.render()).find(node => node.props['aria-label'] === 'Filtrar estudiantes por grupo').props.onChange({ target: { value: '7' } });
+    view.render();
+    assert.equal(view.requests.at(-1), '/admin/students?q=Ana&page=1&grupo_id=7');
+    nodes(view.render()).find(node => node.props['aria-label'] === 'Filtrar estudiantes por grupo').props.onChange({ target: { value: 'sin_grupo' } });
+    view.render();
+    assert.equal(view.requests.at(-1), '/admin/students?q=Ana&page=1&grupo_id=sin_grupo');
+});
+
+test('a group link initializes the student filter without requiring another selection', async () => {
+    const view = await screen('grupo_id=7');
+    view.render();
+    assert.equal(view.requests.at(-1), '/admin/students?q=&page=1&grupo_id=7');
 });

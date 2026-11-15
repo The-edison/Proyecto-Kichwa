@@ -3,6 +3,7 @@ import { Award, ArrowLeft, ArrowRight, CheckCircle2, Circle, ClipboardCheck, Sav
 import { Head, Link } from '../../navigation';
 import { AppLayout } from '../../layouts/AppLayout';
 import { ModuleFinalCard } from '../../components/ModuleFinalCard';
+import { ResultUserName } from '../../components/ResultUserName';
 import { apiGet, apiPatch, apiPost, ApiError } from '../../services/api';
 import type { Evaluation, EvaluationQuestion, EvaluationResult, ExerciseAnswer } from '../../types';
 import '../../../css/module-final.css';
@@ -121,7 +122,7 @@ export default function ModuleFinalEvaluation({ evaluation }: { evaluation: Eval
                 </section>}
                 <div className="module-final-save"><button className="secondary-button" disabled={busy} onClick={() => void persist()}><Save size={17} aria-hidden="true" />Guardar respuestas</button>{!reviewing && <button className="secondary-button" disabled={busy} onClick={() => setReviewing(true)}>Revisar todo</button>}<p role="status">{saved}</p></div>
             </>}
-            {result && <section data-exercise-correct={result.correct_count === result.total_questions} className="module-final-result glass-panel" aria-labelledby="final-result-title"><Award size={44} aria-hidden="true" /><h2 id="final-result-title">{result.passed ? '¡Prueba aprobada!' : 'Sigue aprendiendo'}</h2><p className="module-final-score">{result.score}%</p><p><strong>{result.correct_count} de {result.total_questions} respuestas correctas.</strong> {result.passed ? 'Has superado la prueba final del módulo 1.' : `Necesitas ${required} aciertos para aprobar. Repasa las explicaciones y vuelve a intentarlo.`}</p><p>+{result.xp_earned ?? 0} XP · Total: {result.xp_total ?? 0} XP</p>
+            {result && <section data-exercise-correct={result.correct_count === result.total_questions} className="module-final-result glass-panel" aria-labelledby="final-result-title"><Award size={44} aria-hidden="true" /><h2 id="final-result-title">{result.passed ? '¡Prueba aprobada!' : 'Sigue aprendiendo'}</h2><ResultUserName /><p className="module-final-score">{result.score}%</p><p><strong>{result.correct_count} de {result.total_questions} respuestas correctas.</strong> {result.passed ? 'Has superado la prueba final del módulo 1.' : `Necesitas ${required} aciertos para aprobar. Repasa las explicaciones y vuelve a intentarlo.`}</p><p>+{result.xp_earned ?? 0} Score · Total: {result.xp_total ?? 0} Score</p>
                 <ol className="module-final-feedback">{questions.map((item, index) => { const outcome = result.results.find(value => value.question_id === item.id); return outcome && <li data-answer-correct={outcome.is_correct} key={item.id} className={outcome.is_correct ? 'is-correct' : 'is-incorrect'}><h3>{index + 1}. {outcome.is_correct ? 'Correcta' : 'Por repasar'}</h3><p><strong>{item.prompt}</strong></p><p>{outcome.feedback}</p></li>; })}</ol>
                 <div className="module-final-actions">
                     <button className="secondary-button" disabled={busy || !status?.unlocked} onClick={() => void open()}>Reintentar</button>

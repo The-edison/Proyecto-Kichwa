@@ -1,4 +1,4 @@
-import { CheckCircle2, RotateCcw, Volume2 } from 'lucide-react';
+import { CheckCircle2, Volume2 } from 'lucide-react';
 import { useLessonAudio, type LessonAudioClip } from '../hooks/useLessonAudio';
 import type { Exercise, ExerciseAnswer, ExerciseFeedback } from '../types';
 import { MatchingLines } from './MatchingLines';
@@ -30,7 +30,6 @@ export function AudioMatchingExercise({ exercise, answer, feedback, selectedOrig
                             if (!disabled) onSelectOrigin(origin.id);
                             play(clip);
                         }}>{paired ? <CheckCircle2 size={23} aria-hidden="true" /> : <Volume2 size={23} aria-hidden="true" />}<span>Audio {index + 1}</span></button>
-                        <button type="button" className="guided-audio-repeat" aria-label={`Repetir el audio ${index + 1}`} onClick={() => play(clip)}><RotateCcw size={19} aria-hidden="true" /></button>
                     </div>;
                 })}
             </div>

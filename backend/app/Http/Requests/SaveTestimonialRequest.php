@@ -2,11 +2,19 @@
 
 namespace App\Http\Requests;
 
+use App\Services\PuntajeComentario;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SaveTestimonialRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        if (is_string($this->input('body'))) {
+            $this->merge(['body' => app(PuntajeComentario::class)->sanitize($this->input('body'))]);
+        }
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      */

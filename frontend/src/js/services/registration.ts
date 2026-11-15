@@ -30,7 +30,7 @@ export function passwordChecks(password: string) {
         length: Array.from(password).length >= 12,
         mixed: /\p{Lu}/u.test(password) && /\p{Ll}/u.test(password),
         number: /\p{N}/u.test(password),
-        symbol: /[\p{Z}\p{S}\p{P}]/u.test(password),
+        symbol: /[\p{S}\p{P}]/u.test(password),
     };
 }
 

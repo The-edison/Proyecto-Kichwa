@@ -7,8 +7,8 @@ import { Pagination } from '../../components/Pagination';
 import { LearningProgress, LearningProgressRing, progressValue } from '../../components/LearningProgress';
 import { useApi } from '../../hooks/useApi';
 import type { LearningModule, Paginated, Evaluation, ProgressSummary } from '../../types';
-import indigenousLanguagesImage from '../../../images/indigenous-languages.jpg';
-import culturalDiversityImage from '../../../images/cultural-diversity.jpg';
+import basicLevelImage from '../../../images/nivel-basico.png';
+import intermediateLevelImage from '../../../images/nivel-intermedio.png';
 
 export default function Level({ level }: { level: { id: number; name: string; code: string } }) {
     const [page, setPage] = useState(1);
@@ -18,9 +18,9 @@ export default function Level({ level }: { level: { id: number; name: string; co
     const progress = useApi<ProgressSummary[]>('/progress');
     const summary = progress.data?.find(item => item.level.id === level.id);
     const cover = level.code === 'basic'
-        ? { src: indigenousLanguagesImage, alt: 'Collage de lenguas indígenas, textiles y tradiciones' }
+        ? { src: basicLevelImage, alt: 'Dos jóvenes con vestimenta andina comparten la lectura de un libro' }
         : level.code === 'intermediate'
-        ? { src: culturalDiversityImage, alt: 'Ilustración de diversidad cultural y pueblos indígenas' }
+        ? { src: intermediateLevelImage, alt: 'Jóvenes y mayores conversan y comparten saberes en una comunidad andina' }
         : null;
 
     return <AppLayout title={'Nivel ' + level.name} subtitle="Tu recorrido de aprendizaje, módulo a módulo.">
@@ -41,7 +41,7 @@ export default function Level({ level }: { level: { id: number; name: string; co
                             {cover ? <img src={cover.src} alt={cover.alt} loading="lazy" /> : <span className="learning-cover-icon" aria-hidden="true">{completed ? <Check size={40} strokeWidth={1.6} /> : index % 2 ? <Sparkles size={40} strokeWidth={1.6} /> : <BookOpen size={40} strokeWidth={1.6} />}</span>}
                             <span className="learning-cover-number" aria-hidden="true">{String(number).padStart(2, '0')}</span><span className={`badge ${completed ? 'success' : 'neutral'}`}>{completed ? '✓ Completado' : percentage > 0 ? 'En curso' : 'Por explorar'}</span>
                         </div>
-                        <div className="learning-module-body"><span className="eyebrow">MÓDULO {number}</span><h3>{module.title.replace(/^Módulo\s+\d+\s*/iu, '')}</h3><p>{module.description.replace(/^Objetivo del módulo:\s*/i, '')}</p><div className="learning-module-bottom"><LearningProgress value={percentage} label="Progreso del módulo" /><span className={`learning-card-action ${percentage > 0 && !completed ? 'is-primary' : ''}`}>{completed ? 'Repasar contenidos' : percentage > 0 ? 'Continuar módulo' : 'Explorar módulo'}<ArrowRight size={18} aria-hidden="true" /></span></div></div>
+                        <div className="learning-module-body"><span className="eyebrow">MÓDULO {number}</span><h3>{module.title.replace(/^Módulo\s+\d+\s*/iu, '')}</h3><p>{module.description.replace(/^Objetivo del módulo:\s*/i, '')}</p><div className="learning-module-bottom"><LearningProgress value={percentage} label="Progreso del módulo" /></div></div>
                     </Link></li>;
                 })}
             </ol>}

@@ -1,4 +1,6 @@
 export type Role = 'admin' | 'student';
+export interface StudentGroup { id: number; nombre: string; codigo: string; activo: boolean; estudiantes_count: number; }
+export interface GroupMembership { grupo: Pick<StudentGroup, 'id' | 'nombre' | 'activo'> | null; }
 export interface StudentTestimonial { id: number; name: string; body: string; language: 'es' | 'qu'; created_at: string; }
 export interface TestimonialEligibility { has_commented: boolean; can_comment: boolean; testimonial: StudentTestimonial | null; }
 export interface AuthUser {

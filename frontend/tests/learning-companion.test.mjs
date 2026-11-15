@@ -1,3 +1,4 @@
+import { wordOrderDrag } from './word-order-drag-helper.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -15,7 +16,7 @@ async function load(code, dependencies) {
     const context = vm.createContext({ crypto: { randomUUID } });
     const module = new vm.SourceTextModule(code, { context });
     await module.link(specifier => {
-        const exports = specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx, Fragment: 'fragment' } : dependencies(specifier);
+        const exports = specifier.endsWith('/wordOrderDrag') ? {wordOrderDrag} : specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx, Fragment: 'fragment' } : dependencies(specifier);
         assert.ok(exports, `Missing dependency ${specifier}`);
         return new vm.SyntheticModule(Object.keys(exports), function () { for (const [key, value] of Object.entries(exports)) this.setExport(key, value); }, { context });
     });
@@ -27,28 +28,28 @@ const { LearningCompanion } = await load(companionCode, specifier => specifier.e
 test('companion reveals no reward or score before checking', () => {
     const view = LearningCompanion({});
     assert.match(view.props.className, /is-ready/);
-    assert.equal(content(view).includes('XP'), false);
+    assert.equal(content(view).includes('Score'), false);
     assert.equal(nodes(view).some(n => n.props.className === 'learning-companion-score'), false);
 });
 
-test('graded exercise responses hide the companion badge and XP', () => {
+test('graded exercise responses hide the companion badge and Score', () => {
     const success = LearningCompanion({ correct: true, xpEarned: 10, xpTotal: 70 });
     const retry = LearningCompanion({ correct: false, xpEarned: 0, xpTotal: 70 });
     assert.notEqual(nodes(success).find(n => n.type === 'img').props.src, nodes(retry).find(n => n.type === 'img').props.src);
-    assert.doesNotMatch(content(success), /\+10 XP|Alli rurashka|Bien hecho/);
-    assert.doesNotMatch(content(retry), /\+0 XP|Kutin rurapay|Cada intento/);
+    assert.doesNotMatch(content(success), /\+10 Score|Alli rurashka|Bien hecho/);
+    assert.doesNotMatch(content(retry), /\+0 Score|Kutin rurapay|Cada intento/);
     assert.equal(nodes(success).some(n => n.props.className === 'learning-companion-message'), false);
     assert.equal(nodes(retry).some(n => n.props.className === 'learning-companion-message'), false);
     for (const view of [success, retry]) {
-        assert.doesNotMatch(content(view), /ganados en esta actividad|Total acumulado|70 XP/);
+        assert.doesNotMatch(content(view), /ganados en esta actividad|Total acumulado|70 Score/);
     }
     assert.match(retry.props.className, /is-encourage/);
     assert.equal(nodes(retry).some(n => n.props.role === 'status'), false);
 });
 
-test('zero XP stays zero on an already rewarded or unrewarded correct activity', () => {
+test('zero Score stays zero on an already rewarded or unrewarded correct activity', () => {
     const view = LearningCompanion({ correct: true, xpEarned: 0 });
-    assert.doesNotMatch(content(view), /\+0 XP|ya cuentan en este intento/);
+    assert.doesNotMatch(content(view), /\+0 Score|ya cuenta en este intento/);
     assert.equal(content(view).includes('undefined'), false);
 });
 
@@ -58,15 +59,15 @@ test('final score appears below the portrait for both passed and below-target re
         assert.match(view.props.className, /is-final/);
         assert.match(content(view), /Puntuación final/);
         assert.match(content(view), correct ? /20 \/ 20/ : /12 \/ 20/);
-        assert.match(content(view), /\+10 XP/);
+        assert.match(content(view), /\+10 Score/);
     }
 });
 
-test('portrait-only results leave the grade and XP to the result panel', () => {
+test('portrait-only results leave the grade and Score to the result panel', () => {
     const view = LearningCompanion({ final: true, portraitOnly: true, correct: true, score: '20 / 20', xpEarned: 50 });
     assert.equal(nodes(view).filter(node => node.type === 'img').length, 1);
     assert.equal(nodes(view).some(node => node.props.className === 'learning-companion-message'), false);
-    assert.doesNotMatch(content(view), /20 \/ 20|50 XP|Puntuación final/);
+    assert.doesNotMatch(content(view), /20 \/ 20|50 Score|Puntuación final/);
 });
 
 async function card(post) {

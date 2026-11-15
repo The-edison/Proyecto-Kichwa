@@ -1,6 +1,6 @@
 # Yachay · Plataforma de aprendizaje de Kichwa
 
-Aplicación con paneles de estudiante y administrador, diccionario Kichwa–español, actividades, evaluaciones, progreso, XP e insignias. Interfaz adaptable a computadora, tablet y móvil, con temas claro y oscuro y preferencia guardada por navegador.
+Aplicación con paneles de estudiante y administrador, diccionario Kichwa–español, actividades, evaluaciones, progreso, Score e insignias. Interfaz adaptable a computadora, tablet y móvil, con temas claro y oscuro y preferencia guardada por navegador.
 
 Esta guía permite **clonar y ejecutar el sistema en otra computadora sin copiar las credenciales ni la base de datos del equipo original**. Backend y frontend se ejecutan como servicios separados.
 
@@ -419,6 +419,20 @@ Proyecto-Kichwa/
 ```
 
 El lanzador, `artisan serve` y Vite de desarrollo son para uso local. En producción sirve Laravel desde **`backend/public`** y el frontend compilado desde **`frontend/dist`**, con fallback a `index.html` para rutas React Router. Compila con el `VITE_API_URL` definitivo. Configura HTTPS, `APP_ENV=production`, `APP_DEBUG=false`, URLs/CORS/cookies, administrador propio, SMTP/Google del entorno y almacenamiento persistente con respaldos. No expongas `.env`, `vendor`, logs ni respaldos como archivos públicos.
+
+### Actualizar el despliegue Docker Compose / Dokploy
+
+Usa la rama `main` actualizada y el archivo `./compose.production.yml` del repositorio. Conserva el proyecto existente, sus dominios, variables, `APP_KEY` y volúmenes; realiza el respaldo habitual de PostgreSQL y archivos antes del despliegue. No importes la base local ni uses `migrate:fresh`.
+
+El despliegue construye el frontend con la URL pública y copia sus imágenes y audios. Al iniciar, el servicio `app` aplica las migraciones incrementales, sincroniza `UnidadDosGuiadaSeeder` e `IntermedioModuloDosEjerciciosSeeder`, recalcula las opiniones existentes y regenera la caché de destacados. Después prepara las cachés de Laravel y arranca Apache. La sincronización de la unidad 2 retira los ejercicios solicitados conservando las respuestas y recompensas históricas. No ejecuta `DatabaseSeeder` ni restablece cuentas.
+
+Compose inicia también el servicio `scheduler`, con la misma configuración y almacenamiento de caché que `app`. Ejecuta `schedule:work` para renovar las opiniones cada lunes a las 03:00, hora de Ecuador. No agregues otro cron para estas mismas tareas si utilizas este Compose. Se mantienen `postgres_data`, `media` y `app_private`; `app_cache` conserva la caché compartida entre la API y el scheduler.
+
+En Dokploy, selecciona el último commit de `main` y ejecuta el despliegue de ese mismo proyecto Compose. Comprueba que `app`, `db` y `scheduler` estén saludables. Las migraciones de grupos y opiniones se aplican automáticamente; no requieren pasos manuales ni un seeder general. Los estudiantes existentes quedan sin grupo y pueden seguir usando todo el contenido.
+
+Tras el despliegue, comprueba el inicio de sesión, el selector de grupos del resumen, crear/copiar un código, unirse desde Mi cuenta, las imágenes de niveles, los audios de cortesía y la unidad 2. El punto de continuación de una unidad se conserva en el mismo navegador; borrar sus datos locales elimina ese borrador.
+
+Las verificaciones locales de esta actualización aprobaron 314 pruebas del backend y 359 del frontend, TypeScript, compilación con la URL pública, configuración de Compose y sintaxis del entrypoint. La construcción completa de la imagen y el arranque de los contenedores deben comprobarse en Dokploy: Docker Engine no estaba iniciado en el equipo de preparación.
 
 Documentación adicional:
 

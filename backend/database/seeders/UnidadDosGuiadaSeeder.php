@@ -79,7 +79,9 @@ class UnidadDosGuiadaSeeder extends Seeder
         $this->seedConversationScenes();
         $this->refreshKichwaQuestionSpelling();
         $this->seedCourtesySentenceOrder();
-        $this->refreshCourtesySentenceSpelling();
+        $this->retireExtraCourtesySentences();
+        $this->refreshCourtesyQuestions();
+        $this->retireExtraConversationAnswers();
         PublicacionContenido::invalidate();
     }
 
@@ -298,7 +300,7 @@ class UnidadDosGuiadaSeeder extends Seeder
             }
             $position = $sources->firstOrFail()->orden_actividad;
             $inserted = $sources->sum(fn ($source) => match ($source->configuracion['conversation_group']) {
-                'c' => 4, 'd' => 5, default => 6
+                'c' => 4, 'd' => 5, 'a' => 3, default => 6
             });
             foreach (Actividad::where('id_unidad', $unit->id_unidad)->where('orden_actividad', '>=', $position)->orderByDesc('orden_actividad')->get() as $following) {
                 $following->update(['orden_actividad' => $following->orden_actividad + $inserted]);
@@ -310,7 +312,8 @@ class UnidadDosGuiadaSeeder extends Seeder
                     'c' => 4, 'd' => 5, default => 6
                 };
                 $elements = collect($source->elementos_actividad)->keyBy('id');
-                foreach (range(0, $count - 1) as $index) {
+                $sceneCount = $group === 'a' ? 3 : $count;
+                foreach (range(0, $sceneCount - 1) as $index) {
                     $name = $group.'-'.$index;
                     $spanish = $elements['es-'.$name]['texto'];
                     $options = $group === 'c' ? [$index, ($index + 1) % $count, ($index + 2) % $count] : [$index, ($index + 2) % $count, ($index + 4) % $count];
@@ -328,7 +331,7 @@ class UnidadDosGuiadaSeeder extends Seeder
                             'scene_choice' => true, 'conversation_group' => $group, 'context_text' => $spanish,
                             'context_meaning' => (match ($group) {
                                 'c' => 'Cortesía ', 'd' => 'Despedida ', 'q' => 'Pregunta ', default => 'Respuesta '
-                            }).($index + 1).' de '.$count,
+                            }).($index + 1).' de '.$sceneCount,
                             'prompt_image' => $images[$name], 'prompt_image_alt' => 'Escena de conversación correspondiente a «'.$spanish.'».',
                             'presentation' => 'buttons', 'max_selections' => 1, 'exact_selections' => true,
                             'managed' => true, 'reviewed' => true, 'difficulty' => 'inicial',
@@ -341,6 +344,36 @@ class UnidadDosGuiadaSeeder extends Seeder
                     $record->orden_actividad = $position++;
                     $record->publicado = true;
                     $record->save();
+                }
+            }
+        });
+    }
+
+    private function retireExtraConversationAnswers(): void
+    {
+        DB::transaction(function (): void {
+            DB::select('SELECT pg_advisory_xact_lock(20261011)');
+            $lesson = Tema::where('clave_leccion', self::LESSON_KEY)->firstOrFail();
+            Actividad::where('id_unidad', $lesson->id_unidad)
+                ->whereIn('origen_reactivo', ['u2-scene-a-3-v1', 'u2-scene-a-4-v1', 'u2-scene-a-5-v1'])
+                ->where('publicado', true)->update(['publicado' => false]);
+            foreach (range(0, 2) as $index) {
+                foreach (Actividad::where('id_unidad', $lesson->id_unidad)->where('origen_reactivo', 'u2-scene-a-'.$index.'-v1')->where('publicado', true)->lockForUpdate()->get() as $activity) {
+                    $config = $activity->configuracion;
+                    if (($config['context_meaning'] ?? null) !== 'Respuesta '.($index + 1).' de 6') {
+                        continue;
+                    }
+                    $config['context_meaning'] = 'Respuesta '.($index + 1).' de 3';
+                    if (DB::table('respuestas_actividad')->where('id_actividad', $activity->id_actividad)->exists()) {
+                        $replacement = $activity->replicate();
+                        $position = $activity->orden_actividad;
+                        $activity->update(['publicado' => false, 'orden_actividad' => 1 + (int) Actividad::where('id_unidad', $lesson->id_unidad)->max('orden_actividad')]);
+                        $replacement->configuracion = $config;
+                        $replacement->orden_actividad = $position;
+                        $replacement->save();
+                    } else {
+                        $activity->update(['configuracion' => $config]);
+                    }
                 }
             }
         });
@@ -389,7 +422,7 @@ class UnidadDosGuiadaSeeder extends Seeder
     private function seedCourtesySentenceOrder(): void
     {
         $images = [];
-        foreach (range(0, 3) as $index) {
+        foreach (range(0, 1) as $index) {
             $source = resource_path('images/unidad2/escenas/order-'.$index.'.png');
             $path = 'kichwa/imagenes/'.hash('sha256', hash_file('sha256', $source).':sentence-webp640-q84').'.webp';
             if (! Storage::disk('public')->exists($path)) {
@@ -412,10 +445,8 @@ class UnidadDosGuiadaSeeder extends Seeder
                 return;
             }
             $rows = [
-                ['Kichpichiway yachachik kampak yachana ukuman yaykunkapak', 'Disculpe licenciado para ingresar a sus clases', 'Una estudiante pide permiso a su docente para entrar al aula.'],
-                ['Kishpichiway yachachik ishpana ukuman rinkapak', 'Disculpe licenciado para ir al baño', 'Una estudiante pide permiso a su docente para ir al baño.'],
-                ['Kichpichiway llukshinkapak', 'Disculpe para salir', 'Una estudiante pide permiso para salir del aula.'],
-                ['Kishpichiway pacha mamita', 'Perdón madre tierra', 'Una mujer expresa respeto y pide perdón a la madre tierra junto a una planta.'],
+                ['Kichpichiway yachachik kampak yachana ukuman yaykunkapak', 'Disculpe, licenciado, ¿puedo ingresar a sus clases?', 'Una estudiante pide permiso a su docente para entrar al aula.'],
+                ['Kishpichiway yachachik ishpana ukuman rinkapak', 'Disculpe, licenciado, ¿puedo ir al baño?', 'Una estudiante pide permiso a su docente para ir al baño.'],
             ];
             $position = 1 + (int) Actividad::where('id_unidad', $unit->id_unidad)->max('orden_actividad');
             foreach ($rows as $index => [$kichwa, $spanish, $alt]) {
@@ -424,7 +455,7 @@ class UnidadDosGuiadaSeeder extends Seeder
                 $exercise = ['type' => 'ordenar', 'prompt' => 'Toca las palabras para formar la oración en kichwa.', 'resource' => null, 'zones' => [],
                     'elements' => array_reverse($elements), 'solution' => ['orden' => array_column($elements, 'id')],
                     'config' => ['sentence_order' => true, 'presentation' => 'tiles', 'title' => '5. Ordena las oraciones',
-                        'context_text' => $spanish, 'context_meaning' => 'Oración '.($index + 1).' de 4', 'prompt_image' => $images[$index], 'prompt_image_alt' => $alt,
+                        'context_text' => $spanish, 'context_meaning' => 'Oración '.($index + 1).' de 2', 'prompt_image' => $images[$index], 'prompt_image_alt' => $alt,
                         'managed' => true, 'reviewed' => true, 'difficulty' => 'inicial',
                         'correct_feedback' => '¡Muy bien! '.$kichwa.' significa «'.$spanish.'».',
                         'incorrect_feedback' => 'Revisa el orden de las palabras. Puedes tocar una palabra colocada para quitarla o reiniciar la oración.']];
@@ -439,28 +470,64 @@ class UnidadDosGuiadaSeeder extends Seeder
         });
     }
 
-    private function refreshCourtesySentenceSpelling(): void
+    private function refreshCourtesyQuestions(): void
     {
         DB::transaction(function (): void {
             DB::select('SELECT pg_advisory_xact_lock(20261011)');
             $lesson = Tema::where('clave_leccion', self::LESSON_KEY)->firstOrFail();
-            $activity = Actividad::where('id_unidad', $lesson->id_unidad)->where('origen_reactivo', 'u2-courtesy-order-2-v1')->where('publicado', true)->orderByDesc('id_actividad')->lockForUpdate()->firstOrFail();
-            $elements = array_map(fn (array $element): array => array_replace($element, ['texto' => str_replace('llukshinkapay', 'llukshinkapak', $element['texto'])]), $activity->elementos_actividad);
-            $config = $activity->configuracion;
-            $config['correct_feedback'] = str_replace('llukshinkapay', 'llukshinkapak', $config['correct_feedback']);
-            if ($elements === $activity->elementos_actividad && $config === $activity->configuracion) {
-                return;
+            $questions = [
+                'u2-courtesy-order-0-v1' => ['Disculpe licenciado para ingresar a sus clases', 'Disculpe, licenciado, ¿puedo ingresar a sus clases?'],
+                'u2-courtesy-order-1-v1' => ['Disculpe licenciado para ir al baño', 'Disculpe, licenciado, ¿puedo ir al baño?'],
+            ];
+            foreach ($questions as $origin => [$previous, $question]) {
+                foreach (Actividad::where('id_unidad', $lesson->id_unidad)->where('origen_reactivo', $origin)->where('publicado', true)->lockForUpdate()->get() as $activity) {
+                    $config = $activity->configuracion;
+                    if (($config['context_text'] ?? null) !== $previous) {
+                        continue;
+                    }
+                    $config['context_text'] = $question;
+                    $config['correct_feedback'] = str_replace($previous, $question, $config['correct_feedback'] ?? '');
+                    if (DB::table('respuestas_actividad')->where('id_actividad', $activity->id_actividad)->exists()) {
+                        $replacement = $activity->replicate();
+                        $position = $activity->orden_actividad;
+                        $activity->update(['publicado' => false, 'orden_actividad' => 1 + (int) Actividad::where('id_unidad', $lesson->id_unidad)->max('orden_actividad')]);
+                        $replacement->configuracion = $config;
+                        $replacement->orden_actividad = $position;
+                        $replacement->save();
+                    } else {
+                        $activity->update(['configuracion' => $config]);
+                    }
+                }
             }
-            if (DB::table('respuestas_actividad')->where('id_actividad', $activity->id_actividad)->exists()) {
-                $replacement = $activity->replicate();
-                $position = $activity->orden_actividad;
-                $activity->update(['publicado' => false, 'orden_actividad' => 1 + (int) Actividad::where('id_unidad', $lesson->id_unidad)->max('orden_actividad')]);
-                $replacement->elementos_actividad = $elements;
-                $replacement->configuracion = $config;
-                $replacement->orden_actividad = $position;
-                $replacement->save();
-            } else {
-                $activity->update(['elementos_actividad' => $elements, 'configuracion' => $config]);
+        });
+    }
+
+    private function retireExtraCourtesySentences(): void
+    {
+        DB::transaction(function (): void {
+            DB::select('SELECT pg_advisory_xact_lock(20261011)');
+            $lesson = Tema::where('clave_leccion', self::LESSON_KEY)->firstOrFail();
+            Actividad::where('id_unidad', $lesson->id_unidad)
+                ->whereIn('origen_reactivo', ['u2-courtesy-order-2-v1', 'u2-courtesy-order-3-v1'])
+                ->where('publicado', true)->update(['publicado' => false]);
+            foreach ([0, 1] as $index) {
+                foreach (Actividad::where('id_unidad', $lesson->id_unidad)->where('origen_reactivo', 'u2-courtesy-order-'.$index.'-v1')->where('publicado', true)->lockForUpdate()->get() as $activity) {
+                    $config = $activity->configuracion;
+                    if (($config['context_meaning'] ?? null) !== 'Oración '.($index + 1).' de 4') {
+                        continue;
+                    }
+                    $config['context_meaning'] = 'Oración '.($index + 1).' de 2';
+                    if (DB::table('respuestas_actividad')->where('id_actividad', $activity->id_actividad)->exists()) {
+                        $replacement = $activity->replicate();
+                        $position = $activity->orden_actividad;
+                        $activity->update(['publicado' => false, 'orden_actividad' => 1 + (int) Actividad::where('id_unidad', $lesson->id_unidad)->max('orden_actividad')]);
+                        $replacement->configuracion = $config;
+                        $replacement->orden_actividad = $position;
+                        $replacement->save();
+                    } else {
+                        $activity->update(['configuracion' => $config]);
+                    }
+                }
             }
         });
     }

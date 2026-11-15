@@ -22,7 +22,7 @@ export default function Progress() {
         ['Práctica completada', `${report?.summary.percentage ?? percentage}%`, BookOpen, 'Actividades resueltas correctamente'],
         ['Actividades correctas', report?.summary.completed_activities ?? completed, CheckCheck, `${report?.summary.total_activities ?? total} actividades en total`],
         ['Unidades completadas', mastery.loading ? '…' : report?.summary.completed_units ?? mastery.data?.completed_units.length ?? '—', CheckCircle2, report ? `${report.summary.total_units} unidades disponibles` : 'Con su recorrido completado'],
-        ['Experiencia ganada', mastery.loading ? '…' : mastery.data?.xp ?? '—', Zap, 'XP acumulados de todos tus intentos'],
+        ['Score', mastery.loading ? '…' : mastery.data?.xp ?? '—', Zap, 'Score acumulado de todos tus intentos'],
     ] as const;
     const tests = new Map<number, TestProgress>();
     for (const level of progress.data ?? []) {

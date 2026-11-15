@@ -12,16 +12,16 @@ const copy = {
         loading: 'Cargando tu espacio de opiniones…', loadError: 'No se pudo cargar tu opinión.', retry: 'Volver a intentar',
         intro: 'Tu experiencia puede animar a otros a aprender Kichwa.', label: 'Tu opinión en español sobre Yachay',
         placeholder: '¿Qué te ha gustado de la plataforma? ¿Cómo ha sido aprender aquí?', minimum: 'Mínimo 20 caracteres.',
-        privacy: 'Al publicar, tu comentario será público en las Historias del inicio junto a tu nombre abreviado. Evita incluir datos personales. Puedes editar tu opinión aquí cuando quieras.',
-        success: 'Tu opinión ya está publicada en el inicio.', publishing: 'Publicando…', update: 'Actualizar opinión', publish: 'Publicar opinión', view: 'Ver opiniones en el inicio',
+        privacy: 'Tu comentario puede aparecer en las Historias del inicio junto a tu nombre abreviado si cumple los criterios de la selección automática semanal. Evita incluir datos personales. Puedes editar tu opinión aquí cuando quieras.',
+        success: 'Tu opinión se guardó y será considerada en la selección automática semanal.', publishing: 'Publicando…', update: 'Actualizar opinión', publish: 'Publicar opinión', view: 'Ver opiniones en el inicio',
     },
     qu: {
         lengthError: '20manta 500 kama killkakunawan kampa yuyayta killkay.', publishError: 'Mana rikuchiyta usharirkanchu. Kampa killkashka kayllapi sakirin; kutin rurayta ushanki.',
         loading: 'Kampa rimaykunapa kuskata apamun…', loadError: 'Kampa rimayta mana apamuyta usharirkanchu.', retry: 'Kutin ruray',
         intro: 'Kampa yachakuyka shuk runakunata kichwa shimita yachakunkapak kallpachin.', label: 'Kichwapi Yachaymanta kampa yuyay',
         placeholder: 'Yachaypi imatata munarkanki? Imashinatak kaypi yachakurkanki?', minimum: '20 killkakunamanta ashtawan.',
-        privacy: 'Rikuchikpika kampa rimayka qallariypi tukuypak rikurin, uchillachishka shutiykiwan. Kampa pakalla willayta ama killkaychu. Munashpayki kampa rimayta allichiyta ushanki.',
-        success: 'Kampa rimayka qallariypi rikurin.', publishing: 'Rikuchin…', update: 'Rimayta allichiy', publish: 'Rimayta rikuchiy', view: 'Qallariypi rimaykunata rikuy',
+        privacy: 'Kampa rimayka qallariypi rikuriyta ushan, uchillachishka shutiykiwan. Kampa pakalla willayta ama killkaychu. Munashpayki kampa rimayta allichiyta ushanki.',
+        success: 'Kampa rimayka wakaychishkami.', publishing: 'Rikuchin…', update: 'Rimayta allichiy', publish: 'Rimayta rikuchiy', view: 'Qallariypi rimaykunata rikuy',
     },
 } as const;
 

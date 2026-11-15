@@ -1,3 +1,4 @@
+import { wordOrderDrag } from './word-order-drag-helper.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -9,7 +10,7 @@ const context = vm.createContext({});
 const jsx = (type, props) => ({ type, props });
 const module = new vm.SourceTextModule(code, { context });
 await module.link(async specifier => {
-    const dependencies = specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx, Fragment: 'fragment' }
+    const dependencies = specifier.endsWith('/wordOrderDrag') ? { wordOrderDrag } : specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx, Fragment: 'fragment' }
         : specifier === 'lucide-react' ? { CalendarDays: 'CalendarDays', Hash: 'Hash', RotateCcw: 'RotateCcw' } : {};
     return new vm.SyntheticModule(Object.keys(dependencies), function () {
         for (const [key, value] of Object.entries(dependencies)) this.setExport(key, value);

@@ -1,12 +1,12 @@
 import { Head } from '../../navigation';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Ban, ChartNoAxesCombined, CheckCircle2, Search, ShieldCheck, UserCheck, Users } from 'lucide-react';
+import { Ban, ChartNoAxesCombined, CheckCircle2, LoaderCircle, Search, ShieldCheck } from 'lucide-react';
 import { EmptyState, ErrorState, LoadingState } from '../../components/States';
 import { StudentResults } from '../../components/StudentResults';
 import { useApi } from '../../hooks/useApi';
 import { AppLayout } from '../../layouts/AppLayout';
-import type { Paginated, Student, Mastery } from '../../types';
+import type { Paginated, Student, Mastery, StudentGroup } from '../../types';
 import { apiPatch, ApiError } from '../../services/api';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../../components/ui/pagination';
 
@@ -16,13 +16,17 @@ export default function Students() {
     const [query, setQuery] = useState(initialSearch);
     const [search, setSearch] = useState(initialSearch);
     const [page, setPage] = useState(1);
+    const initialGroup = params.get('grupo_id') ?? '';
+    const [groupFilter, setGroupFilter] = useState(initialGroup);
+    useEffect(() => { setGroupFilter(initialGroup); setPage(1); }, [initialGroup]);
     useEffect(() => { setQuery(initialSearch); setSearch(initialSearch); setPage(1); }, [initialSearch]);
     useEffect(() => {
         if (query.trim() === search) return;
         const timer = setTimeout(() => { setSearch(query.trim()); setPage(1); }, 300);
         return () => clearTimeout(timer);
     }, [query, search]);
-    const { data, loading, error, refresh } = useApi<Paginated<Student>>(`/admin/students?q=${encodeURIComponent(search)}&page=${page}`);
+    const { data, loading, error, refresh } = useApi<Paginated<Student>>(`/admin/students?q=${encodeURIComponent(search)}&page=${page}${groupFilter ? `&grupo_id=${encodeURIComponent(groupFilter)}` : ''}`);
+    const groups = useApi<{ data: StudentGroup[] }>('/admin/grupos');
     const [actionError, setActionError] = useState('');
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const results = useApi<Mastery>(selectedStudent ? '/admin/learning-results/' + selectedStudent.id : null);
@@ -36,8 +40,6 @@ export default function Students() {
         .filter(number => number >= 1 && number <= lastPage).sort((a, b) => a - b);
     const searching = query.trim() !== search;
     const pending = loading || searching;
-    const active = data?.data.filter(student => student.state === 'activo').length ?? 0;
-    const blocked = data?.data.filter(student => student.state === 'bloqueado').length ?? 0;
     useEffect(() => {
         if (data && page > data.last_page) setPage(Math.max(1, data.last_page));
     }, [data, page]);
@@ -52,22 +54,23 @@ export default function Students() {
 
     return <AppLayout title="Estudiantes" subtitle="Acompaña a tu comunidad y consulta su aprendizaje.">
         <Head title="Estudiantes" />
-        <section className="student-directory-overview glass-panel" aria-labelledby="student-community-heading"><div><span className="eyebrow">COMUNIDAD YACHAY</span><h2 id="student-community-heading">Cada estudiante, un nuevo recorrido.</h2><p>Encuentra una cuenta, consulta sus avances y administra su acceso al campus.</p></div><dl className="catalog-summary"><div><dt><Users size={18} aria-hidden="true" />{search ? 'Encontrados' : 'Estudiantes'}</dt><dd>{pending || error ? '—' : data?.total ?? 0}<small>{search ? 'Con esta búsqueda' : 'Cuentas registradas'}</small></dd></div><div><dt><UserCheck size={18} aria-hidden="true" />Activos</dt><dd>{pending || error ? '—' : active}<small>En esta página</small></dd></div><div><dt><Ban size={18} aria-hidden="true" />Bloqueados</dt><dd>{pending || error ? '—' : blocked}<small>En esta página</small></dd></div></dl></section>
         <section className="student-directory glass-panel" aria-labelledby="student-directory-heading">
             <div className="student-directory-heading"><div><span className="eyebrow">GESTIÓN DE ESTUDIANTES</span><h2 id="student-directory-heading">Directorio del campus</h2></div><span className="badge neutral">Página {page} de {lastPage}</span></div>
             <div className="student-directory-toolbar">
                 <label className="catalog-search" htmlFor="student-search"><span>Buscar por nombre, correo o cédula</span><div><Search size={18} aria-hidden="true" /><input id="student-search" type="search" maxLength={100} placeholder="Nombre, correo o cédula…" value={query} onChange={event => setQuery(event.target.value)} /></div></label>
                 <label className="catalog-filter"><span>Estado en esta página</span><select className="field" value={stateFilter} onChange={event => setStateFilter(event.target.value)}><option value="all">Todos los estados</option><option value="activo">Activos</option><option value="bloqueado">Bloqueados</option></select></label>
+                <label className="catalog-filter"><span>Grupo</span><select className="field" aria-label="Filtrar estudiantes por grupo" value={groupFilter} disabled={groups.loading || Boolean(groups.error)} onChange={event => { setGroupFilter(event.target.value); setPage(1); }}><option value="">Todos los estudiantes</option><option value="sin_grupo">Sin grupo</option>{groups.data?.data.map(group => <option key={group.id} value={group.id}>{group.nombre}{group.activo ? '' : ' · Inactivo'}</option>)}</select></label>
                 <label className="catalog-filter"><span>Orden en esta página</span><select className="field" value={sort} onChange={event => setSort(event.target.value)}><option value="original">Orden original</option><option value="name-asc">Nombre: A–Z</option><option value="name-desc">Nombre: Z–A</option><option value="email">Correo: A–Z</option></select></label>
                 <p className="student-directory-status" aria-live="polite">{pending ? 'Cargando estudiantes…' : error ? 'No se pudo cargar el listado.' : `${data?.total ?? 0} ${data?.total === 1 ? 'estudiante encontrado' : 'estudiantes encontrados'} · ${visibleStudents.length} visibles en esta página`}</p>
+                {groups.error && <p className="student-directory-status" role="alert">No se pudo cargar el filtro de grupos. <button type="button" className="text-link" onClick={() => void groups.refresh()}>Reintentar</button></p>}
             </div>
             {actionError && <p className="auth-alert m-5" role="alert">{actionError}</p>}
             {pending ? <div className="directory-state"><LoadingState label="Cargando estudiantes…" /></div> : error ? <div className="directory-state"><ErrorState message={error} /></div> : !data?.data.length ? <div className="directory-state"><EmptyState title={search ? 'Sin resultados' : 'Todavía no hay estudiantes registrados'} description={search ? 'Prueba con otro nombre, correo o cédula.' : 'Las cuentas de estudiantes aparecerán aquí cuando se registren.'} /></div> : !visibleStudents.length ? <div className="directory-state"><EmptyState title="Sin coincidencias en esta página" description="Selecciona otro estado o consulta la siguiente página." action={<button type="button" className="secondary-button" onClick={() => setStateFilter('all')}>Mostrar todos los estados</button>} /></div> : <div className="student-directory-scroll">
                 <ul className="student-directory-list" aria-label="Estudiantes registrados">{visibleStudents.map(student => <li key={student.id}>
                     <article className="student-directory-row" aria-labelledby={`directory-student-${student.id}`}>
-                        <header><span className="directory-card-avatar" aria-hidden="true">{student.name.slice(0, 1).toUpperCase()}</span><div><span className="eyebrow">ESTUDIANTE · #{student.id}</span><h3 id={`directory-student-${student.id}`}>{student.name}</h3></div><span className={`badge ${student.state === 'activo' ? 'success' : 'catalog-draft'}`}>{student.state === 'activo' ? <CheckCircle2 size={13} aria-hidden="true" /> : <Ban size={13} aria-hidden="true" />}{student.state === 'activo' ? 'Activo' : 'Bloqueado'}</span></header>
-                        <dl><div><dt>Correo electrónico</dt><dd>{student.email}</dd></div><div><dt>Cédula</dt><dd>{student.cedula ?? 'No registrada'}</dd></div></dl>
-                        <footer><button type="button" className="primary-button" aria-label={`Ver progreso de ${student.name}`} onClick={() => setSelectedStudent(student)}><ChartNoAxesCombined size={17} aria-hidden="true" />Ver progreso</button><button type="button" className={`ghost-button ${student.state === 'activo' ? 'directory-block-button' : ''}`} disabled={busy !== null} aria-label={`${student.state === 'activo' ? 'Bloquear' : 'Activar'} a ${student.name}`} onClick={() => void changeState(student)}>{student.state === 'activo' ? <Ban size={16} aria-hidden="true" /> : <ShieldCheck size={16} aria-hidden="true" />}{busy === student.id ? 'Actualizando…' : student.state === 'activo' ? 'Bloquear' : 'Activar'}</button></footer>
+                        <header><span className="directory-card-avatar" aria-hidden="true">{student.name.slice(0, 1).toUpperCase()}</span><h3 id={`directory-student-${student.id}`}>{student.name}</h3></header>
+                        <span className={`badge directory-student-state ${student.state === 'activo' ? 'success' : 'catalog-draft'}`}>{student.state === 'activo' ? <CheckCircle2 size={13} aria-hidden="true" /> : <Ban size={13} aria-hidden="true" />}{student.state === 'activo' ? 'Activo' : 'Bloqueado'}</span>
+                        <footer><button type="button" className="primary-button" aria-label={`Ver progreso de ${student.name}`} title="Ver progreso" onClick={() => setSelectedStudent(student)}><ChartNoAxesCombined size={20} aria-hidden="true" /></button><button type="button" className={`ghost-button ${student.state === 'activo' ? 'directory-block-button' : ''}`} disabled={busy !== null} aria-busy={busy === student.id} aria-label={busy === student.id ? `Actualizando estado de ${student.name}` : `${student.state === 'activo' ? 'Bloquear' : 'Activar'} a ${student.name}`} title={student.state === 'activo' ? 'Bloquear' : 'Activar'} onClick={() => void changeState(student)}>{busy === student.id ? <LoaderCircle size={20} className="animate-spin" aria-hidden="true" /> : student.state === 'activo' ? <Ban size={20} aria-hidden="true" /> : <ShieldCheck size={20} aria-hidden="true" />}</button></footer>
                     </article>
                 </li>)}</ul>
             </div>}

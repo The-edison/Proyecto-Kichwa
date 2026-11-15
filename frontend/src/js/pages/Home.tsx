@@ -16,13 +16,13 @@ const copy = {
     es: {
         title: 'Bienvenido a Yachay', eyebrow: 'DESCUBRE · APRENDE · COMPARTE', heading: 'El Kichwa nos une.', headingAccent: 'Cada palabra cuenta nuestra historia.',
         description: 'Aprende a tu ritmo y descubre una lengua viva que nos acerca a nuestras raíces, nuestra gente y nuestra cultura.',
-        explore: 'Explorar', more: 'Conocer más', cultureEyebrow: 'IDIOMA Y MEMORIA',
+        explore: 'Explorar', more: 'Conocer más', cultureEyebrow: 'IDIOMA E HISTORIA',
         cultureTitle: 'Una lengua que nos conecta.',
         cultureLead: 'El kichwa es una lengua viva de la familia quechua. En Ecuador, su historia se entrelaza con los intercambios entre pueblos andinos, la expansión inca y las generaciones que la han seguido hablando.',
         cultureBody: 'Hoy se escucha en comunidades de la Sierra y la Amazonía. Sus palabras guardan formas de contar la vida, compartir saberes y recordar de dónde venimos.',
         sources: 'Fuentes:', dictionarySource: 'diccionario kichwa del Ministerio de Educación', memorySource: 'Memoria oral del pueblo Saraguro (INPC)',
         start: 'Comenzar a aprender', videoEyebrow: 'PARA VER Y ESCUCHAR', videoTitle: 'La historia del Kichwa en Ecuador',
-        videoDescription: 'Un recorrido audiovisual por la lengua y su presencia en nuestro país.', videoLink: 'Ver el video en YouTube',
+        videoDescription: 'Un recorrido audiovisual por la lengua y su presencia en nuestro país.',
     },
     qu: {
         title: 'Yachayman alli shamushka', eyebrow: 'RIKSIY · YACHAKUY · RAKIY', heading: 'Kichwa shimika ñukanchikta tinkichin.', headingAccent: 'Sapa shimi ñukanchik ñawpa yuyayta willan.',
@@ -33,7 +33,7 @@ const copy = {
         cultureBody: 'Kunanpash Sierra, Amazonía llaktakunapi kichwa shimi uyarin. Kay shimipi ñukanchik kawsay, yachay, ñawpa yuyaypash tiyan.',
         sources: 'Maymanta hapishka:', dictionarySource: 'Yachachiy Kamaypa kichwa shimi kamu', memorySource: 'Saraguro runakunapa yuyaykuna (INPC)',
         start: 'Yachakuyta kallariy', videoEyebrow: 'RIKUNKAPAK, UYANKAPAKPASH', videoTitle: 'Ecuadorpi kichwa shimipa ñawpa kawsay',
-        videoDescription: 'Kichwa shimimanta, Ecuadorpi imashina kawsakmanta rikuchik shuyu.', videoLink: 'YouTubepi shuyuta rikuy',
+        videoDescription: 'Kichwa shimimanta, Ecuadorpi imashina kawsakmanta rikuchik shuyu.',
     },
 } as const;
 
@@ -91,7 +91,7 @@ export default function Home() {
                         <h2 id="culture-title" className="section-title">{t.cultureTitle}</h2>
                         <p className="section-lead">{t.cultureLead}</p>
                         <p>{t.cultureBody}</p>
-                        <p className="culture-source">{t.sources} <a href="https://educacion.gob.ec/wp-content/plugins/download-monitor/download.php?id=3113" target="_blank" rel="noreferrer">{t.dictionarySource}</a> {language === 'qu' ? 'shinallatak' : 'y'} <a href="https://www.patrimoniocultural.gob.ec/wp-content/uploads/2023/03/Memoria-Saraguro.pdf" target="_blank" rel="noreferrer">{t.memorySource}</a>.</p>
+                        <p className="culture-source">{t.sources} <strong>{t.dictionarySource}</strong> {language === 'qu' ? 'shinallatak' : 'y'} <strong>{t.memorySource}</strong>.</p>
                         <Link href="/registro" className="primary-button culture-action">{t.start} <ArrowRight size={17} aria-hidden="true" /></Link>
                     </div>
                     <div className="culture-video-card">
@@ -109,7 +109,6 @@ export default function Home() {
                             <span className="eyebrow">{t.videoEyebrow}</span>
                             <h3>{t.videoTitle}</h3>
                             <p>{t.videoDescription}</p>
-                            <a href="https://www.youtube.com/watch?v=O0qVbgG6fuY" target="_blank" rel="noreferrer">{t.videoLink}</a>
                         </div>
                     </div>
                 </div>

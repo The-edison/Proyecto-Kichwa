@@ -1,4 +1,4 @@
-import { RotateCcw, Volume2 } from 'lucide-react';
+import { Volume2 } from 'lucide-react';
 import { useLessonAudio } from '../hooks/useLessonAudio';
 import type { Exercise, ExerciseAnswer, ExerciseFeedback } from '../types';
 
@@ -19,7 +19,6 @@ export function MissingVowelExercise({ exercise, answer, feedback, disabled, onC
             return <div className="guided-listening-row" data-answer-correct={feedback?.item_results?.[element.id] ?? feedback?.is_correct} key={element.id}>
                 <div className={`guided-listening-audio${active ? ' is-active' : ''}`}>
                     <button type="button" onClick={() => play(clip)} aria-label={`Escuchar el audio ${index + 1}`}><Volume2 size={21} aria-hidden="true" /><span>{active ? (state.phase === 'playing' ? 'Sonando' : 'Cargando…') : `Audio ${index + 1}`}</span></button>
-                    <button type="button" className="guided-listening-repeat" aria-label={`Repetir el audio ${index + 1}`} title="Repetir audio" onClick={() => play(clip)}><RotateCcw size={18} aria-hidden="true" /></button>
                 </div>
                 <label className="guided-listening-word">
                     <span className="guided-listening-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>

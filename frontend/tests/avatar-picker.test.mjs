@@ -26,7 +26,7 @@ async function screen({ post, role = 'student', avatar = null } = {}) {
         AuthContext: { useAuth: () => ({ user, refreshUser: async () => { refreshes++; user.avatar = saved; } }) },
         api: { apiBaseUrl: 'https://campus.test', ApiError, apiPost: async (path, payload) => { requests.push({ path, payload }); if (post) await post({ payload, ApiError }); saved = payload.preset === 'initial' ? null : payload.preset; return { avatar: saved }; } },
         AvatarIllustration: { AvatarIllustration: 'AvatarIllustration' },
-        navigation: { Head: 'Head' }, AppLayout: { AppLayout: 'AppLayout' }, PasswordChange: { PasswordChange: 'PasswordChange' },
+        navigation: { Head: 'Head' }, AppLayout: { AppLayout: 'AppLayout' }, PasswordChange: { PasswordChange: 'PasswordChange' }, StudentGroup: { StudentGroup: 'StudentGroup' },
     };
     const cache = new Map();
     const avatarModule = new vm.SourceTextModule(avatarCode, { context });
