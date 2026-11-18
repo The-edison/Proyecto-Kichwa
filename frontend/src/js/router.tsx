@@ -1,10 +1,11 @@
-import { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate, Outlet, useParams } from 'react-router-dom';
+import { lazy, Suspense, useState } from 'react';
+import { Routes, Route, Navigate, Outlet, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { LoadingState } from './components/States';
 import { useApi } from './hooks/useApi';
 import type { Level } from './types';
 import { loadLearningModule, loadLearningUnit } from './services/learningNavigation';
+import { hasFinishedLevelIntroduction, LevelIntroduction } from './components/LevelIntroduction';
 const Home = lazy(() => import('./pages/Home'));
 const Dictionary = lazy(() => import('./pages/Dictionary/Index'));
 const PublicInfo = lazy(() => import('./pages/PublicInfo'));
@@ -47,6 +48,32 @@ function ParameterPage({ kind }: { kind: 'module' | 'unit' | 'evaluation' }) {
     const { id } = useParams();
     return kind === 'module' ? <StudentModule moduleId={Number(id)} /> : kind === 'unit' ? <StudentUnit unitId={Number(id)} /> : <StudentEvaluation evaluationId={Number(id)} />;
 }
+type NavigationLevel = { id: number; modules: Array<{ id: number; units: Array<{ id: number }> }> };
+function LearningIntroGate() {
+    const { user } = useAuth();
+    const { pathname } = useLocation();
+    const levels = useApi<Level[]>('/levels');
+    const navigation = useApi<NavigationLevel[]>('/learning-navigation');
+    const [completedKey, setCompletedKey] = useState<string | null>(null);
+    if (levels.loading || navigation.loading) return <LoadingState />;
+    if (levels.error || navigation.error) return <p role="alert">{levels.error || navigation.error}</p>;
+    const match = pathname.match(/^\/aprender\/(nivel|modulo|unidad)\/(\d+)$/);
+    const kind = match?.[1];
+    const id = Number(match?.[2]);
+    const navigationLevel = navigation.data?.find(level => kind === 'nivel' ? level.id === id
+        : level.modules.some(module => kind === 'modulo' ? module.id === id : module.units.some(unit => unit.id === id)));
+    const level = levels.data?.find(item => item.id === navigationLevel?.id);
+    const videoSrc = level?.code === 'basic' ? '/videos/nivel-basico.mp4'
+        : level?.code === 'intermediate' ? '/videos/nivel-intermedio.mp4' : null;
+    const completionKey = user && level ? `${user.id}:${level.id}` : null;
+    if (user && level && videoSrc && completedKey !== completionKey && !hasFinishedLevelIntroduction(user.id, level.id)) {
+        return <LevelIntroduction key={level.id} levelName={level.name} videoSrc={videoSrc} onComplete={() => {
+            try { localStorage.setItem(`yachay-level-introduction:${user.id}:${level.id}`, 'complete'); } catch { /* Continue in this tab. */ }
+            setCompletedKey(completionKey);
+        }} />;
+    }
+    return <Outlet />;
+}
 function AccountPage() { const { user } = useAuth(); return user ? <Account /> : <Navigate to="/iniciar-sesion" replace />; }
 export function AppRouter() {
     const { loading } = useAuth();
@@ -67,8 +94,11 @@ export function AppRouter() {
         <Route element={<Protected role="student" />}>
             <Route path="/aprender" element={<StudentDashboard />} /><Route path="/aprender/progreso" element={<StudentProgress />} />
             <Route path="/aprender/diccionario" element={<StudentDictionary />} />
-            <Route path="/aprender/nivel/:id" element={<LevelPage />} /><Route path="/aprender/modulo/:id" element={<ParameterPage kind="module" />} />
-            <Route path="/aprender/unidad/:id" element={<ParameterPage kind="unit" />} /><Route path="/aprender/evaluacion/:id" element={<ParameterPage kind="evaluation" />} />
+            <Route element={<LearningIntroGate />}>
+                <Route path="/aprender/nivel/:id" element={<LevelPage />} /><Route path="/aprender/modulo/:id" element={<ParameterPage kind="module" />} />
+                <Route path="/aprender/unidad/:id" element={<ParameterPage kind="unit" />} />
+            </Route>
+            <Route path="/aprender/evaluacion/:id" element={<ParameterPage kind="evaluation" />} />
         </Route>
         <Route path="*" element={<p>Página no encontrada.</p>} />
     </Routes></Suspense>;
