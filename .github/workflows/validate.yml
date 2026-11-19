@@ -1,0 +1,57 @@
+name: Validar Yachay
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+        env:
+          VITE_API_URL: http://127.0.0.1:4173
+      - run: npx playwright install --with-deps chromium
+      - name: Comprobar la aplicacion compilada
+        run: npx playwright test e2e/authors-popover.spec.ts e2e/navigation-performance.spec.ts e2e/level-introduction.spec.ts --project=chromium --workers=1 --reporter=list,html
+        env:
+          YACHAY_E2E_URL: http://127.0.0.1:4173
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7
+
+  docker:
+    needs: frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validar Compose de produccion
+        run: docker compose -f compose.production.yml config --quiet
+        env:
+          APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+          DB_PASSWORD: ci-validation-only
+      - name: Compilar imagen de produccion
+        run: docker build --target production --tag yachay:validation .

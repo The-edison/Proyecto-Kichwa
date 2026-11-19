@@ -4,6 +4,7 @@ import { Globe2, Menu, X } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { Brand } from '../components/Brand';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { AuthorsPopover } from '../components/AuthorsPopover';
 import { useAuth } from '../context/AuthContext';
 import type { HomeLanguage } from '../homeLanguage';
 import '../../css/auth-compact.css';
@@ -66,7 +67,7 @@ function Shell({ children, language = 'es', onLanguageChange }: PublicLayoutProp
                     {footerLinks.map(link => <Link key={link.href} href={link.href}>{link.label}</Link>)}
                 </nav>
                 <div className="public-footer-meta">
-                    <span>Yachay · Plataforma educativa para aprender kichwa</span>
+                    <AuthorsPopover />
                 </div>
             </footer>
         </div>

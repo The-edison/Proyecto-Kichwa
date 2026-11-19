@@ -25,7 +25,7 @@ async function screen({ path = '/', topic = 'privacidad' } = {}) {
                 : specifier === 'react-router-dom' ? { useLocation: () => ({ pathname: path, hash: '' }), useParams: () => ({ topic }) }
                 : specifier.endsWith('/AuthContext') ? { useAuth: () => ({ user: null }) }
                 : specifier.endsWith('/useApi') ? { useApi: () => ({ data: null }) }
-                : Object.fromEntries(['Head', 'Link', 'Brand', 'ThemeToggle', 'PublicLayout', 'CookiesDisclosure'].map(name => [name, name]));
+                : Object.fromEntries(['Head', 'Link', 'Brand', 'ThemeToggle', 'AuthorsPopover', 'PublicLayout', 'CookiesDisclosure'].map(name => [name, name]));
             return stub(specifier, dep);
         });
         await module.evaluate();
