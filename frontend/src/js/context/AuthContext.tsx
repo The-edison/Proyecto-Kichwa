@@ -20,6 +20,8 @@ interface AuthValue {
     loading: boolean;
     googleEnabled: boolean;
     googleLoading: boolean;
+    googleConfigError: string | null;
+    refreshGoogleConfig: () => Promise<void>;
     refreshUser: () => Promise<void>;
     login: (identifier: string, password: string) => Promise<void>;
     register: (data: Record<string, string>) => Promise<void>;
@@ -34,7 +36,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true);
     const [googleEnabled, setGoogleEnabled] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(true);
+    const [googleConfigError, setGoogleConfigError] = useState<string | null>(null);
     const sessionVersion = useRef(0);
+
+    async function refreshGoogleConfig() {
+        setGoogleLoading(true);
+        setGoogleConfigError(null);
+        try {
+            const config = await apiGet<{ google: { enabled: boolean } }>('/config');
+            setGoogleEnabled(config.google.enabled);
+        } catch {
+            setGoogleEnabled(false);
+            setGoogleConfigError('No se pudo consultar Google. Revisa la conexión con el servidor y vuelve a intentarlo.');
+        } finally {
+            setGoogleLoading(false);
+        }
+    }
 
     useEffect(() => {
         let live = true;
@@ -53,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         window.addEventListener('storage', catalogChanged);
         window.addEventListener('pageshow', revalidate);
         document.addEventListener('visibilitychange', revalidate);
-        apiGet<{ google: { enabled: boolean } }>('/config').then((config) => setGoogleEnabled(config.google.enabled)).catch(() => {}).finally(() => setGoogleLoading(false));
+        void refreshGoogleConfig();
         const version = sessionVersion.current;
         tabSessionToken().then(token => token ? apiGet<ApiUser>('/auth/me') : null)
             .then((current) => { if (live && current && version === sessionVersion.current) setUser(toAuthUser(current)); })
@@ -102,7 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function refreshUser() { setUser(toAuthUser(await apiGet<ApiUser>("/auth/me"))); }
     return (
-        <AuthContext.Provider value={{ user, loading, googleEnabled, googleLoading, login, register, logout, refreshUser }}>
+        <AuthContext.Provider value={{ user, loading, googleEnabled, googleLoading, googleConfigError, refreshGoogleConfig, login, register, logout, refreshUser }}>
             {children}
         </AuthContext.Provider>
     );

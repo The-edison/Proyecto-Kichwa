@@ -32,7 +32,7 @@ jobs:
           VITE_API_URL: http://127.0.0.1:4173
       - run: npx playwright install --with-deps chromium
       - name: Comprobar la aplicacion compilada
-        run: npx playwright test e2e/authors-popover.spec.ts e2e/navigation-performance.spec.ts e2e/level-introduction.spec.ts --project=chromium --workers=1 --reporter=list,html
+        run: npx playwright test e2e/authors-popover.spec.ts e2e/navigation-performance.spec.ts e2e/level-introduction.spec.ts e2e/public-access.spec.ts --project=chromium --workers=1 --reporter=list,html
         env:
           YACHAY_E2E_URL: http://127.0.0.1:4173
       - uses: actions/upload-artifact@v4

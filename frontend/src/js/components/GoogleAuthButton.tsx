@@ -5,7 +5,7 @@ import { ApiError, apiPost } from '../services/api';
 import { Link } from '../navigation';
 
 export function GoogleAuthButton({ label = 'Continuar con Google', disabled = false }: { label?: string; disabled?: boolean }) {
-    const { googleEnabled, googleLoading } = useAuth();
+    const { googleEnabled, googleLoading, googleConfigError, refreshGoogleConfig } = useAuth();
     const [redirecting, setRedirecting] = useState(false);
     const leaving = useRef(false);
     const [error, setError] = useState('');
@@ -29,7 +29,8 @@ export function GoogleAuthButton({ label = 'Continuar con Google', disabled = fa
                 {googleLoading || redirecting ? <LoaderCircle size={18} className="animate-spin" aria-hidden="true" /> : <span className="google-mark" aria-hidden="true">G</span>}
                 {redirecting ? 'Conectando con Google…' : googleLoading ? 'Comprobando disponibilidad…' : label}
             </button>}
-        {!googleLoading && !googleEnabled && <p className="text-center text-xs leading-5 text-muted">Google no está disponible. Usa tu correo.</p>}
+        {!googleLoading && !googleEnabled && !googleConfigError && <p className="text-center text-xs leading-5 text-muted">Google no está disponible. Usa tu correo.</p>}
+        {googleConfigError && <div className="space-y-2"><p className="form-error" role="alert">{googleConfigError}</p><button type="button" className="text-link" disabled={googleLoading} onClick={() => void refreshGoogleConfig()}>Volver a comprobar Google</button></div>}
         {error && <p className="form-error" role="alert">{error}</p>}
     </div>;
 }
