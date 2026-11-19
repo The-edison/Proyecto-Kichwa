@@ -20,7 +20,7 @@ class SesionPestana
     {
         if ($request->hasSession() && $request->is('api/*')) {
             $public = $request->is('api/config', 'api/diccionario', 'api/diccionario/*', 'api/media/*')
-                || ($request->is('api/testimonials') && $request->isMethod('GET'))
+                || ($request->is('api/testimonials', 'api/comentarios/destacados') && $request->isMethod('GET'))
                 || $request->is('api/auth/login', 'api/auth/register', 'api/auth/forgot-password', 'api/auth/reset-password', 'api/auth/google/prepare');
             if (! $public) {
                 $key = AutenticacionPestana::key($request);

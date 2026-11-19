@@ -14,6 +14,53 @@ class ComentariosDestacadosTest extends TestCase
 {
     use UsesPostgreSQL;
 
+    #[DataProvider('browserOrigins')]
+    public function test_browser_guests_can_read_featured_opinions_but_cannot_publish_or_access_private_routes(string $host, string $origin): void
+    {
+        $opinion = $this->opinion('Excelente plataforma para aprender Kichwa con mi familia.');
+        config()->set('sanctum.stateful', [$host]);
+        $this->withHeader('Origin', $origin);
+
+        $this->getJson('/api/comentarios/destacados')->assertOk()
+            ->assertJsonCount(1)->assertJsonPath('0.id', $opinion->id)->assertJsonPath('0.name', 'Ana P.');
+        $this->assertGuest('web');
+        $this->getJson('/api/auth/me')->assertUnauthorized();
+        $this->getJson('/api/testimonials/eligibility')->assertUnauthorized();
+        $this->postJson('/api/testimonials', ['body' => 'Excelente plataforma para aprender Kichwa.'])->assertUnauthorized();
+    }
+
+    public static function browserOrigins(): array
+    {
+        return [
+            'local' => ['127.0.0.1:5173', 'http://127.0.0.1:5173'],
+            'production' => ['yachay-kichwa.devs-ueb.tech', 'https://yachay-kichwa.devs-ueb.tech'],
+        ];
+    }
+
+    public function test_publishing_refreshes_an_empty_featured_cache_without_waiting_for_the_weekly_job(): void
+    {
+        $this->getJson('/api/comentarios/destacados')->assertOk()->assertExactJson([]);
+        Sanctum::actingAs(Usuario::factory()->create());
+
+        $response = $this->postJson('/api/testimonials', ['body' => 'Excelente plataforma para aprender Kichwa con mi familia.'])->assertCreated();
+
+        $this->getJson('/api/comentarios/destacados')->assertOk()->assertJsonCount(1)
+            ->assertJsonPath('0.id', $response->json('id'))->assertJsonPath('0.body', $response->json('body'));
+    }
+
+    public function test_publishing_and_editing_recalculate_a_previously_cached_selection(): void
+    {
+        $this->freezeTime();
+        $first = $this->opinion('Excelente plataforma para aprender Kichwa con mi familia.');
+        $this->getJson('/api/comentarios/destacados')->assertJsonCount(1)->assertJsonPath('0.id', $first->id);
+        Sanctum::actingAs(Usuario::factory()->create());
+        $published = $this->postJson('/api/testimonials', ['body' => 'Excelente y genial plataforma, la recomiendo a mi familia.'])->assertCreated();
+
+        $this->getJson('/api/comentarios/destacados')->assertJsonCount(2)->assertJsonPath('0.id', $published->json('id'));
+        $this->postJson('/api/testimonials', ['body' => 'Una experiencia de aprendizaje con toda mi familia.'])->assertOk();
+        $this->getJson('/api/comentarios/destacados')->assertJsonCount(1)->assertJsonPath('0.id', $first->id);
+    }
+
     #[DataProvider('scores')]
     public function test_saving_an_opinion_calculates_its_score_and_exclusion(string $body, int $score, bool $excluded): void
     {

@@ -97,7 +97,7 @@ test('loading and eligibility failures do not expose a publishable form', async 
     assert.ok(nodes(failed.render()).some(node => node.props.role === 'alert'));
 });
 
-async function testimonialsScreen({ language = 'es', data = [], loading = false, error = null } = {}) {
+async function testimonialsScreen({ language = 'es', data = [], loading = false, error = null, user = { role: 'student' } } = {}) {
     const source = await readFile(new URL('../src/js/components/TestimonialsSection.tsx', import.meta.url), 'utf8');
     const { code: sectionCode } = await transformWithOxc(source, 'TestimonialsSection.tsx');
     const context = vm.createContext({});
@@ -109,7 +109,7 @@ async function testimonialsScreen({ language = 'es', data = [], loading = false,
         const dependency = specifier === 'react/jsx-runtime' ? { jsx, jsxs: jsx }
             : specifier === 'lucide-react' ? { MessageCircle: 'MessageCircle' }
             : specifier.endsWith('/navigation') ? { Link: 'Link' }
-            : specifier.endsWith('/AuthContext') ? { useAuth: () => ({ user: { role: 'student' } }) }
+            : specifier.endsWith('/AuthContext') ? { useAuth: () => ({ user }) }
             : specifier.endsWith('/useApi') ? { useApi: path => { requested.push(path); return { data, loading, error, refresh: () => { retries++; } }; } }
             : { StudentOpinionForm: 'StudentOpinionForm' };
         return new vm.SyntheticModule(Object.keys(dependency), function () { for (const [key, value] of Object.entries(dependency)) this.setExport(key, value); }, { context });
@@ -117,6 +117,17 @@ async function testimonialsScreen({ language = 'es', data = [], loading = false,
     await module.evaluate();
     return { tree: module.namespace.TestimonialsSection({ language }), requested, retries: () => retries };
 }
+
+test('guests see real featured opinions without signing in and only publishing requires login', async () => {
+    const { tree, requested } = await testimonialsScreen({ user: null,
+        data: [{ id: 1, name: 'Ana P.', body: 'Excelente plataforma para aprender Kichwa con mi familia.', language: 'es' }] });
+    assert.deepEqual(requested, ['/comentarios/destacados']);
+    const cards = nodes(tree).filter(node => node.type === 'article');
+    assert.ok(JSON.stringify(cards[0]).includes('Ana P.'));
+    assert.ok(JSON.stringify(cards[0]).includes('Excelente plataforma para aprender Kichwa con mi familia.'));
+    assert.equal(nodes(tree).some(node => node.type === 'StudentOpinionForm'), false);
+    assert.ok(nodes(tree).some(node => node.type === 'Link' && node.props.href === '/iniciar-sesion'));
+});
 
 test('the Kichwa heading keeps opinion cards and composer in Spanish', async () => {
     const { tree, requested } = await testimonialsScreen({ language: 'qu' });

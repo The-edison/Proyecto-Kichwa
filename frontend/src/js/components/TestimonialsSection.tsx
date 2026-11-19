@@ -15,7 +15,7 @@ const copy = {
             'Aprender saludos y expresiones cotidianas hace que el Kichwa se sienta más cercano.',
         ],
         exampleName: 'Ejemplo', eyebrow: 'HISTORIAS DE ESTUDIANTES', title: 'Historias de quienes aprenden Kichwa.',
-        intro: 'Experiencias compartidas por nuestra comunidad, seleccionadas automáticamente cada semana. Los espacios marcados como ejemplo son textos de muestra.',
+        intro: 'Experiencias compartidas por nuestra comunidad. Los destacados se actualizan al publicar o editar opiniones. Los espacios marcados como ejemplo son textos de muestra.',
         loading: 'Cargando experiencias…', loadError: 'No se pudieron cargar las opiniones.', retry: 'Volver a intentar',
         exampleOpinion: 'Opinión de ejemplo', student: 'Estudiante de Yachay', exampleText: 'Texto de muestra', shared: 'Experiencia compartida en Yachay',
         write: 'Escribe tu opinión sobre Yachay...', comment: 'Comentar', share: 'Comparte tu experiencia con otros estudiantes.', login: 'Iniciar sesión',

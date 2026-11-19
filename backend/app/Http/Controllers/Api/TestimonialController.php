@@ -50,7 +50,7 @@ class TestimonialController extends Controller
         ]);
     }
 
-    public function store(SaveTestimonialRequest $request): JsonResponse
+    public function store(SaveTestimonialRequest $request, ComentariosDestacados $featured): JsonResponse
     {
         $testimonial = DB::transaction(function () use ($request): Testimonial {
             Usuario::whereKey($request->user()->getKey())->lockForUpdate()->firstOrFail();
@@ -60,6 +60,8 @@ class TestimonialController extends Controller
                 ['body' => $request->validated('body')],
             );
         });
+
+        $featured->refresh();
 
         return response()->json($this->present($testimonial->load('usuario')), $testimonial->wasRecentlyCreated ? 201 : 200);
     }

@@ -12,8 +12,8 @@ const copy = {
         loading: 'Cargando tu espacio de opiniones…', loadError: 'No se pudo cargar tu opinión.', retry: 'Volver a intentar',
         intro: 'Tu experiencia puede animar a otros a aprender Kichwa.', label: 'Tu opinión en español sobre Yachay',
         placeholder: '¿Qué te ha gustado de la plataforma? ¿Cómo ha sido aprender aquí?', minimum: 'Mínimo 20 caracteres.',
-        privacy: 'Tu comentario puede aparecer en las Historias del inicio junto a tu nombre abreviado si cumple los criterios de la selección automática semanal. Evita incluir datos personales. Puedes editar tu opinión aquí cuando quieras.',
-        success: 'Tu opinión se guardó y será considerada en la selección automática semanal.', publishing: 'Publicando…', update: 'Actualizar opinión', publish: 'Publicar opinión', view: 'Ver opiniones en el inicio',
+        privacy: 'Tu comentario puede aparecer en las Historias del inicio junto a tu nombre abreviado si cumple los criterios de la selección automática de destacados. Evita incluir datos personales. Puedes editar tu opinión aquí cuando quieras.',
+        success: 'Tu opinión se guardó y la selección de destacados se actualizó.', publishing: 'Publicando…', update: 'Actualizar opinión', publish: 'Publicar opinión', view: 'Ver opiniones en el inicio',
     },
     qu: {
         lengthError: '20manta 500 kama killkakunawan kampa yuyayta killkay.', publishError: 'Mana rikuchiyta usharirkanchu. Kampa killkashka kayllapi sakirin; kutin rurayta ushanki.',
