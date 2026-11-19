@@ -7,6 +7,7 @@ import { QueryClient, QueryObserver } from '@tanstack/react-query';
 
 const { code } = await transformWithOxc(await readFile(new URL('../src/js/services/learningNavigation.ts', import.meta.url), 'utf8'), 'learningNavigation.ts');
 const { code: linkCode } = await transformWithOxc(await readFile(new URL('../src/js/navigation.tsx', import.meta.url), 'utf8'), 'navigation.tsx');
+const { code: hookCode } = await transformWithOxc(await readFile(new URL('../src/js/hooks/useApi.ts', import.meta.url), 'utf8'), 'useApi.ts');
 const tick = () => new Promise(resolve => setImmediate(resolve));
 function deferred() { let resolve; const promise = new Promise(done => { resolve = done; }); return { promise, resolve }; }
 
@@ -100,17 +101,33 @@ test('clearing the authenticated cache cancels prefetch without repopulating dat
     assert.equal(view.queryClient.getQueryCache().getAll().length, 0);
 });
 
-test('prefetched data still revalidates on visit and invalidation using existing query rules', async () => {
+test('recent prefetched data survives remount while invalidated and expired data refresh', async () => {
     let revision = 0;
     const view = await client({ get: async () => ({ id: 4, revision: ++revision }) });
     view.api.prefetchLearningData('/aprender/modulo/4'); await tick();
-    const observer = new QueryObserver(view.queryClient, { queryKey: ['api', '/modules/4'],
-        queryFn: async () => ({ id: 4, revision: ++revision }), refetchOnMount: 'always' });
+    let options;
+    const context = vm.createContext({});
+    const hook = new vm.SourceTextModule(hookCode, { context });
+    await hook.link(specifier => {
+        const exports = specifier === '@tanstack/react-query'
+            ? { useQuery: value => { options = value; return { data: null, isPending: false }; } }
+            : { apiGet: async () => ({ id: 4, revision: ++revision }), ApiError: Error };
+        return new vm.SyntheticModule(Object.keys(exports), function () {
+            for (const [key, value] of Object.entries(exports)) this.setExport(key, value);
+        }, { context });
+    });
+    await hook.evaluate(); hook.namespace.useApi('/modules/4');
+    const observer = new QueryObserver(view.queryClient, options);
     const unsubscribe = observer.subscribe(() => {}); await tick();
-    assert.equal(observer.getCurrentResult().data.revision, 3);
+    assert.equal(observer.getCurrentResult().data.revision, 1);
     await view.queryClient.invalidateQueries({ queryKey: ['api', '/modules/4'], exact: true });
-    assert.equal(observer.getCurrentResult().data.revision, 4);
-    unsubscribe(); view.queryClient.clear();
+    assert.equal(observer.getCurrentResult().data.revision, 3);
+    unsubscribe();
+    view.queryClient.setQueryData(['api', '/modules/4'], { id: 4, revision: 3 }, { updatedAt: Date.now() - 31_000 });
+    const remounted = new QueryObserver(view.queryClient, options);
+    const stop = remounted.subscribe(() => {}); await tick();
+    assert.equal(remounted.getCurrentResult().data.revision, 4);
+    stop(); view.queryClient.clear();
 });
 
 async function link(props) {

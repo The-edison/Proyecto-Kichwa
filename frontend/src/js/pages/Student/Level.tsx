@@ -7,8 +7,8 @@ import { Pagination } from '../../components/Pagination';
 import { LearningProgress, LearningProgressRing, progressValue } from '../../components/LearningProgress';
 import { useApi } from '../../hooks/useApi';
 import type { LearningModule, Paginated, Evaluation, ProgressSummary } from '../../types';
-import basicLevelImage from '../../../images/nivel-basico.png';
-import intermediateLevelImage from '../../../images/nivel-intermedio.png';
+import basicLevelImage from '../../../images/nivel-basico.webp';
+import intermediateLevelImage from '../../../images/nivel-intermedio.webp';
 
 export default function Level({ level }: { level: { id: number; name: string; code: string } }) {
     const [page, setPage] = useState(1);

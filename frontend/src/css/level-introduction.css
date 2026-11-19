@@ -1,7 +1,53 @@
-.level-introduction { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; overflow: hidden; background: #08090d; color: #fff; }
-.level-introduction video { width: 100%; height: 100%; object-fit: contain; }
-.level-introduction-start { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px; text-align: center; background: rgb(0 0 0 / 68%); }
-.level-introduction-start h1 { color: #fff; font-size: clamp(26px, 5vw, 42px); font-weight: 800; }
-.level-introduction-start p { color: #fff; }
-.level-introduction-start .primary-button { display: inline-flex; align-items: center; gap: 10px; }
-.level-introduction-note { position: absolute; right: 16px; bottom: 16px; left: 16px; margin: 0; padding: 10px 16px; border-radius: 12px; background: rgb(0 0 0 / 72%); color: #fff; text-align: center; font-size: 14px; pointer-events: none; }
+.level-introduction {
+    box-sizing: border-box;
+    position: fixed;
+    inset: 0;
+    width: min(75vw, calc((100dvh - 180px) * 16 / 9));
+    max-width: calc(100vw - 32px);
+    max-height: calc(100dvh - 32px);
+    margin: auto;
+    padding: 10px;
+    overflow: auto;
+    color: #fff;
+    border: 1px solid rgb(205 167 255 / 70%);
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgb(93 62 143 / 54%), rgb(29 24 57 / 76%));
+    box-shadow: 0 24px 80px rgb(17 10 38 / 32%), inset 0 1px 0 rgb(255 255 255 / 28%);
+}
+.level-introduction::backdrop { background: rgb(19 12 37 / 24%); }
+/* Keep blur off the video ancestors so playback can use an independent layer. */
+.learning-introduction-preview { filter: blur(2px); pointer-events: none; }
+.level-introduction-header { display: flex; align-items: center; gap: 12px; padding: 6px 12px 16px; }
+.level-introduction-icon { display: grid; place-items: center; flex: 0 0 44px; height: 44px; border-radius: 14px; background: linear-gradient(145deg, #bd76f5, #7c3aed); box-shadow: inset 0 1px 0 rgb(255 255 255 / 35%); }
+.level-introduction-header p { margin: 0 0 2px; color: #e5d6fa; font-size: .875rem; }
+.level-introduction-header h2 { margin: 0; color: #fff; font-size: clamp(1.125rem, 2vw, 1.65rem); font-weight: 800; line-height: 1.25; }
+.level-introduction-player { position: relative; isolation: isolate; aspect-ratio: 16 / 9; overflow: hidden; border: 1px solid rgb(231 211 255 / 40%); border-radius: 15px; background: #100e18; }
+.level-introduction video { display: block; width: 100%; height: 100%; object-fit: contain; }
+.level-introduction-start { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px; text-align: center; background: linear-gradient(180deg, rgb(15 10 28 / 40%), rgb(15 10 28 / 82%)); }
+.level-introduction-start h3 { margin: 0; color: #fff; font-size: clamp(1.25rem, 2.5vw, 2rem); font-weight: 800; line-height: 1.2; }
+.level-introduction-start p { margin: 0; color: #f0e9fa; font-size: 1rem; }
+.level-introduction-start .primary-button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; }
+.level-introduction-start .primary-button:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+.level-introduction-note { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0; padding: 16px 12px 6px; color: #eedbff; text-align: center; font-size: .9375rem; line-height: 1.5; }
+.level-introduction-note svg { flex-shrink: 0; }
+.level-introduction-buffering { position: absolute; top: 12px; left: 12px; display: flex; align-items: center; gap: 8px; margin: 0; padding: 8px 12px; border-radius: 12px; background: rgb(16 14 24 / 85%); color: #fff; font-size: .875rem; pointer-events: none; }
+.level-introduction-spinner { animation: level-introduction-spin 1s linear infinite; }
+@keyframes level-introduction-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .level-introduction-spinner { animation: none; } }
+@media (max-width: 700px) {
+    .level-introduction { width: calc(100vw - 24px); max-width: calc(100vw - 24px); border-radius: 20px; padding: 8px; }
+    .level-introduction-header { padding: 4px 6px 12px; }
+    .level-introduction-start { gap: 10px; padding: 12px; }
+    .level-introduction-start h3 { font-size: 1.125rem; }
+    .level-introduction-start p { font-size: .875rem; }
+    .level-introduction-note { padding: 12px 4px 4px; font-size: .875rem; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+    .level-introduction { width: min(75vw, calc((100dvh - 140px) * 16 / 9)); }
+    .level-introduction-header { padding-bottom: 8px; }
+    .level-introduction-header p { display: none; }
+    .level-introduction-icon { flex-basis: 32px; height: 32px; border-radius: 10px; }
+    .level-introduction-note { padding-top: 8px; }
+    .level-introduction-start { gap: 8px; padding: 12px; }
+    .level-introduction-start p { display: none; }
+}

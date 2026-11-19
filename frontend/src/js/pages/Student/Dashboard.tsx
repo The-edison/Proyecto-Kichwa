@@ -6,8 +6,8 @@ import { useAuth } from '../../context/AuthContext';
 import { AppLayout } from '../../layouts/AppLayout';
 import '../../../css/learning-journey.css';
 import type { Level, ProgressSummary, Mastery } from '../../types';
-import basicLevelImage from '../../../images/nivel-basico.png';
-import intermediateLevelImage from '../../../images/nivel-intermedio.png';
+import basicLevelImage from '../../../images/nivel-basico.webp';
+import intermediateLevelImage from '../../../images/nivel-intermedio.webp';
 
 const courseCovers = [
     { src: basicLevelImage, alt: 'Dos jóvenes con vestimenta andina comparten la lectura de un libro' },

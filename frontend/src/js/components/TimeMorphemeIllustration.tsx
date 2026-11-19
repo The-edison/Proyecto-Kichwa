@@ -1,4 +1,4 @@
-import atlas from '../../images/time-morpheme-scenes.png';
+import atlas from '../../images/time-morpheme-scenes.webp';
 
 export function TimeMorphemeIllustration({ cell, description }: { cell: number; description: string }) {
     return <span className="time-practice-illustration" style={{ display: 'block', position: 'relative', width: '100%', aspectRatio: '1', overflow: 'hidden', borderRadius: 14 }}>

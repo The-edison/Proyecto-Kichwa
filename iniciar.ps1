@@ -1,4 +1,4 @@
-﻿param([switch]$PostgreSQL, [switch]$Reiniciar)
+﻿param([switch]$PostgreSQL, [switch]$Reiniciar, [switch]$SoloServicios)
 $ErrorActionPreference = 'Stop'
 $projectRoot = $PSScriptRoot
 $backend = Join-Path $projectRoot 'backend'
@@ -51,19 +51,21 @@ if ($Reiniciar) {
     }
     foreach ($ownedService in ($ownedServices | Select-Object -Unique)) { Stop-Process -Id $ownedService -Force }
 }
-Push-Location $backend
-try {
-    & $phpExe -c $phpIni -d "extension_dir=$extensionDirectory" artisan config:clear --no-interaction
-    if ($LASTEXITCODE -ne 0) { throw 'No se pudo cargar Laravel. Revisa PHP y sus extensiones.' }
-    & $phpExe -c $phpIni -d "extension_dir=$extensionDirectory" artisan migrate --no-interaction
-    if ($LASTEXITCODE -ne 0) { throw 'No se pudo migrar. Revisa puerto, usuario y contraseña de PostgreSQL en backend/.env.' }
-    & $phpExe -c $phpIni -d "extension_dir=$extensionDirectory" artisan db:seed --no-interaction
-    if ($LASTEXITCODE -ne 0) { throw 'No se pudieron crear los niveles y el administrador inicial.' }
-    if (-not (Test-Path -LiteralPath (Join-Path $backend 'public\storage'))) {
-        & $phpExe -c $phpIni -d "extension_dir=$extensionDirectory" artisan storage:link --no-interaction
-        if ($LASTEXITCODE -ne 0) { throw 'No se pudo crear storage:link. Comprueba permisos de enlaces de Windows.' }
-    }
-} finally { Pop-Location }
+if (-not $SoloServicios) {
+    Push-Location $backend
+    try {
+        & $phpExe -c $phpIni -d "extension_dir=$extensionDirectory" artisan config:clear --no-interaction
+        if ($LASTEXITCODE -ne 0) { throw 'No se pudo cargar Laravel. Revisa PHP y sus extensiones.' }
+        & $phpExe -c $phpIni -d "extension_dir=$extensionDirectory" artisan migrate --no-interaction
+        if ($LASTEXITCODE -ne 0) { throw 'No se pudo migrar. Revisa puerto, usuario y contraseña de PostgreSQL en backend/.env.' }
+        & $phpExe -c $phpIni -d "extension_dir=$extensionDirectory" artisan db:seed --no-interaction
+        if ($LASTEXITCODE -ne 0) { throw 'No se pudieron crear los niveles y el administrador inicial.' }
+        if (-not (Test-Path -LiteralPath (Join-Path $backend 'public\storage'))) {
+            & $phpExe -c $phpIni -d "extension_dir=$extensionDirectory" artisan storage:link --no-interaction
+            if ($LASTEXITCODE -ne 0) { throw 'No se pudo crear storage:link. Comprueba permisos de enlaces de Windows.' }
+        }
+    } finally { Pop-Location }
+}
 if (-not (Test-LocalPort 8000)) {
     $serverPhpArguments = @('-c', ('"' + $phpIni + '"'), '-d', ('"extension_dir=' + $extensionDirectory + '"'))
     $localCaBundle = Join-Path $backend 'storage\app\private\cacert.pem'

@@ -26,8 +26,8 @@ async function practice(exercise) {
             : specifier.endsWith('/TimeMorphemeIllustration') ? { TimeMorphemeIllustration: 'TimeMorphemeIllustration' }
             : specifier.endsWith('/MorphemeIllustration') ? { MorphemeIllustration: 'MorphemeIllustration' }
             : specifier.endsWith('/MorphemeOrdinalExercise') ? { MorphemeOrdinalExercise: 'MorphemeOrdinalExercise' }
-            : specifier.endsWith('/morpheme-third-place.png') ? { default: 'morpheme-third-place.png' }
-            : specifier.endsWith('/morpheme-family-listening.png') ? { default: 'morpheme-family-listening.png' } : {};
+            : specifier.endsWith('/morpheme-third-place.webp') ? { default: 'morpheme-third-place.webp' }
+            : specifier.endsWith('/morpheme-family-listening.webp') ? { default: 'morpheme-family-listening.webp' } : {};
         return new vm.SyntheticModule(Object.keys(values), function () { for (const [key, value] of Object.entries(values)) this.setExport(key, value); }, { context });
     });
     await module.evaluate();
@@ -133,7 +133,7 @@ test('each family sentence uses its own audio and illustration cell', async () =
         assert.equal(view.audio.src, `/app/audio/intermedio/modulo-2/unidad-1/${word}-oracion.mp3`);
         const illustration = nodes(view.render()).find(node => node.props.className?.includes('morpheme-family-listening-illustration'));
         const image = nodes(illustration).find(node => node.type === 'img');
-        assert.equal(image.props.src, 'morpheme-family-listening.png');
+        assert.equal(image.props.src, 'morpheme-family-listening.webp');
         assert.equal(image.props.style.left, left);
         assert.equal(image.props.style.top, top);
         assert.equal(image.props.style.width, '200%');
@@ -147,7 +147,7 @@ test('third place uses its bronze podium illustration while first place keeps th
     assert.equal(first.find(node => node.type === 'MorphemeIllustration').props.cell, 7);
     assert.equal(first.filter(node => node.type === 'figcaption').length, 1);
     const picture = third.find(node => node.type === 'img');
-    assert.equal(picture.props.src, 'morpheme-third-place.png');
+    assert.equal(picture.props.src, 'morpheme-third-place.webp');
     assert.match(picture.props.alt, /número 3: tercer lugar/);
     assert.equal(third.filter(node => node.type === 'figcaption').length, 0);
 });

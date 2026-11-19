@@ -1,5 +1,5 @@
-import atlas from '../../images/verbal-practice-scenes.png';
-import disgust from '../../images/verbal-disgust.png';
+import atlas from '../../images/verbal-practice-scenes.webp';
+import disgust from '../../images/verbal-disgust.webp';
 
 export function VerbalIllustration({ cell, description }: { cell: number; description: string }) {
     if (cell === 12) return <img className="verbal-practice-illustration" src={disgust} alt={description} width={1024} height={1024} decoding="async" style={{ display: 'block', width: '100%', aspectRatio: '1', objectFit: 'contain', borderRadius: 14 }} />;

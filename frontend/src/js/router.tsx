@@ -6,6 +6,8 @@ import { useApi } from './hooks/useApi';
 import type { Level } from './types';
 import { loadLearningModule, loadLearningUnit } from './services/learningNavigation';
 import { hasFinishedLevelIntroduction, LevelIntroduction } from './components/LevelIntroduction';
+import basicIntroductionVideo from '../videos/nivel-basico.mp4';
+import intermediateIntroductionVideo from '../videos/nivel-intermedio.mp4';
 const Home = lazy(() => import('./pages/Home'));
 const Dictionary = lazy(() => import('./pages/Dictionary/Index'));
 const PublicInfo = lazy(() => import('./pages/PublicInfo'));
@@ -52,25 +54,28 @@ type NavigationLevel = { id: number; modules: Array<{ id: number; units: Array<{
 function LearningIntroGate() {
     const { user } = useAuth();
     const { pathname } = useLocation();
-    const levels = useApi<Level[]>('/levels');
-    const navigation = useApi<NavigationLevel[]>('/learning-navigation');
-    const [completedKey, setCompletedKey] = useState<string | null>(null);
-    if (levels.loading || navigation.loading) return <LoadingState />;
-    if (levels.error || navigation.error) return <p role="alert">{levels.error || navigation.error}</p>;
     const match = pathname.match(/^\/aprender\/(nivel|modulo|unidad)\/(\d+)$/);
     const kind = match?.[1];
     const id = Number(match?.[2]);
+    const levels = useApi<Level[]>('/levels');
+    const navigation = useApi<NavigationLevel[]>(kind === 'modulo' || kind === 'unidad' ? '/learning-navigation' : null);
+    const [completedKey, setCompletedKey] = useState<string | null>(null);
+    if (levels.loading || navigation.loading) return <LoadingState />;
+    if (levels.error || navigation.error) return <p role="alert">{levels.error || navigation.error}</p>;
     const navigationLevel = navigation.data?.find(level => kind === 'nivel' ? level.id === id
         : level.modules.some(module => kind === 'modulo' ? module.id === id : module.units.some(unit => unit.id === id)));
-    const level = levels.data?.find(item => item.id === navigationLevel?.id);
-    const videoSrc = level?.code === 'basic' ? '/videos/nivel-basico.mp4'
-        : level?.code === 'intermediate' ? '/videos/nivel-intermedio.mp4' : null;
+    const level = levels.data?.find(item => item.id === (kind === 'nivel' ? id : navigationLevel?.id));
+    const videoSrc = level?.code === 'basic' ? basicIntroductionVideo
+        : level?.code === 'intermediate' ? intermediateIntroductionVideo : null;
     const completionKey = user && level ? `${user.id}:${level.id}` : null;
     if (user && level && videoSrc && completedKey !== completionKey && !hasFinishedLevelIntroduction(user.id, level.id)) {
-        return <LevelIntroduction key={level.id} levelName={level.name} videoSrc={videoSrc} onComplete={() => {
+        return <>
+        <div className="learning-introduction-preview" inert><Suspense fallback={<LoadingState />}><Outlet /></Suspense></div>
+        <LevelIntroduction key={completionKey} levelName={level.name} videoSrc={videoSrc} onComplete={() => {
             try { localStorage.setItem(`yachay-level-introduction:${user.id}:${level.id}`, 'complete'); } catch { /* Continue in this tab. */ }
             setCompletedKey(completionKey);
-        }} />;
+        }} />
+        </>;
     }
     return <Outlet />;
 }

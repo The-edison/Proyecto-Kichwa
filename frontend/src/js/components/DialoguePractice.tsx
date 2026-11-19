@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowDown, ArrowUp, BookOpen, MessageCircle, RotateCcw } from 'lucide-react';
-import scene from '../../images/dialogue-practice-scene.png';
+import scene from '../../images/dialogue-practice-scene.webp';
 import type { Exercise, ExerciseAnswer, ExerciseFeedback } from '../types';
 import '../../css/dialogue-practice.css';
 

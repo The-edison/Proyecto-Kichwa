@@ -36,7 +36,7 @@ async function screen({ component = 'progress', summaries = progress, rewards = 
         if (specifier.endsWith('/LearningProgress')) return learning;
         if (specifier.endsWith('/LearningJourney') || specifier === './LearningJourney') return journey;
         if (!cache.has(specifier)) {
-            const exports = specifier.endsWith('.css') ? {} : /\.(jpg|png)$/.test(specifier) ? { default: specifier } : dependencies[specifier] ?? dependencies[specifier.split('/').at(-1)];
+            const exports = specifier.endsWith('.css') ? {} : /\.(jpg|png|webp)$/.test(specifier) ? { default: specifier } : dependencies[specifier] ?? dependencies[specifier.split('/').at(-1)];
             assert.ok(exports, specifier);
             cache.set(specifier, new vm.SyntheticModule(Object.keys(exports), function () { for (const [key, value] of Object.entries(exports)) this.setExport(key, value); }, { context }));
         }
